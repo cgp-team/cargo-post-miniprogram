@@ -1,0 +1,170 @@
+/* 全局样式 - 农村客货邮小程序 */
+
+/* 颜色变量参考 */
+/* 主色：#2E7D32（深绿，代表农业/自然）*/
+/* 辅色：#4CAF50（翠绿）*/
+/* 辅色：#FF9800（橙色，代表公交/活力）*/
+/* 背景：#F5F5F5 */
+/* 文字：#333333 */
+
+page {
+  background-color: #F5F5F5;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+    'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  font-size: 28rpx;
+  color: #333333;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 通用容器 */
+.container {
+  min-height: 100vh;
+  padding: 20rpx;
+  box-sizing: border-box;
+}
+
+/* 通用按钮 */
+.btn-primary {
+  background: linear-gradient(135deg, #2E7D32, #43A047);
+  color: #ffffff;
+  border: none;
+  border-radius: 14rpx;
+  padding: 24rpx 40rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  text-align: center;
+  width: 100%;
+  letter-spacing: 1rpx;
+  transition: all 0.3s;
+}
+
+.btn-primary:active {
+  background: linear-gradient(135deg, #1B5E20, #2E7D32);
+  transform: scale(0.98);
+}
+
+.btn-orange {
+  background: linear-gradient(135deg, #FF9800, #FFB74D);
+  color: #ffffff;
+  border: none;
+  border-radius: 14rpx;
+  padding: 24rpx 40rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  text-align: center;
+  width: 100%;
+  letter-spacing: 1rpx;
+  transition: all 0.3s;
+}
+
+.btn-orange:active {
+  background: linear-gradient(135deg, #F57C00, #FF9800);
+  transform: scale(0.98);
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: #2E7D32;
+  border: 2rpx solid #2E7D32;
+  border-radius: 14rpx;
+  padding: 24rpx 40rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.3s;
+}
+
+.btn-outline:active {
+  background-color: #E8F5E9;
+}
+
+/* 输入框 */
+.input-group {
+  margin-bottom: 30rpx;
+}
+
+.input-label {
+  font-size: 28rpx;
+  color: #555;
+  margin-bottom: 12rpx;
+  display: block;
+  font-weight: 500;
+}
+
+.input-field {
+  width: 100%;
+  height: 88rpx;
+  border: 2rpx solid #E8ECEE;
+  border-radius: 14rpx;
+  padding: 0 24rpx;
+  font-size: 30rpx;
+  background-color: #F8FAF8;
+  box-sizing: border-box;
+  transition: all 0.3s;
+}
+
+.input-field:focus {
+  border-color: #4CAF50;
+  background-color: #fff;
+  box-shadow: 0 0 0 6rpx rgba(76,175,80,0.08);
+}
+
+.input-field::placeholder {
+  color: #BDBDBD;
+}
+
+/* 卡片 */
+.card {
+  background-color: #ffffff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+
+/* 弹性布局 */
+.flex-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* 文本 */
+.text-green {
+  color: #2E7D32;
+}
+
+.text-orange {
+  color: #FF9800;
+}
+
+.text-gray {
+  color: #999999;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* 安全区域 */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}

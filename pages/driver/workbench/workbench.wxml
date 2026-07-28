@@ -1,0 +1,193 @@
+<!-- 司机工作台 - 暗黑主题 -->
+<view class="workbench {{status}}">
+  <!-- ========== 顶部：班次进度条（取代标题栏）========== -->
+  <view class="progress-header">
+    <view class="header-safe" style="{{headerSafeStyle}}"></view>
+    <view class="route-label">
+      <text class="route-badge">{{routeName}}</text>
+      <text class="status-tag {{status}}">
+        {{status === 'idle' ? '待发车' : (status === 'driving' ? '行驶中' : '停靠中')}}
+      </text>
+    </view>
+
+    <!-- 进度条 -->
+    <view class="progress-bar-wrap">
+      <view class="progress-stops">
+        <text class="stop-label start">{{startStation}}</text>
+        <text class="stop-label end">{{endStation}}</text>
+      </view>
+      <view class="progress-track">
+        <view class="progress-fill" style="{{progressFillStyle}}"></view>
+        <view class="progress-dot" style="{{progressDotStyle}}"></view>
+      </view>
+      <view class="progress-info" wx:if="{{status === 'driving'}}">
+        <text class="next-stop-name">下一站：{{nextStation}}</text>
+        <text class="next-stop-dist">约{{nextStationDistance}}m</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 状态一：待发车 - 行李舱可视化 ========== -->
+  <view class="idle-panel" wx:if="{{status === 'idle'}}">
+    <!-- 大巴车行李舱图形 -->
+    <view class="cargo-visual">
+      <view class="bus-graphic">
+        <view class="bus-body">
+          <view class="bus-windows">
+            <view class="window"></view>
+            <view class="window"></view>
+            <view class="window"></view>
+            <view class="window"></view>
+          </view>
+          <view class="bus-cargo-area">
+            <view class="cargo-fill" style="{{cargoFillStyle}}">
+              <view class="cargo-fill-inner"></view>
+            </view>
+            <view class="cargo-used-mark" style="{{cargoUsedStyle}}"></view>
+          </view>
+          <view class="bus-wheels">
+            <view class="wheel"></view>
+            <view class="wheel"></view>
+          </view>
+        </view>
+        <view class="cargo-labels">
+          <text class="cargo-label-max">满仓</text>
+          <text class="cargo-label-half">50%</text>
+          <text class="cargo-label-empty">空仓</text>
+        </view>
+      </view>
+
+      <!-- 运力数值 -->
+      <view class="cargo-stats">
+        <text class="cargo-percent">{{cargoCapacity}}%</text>
+        <text class="cargo-title">当前空余仓位</text>
+      </view>
+    </view>
+
+    <!-- 超大滑块 -->
+    <view class="slider-section">
+      <view class="slider-ticks">
+        <text class="tick">0</text>
+        <text class="tick">30%</text>
+        <text class="tick">50%</text>
+        <text class="tick">100%</text>
+      </view>
+      <slider
+        class="cargo-slider"
+        min="0"
+        max="100"
+        value="{{cargoCapacity}}"
+        activeColor="#4CAF50"
+        backgroundColor="#333333"
+        block-size="40"
+        block-color="#ffffff"
+        bindchange="onCapacityChange"
+        show-value="{{false}}"
+      />
+      <view class="slider-buttons">
+        <view class="quick-btn" bindtap="onCapacityChange" data-value="30">30%</view>
+        <view class="quick-btn" bindtap="onCapacityChange" data-value="50">50%</view>
+        <view class="quick-btn" bindtap="onCapacityChange" data-value="100">满仓</view>
+      </view>
+    </view>
+
+    <!-- 发车按钮 -->
+    <button class="start-btn" bindtap="startDrive">
+      <text class="start-icon">🚌</text>
+      <text class="start-text">发 车</text>
+    </button>
+  </view>
+
+  <!-- ========== 状态二：行驶中 - 导航模式 ========== -->
+  <view class="driving-panel" wx:if="{{status === 'driving'}}">
+    <!-- 地图区域（简化版，实际接入腾讯/高德地图组件） -->
+    <view class="map-area">
+      <map
+        class="nav-map"
+        latitude="30.32"
+        longitude="108.21"
+        markers="{{markers}}"
+        polyline="{{polyline}}"
+        show-location="{{true}}"
+        scale="14"
+      ></map>
+
+      <!-- 速度浮层 -->
+      <view class="speed-overlay">
+        <text class="speed-num">{{speed}}</text>
+        <text class="speed-unit">km/h</text>
+      </view>
+
+      <!-- 前方到站提示 -->
+      <view class="next-stop-card" wx:if="{{nextStationDistance < 1000}}">
+        <view class="stop-alert-icon">📍</view>
+        <view class="stop-alert-info">
+          <text class="stop-alert-name">{{nextStation}}</text>
+          <text class="stop-alert-dist">前方 {{nextStationDistance}}m</text>
+          <text class="stop-alert-task" wx:if="{{pendingPickups.length > 0}}">
+            ⚠️ 有 {{pendingPickups.length}} 件货物待装车
+          </text>
+        </view>
+      </view>
+
+      <!-- 语音播报条 -->
+      <view class="voice-bar" wx:if="{{voiceText}}">
+        <text class="voice-icon">🔊</text>
+        <text class="voice-content">{{voiceText}}</text>
+      </view>
+    </view>
+
+    <!-- ETA信息 -->
+    <view class="eta-bar">
+      <view class="eta-item">
+        <text class="eta-label">预计到达</text>
+        <text class="eta-value">{{eta}}</text>
+      </view>
+      <view class="eta-item">
+        <text class="eta-label">剩余站数</text>
+        <text class="eta-value">{{totalStops - currentStopIndex}} 站</text>
+      </view>
+      <view class="eta-item">
+        <text class="eta-label">待装货物</text>
+        <text class="eta-value orange">{{pendingPickups.length}} 件</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 状态三：到站停靠 - 扫码装车 ========== -->
+  <view class="stopped-panel" wx:if="{{status === 'stopped'}}">
+    <!-- 站点信息 -->
+    <view class="stop-banner">
+      <text class="stop-icon">🚏</text>
+      <text class="stop-title">已到达 {{nextStation}}</text>
+      <text class="stop-subtitle">请完成装车作业</text>
+    </view>
+
+    <!-- 待装货物列表 -->
+    <view class="pickup-list" wx:if="{{pendingPickups.length > 0}}">
+      <view class="pickup-item" wx:for="{{pendingPickups}}" wx:key="id">
+        <text class="pickup-emoji">📦</text>
+        <view class="pickup-info">
+          <text class="pickup-name">{{item.name}}</text>
+          <text class="pickup-detail">{{item.weight}} · {{item.farmer}}</text>
+        </view>
+        <text class="pickup-check">☐</text>
+      </view>
+    </view>
+
+    <!-- 巨大扫码按钮 -->
+    <button class="scan-btn" bindtap="scanToLoad">
+      <text class="scan-icon">📷</text>
+      <text class="scan-text">扫码装车</text>
+      <text class="scan-hint">请扫描农户手机上的二维码</text>
+    </button>
+
+    <!-- 跳过 -->
+    <view class="skip-btn" bindtap="skipLoading">
+      <text>跳过，继续行驶 →</text>
+    </view>
+  </view>
+
+  <!-- ========== 底部自定义TabBar ========== -->
+  <driver-tab-bar current="workbench"></driver-tab-bar>
+</view>

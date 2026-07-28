@@ -1,0 +1,85 @@
+<!-- 登录页面 - 农村客货邮小程序 -->
+<view class="login-page">
+  <!-- Logo区域 -->
+  <view class="logo-section">
+    <view class="logo-img-wrap">
+      <view class="logo-placeholder">🚐</view>
+      <view class="logo-ring"></view>
+    </view>
+    <text class="logo-title">农村客货邮</text>
+    <text class="logo-desc">公交带货 · 快递进村 · 农产品出山</text>
+  </view>
+
+  <!-- 角色切换 -->
+  <view class="role-switch">
+    <view
+      class="role-tab {{currentRole === 'user' ? 'active' : ''}}"
+      bindtap="switchRole"
+      data-role="user"
+    >
+      <view class="role-icon-wrap">
+        <text class="role-emoji">👤</text>
+      </view>
+      <text>用户登录</text>
+    </view>
+    <view
+      class="role-tab {{currentRole === 'driver' ? 'active' : ''}}"
+      bindtap="switchRole"
+      data-role="driver"
+    >
+      <view class="role-icon-wrap">
+        <text class="role-emoji">🚌</text>
+      </view>
+      <text>司机登录</text>
+    </view>
+  </view>
+
+  <!-- 登录表单 -->
+  <view class="form-section card">
+    <view class="input-group">
+      <view class="input-label-row">
+        <text class="input-icon">📱</text>
+        <text class="input-label">手机号码</text>
+      </view>
+      <input
+        class="input-field"
+        type="number"
+        placeholder="请输入手机号"
+        value="{{phone}}"
+        bindinput="onPhoneInput"
+        maxlength="11"
+      />
+    </view>
+
+    <view class="input-group">
+      <view class="input-label-row">
+        <text class="input-icon">🔒</text>
+        <text class="input-label">登录密码</text>
+      </view>
+      <input
+        class="input-field"
+        type="password"
+        placeholder="请输入密码"
+        value="{{password}}"
+        bindinput="onPasswordInput"
+      />
+    </view>
+
+    <!-- 登录按钮 -->
+    <button class="btn-primary login-btn" bindtap="handleLogin" loading="{{loading}}">
+      {{currentRole === 'user' ? '用户登录' : '司机登录'}}
+    </button>
+
+    <!-- 微信一键登录 -->
+    <button class="wechat-login-btn" bindtap="handleWechatLogin" hover-class="none">
+      <text class="wechat-emoji">💬</text>
+      <text>微信一键登录</text>
+    </button>
+
+    <!-- 注册入口 -->
+    <view class="register-link">
+      <text class="text-gray">还没有账号？</text>
+      <text class="text-green" bindtap="goToRegister">立即注册</text>
+    </view>
+  </view>
+</view>

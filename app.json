@@ -1,0 +1,24 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/index/index",
+    "pages/register/register",
+    "pages/driver/workbench/workbench",
+    "pages/driver/routes/routes",
+    "pages/driver/earnings/earnings"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#1A1A1A",
+    "navigationBarTitleText": "农村客货邮",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#1A1A1A"
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于展示公交实时位置和物流轨迹"
+    }
+  }
+}

@@ -1,0 +1,51 @@
+<!-- 司机路线页 -->
+<view class="routes-page">
+  <!-- 顶部 -->
+  <view class="page-header">
+    <view class="header-safe" style="height: {{statusBarHeight}}px;"></view>
+    <text class="page-title">🛣️ 我的路线</text>
+    <text class="page-date">今日排班</text>
+  </view>
+
+  <!-- 路线卡片 -->
+  <view class="route-card {{item.status}}" wx:for="{{todayRoutes}}" wx:key="id">
+    <!-- 路线头部 -->
+    <view class="route-card-header">
+      <view class="route-card-left">
+        <text class="route-card-number">{{item.routeNumber}}</text>
+        <text class="route-card-direction">{{item.direction}}</text>
+      </view>
+      <view class="route-card-status {{item.status}}">
+        {{item.status === 'running' ? '进行中' : '待发车'}}
+      </view>
+    </view>
+
+    <!-- 时间 -->
+    <view class="route-time">
+      <text class="time-icon">🕐</text>
+      <text>{{item.time}}</text>
+    </view>
+
+    <!-- 站点时间线 -->
+    <view class="timeline">
+      <view
+        class="timeline-item {{index === item.currentStop ? 'current' : ''}} {{index < item.currentStop ? 'done' : ''}}"
+        wx:for="{{item.stops}}"
+        wx:key="*this"
+        wx:for-item="stop"
+        wx:for-index="index"
+      >
+        <view class="timeline-dot">
+          <view class="dot-inner"></view>
+        </view>
+        <text class="timeline-name">{{stop}}</text>
+        <text class="timeline-tag" wx:if="{{index === 0}}">始发</text>
+        <text class="timeline-tag end" wx:if="{{index === item.stops.length - 1}}">终点</text>
+        <text class="timeline-tag current-tag" wx:if="{{index === item.currentStop}}">当前</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部TabBar -->
+  <driver-tab-bar current="routes"></driver-tab-bar>
+</view>

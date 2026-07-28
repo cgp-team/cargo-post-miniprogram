@@ -1,0 +1,150 @@
+<!-- 首页 - 农村客货邮小程序 -->
+<view class="home-page">
+  <!-- 顶部用户信息栏 -->
+  <view class="top-bar">
+    <view class="location-info" bindtap="switchVillage">
+      <text class="loc-emoji">📌</text>
+      <text class="village-name">{{currentVillage}}</text>
+      <text class="arrow-down">▾</text>
+    </view>
+    <view class="user-avatar" bindtap="goToProfile">
+      <image src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+    </view>
+  </view>
+
+  <!-- 搜索栏 -->
+  <view class="search-bar card">
+    <text class="search-emoji">🔍</text>
+    <input
+      class="search-input"
+      type="text"
+      placeholder="搜索公交线路、农产品、快递单号..."
+      bindtap="goToSearch"
+      disabled
+    />
+  </view>
+
+  <!-- 公告横幅 -->
+  <swiper class="notice-swiper" autoplay interval="3000" circular>
+    <swiper-item wx:for="{{notices}}" wx:key="id">
+      <view class="notice-item">
+        <text class="notice-tag">📢 公告</text>
+        <text class="notice-text">{{item.title}}</text>
+      </view>
+    </swiper-item>
+  </swiper>
+
+  <!-- 功能入口 - 四宫格 -->
+  <view class="feature-grid">
+    <view class="feature-item" bindtap="goToBusTracking">
+      <view class="feature-icon-box green-bg">
+        <text class="feature-emoji">🚌</text>
+      </view>
+      <text class="feature-name">实时公交</text>
+      <text class="feature-desc">查看车辆位置</text>
+    </view>
+
+    <view class="feature-item" bindtap="goToProducts">
+      <view class="feature-icon-box orange-bg">
+        <text class="feature-emoji">🥬</text>
+      </view>
+      <text class="feature-name">农产品选购</text>
+      <text class="feature-desc">新鲜直达餐桌</text>
+    </view>
+
+    <view class="feature-item" bindtap="goToParcel">
+      <view class="feature-icon-box blue-bg">
+        <text class="feature-emoji">📦</text>
+      </view>
+      <text class="feature-name">我的快递</text>
+      <text class="feature-desc">物流全程追踪</text>
+    </view>
+
+    <view class="feature-item" bindtap="goToSend">
+      <view class="feature-icon-box red-bg">
+        <text class="feature-emoji">📮</text>
+      </view>
+      <text class="feature-name">我要寄货</text>
+      <text class="feature-desc">一键寄送农产品</text>
+    </view>
+  </view>
+
+  <!-- 快捷操作 -->
+  <view class="quick-actions">
+    <view class="quick-action-item" bindtap="goToBusTracking">
+      <text class="quick-action-emoji">🕐</text>
+      <text>实时到站</text>
+    </view>
+    <view class="quick-action-item" bindtap="goToParcel">
+      <text class="quick-action-emoji">📍</text>
+      <text>物流追踪</text>
+    </view>
+    <view class="quick-action-item" bindtap="goToProducts">
+      <text class="quick-action-emoji">🔥</text>
+      <text>今日特惠</text>
+    </view>
+  </view>
+
+  <!-- 公交实时到站 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">🚌 附近公交 · 实时到站</text>
+      <text class="section-more" bindtap="goToBusTracking">更多 ›</text>
+    </view>
+
+    <view class="bus-list">
+      <view
+        class="bus-card"
+        wx:for="{{nearbyBuses}}"
+        wx:key="id"
+        bindtap="goToBusDetail"
+        data-id="{{item.id}}"
+      >
+        <view class="bus-header">
+          <text class="bus-number">{{item.routeNumber}}</text>
+          <text class="bus-status {{item.status === 'running' ? 'running' : ''}}">
+            {{item.status === 'running' ? '行驶中' : '已到站'}}
+          </text>
+        </view>
+        <view class="bus-route">
+          <text>{{item.startStation}} → {{item.endStation}}</text>
+        </view>
+        <view class="bus-info">
+          <text class="text-gray">下一站: {{item.nextStation}}</text>
+          <text class="text-orange">⏱ 约{{item.arriveTime}}分钟</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 推荐农产品 -->
+  <view class="section">
+    <view class="section-header">
+      <text class="section-title">🌽 优质农产品 · 村里直发</text>
+      <text class="section-more" bindtap="goToProducts">更多 ›</text>
+    </view>
+
+    <scroll-view class="product-scroll" scroll-x>
+      <view
+        class="product-card"
+        wx:for="{{recommendProducts}}"
+        wx:key="id"
+        bindtap="goToProductDetail"
+        data-id="{{item.id}}"
+      >
+        <image class="product-img" src="{{item.image}}" mode="aspectFill"></image>
+        <view class="product-info">
+          <text class="product-name">{{item.name}}</text>
+          <text class="product-from">{{item.fromVillage}}</text>
+          <view class="product-price-row">
+            <text class="product-price">¥{{item.price}}</text>
+            <text class="product-unit">/{{item.unit}}</text>
+          </view>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 底部安全区 -->
+  <view class="safe-area-bottom"></view>
+</view>

@@ -1,0 +1,174 @@
+<!-- 注册页面 - 农村客货邮小程序 -->
+<view class="register-page">
+  <!-- 页面标题 -->
+  <view class="page-header">
+    <text class="page-title">
+      {{role === 'user' ? '🌾 用户注册' : '🚌 司机注册'}}
+    </text>
+    <text class="page-desc">
+      {{role === 'user' ? '注册成为用户，享受公交带货服务' : '注册成为司机，加入农村物流网络'}}
+    </text>
+    <view class="header-wave"></view>
+  </view>
+
+  <!-- 步骤指示器 -->
+  <view class="step-indicator">
+    <view class="step-dot active">1</view>
+    <view class="step-line"></view>
+    <view class="step-dot">2</view>
+    <view class="step-line"></view>
+    <view class="step-dot">3</view>
+  </view>
+
+  <!-- 表单区域 -->
+  <view class="form-section">
+    <!-- 基本信息 -->
+    <view class="section-title">📋 基本信息</view>
+
+    <view class="input-group">
+      <text class="input-label">📱 手机号码 <text class="required">*</text></text>
+      <input
+        class="input-field"
+        type="number"
+        placeholder="请输入手机号"
+        value="{{form.phone}}"
+        bindinput="onFieldChange"
+        data-field="phone"
+        maxlength="11"
+      />
+    </view>
+
+    <view class="input-group">
+      <text class="input-label">🔒 登录密码 <text class="required">*</text></text>
+      <input
+        class="input-field"
+        type="password"
+        placeholder="6-20位字母或数字"
+        value="{{form.password}}"
+        bindinput="onFieldChange"
+        data-field="password"
+      />
+    </view>
+
+    <view class="input-group">
+      <text class="input-label">🔒 确认密码 <text class="required">*</text></text>
+      <input
+        class="input-field"
+        type="password"
+        placeholder="请再次输入密码"
+        value="{{form.confirmPassword}}"
+        bindinput="onFieldChange"
+        data-field="confirmPassword"
+      />
+    </view>
+
+    <view class="input-group">
+      <text class="input-label">👤 真实姓名 <text class="required">*</text></text>
+      <input
+        class="input-field"
+        type="text"
+        placeholder="请输入真实姓名"
+        value="{{form.realName}}"
+        bindinput="onFieldChange"
+        data-field="realName"
+      />
+    </view>
+
+    <view class="input-group">
+      <text class="input-label">🪪 身份证号 <text class="required">*</text></text>
+      <input
+        class="input-field"
+        type="idcard"
+        placeholder="请输入身份证号"
+        value="{{form.idCard}}"
+        bindinput="onFieldChange"
+        data-field="idCard"
+        maxlength="18"
+      />
+    </view>
+
+    <!-- 司机专用信息 -->
+    <block wx:if="{{role === 'driver'}}">
+      <view class="section-title">🚛 驾驶员信息</view>
+
+      <view class="input-group">
+        <text class="input-label">🚘 车牌号码 <text class="required">*</text></text>
+        <input
+          class="input-field"
+          type="text"
+          placeholder="请输入车牌号，如：京A12345"
+          value="{{form.plateNumber}}"
+          bindinput="onFieldChange"
+          data-field="plateNumber"
+        />
+      </view>
+
+      <view class="input-group">
+        <text class="input-label">📄 驾驶证号 <text class="required">*</text></text>
+        <input
+          class="input-field"
+          type="text"
+          placeholder="请输入驾驶证号"
+          value="{{form.driverLicense}}"
+          bindinput="onFieldChange"
+          data-field="driverLicense"
+        />
+      </view>
+
+      <view class="input-group">
+        <text class="input-label">🛣️ 所属线路</text>
+        <picker
+          mode="selector"
+          range="{{busRoutes}}"
+          bindchange="onRouteChange"
+        >
+          <view class="picker-field {{form.busRoute ? '' : 'placeholder'}}">
+            {{form.busRoute || '请选择所属公交线路'}}
+          </view>
+        </picker>
+      </view>
+
+      <view class="input-group">
+        <text class="input-label">🏢 运营公司</text>
+        <input
+          class="input-field"
+          type="text"
+          placeholder="请输入所属公交公司名称"
+          value="{{form.company}}"
+          bindinput="onFieldChange"
+          data-field="company"
+        />
+      </view>
+    </block>
+
+    <!-- 协议勾选 -->
+    <view class="agreement">
+      <checkbox-group bindchange="onAgreeChange">
+        <label class="flex-row">
+          <checkbox value="agree" checked="{{agreed}}" color="#2E7D32"/>
+          <text class="agree-text">
+            我已阅读并同意
+            <text class="text-green">《用户服务协议》</text>和
+            <text class="text-green">《隐私政策》</text>
+          </text>
+        </label>
+      </checkbox-group>
+    </view>
+
+    <!-- 注册按钮 -->
+    <button
+      class="btn-primary register-btn"
+      bindtap="handleRegister"
+      loading="{{loading}}"
+      disabled="{{!agreed}}"
+    >
+      立即注册
+    </button>
+
+    <!-- 返回登录 -->
+    <view class="login-link">
+      <text class="text-gray">已有账号？</text>
+      <text class="text-green" bindtap="goToLogin">返回登录</text>
+    </view>
+  </view>
+</view>

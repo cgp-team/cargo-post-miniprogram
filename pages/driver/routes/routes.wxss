@@ -1,0 +1,185 @@
+/* 路线页 - 暗黑主题 */
+.routes-page {
+  min-height: 100vh;
+  background: #1A1A1A;
+  color: #fff;
+  padding-bottom: 140rpx;
+}
+
+/* 头部 */
+.page-header {
+  background: linear-gradient(180deg, #0D0D0D, #1A1A1A);
+  padding: 0 32rpx 32rpx;
+  border-bottom: 1rpx solid #2A2A2A;
+}
+
+.page-title {
+  font-size: 44rpx;
+  font-weight: 800;
+  display: block;
+}
+
+.page-date {
+  font-size: 26rpx;
+  color: #888;
+  display: block;
+  margin-top: 8rpx;
+}
+
+/* 路线卡片 */
+.route-card {
+  margin: 24rpx;
+  background: #222;
+  border-radius: 24rpx;
+  padding: 32rpx;
+  border: 1rpx solid #2A2A2A;
+}
+
+.route-card.running {
+  border-color: rgba(76,175,80,0.3);
+}
+
+.route-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20rpx;
+}
+
+.route-card-number {
+  font-size: 42rpx;
+  font-weight: 800;
+  color: #4CAF50;
+  display: block;
+}
+
+.route-card-direction {
+  font-size: 26rpx;
+  color: #999;
+  display: block;
+  margin-top: 4rpx;
+}
+
+.route-card-status {
+  font-size: 24rpx;
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+  font-weight: 600;
+}
+
+.route-card-status.running {
+  background: rgba(76,175,80,0.2);
+  color: #81C784;
+}
+
+.route-card-status.pending {
+  background: rgba(255,152,0,0.2);
+  color: #FFB74D;
+}
+
+.route-time {
+  font-size: 28rpx;
+  color: #ccc;
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-bottom: 30rpx;
+  padding-bottom: 24rpx;
+  border-bottom: 1rpx solid #2A2A2A;
+}
+
+/* 时间线 */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.timeline-item {
+  display: flex;
+  align-items: center;
+  padding: 18rpx 0;
+  position: relative;
+  gap: 20rpx;
+}
+
+.timeline-item::before {
+  content: '';
+  position: absolute;
+  left: 10rpx;
+  top: 48rpx;
+  bottom: -18rpx;
+  width: 2rpx;
+  background: #333;
+}
+
+.timeline-item:last-child::before {
+  display: none;
+}
+
+.timeline-item.done::before {
+  background: #4CAF50;
+}
+
+.timeline-dot {
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 50%;
+  background: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.timeline-item.done .timeline-dot {
+  background: #4CAF50;
+}
+
+.timeline-item.current .timeline-dot {
+  background: #FFB74D;
+  box-shadow: 0 0 16rpx rgba(255,183,77,0.5);
+}
+
+.dot-inner {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  background: #1A1A1A;
+}
+
+.timeline-name {
+  font-size: 28rpx;
+  color: #999;
+  flex: 1;
+}
+
+.timeline-item.done .timeline-name {
+  color: #ccc;
+}
+
+.timeline-item.current .timeline-name {
+  color: #fff;
+  font-weight: 700;
+  font-size: 32rpx;
+}
+
+.timeline-tag {
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  background: rgba(255,152,0,0.2);
+  color: #FFB74D;
+}
+
+.timeline-tag.end {
+  background: rgba(255,82,82,0.2);
+  color: #EF5350;
+}
+
+.timeline-tag.current-tag {
+  background: rgba(255,183,77,0.25);
+  color: #FFB74D;
+  font-weight: 700;
+}
