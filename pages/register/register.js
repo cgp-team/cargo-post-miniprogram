@@ -1,159 +1,80 @@
 /**
- * 注册页面逻辑 - 支持用户/司机双角色
+ * 注册页面 - 对接 Java 后端 member 模块
+ * 新用户通过短信验证码登录即自动注册（createUserIfAbsent）
+ * 此页面仅做引导，实际注册在短信登录时完成
  */
 const api = require('../../utils/api')
 const util = require('../../utils/util')
 
 Page({
   data: {
-    role: 'user', // 'user' | 'driver'
-    form: {
-      phone: '',
-      password: '',
-      confirmPassword: '',
-      realName: '',
-      idCard: '',
-      // 司机专用字段
-      plateNumber: '',
-      driverLicense: '',
-      busRoute: '',
-      company: ''
-    },
-    agreed: false,
-    loading: false,
-    busRoutes: [
-      'C101路 - 县城至大湾村',
-      'C102路 - 县城至青山镇',
-      'C201路 - 县城至竹林乡',
-      'C202路 - 县城至溪口村',
-      'C301路 - 县城至双河镇',
-      'C302路 - 县城至云山村',
-      'C303路 - 县城至桃花源'
-    ]
+    phone: '',
+    smsCode: '',
+    smsCountdown: 0,
+    smsCodeSending: false,
+    loading: false
   },
 
-  onLoad(options) {
-    if (options.role) {
-      this.setData({ role: options.role })
-    }
+  onPhoneInput(e) {
+    this.setData({ phone: e.detail.value })
+  },
+  onSmsCodeInput(e) {
+    this.setData({ smsCode: e.detail.value })
   },
 
-  /**
-   * 表单字段更新
-   */
-  onFieldChange(e) {
-    const field = e.currentTarget.dataset.field
-    const value = e.detail.value
-    this.setData({
-      [`form.${field}`]: value
-    })
-  },
-
-  /**
-   * 线路选择
-   */
-  onRouteChange(e) {
-    const index = e.detail.value
-    this.setData({
-      'form.busRoute': this.data.busRoutes[index]
-    })
-  },
-
-  /**
-   * 协议勾选
-   */
-  onAgreeChange(e) {
-    this.setData({
-      agreed: e.detail.value.length > 0
-    })
-  },
-
-  /**
-   * 表单验证
-   */
-  validateForm() {
-    const { form, role } = this.data
-
-    if (!util.validatePhone(form.phone)) {
+  /** 发送验证码 */
+  async handleSendSms() {
+    const { phone, smsCodeSending, smsCountdown } = this.data
+    if (smsCodeSending || smsCountdown > 0) return
+    if (!util.validatePhone(phone)) {
       wx.showToast({ title: '请输入正确的手机号', icon: 'none' })
-      return false
+      return
     }
-    if (!util.validatePassword(form.password)) {
-      wx.showToast({ title: '密码为6-20位字母或数字', icon: 'none' })
-      return false
+    this.setData({ smsCodeSending: true })
+    try {
+      await api.sendSmsCode(phone, 1)
+      wx.showToast({ title: '验证码已发送', icon: 'success' })
+      this.setData({ smsCountdown: 60 })
+      const timer = setInterval(() => {
+        const count = this.data.smsCountdown - 1
+        if (count <= 0) clearInterval(timer)
+        this.setData({ smsCountdown: count > 0 ? count : 0 })
+      }, 1000)
+    } finally {
+      this.setData({ smsCodeSending: false })
     }
-    if (form.password !== form.confirmPassword) {
-      wx.showToast({ title: '两次密码输入不一致', icon: 'none' })
-      return false
-    }
-    if (!form.realName.trim()) {
-      wx.showToast({ title: '请输入真实姓名', icon: 'none' })
-      return false
-    }
-    if (!util.validateIdCard(form.idCard)) {
-      wx.showToast({ title: '请输入正确的身份证号', icon: 'none' })
-      return false
-    }
-
-    // 司机额外验证
-    if (role === 'driver') {
-      if (!form.plateNumber.trim()) {
-        wx.showToast({ title: '请输入车牌号码', icon: 'none' })
-        return false
-      }
-      if (!form.driverLicense.trim()) {
-        wx.showToast({ title: '请输入驾驶证号', icon: 'none' })
-        return false
-      }
-    }
-
-    if (!this.data.agreed) {
-      wx.showToast({ title: '请阅读并同意服务协议', icon: 'none' })
-      return false
-    }
-
-    return true
   },
 
-  /**
-   * 提交注册
-   */
+  /** 注册（短信验证码登录，新用户自动创建） */
   async handleRegister() {
-    if (!this.validateForm()) return
+    const { phone, smsCode } = this.data
+    if (!util.validatePhone(phone)) {
+      wx.showToast({ title: '请输入正确的手机号', icon: 'none' })
+      return
+    }
+    if (!smsCode || smsCode.length < 4) {
+      wx.showToast({ title: '请输入验证码', icon: 'none' })
+      return
+    }
 
     this.setData({ loading: true })
-
     try {
-      const { role, form } = this.data
+      const res = await api.smsLogin(phone, smsCode)
+      // 保存登录状态
+      wx.setStorageSync('token', res.accessToken || res.token)
+      if (res.refreshToken) wx.setStorageSync('refreshToken', res.refreshToken)
+      if (res.userId) wx.setStorageSync('userId', res.userId)
 
-      // 根据角色调用不同的注册接口
-      const registerApi = role === 'driver' ? api.registerDriver : api.registerUser
-      const res = await registerApi(form)
-
-      wx.showToast({
-        title: '注册成功',
-        icon: 'success',
-        duration: 2000
-      })
-
-      // 注册成功，回到登录页
+      wx.showToast({ title: '注册成功', icon: 'success', duration: 1500 })
       setTimeout(() => {
-        wx.navigateBack()
-      }, 2000)
-
-    } catch (err) {
-      wx.showToast({
-        title: err.message || '注册失败，请重试',
-        icon: 'none'
-      })
+        wx.reLaunch({ url: '/pages/index/index' })
+      }, 1500)
     } finally {
       this.setData({ loading: false })
     }
   },
 
-  /**
-   * 返回登录页
-   */
+  /** 返回登录页 */
   goToLogin() {
     wx.navigateBack()
   }

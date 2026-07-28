@@ -17,10 +17,10 @@ function validateIdCard(idCard) {
 }
 
 /**
- * 密码强度验证 (6-20位字母数字)
+ * 密码强度验证 (6-20位字母或数字)
  */
 function validatePassword(password) {
-  return password.length >= 6 && password.length <= 20
+  return /^[a-zA-Z0-9]{6,20}$/.test(password)
 }
 
 /**

@@ -73,9 +73,10 @@ Page({
       latitude: 30.25 + i * 0.02,
       longitude: 108.15 + i * 0.03,
       title: name,
-      iconPath: i === 0 ? '/images/marker-start.png' : (i === stops.length - 1 ? '/images/marker-end.png' : '/images/marker-stop.png'),
-      width: 28,
-      height: 28
+      iconPath: '',
+      width: 20,
+      height: 20,
+      callout: { content: name, fontSize: 12, padding: 4, display: 'ALWAYS' }
     }))
 
     // 路线连线
@@ -122,11 +123,17 @@ Page({
   simulateDriving() {
     const totalStops = this.data.totalStops
     let currentIdx = 0
+    // 清除旧定时器
+    if (this.driveTimer) clearInterval(this.driveTimer)
 
     const timer = setInterval(() => {
+      // 到站停靠时暂停推进
+      if (this.data.status === 'stopped') return
+
       currentIdx++
       if (currentIdx >= totalStops) {
         clearInterval(timer)
+        this.driveTimer = null
         return
       }
 

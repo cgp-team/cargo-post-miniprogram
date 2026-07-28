@@ -10,32 +10,9 @@
     <text class="logo-desc">公交带货 · 快递进村 · 农产品出山</text>
   </view>
 
-  <!-- 角色切换 -->
-  <view class="role-switch">
-    <view
-      class="role-tab {{currentRole === 'user' ? 'active' : ''}}"
-      bindtap="switchRole"
-      data-role="user"
-    >
-      <view class="role-icon-wrap">
-        <text class="role-emoji">👤</text>
-      </view>
-      <text>用户登录</text>
-    </view>
-    <view
-      class="role-tab {{currentRole === 'driver' ? 'active' : ''}}"
-      bindtap="switchRole"
-      data-role="driver"
-    >
-      <view class="role-icon-wrap">
-        <text class="role-emoji">🚌</text>
-      </view>
-      <text>司机登录</text>
-    </view>
-  </view>
-
   <!-- 登录表单 -->
   <view class="form-section card">
+    <!-- 手机号 -->
     <view class="input-group">
       <view class="input-label-row">
         <text class="input-icon">📱</text>
@@ -51,24 +28,64 @@
       />
     </view>
 
-    <view class="input-group">
-      <view class="input-label-row">
-        <text class="input-icon">🔒</text>
-        <text class="input-label">登录密码</text>
+    <!-- 短信验证码模式 -->
+    <block wx:if="{{loginMode === 'sms'}}">
+      <view class="input-group sms-row">
+        <view class="input-label-row">
+          <text class="input-icon">✉️</text>
+          <text class="input-label">验证码</text>
+        </view>
+        <view class="sms-input-wrap">
+          <input
+            class="input-field sms-field"
+            type="number"
+            placeholder="验证码"
+            value="{{smsCode}}"
+            bindinput="onSmsCodeInput"
+            maxlength="6"
+          />
+          <button
+            class="sms-btn {{smsCountdown > 0 ? 'disabled' : ''}}"
+            bindtap="handleSendSms"
+            disabled="{{smsCountdown > 0 || smsCodeSending}}"
+          >
+            {{smsCountdown > 0 ? smsCountdown + 's' : '发送验证码'}}
+          </button>
+        </view>
       </view>
-      <input
-        class="input-field"
-        type="password"
-        placeholder="请输入密码"
-        value="{{password}}"
-        bindinput="onPasswordInput"
-      />
-    </view>
+      <view class="sms-tip">测试环境固定验证码：9999</view>
+    </block>
+
+    <!-- 密码模式 -->
+    <block wx:else>
+      <view class="input-group">
+        <view class="input-label-row">
+          <text class="input-icon">🔒</text>
+          <text class="input-label">登录密码</text>
+        </view>
+        <input
+          class="input-field"
+          type="password"
+          placeholder="请输入密码"
+          value="{{password}}"
+          bindinput="onPasswordInput"
+        />
+      </view>
+    </block>
 
     <!-- 登录按钮 -->
-    <button class="btn-primary login-btn" bindtap="handleLogin" loading="{{loading}}">
-      {{currentRole === 'user' ? '用户登录' : '司机登录'}}
+    <button
+      class="btn-primary login-btn"
+      bindtap="{{loginMode === 'sms' ? 'handleSmsLogin' : 'handlePasswordLogin'}}"
+      loading="{{loading}}"
+    >
+      {{loginMode === 'sms' ? '验证码登录' : '密码登录'}}
     </button>
+
+    <!-- 切换登录方式 -->
+    <view class="switch-mode" bindtap="switchMode">
+      <text>{{loginMode === 'sms' ? '密码登录' : '验证码登录'}}</text>
+    </view>
 
     <!-- 微信一键登录 -->
     <button class="wechat-login-btn" bindtap="handleWechatLogin" hover-class="none">
@@ -76,10 +93,9 @@
       <text>微信一键登录</text>
     </button>
 
-    <!-- 注册入口 -->
-    <view class="register-link">
-      <text class="text-gray">还没有账号？</text>
-      <text class="text-green" bindtap="goToRegister">立即注册</text>
+    <!-- 注册提示 -->
+    <view class="register-link" bindtap="goToRegister">
+      <text class="text-gray">首次使用？短信登录即自动注册</text>
     </view>
   </view>
 </view>

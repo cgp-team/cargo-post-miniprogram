@@ -8,7 +8,7 @@
       <text class="arrow-down">▾</text>
     </view>
     <view class="user-avatar" bindtap="goToProfile">
-      <image src="{{userInfo.avatarUrl || '/images/default-avatar.png'}}" mode="aspectFill"></image>
+      <text>{{userInfo.avatarUrl || '👤'}}</text>
     </view>
   </view>
 

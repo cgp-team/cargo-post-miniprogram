@@ -287,3 +287,63 @@
 .register-link .text-green {
   font-weight: 600;
 }
+
+/* 短信验证码行 */
+.sms-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.sms-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.sms-field {
+  flex: 1;
+}
+
+.sms-btn {
+  width: 200rpx;
+  height: 72rpx;
+  line-height: 72rpx;
+  font-size: 26rpx;
+  background: #fff;
+  border: 2rpx solid #4CAF50;
+  color: #4CAF50;
+  border-radius: 36rpx;
+  padding: 0;
+  text-align: center;
+}
+
+.sms-btn.disabled {
+  border-color: #BDBDBD;
+  color: #BDBDBD;
+}
+
+.sms-tip {
+  text-align: center;
+  font-size: 24rpx;
+  color: #999;
+  margin-top: 8rpx;
+  margin-bottom: 16rpx;
+}
+
+/* 切换登录方式 */
+.switch-mode {
+  text-align: center;
+  font-size: 28rpx;
+  color: #4CAF50;
+  margin-top: 24rpx;
+  text-decoration: underline;
+}
+
+/* 卡片通用样式 */
+.card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 48rpx 36rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0,0,0,0.07);
+}

@@ -48,7 +48,7 @@ Page({
         fromVillage: '云山村',
         price: '68.00',
         unit: '斤',
-        image: '/images/product-tea.png'
+        image: '🍵'
       },
       {
         id: 2,
@@ -56,7 +56,7 @@ Page({
         fromVillage: '大湾村',
         price: '45.00',
         unit: '箱',
-        image: '/images/product-egg.png'
+        image: '🥚'
       },
       {
         id: 3,
@@ -64,7 +64,7 @@ Page({
         fromVillage: '竹林乡',
         price: '28.00',
         unit: '袋',
-        image: '/images/product-noodle.png'
+        image: '🍜'
       },
       {
         id: 4,
@@ -72,7 +72,7 @@ Page({
         fromVillage: '青山镇',
         price: '55.00',
         unit: '斤',
-        image: '/images/product-nut.png'
+        image: '🥜'
       }
     ]
   },

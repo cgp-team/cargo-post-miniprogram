@@ -22,7 +22,7 @@ Component({
       const key = e.currentTarget.dataset.key
       if (key === this.data.current) return
 
-      wx.redirectTo({
+      wx.reLaunch({
         url: `/pages/driver/${key}/${key}`
       })
     }
