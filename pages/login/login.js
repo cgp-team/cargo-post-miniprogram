@@ -110,11 +110,18 @@ Page({
   },
 
   /** 登录成功处理 */
-  _onLoginSuccess(res) {
+  async _onLoginSuccess(res) {
     const token = res.accessToken || res.token
     wx.setStorageSync('token', token)
     if (res.refreshToken) wx.setStorageSync('refreshToken', res.refreshToken)
     if (res.userId) wx.setStorageSync('userId', res.userId)
+
+    // 芋道标准流程：调用 /member/user/get 获取用户信息
+    try {
+      await api.getUserInfo().then(info => wx.setStorageSync('userInfo', info))
+    } catch (e) {
+      wx.setStorageSync('userInfo', { id: res.userId })
+    }
 
     wx.showToast({ title: '登录成功', icon: 'success', duration: 1500 })
     setTimeout(() => {
