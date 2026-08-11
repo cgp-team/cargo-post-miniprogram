@@ -3,6 +3,7 @@
     "pages/login/login",
     "pages/index/index",
     "pages/goods/goods",
+    "pages/goods/detail/detail",
     "pages/parcel/parcel",
     "pages/mine/mine",
     "pages/send/send",

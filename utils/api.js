@@ -92,6 +92,18 @@ function updatePassword(data) {
   return request('/app-api/member/user/update-password', 'PUT', data)
 }
 
+// ==================== 商品 ====================
+
+/** 获取上架商品列表 */
+function listProducts() {
+  return request('/app-api/transport/product/list')
+}
+
+/** 获取商品详情 */
+function getProduct(id) {
+  return request('/app-api/transport/product/get', 'GET', { id })
+}
+
 module.exports = {
   request,
   smsLogin,
@@ -101,5 +113,7 @@ module.exports = {
   logout,
   getUserInfo,
   updateUser,
-  updatePassword
+  updatePassword,
+  listProducts,
+  getProduct
 }
