@@ -105,6 +105,72 @@ function getProduct(id) {
   return request('/app-api/transport/product/get', 'GET', { id })
 }
 
+// ==================== 商城订单 ====================
+
+/** 创建商城订单（货到付款） */
+function createProductOrder(data) {
+  return request('/app-api/transport/product-order/create', 'POST', data)
+}
+
+/** 我的订单分页（status 可选：0待发货/1已发货/2已完成/3已取消） */
+function pageMyProductOrders(params) {
+  return request('/app-api/transport/product-order/page', 'GET', params)
+}
+
+/** 取消订单（仅待发货） */
+function cancelProductOrder(id) {
+  return request(`/app-api/transport/product-order/cancel?id=${id}`, 'PUT')
+}
+
+// ==================== 寄货 / 包裹 ====================
+
+/** 寄货创建货运订单 */
+function createSendOrder(data) {
+  return request('/app-api/transport/send/create', 'POST', data)
+}
+
+/** 我的寄货记录分页 */
+function pageMySendOrders(params) {
+  return request('/app-api/transport/send/page', 'GET', params)
+}
+
+/** 按业务订单号追踪包裹 */
+function trackParcel(no) {
+  return request('/app-api/transport/send/track', 'GET', { no })
+}
+
+/** 寄货站点列表 */
+function listSendStations() {
+  return request('/app-api/transport/send/stations')
+}
+
+// ==================== 司机端 ====================
+
+/** 司机档案（手机号识别身份） */
+function getDriverProfile(mobile) {
+  return request('/app-api/transport/driver/profile', 'GET', { mobile })
+}
+
+/** 今日班次与经停站点 */
+function getDriverShifts() {
+  return request('/app-api/transport/driver/shifts')
+}
+
+/** 待装车任务 */
+function getDriverPickups() {
+  return request('/app-api/transport/driver/pickups')
+}
+
+/** 运营统计 */
+function getDriverEarnings() {
+  return request('/app-api/transport/driver/earnings')
+}
+
+/** 调度任务（算法派单结果，预留） */
+function getDriverTasks(driverId) {
+  return request('/app-api/transport/driver/tasks', 'GET', { driverId })
+}
+
 module.exports = {
   request,
   smsLogin,
@@ -116,5 +182,17 @@ module.exports = {
   updateUser,
   updatePassword,
   listProducts,
-  getProduct
+  getProduct,
+  createProductOrder,
+  pageMyProductOrders,
+  cancelProductOrder,
+  createSendOrder,
+  pageMySendOrders,
+  trackParcel,
+  listSendStations,
+  getDriverProfile,
+  getDriverShifts,
+  getDriverPickups,
+  getDriverEarnings,
+  getDriverTasks
 }

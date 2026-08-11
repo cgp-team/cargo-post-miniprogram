@@ -54,9 +54,23 @@ Page({
     wx.showToast({ title: '账本功能开发中', icon: 'none' })
   },
 
-  /** 我的订单 */
+  /** 我的订单（商城购买订单） */
   goToOrders() {
-    wx.showToast({ title: '订单功能开发中', icon: 'none' })
+    if (!this.data.isLoggedIn) {
+      wx.reLaunch({ url: '/pages/login/login' })
+      return
+    }
+    wx.navigateTo({ url: '/pages/orders/orders' })
+  },
+
+  /** 我的寄货记录（parcel 是 tab 页，用 switchTab + globalData 传意图） */
+  goToMySend() {
+    if (!this.data.isLoggedIn) {
+      wx.reLaunch({ url: '/pages/login/login' })
+      return
+    }
+    getApp().globalData.parcelIntent = 'my'
+    wx.switchTab({ url: '/pages/parcel/parcel' })
   },
 
   /** 公交收藏 */

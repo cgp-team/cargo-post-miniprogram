@@ -181,6 +181,163 @@
   height: 20rpx;
 }
 
+/* 下单弹窗 */
+.popup-mask {
+  position: fixed;
+  left: 0; right: 0; top: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+}
+
+.popup-body {
+  width: 100%;
+  background: #fff;
+  border-radius: 28rpx 28rpx 0 0;
+  padding: 30rpx 32rpx calc(30rpx + env(safe-area-inset-bottom));
+  animation: popup-slide-up 0.25s ease;
+}
+
+@keyframes popup-slide-up {
+  from { transform: translateY(40%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24rpx;
+}
+
+.popup-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #333;
+}
+
+.popup-close {
+  font-size: 32rpx;
+  color: #999;
+  padding: 8rpx;
+}
+
+.popup-product {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  background: #F8F8F8;
+  border-radius: 16rpx;
+  padding: 20rpx;
+  margin-bottom: 24rpx;
+}
+
+.popup-emoji {
+  font-size: 64rpx;
+}
+
+.popup-product-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.popup-product-name {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.popup-price {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #E53935;
+}
+
+.popup-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.popup-row-col {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12rpx;
+}
+
+.popup-label {
+  font-size: 28rpx;
+  color: #555;
+}
+
+.popup-input {
+  flex: 1;
+  margin-left: 24rpx;
+  background: #F5F5F5;
+  border-radius: 12rpx;
+  padding: 16rpx 20rpx;
+  font-size: 28rpx;
+}
+
+.popup-row-col .popup-input {
+  width: 100%;
+  margin-left: 0;
+  box-sizing: border-box;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+}
+
+.stepper-btn {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  font-size: 34rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stepper-num {
+  font-size: 32rpx;
+  font-weight: 600;
+  min-width: 60rpx;
+  text-align: center;
+}
+
+.popup-total {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  gap: 12rpx;
+  margin: 16rpx 0 24rpx;
+}
+
+.popup-total-amount {
+  font-size: 40rpx;
+  font-weight: 800;
+  color: #E53935;
+}
+
+.popup-submit {
+  height: 92rpx;
+  border-radius: 46rpx;
+  background: linear-gradient(135deg, #FF9800, #F57C00);
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* ============ 老年人模式：详情页字体放大 ============ */
 .elderly-mode .detail-price { font-size: 56rpx; }
 .elderly-mode .detail-name { font-size: 42rpx; }
@@ -188,3 +345,7 @@
 .elderly-mode .desc-text { font-size: 30rpx; }
 .elderly-mode .footer-btn { font-size: 34rpx; height: 100rpx; }
 .elderly-mode .nav-title { font-size: 36rpx; }
+.elderly-mode .popup-title { font-size: 38rpx; }
+.elderly-mode .popup-label { font-size: 32rpx; }
+.elderly-mode .popup-input { font-size: 32rpx; }
+.elderly-mode .popup-submit { font-size: 36rpx; height: 100rpx; }

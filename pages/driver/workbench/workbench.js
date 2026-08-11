@@ -1,100 +1,153 @@
 /**
  * 司机工作台 - 核心页面
  * 三种状态：待发车(idle) / 行驶中(driving) / 到站停靠(stopped)
+ * 数据来源：真实后端（司机档案/今日班次/待装车任务/调度任务）
  */
+const api = require('../../../utils/api')
+const appearance = require('../../../utils/appearance')
+
 Page({
   data: {
     // 状态栏高度（自定义导航栏用）
     statusBarHeight: 20,
+    headerSafeStyle: 'height: 20px;',
 
     // 当前状态: 'idle' | 'driving' | 'stopped'
     status: 'idle',
 
+    // 司机/车辆
+    driverName: '',
+    plateNo: '',
+    cargoLimit: 0,
+
     // 班次信息
-    routeName: 'C302路',
-    startStation: '县城客运站',
-    endStation: '云山村',
-    currentStation: '县城客运站',
-    nextStation: '青山镇路口',
-    nextStationDistance: 2300,
+    routeName: '',
+    startStation: '',
+    endStation: '',
+    currentStation: '',
+    nextStation: '',
+    nextStationDistance: 0,
 
     // 进度条
-    totalStops: 7,
+    totalStops: 0,
     currentStopIndex: 0,
     progressPercent: 0,
     progressFillStyle: 'width: 0%;',
     progressDotStyle: 'left: 0%;',
 
     // 行李舱运力
-    cargoCapacity: 50,        // 百分比，滑块当前值
-    cargoUsed: 30,            // 已被预定的仓位
-    cargoFillStyle: 'height: 50%;',
-    cargoUsedStyle: 'bottom: 30%;',
-    headerSafeStyle: 'height: 20px;',
+    cargoCapacity: 0,        // 空余仓位百分比
+    cargoUsed: 0,            // 已用仓位百分比
+    cargoFillStyle: 'height: 0%;',
+    cargoUsedStyle: 'bottom: 0%;',
 
     // 语音播报
     voiceText: '',
 
-    // 到站任务
-    pendingPickups: [
-      { id: 1, name: '高山云雾茶', weight: '30斤', farmer: '张大爷', stop: '青山镇路口' },
-      { id: 2, name: '土鸡蛋', weight: '15斤', farmer: '李婶', stop: '青山镇路口' }
-    ],
+    // 到站任务（真实货运订单）
+    pendingPickups: [],
+
+    // 调度任务（算法派单结果，预留）
+    tasks: [],
 
     // 行驶数据
     speed: 0,
-    eta: '14:30',
+    eta: '',
 
     // 地图标记点
     markers: [],
-    polyline: []
+    polyline: [],
+
+    loaded: false
   },
 
   onLoad() {
     const sysInfo = wx.getWindowInfo()
-    const sbh = sysInfo.statusBarHeight
-    this.setData({ headerSafeStyle: 'height: ' + sbh + 'px;' })
-    this.initMockData()
+    this.setData({ headerSafeStyle: 'height: ' + (sysInfo.statusBarHeight || 20) + 'px;' })
+    appearance.apply(this)
+    this.loadAll()
   },
 
   onShow() {
-    // 每次显示时刷新
+    appearance.apply(this)
   },
 
-  /**
-   * 初始化模拟数据
-   */
-  initMockData() {
-    const stops = ['县城客运站', '双河桥头', '青山镇路口', '竹林乡', '溪口村', '桃花源', '云山村']
+  /** 加载司机身份 + 班次 + 任务 */
+  async loadAll() {
+    const userInfo = wx.getStorageSync('userInfo') || {}
+    const mobile = userInfo.mobile || ''
+    try {
+      const profile = mobile ? await api.getDriverProfile(mobile) : null
+      if (!profile) {
+        wx.showToast({ title: '未找到司机档案，请联系管理员', icon: 'none', duration: 2500 })
+        this.setData({ loaded: true })
+        return
+      }
+      const [shifts, pickups, tasks] = await Promise.all([
+        api.getDriverShifts().catch(() => []),
+        api.getDriverPickups().catch(() => []),
+        api.getDriverTasks(profile.driverId).catch(() => [])
+      ])
+      this.setData({
+        driverName: profile.name || '',
+        plateNo: profile.plateNo || '',
+        cargoLimit: profile.cargoCapacity || 0,
+        pendingPickups: pickups || [],
+        tasks: tasks || []
+      })
+      this.initFromShifts(shifts || [])
+      this.setData({ loaded: true })
+    } catch (e) {
+      this.setData({ loaded: true })
+    }
+  },
 
-    // 路线标记
-    const markers = stops.map((name, i) => ({
+  /** 从真实班次初始化当前班次、站点、地图、运力 */
+  initFromShifts(shifts) {
+    if (!shifts.length) return
+    // 优先在途班次，否则取第一班
+    const current = shifts.find((s) => s.status === 1) || shifts[0]
+    const stops = current.stops || []
+    if (!stops.length) return
+
+    const markers = stops.map((s, i) => ({
       id: i,
-      latitude: 30.25 + i * 0.02,
-      longitude: 108.15 + i * 0.03,
-      title: name,
+      latitude: s.latitude,
+      longitude: s.longitude,
+      title: s.stationName,
       iconPath: '',
       width: 20,
       height: 20,
-      callout: { content: name, fontSize: 12, padding: 4, display: 'ALWAYS' }
+      callout: { content: s.stationName, fontSize: 12, padding: 4, display: 'ALWAYS' }
     }))
-
-    // 路线连线
     const polyline = [{
-      points: stops.map((_, i) => ({
-        latitude: 30.25 + i * 0.02,
-        longitude: 108.15 + i * 0.03
-      })),
+      points: stops.map((s) => ({ latitude: s.latitude, longitude: s.longitude })),
       color: '#4CAF50',
       width: 6,
       arrowLine: true
     }]
 
+    // 运力：空余百分比 = (件数上限 - 待装车数) / 上限
+    const cap = this.data.cargoLimit
+    const used = this.data.pendingPickups.length
+    const pct = cap > 0 ? Math.max(0, Math.round((cap - used) / cap * 100)) : 100
+    const usedPct = cap > 0 ? Math.min(100, Math.round(used / cap * 100)) : 0
+
     this.setData({
+      routeName: current.routeName || current.shiftCode,
+      startStation: stops[0].stationName,
+      endStation: stops[stops.length - 1].stationName,
       totalStops: stops.length,
+      currentStopIndex: 0,
+      progressPercent: 0,
       markers,
-      polyline
+      polyline,
+      cargoCapacity: pct,
+      cargoUsed: usedPct
     })
+    this.updateComputedStyles()
+    // 真实站点序列（含坐标），供行驶模拟
+    this.shiftStops = stops
   },
 
   /**
@@ -118,10 +171,12 @@ Page({
   },
 
   /**
-   * 模拟行驶过程 (开发演示用)
+   * 模拟行驶过程 (开发演示用，真实站点序列)
    */
   simulateDriving() {
     const totalStops = this.data.totalStops
+    const stops = this.shiftStops || []
+    const names = stops.map((s) => s.stationName)
     let currentIdx = 0
     // 清除旧定时器
     if (this.driveTimer) clearInterval(this.driveTimer)
@@ -137,13 +192,12 @@ Page({
         return
       }
 
-      const stops = ['县城客运站', '双河桥头', '青山镇路口', '竹林乡', '溪口村', '桃花源', '云山村']
       const percent = Math.round((currentIdx / (totalStops - 1)) * 100)
 
       this.setData({
         currentStopIndex: currentIdx,
-        currentStation: stops[currentIdx - 1] || stops[0],
-        nextStation: stops[currentIdx],
+        currentStation: names[currentIdx - 1] || names[0],
+        nextStation: names[currentIdx],
         nextStationDistance: Math.round(Math.random() * 3000 + 500),
         progressPercent: percent,
         speed: Math.round(Math.random() * 30 + 30)

@@ -3,8 +3,14 @@
   <!-- ========== 顶部：班次进度条（取代标题栏）========== -->
   <view class="progress-header">
     <view class="header-safe" style="{{headerSafeStyle}}"></view>
+    <view class="driver-bar" wx:if="{{driverName}}">
+      <text class="driver-emoji">👨‍✈️</text>
+      <text class="driver-text">{{driverName}}</text>
+      <text class="driver-plate">{{plateNo}}</text>
+      <text class="driver-capacity">货仓 {{cargoLimit}} 件</text>
+    </view>
     <view class="route-label">
-      <text class="route-badge">{{routeName}}</text>
+      <text class="route-badge">{{routeName || '今日班次'}}</text>
       <text class="status-tag {{status}}">
         {{status === 'idle' ? '待发车' : (status === 'driving' ? '行驶中' : '停靠中')}}
       </text>
@@ -163,15 +169,26 @@
       <text class="stop-subtitle">请完成装车作业</text>
     </view>
 
-    <!-- 待装货物列表 -->
+    <!-- 待装货物列表（真实货运订单） -->
     <view class="pickup-list" wx:if="{{pendingPickups.length > 0}}">
-      <view class="pickup-item" wx:for="{{pendingPickups}}" wx:key="id">
+      <view class="pickup-item" wx:for="{{pendingPickups}}" wx:key="orderId">
         <text class="pickup-emoji">📦</text>
         <view class="pickup-info">
-          <text class="pickup-name">{{item.name}}</text>
-          <text class="pickup-detail">{{item.weight}} · {{item.farmer}}</text>
+          <text class="pickup-name">{{item.goodsName || '寄货'}}</text>
+          <text class="pickup-detail">{{item.weightKg}}kg · {{item.receiverName || '待定'}}</text>
+          <text class="pickup-detail">{{item.orderNo}}</text>
         </view>
         <text class="pickup-check">☐</text>
+      </view>
+    </view>
+
+    <!-- 算法调度任务（算法派单结果，预留区） -->
+    <view class="task-list" wx:if="{{tasks.length > 0}}">
+      <text class="task-title">📋 调度任务（算法规划）</text>
+      <view class="task-item" wx:for="{{tasks}}" wx:key="id">
+        <text class="task-station">{{item.stationName || '—'}}</text>
+        <text class="task-action">{{item.actionName}}</text>
+        <text class="task-order" wx:if="{{item.orderNo}}">{{item.orderNo}}</text>
       </view>
     </view>
 

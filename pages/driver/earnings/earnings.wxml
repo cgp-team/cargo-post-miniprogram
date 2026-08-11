@@ -6,18 +6,13 @@
     <text class="page-title">💰 我的收益</text>
   </view>
 
-  <!-- 收益总览卡片 -->
+  <!-- 运营统计卡片（真实后端数据） -->
   <view class="overview-card">
     <view class="overview-main">
-      <text class="overview-label">累计收益（元）</text>
+      <text class="overview-label">累计货运订单总额（元）</text>
       <text class="overview-amount">{{totalEarnings}}</text>
     </view>
     <view class="overview-row">
-      <view class="overview-item">
-        <text class="ov-num green">{{monthEarnings}}</text>
-        <text class="ov-label">本月</text>
-      </view>
-      <view class="overview-divider"></view>
       <view class="overview-item">
         <text class="ov-num orange">{{todayEarnings}}</text>
         <text class="ov-label">今日</text>
@@ -25,9 +20,20 @@
       <view class="overview-divider"></view>
       <view class="overview-item">
         <text class="ov-num">{{totalOrders}}</text>
-        <text class="ov-label">总单数</text>
+        <text class="ov-label">累计订单</text>
+      </view>
+      <view class="overview-divider"></view>
+      <view class="overview-item">
+        <text class="ov-num green">{{todayOrders}}</text>
+        <text class="ov-label">今日订单</text>
+      </view>
+      <view class="overview-divider"></view>
+      <view class="overview-item">
+        <text class="ov-num blue">{{pendingCount}}</text>
+        <text class="ov-label">待装车</text>
       </view>
     </view>
+    <view class="overview-sub">今日计划班次 {{shiftCount}} 班 · 数据来自运输平台</view>
   </view>
 
   <!-- 收益明细 -->
@@ -37,16 +43,16 @@
     <view class="record-item" wx:for="{{records}}" wx:key="id">
       <view class="record-left">
         <view class="record-type-icon">
-          <text>{{item.type === '农产品运输' ? '🥬' : '📦'}}</text>
+          <text>{{item.type === '货运订单' ? '🥬' : '📦'}}</text>
         </view>
         <view class="record-info">
           <text class="record-type">{{item.type}}</text>
-          <text class="record-goods">{{item.goods}}</text>
-          <text class="record-meta">{{item.route}} · {{item.time}}</text>
+          <text class="record-goods">{{item.goods}} {{item.weight}}</text>
+          <text class="record-meta">{{item.time}} · {{item.status}}</text>
         </view>
       </view>
       <view class="record-right">
-        <text class="record-amount">+¥{{item.amount}}</text>
+        <text class="record-amount">¥{{item.amount}}</text>
       </view>
     </view>
   </view>
