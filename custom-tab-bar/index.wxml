@@ -1,0 +1,16 @@
+<!-- 自定义底部 TabBar  v2: removed icon-wrap nesting, simpler DOM -->
+<view class="tab-bar" style="{{themeStyle}}">
+  <view
+    wx:for="{{list}}"
+    wx:key="index"
+    class="tab-item {{selected === index ? 'active' : ''}}"
+    data-index="{{index}}"
+    data-path="{{item.pagePath}}"
+    bindtap="switchTab"
+    hover-class="tab-hover"
+  >
+    <text class="tab-emoji">{{item.icon}}</text>
+    <text class="tab-text">{{item.text}}</text>
+    <view wx:if="{{selected === index}}" class="tab-active-line"></view>
+  </view>
+</view>

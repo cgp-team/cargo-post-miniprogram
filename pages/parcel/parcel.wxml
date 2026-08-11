@@ -1,0 +1,104 @@
+<!-- 快递页 - 物流追踪 -->
+<view class="page-parcel {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
+  <!-- 顶部栏 -->
+  <view class="top-bar" style="padding-top: {{statusBarHeight + 16}}px">
+    <view class="top-bar-main">
+      <view class="location-info" bindtap="switchVillage" hover-class="hover">
+        <text class="loc-emoji">📌</text>
+        <text class="village-name">{{currentVillage}}</text>
+        <text class="arrow-down">▾</text>
+      </view>
+      <text class="header-title">快递</text>
+      <view class="user-avatar">
+        <text>{{userInfo.nickname || '👤'}}</text>
+      </view>
+    </view>
+
+    <!-- 单号查询 -->
+    <view class="search-bar">
+      <text class="search-emoji">📦</text>
+      <input
+        class="search-input"
+        type="text"
+        value="{{trackingNo}}"
+        placeholder="输入快递单号查询"
+        bindinput="onTrackingInput"
+        confirm-type="search"
+        bindconfirm="searchParcel"
+      />
+      <view class="search-btn" bindtap="searchParcel" hover-class="hover">查询</view>
+    </view>
+  </view>
+
+  <!-- 状态切换 -->
+  <view class="tab-row">
+    <view
+      class="tab-item {{activeTab === 0 ? 'active' : ''}}"
+      data-index="{{0}}"
+      bindtap="switchTab" hover-class="hover"
+    >进行中</view>
+    <view
+      class="tab-item {{activeTab === 1 ? 'active' : ''}}"
+      data-index="{{1}}"
+      bindtap="switchTab" hover-class="hover"
+    >已签收</view>
+  </view>
+
+  <!-- 快递列表 -->
+  <view class="parcel-list">
+    <view
+      class="parcel-card"
+      wx:for="{{parcels}}"
+      wx:key="id"
+      wx:if="{{(activeTab === 0 && item.status === 'in_transit') || (activeTab === 1 && item.status === 'delivered')}}"
+    >
+      <!-- 头部 -->
+      <view class="parcel-header">
+        <view class="parcel-title-row">
+          <text class="parcel-icon">📦</text>
+          <view class="parcel-info">
+            <text class="parcel-name">{{item.name}}</text>
+            <text class="parcel-no">单号: {{item.trackingNo}}</text>
+          </view>
+        </view>
+        <view class="parcel-status {{item.status}}">{{item.statusLabel}}</view>
+      </view>
+
+      <!-- 承运信息 -->
+      <view class="parcel-route">
+        <text>🚌 {{item.route}} · {{item.fromVillage}}</text>
+        <text class="parcel-eta">⏱ {{item.eta}}</text>
+      </view>
+
+      <!-- 进度条 -->
+      <view class="progress-bar">
+        <view class="progress-fill" style="width: {{item.progress}}%"></view>
+      </view>
+
+      <!-- 时间轴 -->
+      <view class="timeline">
+        <view
+          class="timeline-item"
+          wx:for="{{item.timeline}}"
+          wx:key="index"
+          wx:for-item="step"
+        >
+          <view class="timeline-dot {{step.done ? 'done' : ''}}"></view>
+          <view class="timeline-content">
+            <text class="timeline-time">{{step.time}}</text>
+            <text class="timeline-desc">{{step.desc}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{activeTab === 1}}">
+      <text class="empty-emoji">📭</text>
+      <text class="empty-text">暂无已签收快递</text>
+    </view>
+  </view>
+
+  <!-- 底部安全区 -->
+  <view class="safe-area-bottom"></view>
+</view>

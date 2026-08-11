@@ -2,6 +2,11 @@
   "pages": [
     "pages/login/login",
     "pages/index/index",
+    "pages/goods/goods",
+    "pages/parcel/parcel",
+    "pages/mine/mine",
+    "pages/send/send",
+    "pages/settings/settings",
     "pages/register/register",
     "pages/driver/workbench/workbench",
     "pages/driver/routes/routes",
@@ -14,11 +19,28 @@
     "navigationBarTextStyle": "white",
     "backgroundColor": "#1A1A1A"
   },
+  "tabBar": {
+    "custom": true,
+    "color": "#999999",
+    "selectedColor": "#2E7D32",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
+    "list": [
+      { "pagePath": "pages/index/index", "text": "首页" },
+      { "pagePath": "pages/goods/goods", "text": "商城" },
+      { "pagePath": "pages/parcel/parcel", "text": "快递" },
+      { "pagePath": "pages/mine/mine", "text": "我的" }
+    ]
+  },
   "style": "v2",
   "sitemapLocation": "sitemap.json",
   "permission": {
     "scope.userLocation": {
       "desc": "用于展示公交实时位置和物流轨迹"
     }
-  }
+  },
+  "requiredPrivateInfos": [
+    "getLocation",
+    "chooseLocation"
+  ]
 }

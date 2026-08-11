@@ -1,15 +1,14 @@
 /* 首页样式 - 农村客货邮小程序 */
 .home-page {
-  background: linear-gradient(180deg, #E8F5E9 0%, #F1F8E9 8%, #F5F5F5 25%);
+  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-primary-light) 8%, #F5F5F5 25%);
   min-height: 100vh;
-  padding-bottom: 40rpx;
+  padding-bottom: calc(110rpx + env(safe-area-inset-bottom));
 }
 
 /* 顶部栏 */
 .top-bar {
-  background: linear-gradient(160deg, #1B5E20 0%, #2E7D32 40%, #388E3C 100%);
+  background: linear-gradient(160deg, var(--color-primary-dark) 0%, var(--color-primary) 40%, var(--color-accent) 100%);
   padding: 20rpx 30rpx 28rpx;
-  padding-top: calc(20rpx + env(safe-area-inset-top));
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -65,7 +64,7 @@
   border-radius: 50%;
   border: 3rpx solid rgba(255,255,255,0.6);
   box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.15);
-  background: #E8F5E9;
+  background: var(--color-primary-light);
 }
 
 /* 搜索栏 */
@@ -97,13 +96,138 @@
   color: #BDBDBD;
 }
 
+/* 天气卡片 */
+.weather-card {
+  margin: 20rpx 28rpx;
+  background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+  border-radius: 20rpx;
+  padding: 24rpx 28rpx;
+  box-shadow: 0 4rpx 16rpx rgba(33,150,243,0.16), 0 12rpx 32rpx rgba(33,150,243,0.08);
+}
+
+.weather-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18rpx;
+}
+
+.weather-left {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+}
+
+.weather-icon-circle {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 0 1rpx rgba(255, 255, 255, 0.6);
+}
+
+.weather-icon { font-size: 56rpx; line-height: 1; }
+
+.weather-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.weather-temp-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12rpx;
+}
+
+.weather-temp {
+  font-size: 52rpx;
+  font-weight: 700;
+  color: #1565C0;
+  line-height: 1;
+}
+
+.weather-condition {
+  font-size: 28rpx;
+  color: #1976D2;
+  font-weight: 600;
+}
+
+.weather-location {
+  font-size: 22rpx;
+  color: #1565C0;
+  font-weight: 500;
+  margin-bottom: 2rpx;
+}
+
+.weather-detail {
+  font-size: 22rpx;
+  color: #54708E;
+}
+
+.weather-meta {
+  margin-top: 2rpx;
+}
+
+.weather-refresh {
+  font-size: 20rpx;
+  color: #6E8CA8;
+}
+
+.weather-refresh.warn {
+  color: #F57C00;
+}
+
+.weather-tips {
+  max-width: 220rpx;
+  font-size: 22rpx;
+  color: #1565C0;
+  text-align: right;
+  line-height: 1.5;
+  background: rgba(255,255,255,0.5);
+  padding: 10rpx 16rpx;
+  border-radius: 12rpx;
+}
+
+/* 预报条 */
+.weather-forecast {
+  display: flex;
+  justify-content: space-around;
+  padding-top: 18rpx;
+  border-top: 1rpx solid rgba(255,255,255,0.6);
+}
+
+.forecast-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6rpx;
+}
+
+.forecast-day {
+  font-size: 22rpx;
+  color: #1565C0;
+  font-weight: 500;
+}
+
+.forecast-icon { font-size: 36rpx; }
+
+.forecast-temp {
+  font-size: 22rpx;
+  color: #1976D2;
+  font-weight: 600;
+}
+
 /* 公告横幅 */
 .notice-swiper {
   margin: 24rpx 28rpx;
   height: 78rpx;
   background: linear-gradient(135deg, #FFF8E1, #FFF3CD);
-  border-radius: 14rpx;
-  border-left: 6rpx solid #FF9800;
+  border-radius: 16rpx;
   box-shadow: 0 2rpx 10rpx rgba(255,152,0,0.08);
   overflow: hidden;
 }
@@ -148,7 +272,7 @@
   flex-direction: column;
   align-items: center;
   padding: 20rpx 8rpx;
-  transition: all 0.3s;
+  transition: all 0.15s ease;
   border-radius: 20rpx;
 }
 
@@ -166,13 +290,13 @@
   justify-content: center;
   margin-bottom: 14rpx;
   box-shadow: 0 6rpx 18rpx rgba(0,0,0,0.12);
-  transition: all 0.3s;
+  transition: all 0.15s ease;
 }
 
-.green-bg { background: linear-gradient(135deg, #4CAF50, #388E3C); box-shadow: 0 6rpx 18rpx rgba(76,175,80,0.3); }
-.orange-bg { background: linear-gradient(135deg, #FFB74D, #FF9800); box-shadow: 0 6rpx 18rpx rgba(255,152,0,0.3); }
-.blue-bg { background: linear-gradient(135deg, #42A5F5, #1E88E5); box-shadow: 0 6rpx 18rpx rgba(30,136,229,0.3); }
-.red-bg { background: linear-gradient(135deg, #EF5350, #E53935); box-shadow: 0 6rpx 18rpx rgba(229,57,53,0.3); }
+.green-bg { background: linear-gradient(135deg, #4CAF50, #388E3C); box-shadow: 0 6rpx 18rpx rgba(76,175,80,0.22); }
+.orange-bg { background: linear-gradient(135deg, #FFB74D, #FF9800); box-shadow: 0 6rpx 18rpx rgba(255,152,0,0.22); }
+.blue-bg { background: linear-gradient(135deg, #42A5F5, #1E88E5); box-shadow: 0 6rpx 18rpx rgba(30,136,229,0.22); }
+.red-bg { background: linear-gradient(135deg, #EF5350, #E53935); box-shadow: 0 6rpx 18rpx rgba(229,57,53,0.22); }
 
 .feature-icon {
   width: 54rpx;
@@ -194,7 +318,7 @@
 
 .feature-desc {
   font-size: 20rpx;
-  color: #999;
+  color: #757575;
 }
 
 /* 快捷操作栏 */
@@ -217,11 +341,11 @@
   font-size: 26rpx;
   color: #555;
   font-weight: 500;
-  transition: all 0.3s;
+  transition: all 0.15s ease;
 }
 
 .quick-action-item:active {
-  background: #F1F8E9;
+  background: var(--color-primary-light);
   transform: scale(0.96);
 }
 
@@ -244,18 +368,18 @@
 .section-title {
   font-size: 32rpx;
   font-weight: 700;
-  color: #1B5E20;
+  color: var(--color-primary-dark);
   letter-spacing: 0.5rpx;
 }
 
 .section-more {
   font-size: 26rpx;
-  color: #4CAF50;
+  color: var(--color-primary);
   font-weight: 500;
   padding: 8rpx 16rpx;
-  background: #E8F5E9;
+  background: var(--color-primary-light);
   border-radius: 24rpx;
-  transition: all 0.3s;
+  transition: all 0.15s ease;
 }
 
 /* 公交列表 */
@@ -269,9 +393,8 @@
   background: #fff;
   border-radius: 18rpx;
   padding: 28rpx;
-  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.04);
-  transition: all 0.3s;
-  border: 1rpx solid rgba(0,0,0,0.03);
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04), 0 6rpx 20rpx rgba(0,0,0,0.06);
+  transition: all 0.15s ease;
 }
 
 .bus-card:active {
@@ -289,13 +412,13 @@
 .bus-number {
   font-size: 38rpx;
   font-weight: 700;
-  color: #2E7D32;
+  color: var(--color-primary);
   letter-spacing: 1rpx;
 }
 
 .bus-status {
   font-size: 22rpx;
-  color: #999;
+  color: #757575;
   padding: 6rpx 18rpx;
   background: #F5F5F5;
   border-radius: 20rpx;
@@ -303,8 +426,8 @@
 }
 
 .bus-status.running {
-  color: #2E7D32;
-  background: #E8F5E9;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
   position: relative;
 }
 
@@ -313,7 +436,7 @@
   display: inline-block;
   width: 10rpx;
   height: 10rpx;
-  background: #4CAF50;
+  background: var(--color-accent);
   border-radius: 50%;
   margin-right: 8rpx;
   animation: pulse 1.5s ease-in-out infinite;
@@ -365,8 +488,8 @@
   border-radius: 18rpx;
   margin-right: 20rpx;
   overflow: hidden;
-  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.06);
-  transition: all 0.3s;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04), 0 6rpx 20rpx rgba(0,0,0,0.06);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .product-card:active {
@@ -376,7 +499,14 @@
 .product-img {
   width: 290rpx;
   height: 210rpx;
-  background: linear-gradient(135deg, #E8F5E9, #C8E6C9);
+  background: var(--color-primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.product-img-emoji {
+  font-size: 96rpx;
 }
 
 .product-info {
@@ -396,7 +526,7 @@
 
 .product-from {
   font-size: 22rpx;
-  color: #999;
+  color: #757575;
   display: flex;
   align-items: center;
   gap: 4rpx;
@@ -422,10 +552,64 @@
 
 .product-unit {
   font-size: 22rpx;
-  color: #999;
+  color: #757575;
+}
+
+/* 悬浮寄货按钮 — 遵循 craft-floor depth 原则 */
+.fab-send {
+  position: fixed;
+  right: 36rpx;
+  bottom: calc(140rpx + env(safe-area-inset-bottom));
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF9800, #F57C00);
+  box-shadow: 0 8rpx 28rpx rgba(255, 152, 0, 0.40);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fab-send:active {
+  transform: scale(0.92);
+  box-shadow: 0 4rpx 14rpx rgba(255, 152, 0, 0.30);
+}
+
+.fab-icon {
+  font-size: 52rpx;
+  line-height: 1;
 }
 
 /* 底部安全区 */
 .safe-area-bottom {
   height: calc(40rpx + env(safe-area-inset-bottom));
 }
+
+/* ============ 老年人模式：首页字体放大 ============ */
+.elderly-mode .village-name { font-size: 38rpx; }
+.elderly-mode .search-input { font-size: 32rpx; }
+.elderly-mode .weather-temp { font-size: 60rpx; }
+.elderly-mode .weather-condition { font-size: 32rpx; }
+.elderly-mode .weather-detail { font-size: 26rpx; }
+.elderly-mode .weather-tips { font-size: 26rpx; max-width: 260rpx; }
+.elderly-mode .weather-refresh { font-size: 24rpx; }
+.elderly-mode .forecast-day { font-size: 26rpx; }
+.elderly-mode .forecast-temp { font-size: 26rpx; }
+.elderly-mode .notice-text { font-size: 30rpx; }
+.elderly-mode .feature-name { font-size: 28rpx; }
+.elderly-mode .feature-desc { font-size: 24rpx; }
+.elderly-mode .feature-icon-box { width: 112rpx; height: 112rpx; }
+.elderly-mode .feature-emoji { font-size: 54rpx; }
+.elderly-mode .quick-action-item { font-size: 30rpx; padding: 24rpx; }
+.elderly-mode .section-title { font-size: 38rpx; }
+.elderly-mode .section-more { font-size: 30rpx; }
+.elderly-mode .bus-number { font-size: 44rpx; }
+.elderly-mode .bus-status { font-size: 26rpx; }
+.elderly-mode .bus-route { font-size: 30rpx; }
+.elderly-mode .bus-info { font-size: 28rpx; }
+.elderly-mode .product-name { font-size: 32rpx; }
+.elderly-mode .product-from { font-size: 26rpx; }
+.elderly-mode .product-price { font-size: 40rpx; }
+.elderly-mode .product-unit { font-size: 26rpx; }

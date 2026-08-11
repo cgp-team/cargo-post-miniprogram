@@ -1,7 +1,7 @@
 /* 登录页面样式 - 农村客货邮小程序 */
 .login-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #E8F5E9 0%, #C8E6C9 15%, #F1F8E9 40%, #F5F5F5 70%);
+  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-primary-light) 35%, #F5F5F5 70%);
   padding: 0 40rpx;
   padding-bottom: 80rpx;
   box-sizing: border-box;
@@ -54,7 +54,7 @@
   width: 150rpx;
   height: 150rpx;
   border-radius: 32rpx;
-  background: linear-gradient(135deg, #1B5E20, #388E3C, #4CAF50);
+  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary), var(--color-accent));
   font-size: 72rpx;
   display: flex;
   align-items: center;
@@ -90,7 +90,7 @@
 
 .logo-desc {
   font-size: 26rpx;
-  color: #689F63;
+  color: #4E7A56;
   letter-spacing: 1rpx;
 }
 
@@ -115,7 +115,7 @@
   border-radius: 14rpx;
   font-size: 28rpx;
   color: #999;
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 }
 
@@ -131,7 +131,7 @@
   width: 56rpx;
   height: 56rpx;
   margin-bottom: 10rpx;
-  transition: all 0.35s;
+  transition: all 0.15s ease;
 }
 
 .role-tab.active .role-icon {
@@ -169,17 +169,17 @@
   font-size: 30rpx;
   background-color: #F8FAF8;
   box-sizing: border-box;
-  transition: all 0.3s;
+  transition: all 0.15s ease;
 }
 
 .login-page .input-field:focus {
-  border-color: #4CAF50;
+  border-color: var(--color-accent);
   background-color: #fff;
-  box-shadow: 0 0 0 6rpx rgba(76,175,80,0.08);
+  box-shadow: 0 0 0 6rpx rgba(76, 175, 80, 0.08);
 }
 
 .login-page .input-field::placeholder {
-  color: #BDBDBD;
+  color: #A6A6A6;
 }
 
 /* 登录按钮 */
@@ -191,16 +191,16 @@
   font-weight: 600;
   border-radius: 50rpx;
   border: none;
-  background: linear-gradient(135deg, #2E7D32, #43A047);
-  color: #fff;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  color: var(--color-on-primary);
   letter-spacing: 2rpx;
-  box-shadow: 0 8rpx 24rpx rgba(46,125,50,0.3);
-  transition: all 0.3s;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.18);
+  transition: all 0.15s ease;
 }
 
 .login-btn:active {
-  background: linear-gradient(135deg, #1B5E20, #2E7D32);
-  box-shadow: 0 4rpx 12rpx rgba(46,125,50,0.25);
+  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.14);
   transform: scale(0.98);
 }
 
@@ -221,13 +221,13 @@
   font-size: 30rpx;
   color: #333;
   letter-spacing: 1rpx;
-  transition: all 0.3s;
+  transition: all 0.15s ease;
   box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
 }
 
 .wechat-login-btn:active {
   background: #F5F5F5;
-  border-color: #4CAF50;
+  border-color: var(--color-accent);
 }
 
 .wechat-icon {
@@ -257,7 +257,7 @@
   margin-bottom: 8rpx;
   border-radius: 50%;
   background: rgba(0,0,0,0.04);
-  transition: all 0.35s;
+  transition: all 0.15s ease;
 }
 
 .role-tab.active .role-icon-wrap {
@@ -311,8 +311,8 @@
   line-height: 72rpx;
   font-size: 26rpx;
   background: #fff;
-  border: 2rpx solid #4CAF50;
-  color: #4CAF50;
+  border: 2rpx solid var(--color-accent);
+  color: var(--color-primary);
   border-radius: 36rpx;
   padding: 0;
   text-align: center;
@@ -326,7 +326,7 @@
 .sms-tip {
   text-align: center;
   font-size: 24rpx;
-  color: #999;
+  color: #757575;
   margin-top: 8rpx;
   margin-bottom: 16rpx;
 }
@@ -335,7 +335,7 @@
 .switch-mode {
   text-align: center;
   font-size: 28rpx;
-  color: #4CAF50;
+  color: var(--color-primary);
   margin-top: 24rpx;
   text-decoration: underline;
 }
@@ -347,3 +347,14 @@
   padding: 48rpx 36rpx;
   box-shadow: 0 8rpx 32rpx rgba(0,0,0,0.07);
 }
+
+/* ============ 老年人模式：登录页字体放大 ============ */
+.elderly-mode .logo-title { font-size: 56rpx; }
+.elderly-mode .logo-desc { font-size: 30rpx; }
+.elderly-mode .login-page .input-label { font-size: 32rpx; }
+.elderly-mode .login-page .input-field { font-size: 34rpx; height: 104rpx; }
+.elderly-mode .login-btn { font-size: 40rpx; }
+.elderly-mode .wechat-login-btn { font-size: 34rpx; }
+.elderly-mode .sms-btn { font-size: 30rpx; width: 220rpx; }
+.elderly-mode .switch-mode { font-size: 32rpx; }
+.elderly-mode .register-link { font-size: 32rpx; }

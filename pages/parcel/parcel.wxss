@@ -1,0 +1,262 @@
+/* 快递页样式 */
+.page-parcel {
+  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-primary-light) 8%, #F5F5F5 25%);
+  min-height: 100vh;
+  padding-bottom: calc(100rpx + env(safe-area-inset-bottom));
+}
+
+/* 顶部栏 */
+.top-bar {
+  background: linear-gradient(160deg, var(--color-primary-dark) 0%, var(--color-primary) 40%, var(--color-accent) 100%);
+  padding: 20rpx 30rpx 28rpx;
+}
+
+.top-bar-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.location-info { display: flex; align-items: center; gap: 8rpx; }
+.loc-emoji { font-size: 32rpx; }
+.village-name { font-size: 32rpx; font-weight: 700; color: #fff; }
+.arrow-down { font-size: 24rpx; color: rgba(255,255,255,0.8); }
+.header-title { font-size: 34rpx; font-weight: 700; color: #fff; }
+.user-avatar text { font-size: 40rpx; }
+
+/* 查询栏 */
+.search-bar {
+  margin-top: 20rpx;
+  display: flex;
+  align-items: center;
+  padding: 16rpx 20rpx;
+  background: #fff;
+  border-radius: 20rpx;
+  box-shadow: 0 8rpx 28rpx rgba(0,0,0,0.10);
+  position: relative;
+  z-index: 3;
+}
+
+.search-emoji { font-size: 36rpx; margin-right: 12rpx; opacity: 0.45; }
+
+.search-input {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+}
+
+.search-btn {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  color: var(--color-on-primary);
+  font-size: 26rpx;
+  font-weight: 600;
+  padding: 14rpx 32rpx;
+  border-radius: 14rpx;
+  margin-left: 16rpx;
+  flex-shrink: 0;
+}
+
+.search-btn:active { opacity: 0.85; }
+
+/* 状态切换 */
+.tab-row {
+  display: flex;
+  margin: 24rpx 28rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 6rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.04);
+}
+
+.tab-row .tab-item {
+  flex: 1;
+  text-align: center;
+  padding: 18rpx;
+  font-size: 28rpx;
+  color: #666;
+  border-radius: 12rpx;
+  transition: all 0.15s ease;
+}
+
+.tab-row .tab-item.active {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  color: var(--color-on-primary);
+  font-weight: 600;
+}
+
+/* 快递卡片 */
+.parcel-list {
+  padding: 0 28rpx;
+}
+
+.parcel-card {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 30rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04), 0 6rpx 20rpx rgba(0,0,0,0.06);
+  transition: transform 0.15s ease;
+}
+
+.parcel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 18rpx;
+}
+
+.parcel-title-row {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+}
+
+.parcel-icon { font-size: 48rpx; }
+
+.parcel-info { display: flex; flex-direction: column; gap: 6rpx; }
+
+.parcel-name {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #333;
+}
+
+.parcel-no {
+  font-size: 22rpx;
+  color: #757575;
+}
+
+.parcel-status {
+  font-size: 22rpx;
+  padding: 8rpx 18rpx;
+  border-radius: 20rpx;
+  font-weight: 600;
+}
+
+.parcel-status.in_transit {
+  color: #E65100;
+  background: #FFF3E0;
+}
+
+.parcel-status.delivered {
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+/* 承运信息 */
+.parcel-route {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18rpx 20rpx;
+  background: #F8FAF8;
+  border-radius: 14rpx;
+  margin-bottom: 18rpx;
+  font-size: 24rpx;
+  color: #666;
+}
+
+.parcel-eta {
+  color: #E65100;
+  font-weight: 600;
+}
+
+/* 进度条 */
+.progress-bar {
+  height: 8rpx;
+  background: #E8ECEE;
+  border-radius: 4rpx;
+  margin-bottom: 24rpx;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-primary));
+  border-radius: 4rpx;
+  transition: width 0.5s;
+}
+
+/* 时间轴 */
+.timeline {
+  padding-left: 8rpx;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 18rpx;
+  padding-bottom: 18rpx;
+  position: relative;
+}
+
+.timeline-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 11rpx;
+  top: 28rpx;
+  bottom: 0;
+  width: 2rpx;
+  background: #E0E0E0;
+}
+
+.timeline-dot {
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 50%;
+  background: #E0E0E0;
+  flex-shrink: 0;
+  margin-top: 4rpx;
+  transition: all 0.15s ease;
+}
+
+.timeline-dot.done {
+  background: var(--color-accent);
+  box-shadow: 0 0 0 6rpx rgba(76,175,80,0.2);
+}
+
+.timeline-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.timeline-time {
+  font-size: 22rpx;
+  color: #757575;
+}
+
+.timeline-desc {
+  font-size: 26rpx;
+  color: #555;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80rpx 0;
+}
+
+.empty-emoji { font-size: 96rpx; margin-bottom: 20rpx; }
+.empty-text { font-size: 28rpx; color: #757575; }
+
+.safe-area-bottom {
+  height: calc(40rpx + env(safe-area-inset-bottom));
+}
+
+/* ============ 老年人模式：快递页字体放大 ============ */
+.elderly-mode .village-name { font-size: 38rpx; }
+.elderly-mode .header-title { font-size: 40rpx; }
+.elderly-mode .search-input { font-size: 32rpx; }
+.elderly-mode .search-btn { font-size: 30rpx; padding: 18rpx 36rpx; }
+.elderly-mode .tab-row .tab-item { font-size: 32rpx; padding: 22rpx; }
+.elderly-mode .parcel-name { font-size: 34rpx; }
+.elderly-mode .parcel-no { font-size: 26rpx; }
+.elderly-mode .parcel-status { font-size: 26rpx; }
+.elderly-mode .parcel-route { font-size: 28rpx; }
+.elderly-mode .timeline-desc { font-size: 30rpx; }
+.elderly-mode .timeline-time { font-size: 26rpx; }
+.elderly-mode .empty-text { font-size: 32rpx; }

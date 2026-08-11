@@ -1,14 +1,14 @@
 /* 注册页面样式 - 农村客货邮小程序 */
 .register-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #E8F5E9 0%, #F1F8E9 30%, #F5F5F5 60%);
+  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-primary-light) 30%, #F5F5F5 60%);
   padding-bottom: 80rpx;
   position: relative;
 }
 
 /* 页面头部 */
 .page-header {
-  background: linear-gradient(160deg, #1B5E20 0%, #2E7D32 30%, #388E3C 60%, #43A047 100%);
+  background: linear-gradient(160deg, var(--color-primary-dark) 0%, var(--color-primary) 30%, var(--color-primary) 60%, var(--color-accent) 100%);
   padding: 80rpx 40rpx 70rpx;
   position: relative;
   overflow: hidden;
@@ -89,7 +89,7 @@
   font-size: 22rpx;
   color: #999;
   font-weight: 600;
-  transition: all 0.3s;
+  transition: all 0.15s ease;
 }
 
 .step-dot.active {
@@ -110,7 +110,7 @@
   height: 3rpx;
   background: #E0E0E0;
   margin: 0 4rpx;
-  transition: all 0.3s;
+  transition: all 0.15s ease;
 }
 
 .step-line.done {
@@ -172,17 +172,17 @@
   font-size: 30rpx;
   background-color: #F8FAF8;
   box-sizing: border-box;
-  transition: all 0.3s;
+  transition: all 0.15s ease;
 }
 
 .register-page .input-field:focus {
-  border-color: #4CAF50;
+  border-color: var(--color-accent);
   background-color: #fff;
-  box-shadow: 0 0 0 6rpx rgba(76,175,80,0.08);
+  box-shadow: 0 0 0 6rpx rgba(76, 175, 80, 0.08);
 }
 
 .register-page .input-field::placeholder {
-  color: #BDBDBD;
+  color: #A6A6A6;
 }
 
 .required {
@@ -201,11 +201,11 @@
   line-height: 92rpx;
   background-color: #F8FAF8;
   box-sizing: border-box;
-  transition: all 0.3s;
+  transition: all 0.15s ease;
 }
 
 .picker-field.placeholder {
-  color: #BDBDBD;
+  color: #A6A6A6;
 }
 
 /* 协议 */
@@ -237,15 +237,15 @@
   font-weight: 600;
   border-radius: 50rpx;
   border: none;
-  background: linear-gradient(135deg, #2E7D32, #43A047);
-  color: #fff;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  color: var(--color-on-primary);
   letter-spacing: 2rpx;
-  box-shadow: 0 8rpx 24rpx rgba(46,125,50,0.3);
-  transition: all 0.3s;
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.18);
+  transition: all 0.15s ease;
 }
 
 .register-btn:active {
-  background: linear-gradient(135deg, #1B5E20, #2E7D32);
+  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
   transform: scale(0.98);
 }
 
@@ -287,8 +287,8 @@
   line-height: 72rpx;
   font-size: 26rpx;
   background: #fff;
-  border: 2rpx solid #4CAF50;
-  color: #4CAF50;
+  border: 2rpx solid var(--color-accent);
+  color: var(--color-primary);
   border-radius: 36rpx;
   padding: 0;
   text-align: center;
@@ -302,7 +302,16 @@
 .sms-tip {
   text-align: center;
   font-size: 24rpx;
-  color: #999;
+  color: #757575;
   margin-top: -8rpx;
   margin-bottom: 16rpx;
 }
+
+/* ============ 老年人模式：注册页字体放大 ============ */
+.elderly-mode .page-title { font-size: 52rpx; }
+.elderly-mode .page-desc { font-size: 30rpx; }
+.elderly-mode .register-page .input-label { font-size: 32rpx; }
+.elderly-mode .register-page .input-field { font-size: 34rpx; height: 104rpx; }
+.elderly-mode .register-btn { font-size: 40rpx; }
+.elderly-mode .sms-btn { font-size: 30rpx; width: 220rpx; }
+.elderly-mode .login-link { font-size: 32rpx; }

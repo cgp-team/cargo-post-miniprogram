@@ -1,0 +1,37 @@
+<view class="page-settings {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
+  <!-- 老年人模式 -->
+  <view class="section-label">🧓 显示设置</view>
+  <view class="setting-item" bindtap="toggleElderly" hover-class="hover">
+    <view class="setting-left">
+      <text class="setting-emoji">🔍</text>
+      <view class="setting-info">
+        <text class="setting-name">老年人模式</text>
+        <text class="setting-desc">更大字体、更大按钮，方便长辈使用</text>
+      </view>
+    </view>
+    <view class="toggle-switch {{elderlyMode ? 'on' : 'off'}}">
+      <view class="toggle-knob"></view>
+    </view>
+  </view>
+
+  <!-- 主题颜色 -->
+  <view class="section-label">🎨 主题颜色</view>
+  <view class="theme-list">
+    <view
+      wx:for="{{themeList}}"
+      wx:key="key"
+      class="theme-row {{themeColor === item.key ? 'active' : ''}}"
+      data-key="{{item.key}}"
+      bindtap="switchTheme" hover-class="hover"
+    >
+      <view class="theme-dot" style="background: {{item.color}}">
+        <text wx:if="{{themeColor === item.key}}" class="theme-check">✓</text>
+      </view>
+      <view class="theme-info">
+        <text class="theme-name">{{item.name}}</text>
+        <text class="theme-desc">{{item.desc}}</text>
+      </view>
+      <view wx:if="{{themeColor === item.key}}" class="theme-radio"></view>
+    </view>
+  </view>
+</view>
