@@ -5,7 +5,7 @@
  * 本地调试：
  *   在微信开发者工具中 "详情 → 本地设置 → 不校验合法域名" 勾选
  */
-const { getBaseUrl } = require('../config')
+const { getBaseUrl } = require('./config')
 const BASE_URL = getBaseUrl()
 
 /**

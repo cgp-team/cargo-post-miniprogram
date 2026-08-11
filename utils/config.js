@@ -7,6 +7,9 @@
  *   release  正式版（审核发布后）
  *
  * 需要切环境时只改这里，不用动 api.js。
+ *
+ * 注意：微信开发者工具对"根目录文件 + 跨目录 require('../config')"解析有坑，
+ * 所以放在 utils/ 下、与 api.js 同目录用 require('./config') 引用。
  */
 const BASE_URLS = {
   develop: 'http://1.15.29.107/api', // 开发服务器
