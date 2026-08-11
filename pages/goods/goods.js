@@ -21,62 +21,7 @@ Page({
       { id: 4, name: '茶叶' },
       { id: 5, name: '干货' }
     ],
-    products: [
-      {
-        id: 1,
-        name: '高山脆李',
-        fromVillage: '云山村',
-        price: '68.00',
-        unit: '斤',
-        image: '🍑',
-        badge: '大巴直通车'
-      },
-      {
-        id: 2,
-        name: '土鸡蛋30枚装',
-        fromVillage: '大湾村',
-        price: '45.00',
-        unit: '箱',
-        image: '🥚',
-        badge: '大巴直通车'
-      },
-      {
-        id: 3,
-        name: '有机红薯粉',
-        fromVillage: '竹林乡',
-        price: '28.00',
-        unit: '袋',
-        image: '🍜',
-        badge: ''
-      },
-      {
-        id: 4,
-        name: '野生山核桃',
-        fromVillage: '青山镇',
-        price: '55.00',
-        unit: '斤',
-        image: '🥜',
-        badge: '大巴直通车'
-      },
-      {
-        id: 5,
-        name: '明前龙井茶',
-        fromVillage: '云山村',
-        price: '128.00',
-        unit: '盒',
-        image: '🍵',
-        badge: ''
-      },
-      {
-        id: 6,
-        name: '农家腊肉',
-        fromVillage: '溪口村',
-        price: '88.00',
-        unit: '斤',
-        image: '🥩',
-        badge: '大巴直通车'
-      }
-    ]
+    products: []
   },
 
   onLoad() {
@@ -89,6 +34,7 @@ Page({
       currentVillage: app.globalData.currentVillage || '云山村'
     })
     appearance.apply(this)
+    this.loadProducts()
   },
 
   onShow() {
@@ -98,16 +44,28 @@ Page({
     appearance.apply(this)
   },
 
+  /** 加载上架商品（后端真实数据） */
+  async loadProducts() {
+    try {
+      const list = (await api.listProducts()) || []
+      this.setData({
+        products: list.map((p) => ({ ...p, price: Number(p.price).toFixed(2) }))
+      })
+    } catch (e) {
+      // 错误提示已由 api.js 统一处理
+    }
+  },
+
   /** 切换分类 */
   switchCategory(e) {
     const id = e.currentTarget.dataset.id
     this.setData({ activeCategory: id })
   },
 
-  /** 点击商品 */
+  /** 点击商品 → 跳详情页 */
   goToDetail(e) {
     const id = e.currentTarget.dataset.id
-    wx.showToast({ title: '商品详情开发中', icon: 'none' })
+    wx.navigateTo({ url: `/pages/goods/detail/detail?id=${id}` })
   },
 
   /** 切换村庄 */
@@ -124,7 +82,9 @@ Page({
 
   /** 下拉刷新 */
   onPullDownRefresh() {
-    wx.stopPullDownRefresh()
-    wx.showToast({ title: '已刷新', icon: 'success', duration: 1000 })
+    this.loadProducts().then(() => {
+      wx.stopPullDownRefresh()
+      wx.showToast({ title: '已刷新', icon: 'success', duration: 1000 })
+    })
   }
 })

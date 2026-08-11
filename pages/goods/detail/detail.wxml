@@ -1,0 +1,44 @@
+<!-- 商品详情页 -->
+<view class="page-detail {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
+  <!-- 自定义导航 -->
+  <view class="detail-nav" style="padding-top: {{statusBarHeight + 8}}px">
+    <view class="nav-back" bindtap="goBack" hover-class="hover">←</view>
+    <text class="nav-title">商品详情</text>
+  </view>
+
+  <block wx:if="{{product}}">
+    <!-- 主图区 -->
+    <view class="detail-hero">
+      <view class="hero-img">
+        <text class="hero-emoji">{{product.image}}</text>
+        <view wx:if="{{product.badge}}" class="hero-badge">🚌 {{product.badge}}</view>
+      </view>
+    </view>
+
+    <!-- 信息卡 -->
+    <view class="info-card">
+      <view class="price-row">
+        <text class="detail-price">¥{{product.price}}</text>
+        <text class="detail-unit">/{{product.unit}}</text>
+      </view>
+      <text class="detail-name">{{product.name}}</text>
+      <view class="detail-meta">
+        <text class="meta-item">🏘 {{product.fromVillage}}</text>
+        <text class="meta-item">库存 {{product.stock}}</text>
+      </view>
+    </view>
+
+    <!-- 商品介绍 -->
+    <view class="desc-card">
+      <text class="desc-title">商品介绍</text>
+      <text class="desc-text">{{product.description}}</text>
+    </view>
+  </block>
+
+  <!-- 底部操作栏 -->
+  <view class="detail-footer">
+    <view class="footer-btn cart-btn" bindtap="addCart" hover-class="hover">加入购物车</view>
+    <view class="footer-btn buy-btn" bindtap="buyNow" hover-class="hover">立即购买</view>
+  </view>
+  <view class="safe-area-bottom"></view>
+</view>

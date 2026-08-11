@@ -296,7 +296,7 @@ Page({
    */
   goToProductDetail(e) {
     const productId = e.currentTarget.dataset.id
-    wx.showToast({ title: `产品${productId}详情开发中`, icon: 'none' })
+    wx.navigateTo({ url: `/pages/goods/detail/detail?id=${productId}` })
   },
 
   /**
