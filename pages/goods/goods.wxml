@@ -1,0 +1,67 @@
+<!-- 商城页 - 买家界面 -->
+<view class="page-goods {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
+  <!-- 顶部村选择栏 -->
+  <view class="top-bar" style="padding-top: {{statusBarHeight + 16}}px">
+    <view class="top-bar-main">
+      <view class="location-info" bindtap="switchVillage" hover-class="hover">
+        <text class="loc-emoji">📌</text>
+        <text class="village-name">{{currentVillage}}</text>
+        <text class="arrow-down">▾</text>
+      </view>
+      <text class="header-title">商城</text>
+      <view class="user-avatar" bindtap="goToProfile" hover-class="hover">
+        <text>{{userInfo.nickname || '👤'}}</text>
+      </view>
+    </view>
+
+    <!-- 搜索栏 -->
+    <view class="search-bar card">
+      <text class="search-emoji">🔍</text>
+      <input class="search-input" type="text" placeholder="搜索农产品…" disabled />
+    </view>
+  </view>
+
+  <!-- 分类标签 -->
+  <scroll-view class="category-scroll" scroll-x>
+    <view class="category-list">
+      <view
+        wx:for="{{categories}}"
+        wx:key="id"
+        class="category-tag {{activeCategory === item.id ? 'active' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="switchCategory" hover-class="hover"
+      >{{item.name}}</view>
+    </view>
+  </scroll-view>
+
+  <!-- 商品网格 -->
+  <view class="product-grid">
+    <view
+      class="product-card"
+      wx:for="{{products}}"
+      wx:key="id"
+      bindtap="goToDetail" hover-class="hover"
+      data-id="{{item.id}}"
+    >
+      <view class="product-img-wrap">
+        <text class="product-emoji">{{item.image}}</text>
+        <view wx:if="{{item.badge}}" class="product-badge">
+          <text>🚌 {{item.badge}}</text>
+        </view>
+      </view>
+      <view class="product-info">
+        <text class="product-name">{{item.name}}</text>
+        <view class="product-from">
+          <text>🏘 {{item.fromVillage}}</text>
+        </view>
+        <view class="product-price-row">
+          <text class="product-price">¥{{item.price}}</text>
+          <text class="product-unit">/{{item.unit}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部安全区 -->
+  <view class="safe-area-bottom"></view>
+</view>

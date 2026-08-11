@@ -4,6 +4,7 @@
  */
 const api = require('../../utils/api')
 const util = require('../../utils/util')
+const appearance = require('../../utils/appearance')
 
 Page({
   data: {
@@ -13,7 +14,14 @@ Page({
     smsCodeSending: false,
     smsCountdown: 0,
     loginMode: 'sms', // 'sms' | 'password'
-    loading: false
+    loading: false,
+    elderlyMode: false,
+    themeColor: 'green',
+    themeStyle: ''
+  },
+
+  onLoad() {
+    appearance.apply(this)
   },
 
   /** 切换登录方式 */

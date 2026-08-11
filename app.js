@@ -9,6 +9,10 @@ App({
 
   globalData: {
     userInfo: null,
-    token: null
+    token: null,
+    currentVillage: '云山村',
+    villageList: ['云山村', '大湾村', '青山镇', '竹林乡', '溪口村', '双河镇'],
+    elderlyMode: wx.getStorageSync('elderlyMode') || false,
+    themeColor: wx.getStorageSync('themeColor') || 'green'
   }
 })

@@ -8,6 +8,13 @@
 /* 文字：#333333 */
 
 page {
+  /* 主题色 CSS 变量默认值（页面根节点内联 style 可覆盖） */
+  --color-primary: #2E7D32;
+  --color-primary-dark: #1B5E20;
+  --color-accent: #4CAF50;
+  --color-primary-light: #E8F5E9;
+  --color-on-primary: #ffffff;
+
   background-color: #F5F5F5;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
     'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
@@ -15,6 +22,12 @@ page {
   color: #333333;
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
+  animation: page-in 0.25s ease-out;
+}
+
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(12rpx); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 /* 通用容器 */
@@ -26,8 +39,8 @@ page {
 
 /* 通用按钮 */
 .btn-primary {
-  background: linear-gradient(135deg, #2E7D32, #43A047);
-  color: #ffffff;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  color: var(--color-on-primary);
   border: none;
   border-radius: 14rpx;
   padding: 24rpx 40rpx;
@@ -36,11 +49,11 @@ page {
   text-align: center;
   width: 100%;
   letter-spacing: 1rpx;
-  transition: all 0.3s;
+  transition: all 0.15s ease;
 }
 
 .btn-primary:active {
-  background: linear-gradient(135deg, #1B5E20, #2E7D32);
+  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
   transform: scale(0.98);
 }
 
@@ -55,7 +68,7 @@ page {
   text-align: center;
   width: 100%;
   letter-spacing: 1rpx;
-  transition: all 0.3s;
+  transition: all 0.15s ease;
 }
 
 .btn-orange:active {
@@ -65,18 +78,18 @@ page {
 
 .btn-outline {
   background-color: transparent;
-  color: #2E7D32;
-  border: 2rpx solid #2E7D32;
+  color: var(--color-primary);
+  border: 2rpx solid var(--color-primary);
   border-radius: 14rpx;
   padding: 24rpx 40rpx;
   font-size: 32rpx;
   font-weight: 600;
   text-align: center;
-  transition: all 0.3s;
+  transition: all 0.15s ease;
 }
 
 .btn-outline:active {
-  background-color: #E8F5E9;
+  background-color: var(--color-primary-light);
 }
 
 /* 输入框 */
@@ -101,26 +114,32 @@ page {
   font-size: 30rpx;
   background-color: #F8FAF8;
   box-sizing: border-box;
-  transition: all 0.3s;
+  transition: all 0.15s ease;
 }
 
 .input-field:focus {
-  border-color: #4CAF50;
+  border-color: var(--color-accent);
   background-color: #fff;
   box-shadow: 0 0 0 6rpx rgba(76,175,80,0.08);
 }
 
 .input-field::placeholder {
-  color: #BDBDBD;
+  color: #A6A6A6;
 }
 
-/* 卡片 */
+/* 卡片 — 深度阴影，悬浮感 */
 .card {
   background-color: #ffffff;
   border-radius: 20rpx;
   padding: 30rpx;
   margin-bottom: 24rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04), 0 8rpx 24rpx rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.04), 0 4rpx 12rpx rgba(0, 0, 0, 0.06);
 }
 
 /* 弹性布局 */
@@ -149,22 +168,51 @@ page {
 
 /* 文本 */
 .text-green {
-  color: #2E7D32;
+  color: var(--color-primary);
 }
 
 .text-orange {
-  color: #FF9800;
+  color: #E65100;
 }
 
 .text-gray {
-  color: #999999;
+  color: #757575;
 }
 
 .text-center {
   text-align: center;
 }
 
+/* 全局按压反馈：配合 hover-class 使用。
+   微信原生 hover 即时生效（约50ms），比 :active + 长过渡更跟手 */
+.hover {
+  opacity: 0.8;
+}
+
 /* 安全区域 */
 .safe-area-bottom {
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ============ 老年人模式：全局字体放大 ============
+   页面根节点挂 .elderly-mode 类后，以下规则比页面同级选择器
+   优先级更高（多一层类），会覆盖页面样式中的字号 */
+.elderly-mode .btn-primary,
+.elderly-mode .btn-orange,
+.elderly-mode .btn-outline {
+  font-size: 38rpx;
+  padding: 30rpx 40rpx;
+}
+
+.elderly-mode .input-label {
+  font-size: 32rpx;
+}
+
+.elderly-mode .input-field {
+  font-size: 34rpx;
+  height: 96rpx;
+}
+
+.elderly-mode .card {
+  padding: 34rpx;
 }

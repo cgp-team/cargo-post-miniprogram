@@ -5,6 +5,7 @@
  */
 const api = require('../../utils/api')
 const util = require('../../utils/util')
+const appearance = require('../../utils/appearance')
 
 Page({
   data: {
@@ -12,7 +13,14 @@ Page({
     smsCode: '',
     smsCountdown: 0,
     smsCodeSending: false,
-    loading: false
+    loading: false,
+    elderlyMode: false,
+    themeColor: 'green',
+    themeStyle: ''
+  },
+
+  onLoad() {
+    appearance.apply(this)
   },
 
   onPhoneInput(e) {

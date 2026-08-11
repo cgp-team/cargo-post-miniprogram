@@ -1,0 +1,125 @@
+<!-- 寄货页 - 农户一键寄货 -->
+<view class="page-send {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
+
+  <!-- Step 1: 填写货物信息 -->
+  <view wx:if="{{step === 1}}" class="step-card">
+    <view class="step-title">
+      <text class="step-num">1</text>
+      <text>填写货物信息</text>
+    </view>
+
+    <!-- 语音示例提示 -->
+    <view class="voice-hint">
+      <text class="voice-mic">🎤</text>
+      <text class="voice-text">语音输入开发中…支持方言识别</text>
+      <text class="voice-example">示例："我要寄50斤脆李到城里"</text>
+    </view>
+
+    <view class="form-group">
+      <text class="form-label">货物名称 *</text>
+      <input
+        class="form-input"
+        placeholder="如：脆李、土鸡蛋、红薯粉"
+        value="{{goodsName}}"
+        bindinput="onNameInput"
+      />
+    </view>
+
+    <view class="form-group">
+      <text class="form-label">货物重量 *</text>
+      <view class="weight-row">
+        <input
+          class="form-input flex-1"
+          type="digit"
+          placeholder="如：50"
+          value="{{goodsWeight}}"
+          bindinput="onWeightInput"
+        />
+        <text class="weight-unit">斤</text>
+      </view>
+    </view>
+
+    <view class="form-group">
+      <text class="form-label">备注（选填）</text>
+      <textarea
+        class="form-textarea"
+        placeholder="补充说明，如：麻烦放阴凉处"
+        value="{{goodsNote}}"
+        bindinput="onNoteInput"
+        maxlength="100"
+      />
+    </view>
+
+    <button class="btn-primary send-btn" bindtap="goToPhoto">下一步：拍照确认</button>
+  </view>
+
+  <!-- Step 2: 拍照确认 -->
+  <view wx:if="{{step === 2}}" class="step-card">
+    <view class="step-title">
+      <text class="step-num">2</text>
+      <text>拍照确认货物</text>
+    </view>
+
+    <view class="photo-area" bindtap="takePhoto" hover-class="hover">
+      <image wx:if="{{photoPath}}" class="photo-preview" src="{{photoPath}}" mode="aspectFill"></image>
+      <view wx:else class="photo-placeholder">
+        <text class="photo-camera">📸</text>
+        <text class="photo-hint">点击拍照</text>
+        <text class="photo-sub">拍摄货物照片，方便司机辨认</text>
+      </view>
+    </view>
+
+    <view class="info-summary">
+      <view class="info-row">
+        <text class="info-label">货物</text>
+        <text class="info-value">{{goodsName}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">重量</text>
+        <text class="info-value">{{goodsWeight}} 斤</text>
+      </view>
+      <view wx:if="{{goodsNote}}" class="info-row">
+        <text class="info-label">备注</text>
+        <text class="info-value">{{goodsNote}}</text>
+      </view>
+    </view>
+
+    <view class="step-actions">
+      <button class="btn-outline" bindtap="resetSend">重新填写</button>
+      <button class="btn-primary" bindtap="confirmSend">确认发布</button>
+    </view>
+  </view>
+
+  <!-- Step 3: 匹配成功 -->
+  <view wx:if="{{step === 3}}" class="step-card match-success">
+    <text class="match-emoji">🎉</text>
+    <text class="match-title">智能匹配成功！</text>
+
+    <view class="match-bus-card">
+      <view class="bus-icon-row">
+        <text class="bus-emoji">🚌</text>
+        <view class="bus-line"></view>
+        <text class="bus-stop">📍</text>
+      </view>
+      <text class="bus-route-text">{{matchedBus.route}}</text>
+      <text class="bus-detail">从 {{matchedBus.fromStop}} 发出</text>
+
+      <view class="countdown-box">
+        <text class="countdown-num">{{matchedBus.waitMinutes}}</text>
+        <text class="countdown-unit">分钟</text>
+      </view>
+      <text class="countdown-hint">后到达村口招呼站</text>
+    </view>
+
+    <view class="match-reminder">
+      <text class="reminder-title">📢 温馨提示</text>
+      <text class="reminder-text">请携带货物前往村口招呼站等候，</text>
+      <text class="reminder-text">到站后向司机出示二维码扫码装车。</text>
+    </view>
+
+    <view class="step-actions">
+      <button class="btn-primary" bindtap="goHome">我知道了，返回首页</button>
+    </view>
+  </view>
+
+</view>

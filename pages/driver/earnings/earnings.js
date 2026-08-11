@@ -62,7 +62,7 @@ Page({
   },
 
   onLoad() {
-    const sysInfo = wx.getSystemInfoSync()
+    const sysInfo = wx.getWindowInfo()
     this.setData({ statusBarHeight: sysInfo.statusBarHeight })
   }
 })

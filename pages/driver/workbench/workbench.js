@@ -51,7 +51,7 @@ Page({
   },
 
   onLoad() {
-    const sysInfo = wx.getSystemInfoSync()
+    const sysInfo = wx.getWindowInfo()
     const sbh = sysInfo.statusBarHeight
     this.setData({ headerSafeStyle: 'height: ' + sbh + 'px;' })
     this.initMockData()

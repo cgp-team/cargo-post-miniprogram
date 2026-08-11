@@ -1,5 +1,5 @@
 <!-- 登录页面 - 农村客货邮小程序 -->
-<view class="login-page">
+<view class="login-page {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
   <!-- Logo区域 -->
   <view class="logo-section">
     <view class="logo-img-wrap">
@@ -46,7 +46,7 @@
           />
           <button
             class="sms-btn {{smsCountdown > 0 ? 'disabled' : ''}}"
-            bindtap="handleSendSms"
+            bindtap="handleSendSms" hover-class="hover"
             disabled="{{smsCountdown > 0 || smsCodeSending}}"
           >
             {{smsCountdown > 0 ? smsCountdown + 's' : '发送验证码'}}
@@ -76,14 +76,14 @@
     <!-- 登录按钮 -->
     <button
       class="btn-primary login-btn"
-      bindtap="{{loginMode === 'sms' ? 'handleSmsLogin' : 'handlePasswordLogin'}}"
+      bindtap="{{loginMode === 'sms' ? 'handleSmsLogin' : 'handlePasswordLogin'}}" hover-class="hover"
       loading="{{loading}}"
     >
       {{loginMode === 'sms' ? '验证码登录' : '密码登录'}}
     </button>
 
     <!-- 切换登录方式 -->
-    <view class="switch-mode" bindtap="switchMode">
+    <view class="switch-mode" bindtap="switchMode" hover-class="hover">
       <text>{{loginMode === 'sms' ? '密码登录' : '验证码登录'}}</text>
     </view>
 
@@ -94,7 +94,7 @@
     </button>
 
     <!-- 注册提示 -->
-    <view class="register-link" bindtap="goToRegister">
+    <view class="register-link" bindtap="goToRegister" hover-class="hover">
       <text class="text-gray">首次使用？短信登录即自动注册</text>
     </view>
   </view>

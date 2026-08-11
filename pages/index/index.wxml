@@ -1,13 +1,13 @@
 <!-- 首页 - 农村客货邮小程序 -->
-<view class="home-page">
+<view class="home-page {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
   <!-- 顶部用户信息栏 -->
-  <view class="top-bar">
-    <view class="location-info" bindtap="switchVillage">
+  <view class="top-bar" style="padding-top: {{statusBarHeight + 16}}px">
+    <view class="location-info" bindtap="switchVillage" hover-class="hover">
       <text class="loc-emoji">📌</text>
       <text class="village-name">{{currentVillage}}</text>
       <text class="arrow-down">▾</text>
     </view>
-    <view class="user-avatar" bindtap="goToProfile">
+    <view class="user-avatar" bindtap="goToProfile" hover-class="hover">
       <text>{{userInfo.avatarUrl || '👤'}}</text>
     </view>
   </view>
@@ -19,9 +19,45 @@
       class="search-input"
       type="text"
       placeholder="搜索公交线路、农产品、快递单号..."
-      bindtap="goToSearch"
+      bindtap="goToSearch" hover-class="hover"
       disabled
     />
+  </view>
+
+  <!-- 天气卡片（秒开：先渲染缓存/兜底，再刷新真实数据） -->
+  <view wx:if="{{weather.temp != null}}" class="weather-card">
+    <view class="weather-main">
+      <view class="weather-left">
+        <view class="weather-icon-circle">
+          <text class="weather-icon">{{weather.icon}}</text>
+        </view>
+        <view class="weather-info">
+          <view class="weather-temp-row">
+            <text class="weather-temp">{{weather.temp}}°</text>
+            <text class="weather-condition">{{weather.condition}}</text>
+          </view>
+          <text wx:if="{{weather.locationName}}" class="weather-location">📍 {{weather.locationName}}</text>
+          <view class="weather-detail">
+            <text>💧 {{weather.humidity}}%  🌬 {{weather.wind}}</text>
+          </view>
+          <view class="weather-meta">
+            <text wx:if="{{weatherLoading}}" class="weather-refresh">🔄 更新中…</text>
+            <text wx:elif="{{weather.mock}}" class="weather-refresh warn">⚠ 网络异常，展示本地天气</text>
+            <text wx:elif="{{weatherUpdateTime}}" class="weather-refresh">{{weatherUpdateTime}}</text>
+          </view>
+        </view>
+      </view>
+      <view class="weather-tips">
+        <text>{{weather.tips}}</text>
+      </view>
+    </view>
+    <view class="weather-forecast">
+      <view class="forecast-item" wx:for="{{weather.forecast}}" wx:key="day">
+        <text class="forecast-day">{{item.day}}</text>
+        <text class="forecast-icon">{{item.icon}}</text>
+        <text class="forecast-temp">{{item.tempLo}}° {{item.tempHi}}°</text>
+      </view>
+    </view>
   </view>
 
   <!-- 公告横幅 -->
@@ -36,7 +72,7 @@
 
   <!-- 功能入口 - 四宫格 -->
   <view class="feature-grid">
-    <view class="feature-item" bindtap="goToBusTracking">
+    <view class="feature-item" bindtap="goToBusTracking" hover-class="hover">
       <view class="feature-icon-box green-bg">
         <text class="feature-emoji">🚌</text>
       </view>
@@ -44,7 +80,7 @@
       <text class="feature-desc">查看车辆位置</text>
     </view>
 
-    <view class="feature-item" bindtap="goToProducts">
+    <view class="feature-item" bindtap="goToProducts" hover-class="hover">
       <view class="feature-icon-box orange-bg">
         <text class="feature-emoji">🥬</text>
       </view>
@@ -52,7 +88,7 @@
       <text class="feature-desc">新鲜直达餐桌</text>
     </view>
 
-    <view class="feature-item" bindtap="goToParcel">
+    <view class="feature-item" bindtap="goToParcel" hover-class="hover">
       <view class="feature-icon-box blue-bg">
         <text class="feature-emoji">📦</text>
       </view>
@@ -60,7 +96,7 @@
       <text class="feature-desc">物流全程追踪</text>
     </view>
 
-    <view class="feature-item" bindtap="goToSend">
+    <view class="feature-item" bindtap="goToSend" hover-class="hover">
       <view class="feature-icon-box red-bg">
         <text class="feature-emoji">📮</text>
       </view>
@@ -71,15 +107,15 @@
 
   <!-- 快捷操作 -->
   <view class="quick-actions">
-    <view class="quick-action-item" bindtap="goToBusTracking">
+    <view class="quick-action-item" bindtap="goToBusTracking" hover-class="hover">
       <text class="quick-action-emoji">🕐</text>
       <text>实时到站</text>
     </view>
-    <view class="quick-action-item" bindtap="goToParcel">
+    <view class="quick-action-item" bindtap="goToParcel" hover-class="hover">
       <text class="quick-action-emoji">📍</text>
       <text>物流追踪</text>
     </view>
-    <view class="quick-action-item" bindtap="goToProducts">
+    <view class="quick-action-item" bindtap="goToProducts" hover-class="hover">
       <text class="quick-action-emoji">🔥</text>
       <text>今日特惠</text>
     </view>
@@ -97,7 +133,7 @@
         class="bus-card"
         wx:for="{{nearbyBuses}}"
         wx:key="id"
-        bindtap="goToBusDetail"
+        bindtap="goToBusDetail" hover-class="hover"
         data-id="{{item.id}}"
       >
         <view class="bus-header">
@@ -129,10 +165,10 @@
         class="product-card"
         wx:for="{{recommendProducts}}"
         wx:key="id"
-        bindtap="goToProductDetail"
+        bindtap="goToProductDetail" hover-class="hover"
         data-id="{{item.id}}"
       >
-        <image class="product-img" src="{{item.image}}" mode="aspectFill"></image>
+        <view class="product-img"><text class="product-img-emoji">{{item.image}}</text></view>
         <view class="product-info">
           <text class="product-name">{{item.name}}</text>
           <text class="product-from">{{item.fromVillage}}</text>
@@ -143,6 +179,11 @@
         </view>
       </view>
     </scroll-view>
+  </view>
+
+  <!-- 悬浮寄货按钮 -->
+  <view class="fab-send" bindtap="goToSend" hover-class="hover">
+    <text class="fab-icon">📮</text>
   </view>
 
   <!-- 底部安全区 -->
