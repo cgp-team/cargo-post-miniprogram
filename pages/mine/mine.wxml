@@ -53,6 +53,11 @@
         <text class="menu-text">我的订单</text>
         <text class="menu-arrow">›</text>
       </view>
+      <view class="menu-item" bindtap="goToMySend" hover-class="hover">
+        <text class="menu-emoji">📮</text>
+        <text class="menu-text">我的寄货</text>
+        <text class="menu-arrow">›</text>
+      </view>
       <view class="menu-item" bindtap="goToBusFavorites" hover-class="hover">
         <text class="menu-emoji">🚌</text>
         <text class="menu-text">公交收藏</text>

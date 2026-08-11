@@ -15,8 +15,8 @@
         <text class="route-card-number">{{item.routeNumber}}</text>
         <text class="route-card-direction">{{item.direction}}</text>
       </view>
-      <view class="route-card-status {{item.status}}">
-        {{item.status === 'running' ? '进行中' : '待发车'}}
+      <view class="route-card-status {{item.status === 'done' ? 'pending' : item.status}}">
+        {{item.statusText}}
       </view>
     </view>
 

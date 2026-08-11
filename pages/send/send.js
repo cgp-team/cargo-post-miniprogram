@@ -1,43 +1,98 @@
 /**
  * 寄货页 - 农户一键寄货
- * 初期简化版：语音示例 → 填写信息 → 拍照 → 智能匹配
+ * 步骤：填写信息 + 选站点 → 拍照 + 收货信息 → 真实提交创建货运订单
  */
+const api = require('../../utils/api')
 const appearance = require('../../utils/appearance')
 
 Page({
   data: {
-    step: 1,          // 1=填写信息, 2=拍照确认, 3=匹配成功
+    step: 1,          // 1=填写信息, 2=拍照确认, 3=提交成功
     goodsName: '',
     goodsWeight: '',
     goodsNote: '',
     photoPath: '',
-    matchedBus: {
-      route: 'C302路',
-      fromStop: '云山村招呼站',
-      waitMinutes: 15
-    },
+    // 站点（从后端拉取）
+    stations: [],
+    pickupStationId: null,
+    pickupStationName: '',
+    deliveryStationId: null,
+    deliveryStationName: '',
+    // 收货信息
+    receiverName: '',
+    receiverMobile: '',
+    receiverAddress: '',
+    // 提交结果
+    orderNo: '',
     elderlyMode: false,
     themeColor: 'green',
     themeStyle: ''
   },
 
-  onLoad() {
+  async onLoad() {
     appearance.apply(this)
+    this.loadStations()
+  },
+
+  /** 加载寄货站点列表 */
+  async loadStations() {
+    try {
+      const stations = await api.listSendStations()
+      this.setData({ stations: stations || [] })
+    } catch (e) { /* api 已 toast */ }
   },
 
   onNameInput(e) { this.setData({ goodsName: e.detail.value }) },
   onWeightInput(e) { this.setData({ goodsWeight: e.detail.value }) },
   onNoteInput(e) { this.setData({ goodsNote: e.detail.value }) },
+  onReceiverNameInput(e) { this.setData({ receiverName: e.detail.value }) },
+  onReceiverMobileInput(e) { this.setData({ receiverMobile: e.detail.value }) },
+  onReceiverAddressInput(e) { this.setData({ receiverAddress: e.detail.value }) },
+
+  /** 选择取货站点 */
+  choosePickupStation() {
+    this.chooseStation((s) => {
+      this.setData({ pickupStationId: s.id, pickupStationName: s.stationName })
+    })
+  },
+
+  /** 选择送达站点 */
+  chooseDeliveryStation() {
+    this.chooseStation((s) => {
+      this.setData({ deliveryStationId: s.id, deliveryStationName: s.stationName })
+    })
+  },
+
+  chooseStation(cb) {
+    const names = this.data.stations.map((s) => s.stationName)
+    if (!names.length) {
+      wx.showToast({ title: '站点加载中，请稍后', icon: 'none' })
+      this.loadStations()
+      return
+    }
+    wx.showActionSheet({
+      itemList: names,
+      success: (res) => cb(this.data.stations[res.tapIndex])
+    })
+  },
 
   /** 下一步：拍照 */
   goToPhoto() {
-    const { goodsName, goodsWeight } = this.data
+    const { goodsName, goodsWeight, pickupStationId, deliveryStationId } = this.data
     if (!goodsName.trim()) {
       wx.showToast({ title: '请输入货物名称', icon: 'none' })
       return
     }
-    if (!goodsWeight.trim()) {
-      wx.showToast({ title: '请输入货物重量', icon: 'none' })
+    if (!goodsWeight.trim() || Number(goodsWeight) <= 0) {
+      wx.showToast({ title: '请输入正确的货物重量', icon: 'none' })
+      return
+    }
+    if (!pickupStationId) {
+      wx.showToast({ title: '请选择取货站点', icon: 'none' })
+      return
+    }
+    if (!deliveryStationId) {
+      wx.showToast({ title: '请选择送达站点', icon: 'none' })
       return
     }
     this.setData({ step: 2 })
@@ -56,27 +111,36 @@ Page({
     })
   },
 
-  /** 确认发布 → 模拟智能匹配 */
-  confirmSend() {
-    if (!this.data.photoPath) {
+  /** 确认发布 → 真实创建货运订单 */
+  async confirmSend() {
+    const { photoPath, receiverMobile } = this.data
+    if (!photoPath) {
       wx.showToast({ title: '请先拍照确认货物', icon: 'none' })
       return
     }
-
-    wx.showLoading({ title: '智能匹配中…', mask: true })
-
-    setTimeout(() => {
-      wx.hideLoading()
-      this.setData({ step: 3 })
-
-      // 语音播报（如果支持）
-      const { matchedBus } = this.data
-      wx.showToast({
-        title: `匹配成功！${matchedBus.route}距站点${matchedBus.waitMinutes}分钟`,
-        icon: 'none',
-        duration: 3000
+    if (!receiverMobile.trim()) {
+      wx.showToast({ title: '请输入收货电话', icon: 'none' })
+      return
+    }
+    wx.showLoading({ title: '提交中…', mask: true })
+    try {
+      const res = await api.createSendOrder({
+        pickupStationId: this.data.pickupStationId,
+        deliveryStationId: this.data.deliveryStationId,
+        goodsName: this.data.goodsName.trim(),
+        goodsWeight: Number(this.data.goodsWeight) * 0.5, // 斤 → kg
+        goodsNote: this.data.goodsNote.trim(),
+        photoUrl: this.data.photoPath,
+        receiverName: this.data.receiverName.trim(),
+        receiverMobile: receiverMobile.trim(),
+        receiverAddress: this.data.receiverAddress.trim()
       })
-    }, 2000)
+      wx.hideLoading()
+      this.setData({ orderNo: res.orderNo, step: 3 })
+    } catch (e) {
+      wx.hideLoading()
+      // 错误提示已由 api.js 统一处理，保留当前页面现场
+    }
   },
 
   /** 重新发布 */
@@ -87,6 +151,10 @@ Page({
       goodsWeight: '',
       goodsNote: '',
       photoPath: '',
+      receiverName: '',
+      receiverMobile: '',
+      receiverAddress: '',
+      orderNo: ''
     })
   },
 

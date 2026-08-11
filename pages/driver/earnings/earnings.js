@@ -1,68 +1,73 @@
 /**
- * 司机收益页 - 查看运输副业收入
+ * 司机收益页 - 运营统计（真实后端数据：班次/货运订单）
  */
+const api = require('../../../utils/api')
+const appearance = require('../../../utils/appearance')
+
 Page({
   data: {
     statusBarHeight: 0,
 
-    // 收益总览
-    totalEarnings: 12850.50,
-    monthEarnings: 3650.00,
-    todayEarnings: 180.00,
-    totalOrders: 326,
+    // 运营统计
+    totalEarnings: '0.00',   // 累计货运订单总额
+    todayEarnings: '0.00',   // 今日货运订单总额
+    totalOrders: 0,          // 累计货运订单数
+    todayOrders: 0,          // 今日货运订单数
+    shiftCount: 0,           // 今日计划班次
+    pendingCount: 0,         // 待装车任务数
 
-    // 收益明细
-    records: [
-      {
-        id: 1,
-        type: '农产品运输',
-        route: 'C302路',
-        goods: '高山云雾茶 30斤',
-        amount: 45.00,
-        time: '2026-07-23 10:30',
-        status: 'completed'
-      },
-      {
-        id: 2,
-        type: '快递代运',
-        route: 'C302路',
-        goods: '包裹 x3',
-        amount: 18.00,
-        time: '2026-07-23 09:15',
-        status: 'completed'
-      },
-      {
-        id: 3,
-        type: '农产品运输',
-        route: 'C302路',
-        goods: '土鸡蛋 15斤',
-        amount: 30.00,
-        time: '2026-07-22 16:20',
-        status: 'completed'
-      },
-      {
-        id: 4,
-        type: '农产品运输',
-        route: 'C101路',
-        goods: '有机红薯粉 50袋',
-        amount: 75.00,
-        time: '2026-07-22 11:00',
-        status: 'completed'
-      },
-      {
-        id: 5,
-        type: '快递代运',
-        route: 'C302路',
-        goods: '包裹 x5',
-        amount: 25.00,
-        time: '2026-07-21 14:45',
-        status: 'completed'
-      }
-    ]
+    // 最近订单明细
+    records: [],
+
+    loading: false,
+    loaded: false,
+    elderlyMode: false,
+    themeColor: 'green',
+    themeStyle: ''
   },
 
   onLoad() {
     const sysInfo = wx.getWindowInfo()
-    this.setData({ statusBarHeight: sysInfo.statusBarHeight })
+    this.setData({ statusBarHeight: sysInfo.statusBarHeight || 20 })
+    appearance.apply(this)
+    this.loadEarnings()
+  },
+
+  onShow() {
+    appearance.apply(this)
+  },
+
+  async loadEarnings() {
+    this.setData({ loading: true })
+    try {
+      const e = await api.getDriverEarnings()
+      const records = (e.records || []).map((r) => ({
+        id: r.orderNo,
+        type: '货运订单',
+        goods: r.goodsName || '寄货',
+        weight: r.weightKg ? r.weightKg + 'kg' : '',
+        amount: r.totalAmount || '0',
+        time: this.formatTime(r.createTime),
+        status: r.statusName || ''
+      }))
+      this.setData({
+        totalEarnings: e.totalAmount || '0.00',
+        todayEarnings: e.todayAmount || '0.00',
+        totalOrders: e.totalOrders || 0,
+        todayOrders: e.todayOrders || 0,
+        shiftCount: e.shiftCount || 0,
+        pendingCount: e.pendingCount || 0,
+        records,
+        loaded: true
+      })
+    } catch (e) {
+      this.setData({ loaded: true })
+    } finally {
+      this.setData({ loading: false })
+    }
+  },
+
+  formatTime(t) {
+    return (t || '').replace('T', ' ').substring(0, 16)
   }
 })

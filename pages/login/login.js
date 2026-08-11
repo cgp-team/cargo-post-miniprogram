@@ -135,7 +135,9 @@ Page({
   async _wechatLogin(phoneCode, loginCode) {
     this.setData({ loading: true })
     try {
-      const res = await api.wechatMiniAppLogin(phoneCode, loginCode, '')
+      // state：随机字符串（后端校验非空，用于防 CSRF）
+      const state = 'wx' + Date.now() + Math.random().toString(36).slice(2, 10)
+      const res = await api.wechatMiniAppLogin(phoneCode, loginCode, state)
       this._onLoginSuccess(res)
     } catch (err) {
       // 错误提示已由 api.js 统一处理

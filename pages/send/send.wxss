@@ -271,6 +271,58 @@
 
 .step-actions .btn-primary { flex: none; width: 100%; }
 
+/* 站点选择 */
+.station-picker {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 88rpx;
+  border: 2rpx solid #E8ECEE;
+  border-radius: 14rpx;
+  padding: 0 24rpx;
+  background: #F8FAF8;
+}
+
+.station-text {
+  font-size: 30rpx;
+  color: #333;
+}
+
+.station-text.placeholder {
+  color: #bbb;
+}
+
+.station-arrow {
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 收货信息 */
+.receiver-section {
+  margin-bottom: 28rpx;
+  border-top: 1rpx dashed #E8ECEE;
+  padding-top: 24rpx;
+}
+
+.receiver-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  display: block;
+  margin-bottom: 20rpx;
+}
+
+/* 提交成功 - 订单号 */
+.order-no-display {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--color-primary);
+  word-break: break-all;
+  display: block;
+  text-align: center;
+  margin-bottom: 10rpx;
+}
+
 /* ============ 老年人模式：寄货页字体放大 ============ */
 .elderly-mode .step-title { font-size: 40rpx; }
 .elderly-mode .form-label { font-size: 32rpx; }

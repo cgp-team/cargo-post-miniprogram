@@ -1,8 +1,19 @@
 /**
- * 快递页 - 物流追踪
- * 快递单号查询 + 物流状态可视化
+ * 快递/寄货追踪页 - 接后端真实数据
+ * tab0 我的寄货（pageMySendOrders），tab1 单号查询（trackParcel）
  */
+const api = require('../../utils/api')
 const appearance = require('../../utils/appearance')
+
+/** 运输订单状态流（对应 TransportOrderStatusEnum） */
+const STATUS_FLOW = [
+  { status: 0, label: '待调度', desc: '寄货已提交，等待调度归集' },
+  { status: 1, label: '已入池', desc: '订单已进入调度订单池' },
+  { status: 2, label: '已分配', desc: '已分配班次车辆' },
+  { status: 3, label: '已发车', desc: '车辆已发车，运输中' },
+  { status: 4, label: '已完成', desc: '货物已送达目的地' },
+  { status: 5, label: '已取消', desc: '订单已取消' }
+]
 
 Page({
   data: {
@@ -11,47 +22,22 @@ Page({
     elderlyMode: false,
     themeColor: 'green',
     themeStyle: '',
-    activeTab: 0, // 0=进行中, 1=已签收
+    statusBarHeight: 20,
+    activeTab: 0, // 0=我的寄货 1=单号查询
     trackingNo: '',
-    parcels: [
-      {
-        id: 1,
-        name: '高山云雾茶',
-        trackingNo: 'CT302202601001',
-        route: 'C302路',
-        fromVillage: '云山村',
-        status: 'in_transit',
-        statusLabel: '运输中',
-        progress: 70,
-        eta: '预计明日 14:30 到达',
-        timeline: [
-          { time: '08:30', desc: '农户已交付村口招呼站', done: true },
-          { time: '09:15', desc: 'C302路大巴承运，驶往县城', done: true },
-          { time: '11:00', desc: '途经青山镇路口', done: false },
-          { time: '14:30', desc: '预计到达县城客运总站', done: false }
-        ]
-      },
-      {
-        id: 2,
-        name: '土鸡蛋30枚装',
-        trackingNo: 'CT101202601005',
-        route: 'C101路',
-        fromVillage: '大湾村',
-        status: 'delivered',
-        statusLabel: '已签收',
-        progress: 100,
-        eta: '1月15日 16:20 已签收',
-        timeline: [
-          { time: '09:00', desc: '农户已交付村口招呼站', done: true },
-          { time: '10:30', desc: 'C101路大巴承运，驶往县城', done: true },
-          { time: '15:00', desc: '到达县城客运总站', done: true },
-          { time: '16:20', desc: '快递员已配送签收', done: true }
-        ]
-      }
-    ]
+    // 我的寄货
+    sendList: [],
+    pageNo: 1,
+    pageSize: 10,
+    total: 0,
+    hasMore: true,
+    loading: false,
+    // 单号查询结果
+    trackResult: null,
+    noResult: false
   },
 
-  onLoad() {
+  onLoad(options) {
     const sys = wx.getWindowInfo()
     this.setData({ statusBarHeight: sys.statusBarHeight || 20 })
     const userInfo = wx.getStorageSync('userInfo')
@@ -61,33 +47,132 @@ Page({
       currentVillage: app.globalData.currentVillage || '云山村'
     })
     appearance.apply(this)
+    // 「我的」→「我的寄货」默认进寄货列表（switchTab 通过 globalData 传意图）
+    if ((options && options.tab === 'my') || app.globalData.parcelIntent === 'my') {
+      app.globalData.parcelIntent = ''
+      this.setData({ activeTab: 0 })
+    }
+    this.reloadSendList()
   },
 
   onShow() {
     const app = getApp()
     this.setData({ currentVillage: app.globalData.currentVillage || '云山村' })
-    // 同步老年模式 / 主题色（设置页改动后回来立即生效）
+    // 同步老年模式 / 主题色
     appearance.apply(this)
+    // 从「我的寄货」切过来时进入寄货列表 tab
+    if (app.globalData.parcelIntent === 'my') {
+      app.globalData.parcelIntent = ''
+      this.setData({ activeTab: 0 })
+      this.reloadSendList()
+      return
+    }
+    if (this.data.activeTab === 0) {
+      this.reloadSendList()
+    }
+  },
+
+  onPullDownRefresh() {
+    if (this.data.activeTab === 0) {
+      this.reloadSendList().finally(() => wx.stopPullDownRefresh())
+    } else {
+      wx.stopPullDownRefresh()
+    }
+  },
+
+  onReachBottom() {
+    if (this.data.activeTab === 0) this.loadMore()
   },
 
   /** 切换 tab */
   switchTab(e) {
-    const idx = e.currentTarget.dataset.index
+    const idx = Number(e.currentTarget.dataset.index)
+    if (idx === this.data.activeTab) return
     this.setData({ activeTab: idx })
-  },
-
-  /** 查询快递 */
-  searchParcel() {
-    const no = this.data.trackingNo.trim()
-    if (!no) {
-      wx.showToast({ title: '请输入快递单号', icon: 'none' })
-      return
-    }
-    wx.showToast({ title: '查询功能开发中', icon: 'none' })
+    if (idx === 0) this.reloadSendList()
   },
 
   onTrackingInput(e) {
     this.setData({ trackingNo: e.detail.value })
+  },
+
+  /** 单号查询 */
+  async searchParcel() {
+    const no = this.data.trackingNo.trim()
+    if (!no) {
+      wx.showToast({ title: '请输入运单号', icon: 'none' })
+      return
+    }
+    wx.showLoading({ title: '查询中…', mask: true })
+    try {
+      const res = await api.trackParcel(no)
+      wx.hideLoading()
+      res.timeline = this.buildTimeline(res.status)
+      this.setData({ trackResult: res, noResult: false })
+    } catch (e) {
+      wx.hideLoading()
+      this.setData({ trackResult: null, noResult: true })
+    }
+  },
+
+  reloadSendList() {
+    this.setData({ pageNo: 1, sendList: [], total: 0, hasMore: true })
+    return this.loadSendList()
+  },
+
+  async loadSendList() {
+    this.setData({ loading: true })
+    try {
+      const res = await api.pageMySendOrders({ pageNo: this.data.pageNo, pageSize: this.data.pageSize })
+      const list = (res.list || []).map((o) => ({
+        ...o,
+        statusName: o.statusName || this.statusText(o.status)
+      }))
+      const merged = this.data.pageNo === 1 ? list : this.data.sendList.concat(list)
+      const total = res.total || 0
+      this.setData({
+        sendList: merged,
+        total,
+        hasMore: merged.length < total
+      })
+    } catch (e) {
+      // 错误提示已由 api.js 统一处理
+    } finally {
+      this.setData({ loading: false })
+    }
+  },
+
+  loadMore() {
+    if (this.data.loading || !this.data.hasMore) return
+    this.setData({ pageNo: this.data.pageNo + 1 })
+    this.loadSendList()
+  },
+
+  statusText(s) {
+    const item = STATUS_FLOW.find((i) => i.status === s)
+    return item ? item.label : ''
+  },
+
+  statusColor(s) {
+    return { 0: '#FF9800', 1: '#FF9800', 2: '#1565C0', 3: '#1565C0', 4: '#2E7D32', 5: '#999' }[s] || '#666'
+  },
+
+  trackProgress(s) {
+    return { 0: 15, 1: 30, 2: 45, 3: 70, 4: 100, 5: 15 }[s] || 10
+  },
+
+  /** 按状态生成时间轴 */
+  buildTimeline(status) {
+    return STATUS_FLOW.map((step) => ({
+      label: step.label,
+      desc: step.desc,
+      // 已取消：仅展示前两个节点；否则当前状态及之前均为完成
+      done: status === 5 ? step.status <= 1 : step.status <= (status == null ? -1 : status)
+    }))
+  },
+
+  formatTime(t) {
+    return (t || '').replace('T', ' ').substring(0, 16)
   },
 
   /** 切换村庄 */
@@ -100,11 +185,5 @@ Page({
         this.setData({ currentVillage: villages[res.tapIndex] })
       }
     })
-  },
-
-  /** 下拉刷新 */
-  onPullDownRefresh() {
-    wx.stopPullDownRefresh()
-    wx.showToast({ title: '已刷新', icon: 'success', duration: 1000 })
   }
 })

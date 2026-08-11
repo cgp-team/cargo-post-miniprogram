@@ -1,0 +1,48 @@
+<!-- 我的订单页 -->
+<view class="page-orders {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
+  <!-- 状态 tab -->
+  <view class="order-tabs">
+    <view
+      wx:for="{{statusTabs}}"
+      wx:key="name"
+      class="order-tab {{activeTab === item.key ? 'active' : ''}}"
+      data-key="{{item.key}}"
+      bindtap="switchTab"
+    >{{item.name}}</view>
+  </view>
+
+  <!-- 订单列表 -->
+  <view class="order-list" wx:if="{{list.length}}">
+    <view class="order-card" wx:for="{{list}}" wx:key="id">
+      <view class="order-head">
+        <text class="order-no">单号 {{item.orderNo}}</text>
+        <text class="order-status" style="color: {{statusColor(item.status)}}">{{item.statusName}}</text>
+      </view>
+      <view class="order-goods" wx:for="{{item.items}}" wx:for-item="g" wx:key="productId">
+        <text class="order-emoji">{{g.productImage}}</text>
+        <view class="order-goods-info">
+          <text class="order-goods-name">{{g.productName}}</text>
+          <text class="order-goods-sub">¥{{g.productPrice}} × {{g.quantity}}</text>
+        </view>
+        <text class="order-goods-amount">¥{{g.amount}}</text>
+      </view>
+      <view class="order-foot">
+        <text class="order-time">{{formatTime(item.createTime)}}</text>
+        <view class="order-foot-right">
+          <text class="order-total">合计 ¥{{item.totalAmount}}</text>
+          <view wx:if="{{item.status === 0}}" class="order-cancel" data-id="{{item.id}}" bindtap="cancelOrder">取消订单</view>
+        </view>
+      </view>
+    </view>
+    <view wx:if="{{!hasMore}}" class="order-nomore">没有更多了</view>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:if="{{!list.length && !loading}}" class="order-empty">
+    <text class="empty-emoji">📦</text>
+    <text class="empty-text">还没有订单</text>
+    <view class="empty-btn" bindtap="goHome">去逛逛</view>
+  </view>
+
+  <view class="safe-area-bottom"></view>
+</view>

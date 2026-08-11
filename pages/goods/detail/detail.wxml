@@ -41,4 +41,52 @@
     <view class="footer-btn buy-btn" bindtap="buyNow" hover-class="hover">立即购买</view>
   </view>
   <view class="safe-area-bottom"></view>
+
+  <!-- 下单弹窗 -->
+  <view wx:if="{{showOrderPop}}" class="popup-mask" bindtap="closeOrderPop">
+    <view class="popup-body" catchtap="noop">
+      <view class="popup-header">
+        <text class="popup-title">确认下单</text>
+        <text class="popup-close" bindtap="closeOrderPop">✕</text>
+      </view>
+      <block wx:if="{{product}}">
+        <view class="popup-product">
+          <text class="popup-emoji">{{product.image}}</text>
+          <view class="popup-product-info">
+            <text class="popup-product-name">{{product.name}}</text>
+            <text class="popup-price">¥{{product.price}}/{{product.unit}}</text>
+          </view>
+        </view>
+        <view class="popup-row">
+          <text class="popup-label">购买数量</text>
+          <view class="stepper">
+            <view class="stepper-btn" bindtap="quantityMinus" hover-class="hover">−</view>
+            <text class="stepper-num">{{quantity}}</text>
+            <view class="stepper-btn" bindtap="quantityPlus" hover-class="hover">＋</view>
+          </view>
+        </view>
+        <view class="popup-row">
+          <text class="popup-label">收货人</text>
+          <input class="popup-input" value="{{receiverName}}" placeholder="请输入收货人姓名" bindinput="onReceiverNameInput" />
+        </view>
+        <view class="popup-row">
+          <text class="popup-label">电话</text>
+          <input class="popup-input" type="number" value="{{receiverMobile}}" placeholder="请输入联系电话" bindinput="onReceiverMobileInput" />
+        </view>
+        <view class="popup-row popup-row-col">
+          <text class="popup-label">收货地址</text>
+          <input class="popup-input" value="{{receiverAddress}}" placeholder="请填写村/镇收货地址" bindinput="onReceiverAddressInput" />
+        </view>
+        <view class="popup-row popup-row-col">
+          <text class="popup-label">备注</text>
+          <input class="popup-input" value="{{remark}}" placeholder="选填" bindinput="onRemarkInput" />
+        </view>
+        <view class="popup-total">
+          <text>合计</text>
+          <text class="popup-total-amount">¥{{totalAmount}}</text>
+        </view>
+        <view class="popup-submit" bindtap="submitOrder" hover-class="hover">提交订单</view>
+      </block>
+    </view>
+  </view>
 </view>
