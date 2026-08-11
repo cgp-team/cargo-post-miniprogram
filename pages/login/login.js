@@ -108,13 +108,40 @@ Page({
     }
   },
 
-  /** 微信小程序一键登录 */
-  handleWechatLogin() {
-    wx.showToast({ title: '微信登录开发中', icon: 'none' })
-    // TODO: 接入 /app-api/member/auth/weixin-mini-app-login
+  /** 微信小程序一键登录：手机号快捷验证回调 */
+  onWechatPhoneNumber(e) {
+    // e.detail.code 为动态令牌（需小程序已开通"手机号快捷验证"能力）；未开通或用户拒绝时无 code
+    const phoneCode = e.detail.code
+    if (!phoneCode) {
+      wx.showToast({ title: '手机号授权失败，请使用验证码登录', icon: 'none', duration: 2500 })
+      return
+    }
     // 1. wx.login() 获取 loginCode
-    // 2. 手机号快速验证组件获取 phoneCode
-    // 3. 调用 api.wechatMiniAppLogin(phoneCode, loginCode, state)
+    wx.login({
+      success: (res) => {
+        if (!res.code) {
+          wx.showToast({ title: '微信登录失败，请重试', icon: 'none' })
+          return
+        }
+        this._wechatLogin(phoneCode, res.code)
+      },
+      fail: () => {
+        wx.showToast({ title: '微信登录失败，请重试', icon: 'none' })
+      }
+    })
+  },
+
+  /** 2. 调用后端微信一键登录（phoneCode + loginCode） */
+  async _wechatLogin(phoneCode, loginCode) {
+    this.setData({ loading: true })
+    try {
+      const res = await api.wechatMiniAppLogin(phoneCode, loginCode, '')
+      this._onLoginSuccess(res)
+    } catch (err) {
+      // 错误提示已由 api.js 统一处理
+    } finally {
+      this.setData({ loading: false })
+    }
   },
 
   /** 登录成功处理 */

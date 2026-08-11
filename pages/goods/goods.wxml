@@ -34,8 +34,20 @@
     </view>
   </scroll-view>
 
+  <!-- 加载中 -->
+  <view wx:if="{{loading}}" class="goods-state">
+    <view class="loading-spinner"></view>
+    <text class="state-text">商品加载中…</text>
+  </view>
+
+  <!-- 空列表 -->
+  <view wx:elif="{{!products.length}}" class="goods-state">
+    <text class="state-emoji">📦</text>
+    <text class="state-text">暂无上架商品</text>
+  </view>
+
   <!-- 商品网格 -->
-  <view class="product-grid">
+  <view wx:else class="product-grid">
     <view
       class="product-card"
       wx:for="{{products}}"

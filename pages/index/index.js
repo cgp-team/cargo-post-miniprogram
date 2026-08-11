@@ -227,11 +227,20 @@ Page({
    */
   async loadHomeData() {
     try {
-      // 这里后续接入后端API获取公告、推荐商品等数据
-      // const res = await api.request('/home/data')
-      // this.setData({ ... })
+      // 推荐商品：拉取后端上架商品，取前 4 条
+      const list = (await api.listProducts()) || []
+      this.setData({
+        recommendProducts: list.slice(0, 4).map((p) => ({
+          id: p.id,
+          name: p.name,
+          fromVillage: p.fromVillage,
+          price: Number(p.price).toFixed(2),
+          unit: p.unit,
+          image: p.image
+        }))
+      })
     } catch (err) {
-      console.error('加载首页数据失败', err)
+      console.error('加载推荐商品失败', err)
     }
   },
 

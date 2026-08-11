@@ -43,14 +43,15 @@ Page({
     this.setData({ step: 2 })
   },
 
-  /** 拍照 */
+  /** 拍照（wx.chooseMedia 替代已废弃的 wx.chooseImage） */
   takePhoto() {
-    wx.chooseImage({
+    wx.chooseMedia({
       count: 1,
+      mediaType: ['image'],
       sizeType: ['compressed'],
       sourceType: ['camera'],
       success: (res) => {
-        this.setData({ photoPath: res.tempFilePaths[0] })
+        this.setData({ photoPath: res.tempFiles[0].tempFilePath })
       }
     })
   },

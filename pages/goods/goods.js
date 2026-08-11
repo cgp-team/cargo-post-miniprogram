@@ -21,7 +21,8 @@ Page({
       { id: 4, name: '茶叶' },
       { id: 5, name: '干货' }
     ],
-    products: []
+    products: [],
+    loading: true
   },
 
   onLoad() {
@@ -46,6 +47,7 @@ Page({
 
   /** 加载上架商品（后端真实数据） */
   async loadProducts() {
+    this.setData({ loading: true })
     try {
       const list = (await api.listProducts()) || []
       this.setData({
@@ -53,6 +55,8 @@ Page({
       })
     } catch (e) {
       // 错误提示已由 api.js 统一处理
+    } finally {
+      this.setData({ loading: false })
     }
   },
 

@@ -87,8 +87,8 @@
       <text>{{loginMode === 'sms' ? '密码登录' : '验证码登录'}}</text>
     </view>
 
-    <!-- 微信一键登录 -->
-    <button class="wechat-login-btn" bindtap="handleWechatLogin" hover-class="none">
+    <!-- 微信一键登录（手机号快捷验证） -->
+    <button class="wechat-login-btn" open-type="getPhoneNumber" bindgetphonenumber="onWechatPhoneNumber" hover-class="none">
       <text class="wechat-emoji">💬</text>
       <text>微信一键登录</text>
     </button>
