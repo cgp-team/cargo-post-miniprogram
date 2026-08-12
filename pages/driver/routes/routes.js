@@ -43,7 +43,7 @@ Page({
           status: statusKey,
           statusText: s.statusName || (s.status === 1 ? '进行中' : s.status === 2 ? '已完成' : '待发车'),
           stops: names,
-          currentStop: statusKey === 'running' ? this.currentStopIndex(s, names.length) : 0
+          currentStop: statusKey === 'running' ? this.currentStopIndex(s, names.length, s.stops || []) : 0
         }
       })
       this.setData({ todayRoutes, loaded: true })
@@ -59,9 +59,13 @@ Page({
     return String(t).substring(0, 5)
   },
 
-  /** 在途班次当前站点估算（按已行驶时长占比） */
-  currentStopIndex(shift, stopCount) {
+  /** 在途班次当前站点：优先后端真实 currentStationId，回退按已行驶时长占比估算 */
+  currentStopIndex(shift, stopCount, stops) {
     if (!shift || stopCount <= 1) return 0
+    if (shift.currentStationId != null && stops && stops.length) {
+      const idx = stops.findIndex((st) => st.stationId === shift.currentStationId)
+      if (idx >= 0) return idx
+    }
     const timeStr = String(shift.plannedDepartureTime || '')
     const parts = timeStr.split(':').map(Number)
     const duration = shift.plannedDurationMinutes || 60

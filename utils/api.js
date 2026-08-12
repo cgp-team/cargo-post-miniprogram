@@ -146,9 +146,9 @@ function listSendStations() {
 
 // ==================== 司机端 ====================
 
-/** 司机档案（手机号识别身份） */
-function getDriverProfile(mobile) {
-  return request('/app-api/transport/driver/profile', 'GET', { mobile })
+/** 司机档案（登录会员识别身份） */
+function getDriverProfile() {
+  return request('/app-api/transport/driver/profile')
 }
 
 /** 今日班次与经停站点 */
