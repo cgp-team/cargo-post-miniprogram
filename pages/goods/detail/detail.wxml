@@ -47,7 +47,7 @@
     <view class="popup-body" catchtap="noop">
       <view class="popup-header">
         <text class="popup-title">确认下单</text>
-        <text class="popup-close" bindtap="closeOrderPop">✕</text>
+        <text class="popup-close" bindtap="closeOrderPop" hover-class="hover">✕</text>
       </view>
       <block wx:if="{{product}}">
         <view class="popup-product">

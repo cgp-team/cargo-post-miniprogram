@@ -91,14 +91,14 @@
         show-value="{{false}}"
       />
       <view class="slider-buttons">
-        <view class="quick-btn" bindtap="onCapacityChange" data-value="30">30%</view>
-        <view class="quick-btn" bindtap="onCapacityChange" data-value="50">50%</view>
-        <view class="quick-btn" bindtap="onCapacityChange" data-value="100">满仓</view>
+        <view class="quick-btn" bindtap="onCapacityChange" data-value="30" hover-class="hover">30%</view>
+        <view class="quick-btn" bindtap="onCapacityChange" data-value="50" hover-class="hover">50%</view>
+        <view class="quick-btn" bindtap="onCapacityChange" data-value="100" hover-class="hover">满仓</view>
       </view>
     </view>
 
     <!-- 发车按钮 -->
-    <button class="start-btn" bindtap="startDrive">
+    <button class="start-btn" bindtap="startDrive" hover-class="hover">
       <text class="start-icon">🚌</text>
       <text class="start-text">发 车</text>
     </button>
@@ -160,7 +160,7 @@
     </view>
 
     <!-- 到站确认按钮 -->
-    <button class="arrive-btn" bindtap="arriveAtStation">
+    <button class="arrive-btn" bindtap="arriveAtStation" hover-class="hover">
       <text class="arrive-icon">🚏</text>
       <text class="arrive-text">到达 {{nextStation || '下一站'}}</text>
     </button>
@@ -199,21 +199,21 @@
     </view>
 
     <!-- 巨大扫码按钮 -->
-    <button class="scan-btn" bindtap="scanToLoad">
+    <button class="scan-btn" bindtap="scanToLoad" hover-class="hover">
       <text class="scan-icon">📷</text>
       <text class="scan-text">扫码装车</text>
       <text class="scan-hint">请扫描农户手机上的二维码</text>
     </button>
 
     <!-- 妥投扫码 -->
-    <button class="scan-btn deliver-btn" bindtap="scanToDeliver">
+    <button class="scan-btn deliver-btn" bindtap="scanToDeliver" hover-class="hover">
       <text class="scan-icon">✅</text>
       <text class="scan-text">扫码妥投</text>
       <text class="scan-hint">送达收件人后扫码完成派送</text>
     </button>
 
     <!-- 跳过 -->
-    <view class="skip-btn" bindtap="skipLoading">
+    <view class="skip-btn" bindtap="skipLoading" hover-class="hover">
       <text>跳过，继续行驶 →</text>
     </view>
   </view>

@@ -6,6 +6,7 @@
  */
 const api = require('../../../utils/api')
 const appearance = require('../../../utils/appearance')
+const feedback = require('../../../utils/feedback')
 
 /** 位置上报间隔（毫秒） */
 const LOCATION_REPORT_INTERVAL = 10000
@@ -146,7 +147,7 @@ Page({
     }))
     const polyline = [{
       points: stops.map((s) => ({ latitude: s.latitude, longitude: s.longitude })),
-      color: '#4CAF50',
+      color: '#6FBF7A',
       width: 6,
       arrowLine: true
     }]
@@ -213,6 +214,7 @@ Page({
       return // request 已 toast 错误信息
     }
     this.submitting = false
+    feedback.tap()
     this.setData({
       status: 'driving',
       currentStopIndex: 0,
@@ -310,6 +312,7 @@ Page({
       return
     }
     this.submitting = false
+    feedback.tap()
     const isTerminal = nextIdx === stops.length - 1
     if (isTerminal) {
       // 班次完成
@@ -404,6 +407,7 @@ Page({
           return
         }
         this.submitting = false
+        feedback.tap()
         wx.showToast({ title: successText, icon: 'success' })
         const pickups = this.data.pendingPickups.filter((p) => p.orderId !== order.orderId)
         this.refreshCargo(pickups)

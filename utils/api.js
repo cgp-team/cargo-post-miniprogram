@@ -196,6 +196,13 @@ function reportDriverLocation(data) {
   return request('/app-api/transport/driver/location', 'POST', data)
 }
 
+// ==================== 实时公交 ====================
+
+/** 实时公交列表（复用监控车辆位置，含线路起终点/下一站/ETA，免登录） */
+function getRealtimeBuses() {
+  return request('/app-api/transport/bus/realtime')
+}
+
 module.exports = {
   request,
   smsLogin,
@@ -224,5 +231,6 @@ module.exports = {
   driverArrive,
   driverPickupConfirm,
   driverDeliver,
-  reportDriverLocation
+  reportDriverLocation,
+  getRealtimeBuses
 }

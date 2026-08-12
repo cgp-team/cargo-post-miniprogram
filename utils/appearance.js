@@ -16,28 +16,45 @@
 
 const DEFAULT_THEME = 'green'
 
-/** 各主题色板（与设置页色点保持一致） */
+/**
+ * 各主题色板（key 与设置页存储保持一致：green/orange/blue）。
+ * 设计语言：山乡巴士 · 站牌与车票——
+ *   primary 站牌绿（大面积主角，非点缀）、dark 深站牌绿、accent 新芽绿、
+ *   clay 陶土橙（司机/行动）、gold 稻谷金（农产品/公告）、paper 米纸底、ink 墨字。
+ */
 const THEMES = {
   green: {
-    name: '翠绿',
-    primary: '#2E7D32',    // 主色
-    dark: '#1B5E20',       // 深色（渐变深端/标题）
-    accent: '#4CAF50',     // 辅助强调色
-    light: '#E8F5E9'       // 浅色背景
+    name: '山野绿',
+    primary: '#2E7D32',    // 站牌绿（主）
+    dark: '#1C4B2E',       // 深站牌绿（头部/标题）
+    accent: '#4CAF50',     // 新芽绿（强调）
+    light: '#EAF3EA',      // 浅绿（浅色背景）
+    clay: '#C75B2A',       // 陶土橙（司机/行动暖色）
+    gold: '#D9A441',       // 稻谷金（农产品价格/公告）
+    paper: '#F6F2E9',      // 米纸底（页面底色）
+    ink: '#2B2B28'         // 墨字（正文）
   },
   orange: {
-    name: '暖橙',
-    primary: '#FF9800',
-    dark: '#E65100',
-    accent: '#FFB74D',
-    light: '#FFF3E0'
+    name: '陶土橙',
+    primary: '#C75B2A',
+    dark: '#9E4A1F',
+    accent: '#E07A3F',
+    light: '#F8ECE3',
+    clay: '#C75B2A',
+    gold: '#D9A441',
+    paper: '#F6F2E9',
+    ink: '#2B2B28'
   },
   blue: {
-    name: '天蓝',
-    primary: '#1565C0',
-    dark: '#0D47A1',
-    accent: '#1E88E5',
-    light: '#E3F2FD'
+    name: '山泉蓝',
+    primary: '#1F5E9E',
+    dark: '#123F6E',
+    accent: '#2E7BBF',
+    light: '#E6EFF5',
+    clay: '#C75B2A',
+    gold: '#D9A441',
+    paper: '#F6F2E9',
+    ink: '#2B2B28'
   }
 }
 
@@ -57,7 +74,11 @@ function themeStyle(color) {
     `--color-primary-dark:${t.dark};`,
     `--color-accent:${t.accent};`,
     `--color-primary-light:${t.light};`,
-    `--color-on-primary:#ffffff;`
+    `--color-on-primary:#ffffff;`,
+    `--color-clay:${t.clay};`,
+    `--color-gold:${t.gold};`,
+    `--color-paper:${t.paper};`,
+    `--color-ink:${t.ink};`
   ].join('')
 }
 

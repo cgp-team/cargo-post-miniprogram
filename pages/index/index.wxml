@@ -1,11 +1,14 @@
 <!-- 首页 - 农村客货邮小程序 -->
 <view class="home-page {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
-  <!-- 顶部用户信息栏 -->
+  <!-- 顶部站牌栏 -->
   <view class="top-bar" style="padding-top: {{statusBarHeight + 16}}px">
-    <view class="location-info" bindtap="switchVillage" hover-class="hover">
-      <text class="loc-emoji">📌</text>
-      <text class="village-name">{{currentVillage}}</text>
-      <text class="arrow-down">▾</text>
+    <view class="top-left">
+      <view class="location-info" bindtap="switchVillage" hover-class="hover">
+        <text class="village-name">{{currentVillage}}</text>
+        <text class="arrow-down">▾</text>
+        <text class="top-badge">县城⇄乡村</text>
+      </view>
+      <text class="top-sub">客货邮 · 城乡直达</text>
     </view>
     <view class="user-avatar" bindtap="goToProfile" hover-class="hover">
       <text>{{userInfo.avatarUrl || '👤'}}</text>
@@ -125,12 +128,12 @@
   <view class="section">
     <view class="section-header">
       <text class="section-title">🚌 附近公交 · 实时到站</text>
-      <text class="section-more" bindtap="goToBusTracking">更多 ›</text>
+      <text class="section-more" bindtap="goToBusTracking" hover-class="hover">更多 ›</text>
     </view>
 
     <view class="bus-list">
       <view
-        class="bus-card"
+        class="bus-card ticket-card"
         wx:for="{{nearbyBuses}}"
         wx:key="id"
         bindtap="goToBusDetail" hover-class="hover"
@@ -145,6 +148,8 @@
         <view class="bus-route">
           <text>{{item.startStation}} → {{item.endStation}}</text>
         </view>
+        <!-- 山路线：本站到下站之间的路 -->
+        <view class="road-line"></view>
         <view class="bus-info">
           <text class="text-gray">下一站: {{item.nextStation}}</text>
           <text class="text-orange">⏱ 约{{item.arriveTime}}分钟</text>
@@ -157,7 +162,7 @@
   <view class="section">
     <view class="section-header">
       <text class="section-title">🌽 优质农产品 · 村里直发</text>
-      <text class="section-more" bindtap="goToProducts">更多 ›</text>
+      <text class="section-more" bindtap="goToProducts" hover-class="hover">更多 ›</text>
     </view>
 
     <scroll-view class="product-scroll" scroll-x>

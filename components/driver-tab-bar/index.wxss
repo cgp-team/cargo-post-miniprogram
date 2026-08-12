@@ -1,11 +1,11 @@
-/* 司机端自定义TabBar */
+/* 司机端自定义TabBar —— 站牌车票风（暗色保留，激活图标深站牌绿块） */
 .driver-tab-bar {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   display: flex;
-  background: #0D0D0D;
+  background: #12110F;
   border-top: 1rpx solid #2A2A2A;
   padding-bottom: env(safe-area-inset-bottom);
   z-index: 999;
@@ -18,17 +18,28 @@
   align-items: center;
   padding: 16rpx 0 12rpx;
   position: relative;
-  color: #666;
+  color: #8A8578;
   transition: all 0.3s;
 }
 
 .tab-item.active {
-  color: #4CAF50;
+  color: #6FBF7A;
 }
 
 .tab-icon {
   font-size: 40rpx;
   margin-bottom: 4rpx;
+  line-height: 1;
+  transition: all 0.3s;
+}
+
+/* 激活：图标变深站牌绿块白字 */
+.tab-item.active .tab-icon {
+  background: #1C4B2E;
+  color: #ffffff;
+  border-radius: 22rpx;
+  padding: 8rpx 26rpx;
+  box-shadow: inset 0 4rpx 0 rgba(255, 255, 255, 0.16), 0 4rpx 12rpx rgba(0, 0, 0, 0.4);
 }
 
 .tab-label {
@@ -36,13 +47,7 @@
   font-weight: 500;
 }
 
-.tab-indicator {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 40rpx;
-  height: 4rpx;
-  background: #4CAF50;
-  border-radius: 0 0 3rpx 3rpx;
+.tab-item.active .tab-label {
+  font-weight: 700;
+  color: #8FE09A;
 }

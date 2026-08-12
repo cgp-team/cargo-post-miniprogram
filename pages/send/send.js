@@ -4,6 +4,7 @@
  */
 const api = require('../../utils/api')
 const appearance = require('../../utils/appearance')
+const feedback = require('../../utils/feedback')
 
 Page({
   data: {
@@ -114,6 +115,7 @@ Page({
   /** 确认发布 → 真实创建货运订单 */
   async confirmSend() {
     const { photoPath, receiverMobile } = this.data
+    if (this.submitting) return
     if (!photoPath) {
       wx.showToast({ title: '请先拍照确认货物', icon: 'none' })
       return
@@ -122,6 +124,7 @@ Page({
       wx.showToast({ title: '请输入收货电话', icon: 'none' })
       return
     }
+    this.submitting = true
     wx.showLoading({ title: '提交中…', mask: true })
     try {
       const res = await api.createSendOrder({
@@ -135,9 +138,12 @@ Page({
         receiverMobile: receiverMobile.trim(),
         receiverAddress: this.data.receiverAddress.trim()
       })
+      this.submitting = false
       wx.hideLoading()
+      feedback.tap()
       this.setData({ orderNo: res.orderNo, step: 3 })
     } catch (e) {
+      this.submitting = false
       wx.hideLoading()
       // 错误提示已由 api.js 统一处理，保留当前页面现场
     }

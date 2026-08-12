@@ -1,19 +1,20 @@
-/* 自定义底部 TabBar 样式 */
+/* 自定义底部 TabBar 样式 —— 站牌车票风 */
+/* 激活项图标做成"站牌绿块"，白字，似真实公交站牌 */
 
 /* P1 fix: touch targets ≥ 88rpx (WCAG 2.5.5 / responsive) */
-/* P2 fix: reduced shadow, cleaner separation */
 .tab-bar {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   display: flex;
-  background: #FFFFFF;
-  box-shadow: 0 -4rpx 24rpx rgba(0, 0, 0, 0.05);
+  background: #FFFDF8;
+  box-shadow: 0 -4rpx 24rpx rgba(60, 50, 30, 0.08);
   padding-bottom: env(safe-area-inset-bottom);
   z-index: 9999;
   /* 主题色默认值，根节点内联 style 覆盖 */
   --color-primary: #2E7D32;
+  --color-primary-dark: #1C4B2E;
 }
 
 .tab-item {
@@ -25,7 +26,7 @@
   min-height: 100rpx;
   padding: 8rpx 0;
   position: relative;
-  color: #999999;
+  color: #8A8578;
   transition: color 0.18s ease;
 }
 
@@ -41,22 +42,26 @@
   font-size: 42rpx;
   line-height: 1;
   display: block;
+  transition: all 0.18s ease;
+}
+
+/* 激活：图标变站牌绿块白字（落款横档 + 微投影） */
+.tab-item.active .tab-emoji {
+  background: var(--color-primary);
+  color: #ffffff;
+  border-radius: 22rpx;
+  padding: 8rpx 26rpx;
+  box-shadow: inset 0 4rpx 0 rgba(255, 255, 255, 0.18), 0 4rpx 12rpx rgba(0, 0, 0, 0.14);
+  transform: translateY(-2rpx);
 }
 
 .tab-text {
   font-size: 20rpx;
   font-weight: 500;
-  margin-top: 2rpx;
+  margin-top: 6rpx;
   line-height: 1;
 }
 
-.tab-active-line {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 40rpx;
-  height: 5rpx;
-  background: var(--color-primary);
-  border-radius: 0 0 4rpx 4rpx;
+.tab-item.active .tab-text {
+  font-weight: 700;
 }

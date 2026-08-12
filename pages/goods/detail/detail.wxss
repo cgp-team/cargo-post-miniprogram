@@ -1,7 +1,7 @@
 /* 商品详情页样式 */
 .page-detail {
   min-height: 100vh;
-  background: #F5F5F5;
+  background: var(--color-paper);
   padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
 }
 
@@ -63,7 +63,7 @@
   position: absolute;
   top: 20rpx;
   left: 20rpx;
-  background: linear-gradient(135deg, #FF9800, #FFA726);
+  background: linear-gradient(135deg, var(--color-clay), var(--color-clay));
   color: #fff;
   font-size: 22rpx;
   font-weight: 600;
@@ -173,7 +173,7 @@
 }
 
 .buy-btn {
-  background: linear-gradient(135deg, #FF9800, #F57C00);
+  background: linear-gradient(135deg, var(--color-clay), var(--color-clay));
   color: #fff;
 }
 
@@ -275,7 +275,7 @@
 .popup-input {
   flex: 1;
   margin-left: 24rpx;
-  background: #F5F5F5;
+  background: var(--color-paper);
   border-radius: 12rpx;
   padding: 16rpx 20rpx;
   font-size: 28rpx;
@@ -329,7 +329,7 @@
 .popup-submit {
   height: 92rpx;
   border-radius: 46rpx;
-  background: linear-gradient(135deg, #FF9800, #F57C00);
+  background: linear-gradient(135deg, var(--color-clay), var(--color-clay));
   color: #fff;
   font-size: 32rpx;
   font-weight: 700;

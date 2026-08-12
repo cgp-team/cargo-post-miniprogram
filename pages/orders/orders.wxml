@@ -30,7 +30,7 @@
         <text class="order-time">{{formatTime(item.createTime)}}</text>
         <view class="order-foot-right">
           <text class="order-total">合计 ¥{{item.totalAmount}}</text>
-          <view wx:if="{{item.status === 0}}" class="order-cancel" data-id="{{item.id}}" bindtap="cancelOrder">取消订单</view>
+          <view wx:if="{{item.status === 0}}" class="order-cancel" data-id="{{item.id}}" bindtap="cancelOrder" hover-class="hover">取消订单</view>
         </view>
       </view>
     </view>

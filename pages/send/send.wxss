@@ -1,7 +1,7 @@
 /* 寄货页样式 */
 .page-send {
   min-height: 100vh;
-  background: #F5F5F5;
+  background: var(--color-paper);
   padding: 24rpx;
 }
 
@@ -49,7 +49,7 @@
 
 .voice-mic { font-size: 56rpx; margin-bottom: 10rpx; }
 .voice-text { font-size: 26rpx; color: #666; margin-bottom: 6rpx; }
-.voice-example { font-size: 24rpx; color: #E65100; font-weight: 600; }
+.voice-example { font-size: 24rpx; color: var(--color-clay); font-weight: 600; }
 
 /* 表单 */
 .form-group { margin-bottom: 26rpx; }
@@ -227,13 +227,13 @@
 .countdown-num {
   font-size: 80rpx;
   font-weight: 800;
-  color: #E65100;
+  color: var(--color-clay);
   line-height: 1;
 }
 
 .countdown-unit {
   font-size: 36rpx;
-  color: #E65100;
+  color: var(--color-clay);
   font-weight: 600;
 }
 
@@ -257,7 +257,7 @@
 .reminder-title {
   font-size: 28rpx;
   font-weight: 700;
-  color: #E65100;
+  color: var(--color-clay);
   display: block;
   margin-bottom: 10rpx;
 }

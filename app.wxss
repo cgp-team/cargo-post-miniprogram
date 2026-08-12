@@ -1,25 +1,31 @@
 /* 全局样式 - 农村客货邮小程序 */
 
-/* 颜色变量参考 */
-/* 主色：#2E7D32（深绿，代表农业/自然）*/
-/* 辅色：#4CAF50（翠绿）*/
-/* 辅色：#FF9800（橙色，代表公交/活力）*/
-/* 背景：#F5F5F5 */
-/* 文字：#333333 */
+/* 颜色变量参考（山乡巴士 · 站牌与车票） */
+/* 主色：#2E7D32（站牌绿，大面积主角）*/
+/* 深绿：#1C4B2E（头部/标题）*/
+/* 辅色：#4CAF50（新芽绿，强调）*/
+/* 暖色：#C75B2A（陶土橙，司机/行动）、#D9A441（稻谷金，农产品/公告）*/
+/* 底色：#F6F2E9（米纸底） */
+/* 文字：#2B2B28（墨字） */
 
 page {
-  /* 主题色 CSS 变量默认值（页面根节点内联 style 可覆盖） */
+  /* 主题色 CSS 变量默认值（页面根节点内联 style 可覆盖）
+     设计语言：山乡巴士 · 站牌与车票 */
   --color-primary: #2E7D32;
-  --color-primary-dark: #1B5E20;
+  --color-primary-dark: #1C4B2E;
   --color-accent: #4CAF50;
-  --color-primary-light: #E8F5E9;
+  --color-primary-light: #EAF3EA;
   --color-on-primary: #ffffff;
+  --color-clay: #C75B2A;   /* 陶土橙：司机/行动 */
+  --color-gold: #D9A441;   /* 稻谷金：农产品/公告 */
+  --color-paper: #F6F2E9;  /* 米纸底：页面底色 */
+  --color-ink: #2B2B28;    /* 墨字：正文 */
 
-  background-color: #F5F5F5;
+  background-color: var(--color-paper);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
     'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
   font-size: 28rpx;
-  color: #333333;
+  color: var(--color-ink);
   box-sizing: border-box;
   -webkit-font-smoothing: antialiased;
   animation: page-in 0.25s ease-out;
@@ -37,42 +43,46 @@ page {
   box-sizing: border-box;
 }
 
-/* 通用按钮 */
+/* 通用按钮 —— 站牌式：深绿实板，顶部一条浅色"落款横档"，似真实站牌 */
 .btn-primary {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  background: var(--color-primary);
   color: var(--color-on-primary);
   border: none;
-  border-radius: 14rpx;
+  border-radius: 10rpx;
   padding: 24rpx 40rpx;
   font-size: 32rpx;
   font-weight: 600;
   text-align: center;
   width: 100%;
-  letter-spacing: 1rpx;
+  letter-spacing: 2rpx;
+  box-shadow: inset 0 6rpx 0 rgba(255,255,255,0.12), 0 6rpx 16rpx rgba(0,0,0,0.10);
   transition: all 0.15s ease;
 }
 
 .btn-primary:active {
-  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
+  background: var(--color-primary-dark);
   transform: scale(0.98);
+  box-shadow: inset 0 2rpx 0 rgba(255,255,255,0.10), 0 2rpx 8rpx rgba(0,0,0,0.10);
 }
 
 .btn-orange {
-  background: linear-gradient(135deg, #FF9800, #FFB74D);
+  background: var(--color-clay);
   color: #ffffff;
   border: none;
-  border-radius: 14rpx;
+  border-radius: 10rpx;
   padding: 24rpx 40rpx;
   font-size: 32rpx;
   font-weight: 600;
   text-align: center;
   width: 100%;
-  letter-spacing: 1rpx;
+  letter-spacing: 2rpx;
+  box-shadow: inset 0 6rpx 0 rgba(255,255,255,0.12), 0 6rpx 16rpx rgba(0,0,0,0.10);
   transition: all 0.15s ease;
 }
 
 .btn-orange:active {
-  background: linear-gradient(135deg, #F57C00, #FF9800);
+  background: var(--color-clay);
+  filter: brightness(0.9);
   transform: scale(0.98);
 }
 
@@ -108,11 +118,11 @@ page {
 .input-field {
   width: 100%;
   height: 88rpx;
-  border: 2rpx solid #E8ECEE;
-  border-radius: 14rpx;
+  border: 2rpx solid #E4DECD;
+  border-radius: 12rpx;
   padding: 0 24rpx;
   font-size: 30rpx;
-  background-color: #F8FAF8;
+  background-color: #FBF8F1;
   box-sizing: border-box;
   transition: all 0.15s ease;
 }
@@ -127,19 +137,128 @@ page {
   color: #A6A6A6;
 }
 
-/* 卡片 — 深度阴影，悬浮感 */
+/* 卡片 — 暖白 + 柔和阴影，悬浮感 */
 .card {
-  background-color: #ffffff;
-  border-radius: 20rpx;
+  background-color: #FFFDF8;
+  border-radius: 18rpx;
   padding: 30rpx;
   margin-bottom: 24rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04), 0 8rpx 24rpx rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2rpx 8rpx rgba(60, 50, 30, 0.05), 0 8rpx 24rpx rgba(60, 50, 30, 0.06);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .card:active {
   transform: translateY(2rpx);
-  box-shadow: 0 1rpx 4rpx rgba(0, 0, 0, 0.04), 0 4rpx 12rpx rgba(0, 0, 0, 0.06);
+  box-shadow: 0 1rpx 4rpx rgba(60, 50, 30, 0.05), 0 4rpx 12rpx rgba(60, 50, 30, 0.06);
+}
+
+/* ============ 签名原语：山乡巴士 · 站牌与车票 ============ */
+
+/* 站牌头部：深绿实板 + 顶部落款横档 + 角落线路号角标 */
+.signpost {
+  position: relative;
+  background: linear-gradient(160deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
+  color: #ffffff;
+  padding: 30rpx 32rpx 28rpx;
+  border-radius: 12rpx;
+  box-shadow: 0 8rpx 24rpx rgba(28, 75, 46, 0.25);
+  overflow: hidden;
+}
+
+.signpost::before {
+  content: '';
+  position: absolute;
+  top: 8rpx;
+  left: 24rpx;
+  right: 24rpx;
+  height: 5rpx;
+  background: rgba(255, 255, 255, 0.28);
+  border-radius: 3rpx;
+}
+
+.signpost::after {
+  content: '';
+  position: absolute;
+  top: -30rpx;
+  right: -20rpx;
+  width: 180rpx;
+  height: 180rpx;
+  background: radial-gradient(circle, rgba(255,255,255,0.10) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.signpost-title {
+  position: relative;
+  z-index: 1;
+  font-size: 40rpx;
+  font-weight: 800;
+  letter-spacing: 2rpx;
+  color: #ffffff;
+}
+
+.signpost-sub {
+  position: relative;
+  z-index: 1;
+  font-size: 24rpx;
+  color: rgba(255,255,255,0.82);
+  margin-top: 8rpx;
+  letter-spacing: 1rpx;
+}
+
+.signpost-badge {
+  position: absolute;
+  top: 22rpx;
+  right: 24rpx;
+  z-index: 2;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1rpx solid rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+  font-size: 20rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 24rpx;
+  letter-spacing: 1rpx;
+}
+
+/* 车票卡：暖白底 + 右侧虚线撕口 + 左上角票号位 */
+.ticket-card {
+  position: relative;
+  background: #FFFDF8;
+  border-radius: 16rpx 8rpx 8rpx 16rpx;
+  padding: 28rpx 30rpx;
+  box-shadow: 0 2rpx 8rpx rgba(60, 50, 30, 0.05), 0 8rpx 24rpx rgba(60, 50, 30, 0.06);
+  overflow: hidden;
+}
+
+.ticket-card::after {
+  /* 右侧锯齿撕口：半圆向左凸入卡片，米纸底色透出（每 16rpx 一个） */
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 0;
+  width: 16rpx;
+  background: radial-gradient(circle at 0% 50%, #F6F2E9 8rpx, transparent 8.5rpx) 0 0 / 16rpx 16rpx repeat-y;
+}
+
+.ticket-card::before {
+  /* 撕口内侧虚线（车票副券线） */
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 16rpx;
+  width: 2rpx;
+  background: repeating-linear-gradient(180deg, #D8D2C4 0, #D8D2C4 8rpx, transparent 8rpx, transparent 16rpx);
+}
+
+/* 山路线：虚线道路 + 站点圆点（时间线/进度用） */
+.road-line {
+  position: relative;
+  height: 6rpx;
+  margin: 24rpx 0;
+  background: repeating-linear-gradient(90deg, var(--color-accent) 0, var(--color-accent) 12rpx, transparent 12rpx, transparent 20rpx);
+  opacity: 0.7;
 }
 
 /* 弹性布局 */
@@ -172,7 +291,7 @@ page {
 }
 
 .text-orange {
-  color: #E65100;
+  color: var(--color-clay);
 }
 
 .text-gray {
@@ -184,9 +303,24 @@ page {
 }
 
 /* 全局按压反馈：配合 hover-class 使用。
-   微信原生 hover 即时生效（约50ms），比 :active + 长过渡更跟手 */
+   微信原生 hover 即时生效（约50ms），比 :active + 长过渡更跟手；
+   轻微缩小 + 降透明度，模拟"按下去"的触感 */
 .hover {
-  opacity: 0.8;
+  opacity: 0.82;
+  transform: scale(0.98);
+}
+
+/* 按钮禁用态：表单提交中/不可用时置灰，去掉立体感 */
+.btn-primary[disabled],
+.btn-primary.disabled,
+.btn-orange[disabled],
+.btn-orange.disabled,
+.btn-outline[disabled],
+.btn-outline.disabled {
+  opacity: 0.5;
+  box-shadow: none;
+  pointer-events: none;
+  filter: saturate(0.4);
 }
 
 /* 安全区域 */
