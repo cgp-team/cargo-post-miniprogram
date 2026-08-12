@@ -158,6 +158,12 @@
         <text class="eta-value orange">{{pendingPickups.length}} 件</text>
       </view>
     </view>
+
+    <!-- 到站确认按钮 -->
+    <button class="arrive-btn" bindtap="arriveAtStation">
+      <text class="arrive-icon">🚏</text>
+      <text class="arrive-text">到达 {{nextStation || '下一站'}}</text>
+    </button>
   </view>
 
   <!-- ========== 状态三：到站停靠 - 扫码装车 ========== -->
@@ -197,6 +203,13 @@
       <text class="scan-icon">📷</text>
       <text class="scan-text">扫码装车</text>
       <text class="scan-hint">请扫描农户手机上的二维码</text>
+    </button>
+
+    <!-- 妥投扫码 -->
+    <button class="scan-btn deliver-btn" bindtap="scanToDeliver">
+      <text class="scan-icon">✅</text>
+      <text class="scan-text">扫码妥投</text>
+      <text class="scan-hint">送达收件人后扫码完成派送</text>
     </button>
 
     <!-- 跳过 -->

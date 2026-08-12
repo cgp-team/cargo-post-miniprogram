@@ -675,3 +675,45 @@
   color: rgba(255, 255, 255, 0.5);
   margin-left: auto;
 }
+
+/* 到站确认按钮（行驶中） */
+.arrive-btn {
+  width: calc(100% - 64rpx);
+  margin: 32rpx;
+  height: 120rpx;
+  background: linear-gradient(180deg, #4CAF50, #2E7D32);
+  border-radius: 24rpx;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  border: none;
+  box-shadow: 0 12rpx 36rpx rgba(76,175,80,0.35);
+}
+
+.arrive-btn:active {
+  transform: scale(0.97);
+  box-shadow: 0 6rpx 18rpx rgba(76,175,80,0.3);
+}
+
+.arrive-icon {
+  font-size: 40rpx;
+}
+
+.arrive-text {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+/* 妥投扫码按钮（停靠中，次按钮） */
+.deliver-btn {
+  height: 200rpx;
+  background: linear-gradient(180deg, #3B82F6, #1D4ED8);
+  box-shadow: 0 16rpx 48rpx rgba(59,130,246,0.35);
+}
+
+.deliver-btn:active {
+  box-shadow: 0 8rpx 24rpx rgba(59,130,246,0.3);
+}
