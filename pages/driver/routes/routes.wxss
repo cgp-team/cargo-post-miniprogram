@@ -36,7 +36,7 @@
 }
 
 .route-card.running {
-  border-color: rgba(76,175,80,0.3);
+  border-color: rgba(111,191,122,0.3);
 }
 
 .route-card-header {
@@ -49,7 +49,7 @@
 .route-card-number {
   font-size: 42rpx;
   font-weight: 800;
-  color: #4CAF50;
+  color: #6FBF7A;
   display: block;
 }
 
@@ -68,13 +68,13 @@
 }
 
 .route-card-status.running {
-  background: rgba(76,175,80,0.2);
-  color: #81C784;
+  background: rgba(111,191,122,0.18);
+  color: #8FE09A;
 }
 
 .route-card-status.pending {
-  background: rgba(255,152,0,0.2);
-  color: #FFB74D;
+  background: rgba(224,122,63,0.18);
+  color: #E8925B;
 }
 
 .route-time {
@@ -88,7 +88,7 @@
   border-bottom: 1rpx solid #2A2A2A;
 }
 
-/* 时间线 */
+/* 时间线 —— 山路线：虚线山路 + 站点圆点（路过=绿，当前=陶土橙脉冲） */
 .timeline {
   display: flex;
   flex-direction: column;
@@ -103,14 +103,15 @@
   gap: 20rpx;
 }
 
+/* 站点间虚线山路（未路过=暗灰虚线，路过=新芽绿虚线） */
 .timeline-item::before {
   content: '';
   position: absolute;
   left: 10rpx;
   top: 48rpx;
   bottom: -18rpx;
-  width: 2rpx;
-  background: #333;
+  width: 3rpx;
+  background: repeating-linear-gradient(180deg, #444 0, #444 8rpx, transparent 8rpx, transparent 14rpx);
 }
 
 .timeline-item:last-child::before {
@@ -118,14 +119,17 @@
 }
 
 .timeline-item.done::before {
-  background: #4CAF50;
+  background: repeating-linear-gradient(180deg, #6FBF7A 0, #6FBF7A 8rpx, transparent 8rpx, transparent 14rpx);
 }
 
+/* 站点圆点：路过=实心绿，未到=空心暗，当前=陶土橙带脉冲 */
 .timeline-dot {
-  width: 24rpx;
-  height: 24rpx;
+  width: 26rpx;
+  height: 26rpx;
   border-radius: 50%;
-  background: #333;
+  background: #222;
+  border: 3rpx solid #555;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -134,12 +138,20 @@
 }
 
 .timeline-item.done .timeline-dot {
-  background: #4CAF50;
+  background: #6FBF7A;
+  border-color: #6FBF7A;
 }
 
 .timeline-item.current .timeline-dot {
-  background: #FFB74D;
-  box-shadow: 0 0 16rpx rgba(255,183,77,0.5);
+  background: #E07A3F;
+  border-color: #E07A3F;
+  box-shadow: 0 0 0 8rpx rgba(224, 122, 63, 0.18);
+  animation: station-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes station-pulse {
+  0%, 100% { box-shadow: 0 0 0 6rpx rgba(224, 122, 63, 0.16); }
+  50% { box-shadow: 0 0 0 12rpx rgba(224, 122, 63, 0.05); }
 }
 
 .dot-inner {
@@ -169,8 +181,8 @@
   font-size: 20rpx;
   padding: 4rpx 12rpx;
   border-radius: 8rpx;
-  background: rgba(255,152,0,0.2);
-  color: #FFB74D;
+  background: rgba(224,122,63,0.2);
+  color: #E8925B;
 }
 
 .timeline-tag.end {
@@ -179,7 +191,7 @@
 }
 
 .timeline-tag.current-tag {
-  background: rgba(255,183,77,0.25);
-  color: #FFB74D;
+  background: rgba(224,122,63,0.28);
+  color: #F0A06C;
   font-weight: 700;
 }

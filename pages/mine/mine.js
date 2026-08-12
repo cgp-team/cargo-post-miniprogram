@@ -13,9 +13,9 @@ Page({
     themeColor: 'green',
     themeStyle: '',
     themeList: [
-      { key: 'green', name: '翠绿', color: '#2E7D32' },
-      { key: 'orange', name: '暖橙', color: '#FF9800' },
-      { key: 'blue', name: '天蓝', color: '#1565C0' }
+      { key: 'green', name: appearance.THEMES.green.name, color: appearance.THEMES.green.primary },
+      { key: 'orange', name: appearance.THEMES.orange.name, color: appearance.THEMES.orange.primary },
+      { key: 'blue', name: appearance.THEMES.blue.name, color: appearance.THEMES.blue.primary }
     ]
   },
 

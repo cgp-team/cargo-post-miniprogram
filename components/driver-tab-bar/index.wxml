@@ -9,6 +9,5 @@
   >
     <text class="tab-icon">{{item.icon}}</text>
     <text class="tab-label">{{item.label}}</text>
-    <view class="tab-indicator" wx:if="{{current === item.key}}"></view>
   </view>
 </view>

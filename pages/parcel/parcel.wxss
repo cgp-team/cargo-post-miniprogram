@@ -1,6 +1,6 @@
 /* 快递页样式 */
 .page-parcel {
-  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-primary-light) 8%, #F5F5F5 25%);
+  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-primary-light) 8%, var(--color-paper) 25%);
   min-height: 100vh;
   padding-bottom: calc(100rpx + env(safe-area-inset-bottom));
 }
@@ -136,7 +136,7 @@
 }
 
 .parcel-status.in_transit {
-  color: #E65100;
+  color: var(--color-clay);
   background: #FFF3E0;
 }
 
@@ -159,7 +159,7 @@
 }
 
 .parcel-eta {
-  color: #E65100;
+  color: var(--color-clay);
   font-weight: 600;
 }
 

@@ -1,6 +1,6 @@
 /* 我的页样式 */
 .page-mine {
-  background: #F5F5F5;
+  background: var(--color-paper);
   min-height: 100vh;
   padding-bottom: calc(100rpx + env(safe-area-inset-bottom));
 }
@@ -112,7 +112,7 @@
 }
 
 .send-btn {
-  background: linear-gradient(135deg, #FF9800, #F57C00);
+  background: linear-gradient(135deg, var(--color-clay), var(--color-clay));
 }
 
 .ledger-btn {
@@ -138,7 +138,7 @@
   gap: 18rpx;
   padding: 30rpx 28rpx;
   transition: all 0.15s ease;
-  border-bottom: 1rpx solid #F5F5F5;
+  border-bottom: 1rpx solid var(--color-paper);
 }
 
 .menu-item:last-child { border-bottom: none; }
@@ -167,7 +167,7 @@
 
 /* 主题颜色标签 */
 .menu-label { font-size: 24rpx; color: #757575; padding: 20rpx 28rpx 12rpx; }
-.menu-divider { height: 1rpx; background: #F5F5F5; margin: 0 28rpx; }
+.menu-divider { height: 1rpx; background: var(--color-paper); margin: 0 28rpx; }
 
 .theme-row {
   display: flex; gap: 16rpx; padding: 8rpx 28rpx 24rpx;

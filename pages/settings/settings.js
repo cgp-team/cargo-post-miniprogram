@@ -6,9 +6,9 @@ Page({
     themeColor: 'green',
     themeStyle: '',
     themeList: [
-      { key: 'green', name: '翠绿', color: '#2E7D32', desc: '默认主题' },
-      { key: 'orange', name: '暖橙', color: '#FF9800', desc: '热情温暖' },
-      { key: 'blue', name: '天蓝', color: '#1565C0', desc: '沉稳冷静' }
+      { key: 'green', name: appearance.THEMES.green.name, color: appearance.THEMES.green.primary, desc: '默认主题' },
+      { key: 'orange', name: appearance.THEMES.orange.name, color: appearance.THEMES.orange.primary, desc: '热情温暖' },
+      { key: 'blue', name: appearance.THEMES.blue.name, color: appearance.THEMES.blue.primary, desc: '沉稳冷静' }
     ]
   },
 

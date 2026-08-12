@@ -41,12 +41,12 @@
 
 .status-tag.idle {
   background: rgba(255,152,0,0.2);
-  color: #FFB74D;
+  color: #E8925B;
 }
 
 .status-tag.driving {
   background: rgba(76,175,80,0.2);
-  color: #81C784;
+  color: #8FE09A;
 }
 
 .status-tag.stopped {
@@ -70,8 +70,8 @@
   color: #888;
 }
 
-.stop-label.start { color: #81C784; }
-.stop-label.end { color: #FFB74D; }
+.stop-label.start { color: #8FE09A; }
+.stop-label.end { color: #E8925B; }
 
 .progress-track {
   position: relative;
@@ -83,7 +83,7 @@
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #4CAF50, #81C784);
+  background: linear-gradient(90deg, #6FBF7A, #8FE09A);
   border-radius: 5rpx;
   transition: width 0.5s ease;
 }
@@ -94,7 +94,7 @@
   width: 28rpx;
   height: 28rpx;
   background: #ffffff;
-  border: 4rpx solid #4CAF50;
+  border: 4rpx solid #6FBF7A;
   border-radius: 50%;
   transform: translate(-50%, -50%);
   box-shadow: 0 0 16rpx rgba(76,175,80,0.6);
@@ -114,7 +114,7 @@
 
 .next-stop-dist {
   font-size: 28rpx;
-  color: #81C784;
+  color: #8FE09A;
   font-weight: 600;
 }
 
@@ -183,7 +183,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(180deg, #4CAF50, #2E7D32);
+  background: linear-gradient(180deg, #6FBF7A, #5AAE66);
   transition: height 0.3s ease;
   border-radius: 0 0 12rpx 12rpx;
 }
@@ -203,7 +203,7 @@
   left: 0;
   right: 0;
   height: 3rpx;
-  background: #FF9800;
+  background: #E07A3F;
   z-index: 2;
 }
 
@@ -245,7 +245,7 @@
 .cargo-percent {
   font-size: 100rpx;
   font-weight: 900;
-  color: #4CAF50;
+  color: #6FBF7A;
   line-height: 1;
 }
 
@@ -295,16 +295,16 @@
 }
 
 .quick-btn:active {
-  background: #4CAF50;
+  background: #6FBF7A;
   color: #fff;
-  border-color: #4CAF50;
+  border-color: #6FBF7A;
 }
 
 /* 发车按钮 */
 .start-btn {
   width: 320rpx;
   height: 120rpx;
-  background: linear-gradient(135deg, #4CAF50, #2E7D32);
+  background: linear-gradient(135deg, #6FBF7A, #5AAE66);
   border-radius: 60rpx;
   display: flex;
   align-items: center;
@@ -366,7 +366,7 @@
 .speed-num {
   font-size: 56rpx;
   font-weight: 900;
-  color: #4CAF50;
+  color: #6FBF7A;
   line-height: 1;
 }
 
@@ -387,7 +387,7 @@
   display: flex;
   align-items: center;
   gap: 20rpx;
-  border: 2rpx solid #FFB74D;
+  border: 2rpx solid #E8925B;
   backdrop-filter: blur(10rpx);
 }
 
@@ -408,7 +408,7 @@
 
 .stop-alert-dist {
   font-size: 28rpx;
-  color: #FFB74D;
+  color: #E8925B;
   display: block;
   margin-top: 4rpx;
 }
@@ -441,7 +441,7 @@
 
 .voice-content {
   font-size: 26rpx;
-  color: #81C784;
+  color: #8FE09A;
   flex: 1;
 }
 
@@ -474,7 +474,7 @@
 }
 
 .eta-value.orange {
-  color: #FFB74D;
+  color: #E8925B;
 }
 
 /* ========== 停靠面板 ========== */
@@ -563,7 +563,7 @@
 .scan-btn {
   width: 100%;
   height: 280rpx;
-  background: linear-gradient(180deg, #4CAF50, #2E7D32);
+  background: linear-gradient(180deg, #6FBF7A, #5AAE66);
   border-radius: 32rpx;
   display: flex;
   flex-direction: column;
@@ -643,7 +643,7 @@
 .task-title {
   font-size: 26rpx;
   font-weight: 600;
-  color: #4CAF50;
+  color: #6FBF7A;
   display: block;
   margin-bottom: 16rpx;
 }
@@ -664,7 +664,7 @@
 
 .task-action {
   font-size: 24rpx;
-  color: #FFB74D;
+  color: #E8925B;
   background: rgba(255, 183, 77, 0.12);
   border-radius: 8rpx;
   padding: 4rpx 14rpx;
@@ -681,7 +681,7 @@
   width: calc(100% - 64rpx);
   margin: 32rpx;
   height: 120rpx;
-  background: linear-gradient(180deg, #4CAF50, #2E7D32);
+  background: linear-gradient(180deg, #6FBF7A, #5AAE66);
   border-radius: 24rpx;
   display: flex;
   flex-direction: row;

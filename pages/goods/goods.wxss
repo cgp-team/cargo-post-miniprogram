@@ -1,6 +1,6 @@
 /* 商城页样式 */
 .page-goods {
-  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-primary-light) 8%, #F5F5F5 25%);
+  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-primary-light) 8%, var(--color-paper) 25%);
   min-height: 100vh;
   padding-bottom: calc(100rpx + env(safe-area-inset-bottom));
 }
@@ -140,7 +140,7 @@
   position: absolute;
   bottom: 10rpx;
   left: 10rpx;
-  background: linear-gradient(135deg, #FF9800, #FFA726);
+  background: linear-gradient(135deg, var(--color-clay), var(--color-clay));
   color: #fff;
   font-size: 20rpx;
   font-weight: 600;

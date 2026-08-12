@@ -1,4 +1,4 @@
-.page-settings { min-height: 100vh; background: #F5F5F5; padding: 24rpx 28rpx; }
+.page-settings { min-height: 100vh; background: var(--color-paper); padding: 24rpx 28rpx; }
 
 .section-label { font-size: 26rpx; color: #757575; font-weight: 600; margin: 30rpx 0 16rpx; padding-left: 8rpx; }
 .section-label:first-child { margin-top: 8rpx; }

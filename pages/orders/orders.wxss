@@ -1,7 +1,7 @@
 /* 我的订单页样式 */
 .page-orders {
   min-height: 100vh;
-  background: #F5F5F5;
+  background: var(--color-paper);
 }
 
 /* 状态 tab */

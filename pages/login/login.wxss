@@ -1,7 +1,7 @@
 /* 登录页面样式 - 农村客货邮小程序 */
 .login-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-primary-light) 35%, #F5F5F5 70%);
+  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-primary-light) 35%, var(--color-paper) 70%);
   padding: 0 40rpx;
   padding-bottom: 80rpx;
   box-sizing: border-box;
@@ -83,7 +83,7 @@
 .logo-title {
   font-size: 48rpx;
   font-weight: 700;
-  color: #1B5E20;
+  color: var(--color-primary-dark);
   margin-bottom: 10rpx;
   letter-spacing: 2rpx;
 }
@@ -120,7 +120,7 @@
 }
 
 .role-tab.active {
-  background: linear-gradient(135deg, #2E7D32, #388E3C, #43A047);
+  background: linear-gradient(135deg, var(--color-primary), #388E3C, #43A047);
   color: #ffffff;
   font-weight: 600;
   box-shadow: 0 8rpx 24rpx rgba(46,125,50,0.3);
@@ -226,7 +226,7 @@
 }
 
 .wechat-login-btn:active {
-  background: #F5F5F5;
+  background: var(--color-paper);
   border-color: var(--color-accent);
 }
 

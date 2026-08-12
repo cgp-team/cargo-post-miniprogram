@@ -11,6 +11,5 @@
   >
     <text class="tab-emoji">{{item.icon}}</text>
     <text class="tab-text">{{item.text}}</text>
-    <view wx:if="{{selected === index}}" class="tab-active-line"></view>
   </view>
 </view>

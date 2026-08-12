@@ -4,6 +4,7 @@
  */
 const api = require('../../utils/api')
 const util = require('../../utils/util')
+const feedback = require('../../utils/feedback')
 const appearance = require('../../utils/appearance')
 
 Page({
@@ -148,6 +149,7 @@ Page({
 
   /** 登录成功处理 */
   async _onLoginSuccess(res) {
+    feedback.tap()
     const token = res.accessToken || res.token
     wx.setStorageSync('token', token)
     if (res.refreshToken) wx.setStorageSync('refreshToken', res.refreshToken)
