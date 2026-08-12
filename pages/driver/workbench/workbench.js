@@ -95,10 +95,9 @@ Page({
 
   /** 加载司机身份 + 班次 + 任务 */
   async loadAll() {
-    const userInfo = wx.getStorageSync('userInfo') || {}
-    const mobile = userInfo.mobile || ''
     try {
-      const profile = mobile ? await api.getDriverProfile(mobile) : null
+      // 身份由后端按登录会员解析，前端不再传手机号/driverId
+      const profile = await api.getDriverProfile()
       if (!profile) {
         wx.showToast({ title: '未找到司机档案，请联系管理员', icon: 'none', duration: 2500 })
         this.setData({ loaded: true })
@@ -152,19 +151,29 @@ Page({
       arrowLine: true
     }]
 
-    // 运力：空余百分比 = (件数上限 - 待装车数) / 上限
+    // 运力：已装件数以后端执行记录 loadedCount 为准（真实落库），空余 = (上限 - 已装) / 上限
     const cap = this.data.cargoLimit
-    const used = this.data.pendingPickups.length
+    const used = (current.loadedCount != null ? current.loadedCount : this.data.pendingPickups.length) || 0
     const pct = cap > 0 ? Math.max(0, Math.round((cap - used) / cap * 100)) : 100
     const usedPct = cap > 0 ? Math.min(100, Math.round(used / cap * 100)) : 0
+
+    // 重进小程序时按后端当前站点恢复进度（在途不丢站）
+    let resumeIndex = 0
+    if (current.currentStationId != null) {
+      const idx = stops.findIndex((s) => s.stationId === current.currentStationId)
+      if (idx >= 0) resumeIndex = idx
+    }
+    const resumePercent = stops.length > 1 ? Math.round(resumeIndex / (stops.length - 1) * 100) : 0
 
     this.setData({
       routeName: current.routeName || current.shiftCode,
       startStation: stops[0].stationName,
       endStation: stops[stops.length - 1].stationName,
       totalStops: stops.length,
-      currentStopIndex: 0,
-      progressPercent: 0,
+      currentStopIndex: resumeIndex,
+      progressPercent: resumePercent,
+      currentStation: resumeIndex > 0 ? stops[resumeIndex - 1].stationName : '',
+      nextStation: stops[Math.min(resumeIndex, stops.length - 1)].stationName,
       markers,
       polyline,
       cargoCapacity: pct,
@@ -195,12 +204,15 @@ Page({
    * 发车 - 调后端创建执行记录，成功后进入行驶中并开始位置上报
    */
   async startDrive() {
-    if (!this.driverId || !this.shiftId) return
+    if (!this.driverId || !this.shiftId || this.submitting) return
+    this.submitting = true
     try {
       await api.driverDepart(this.driverId, this.shiftId)
     } catch (e) {
+      this.submitting = false
       return // request 已 toast 错误信息
     }
+    this.submitting = false
     this.setData({
       status: 'driving',
       currentStopIndex: 0,
@@ -218,11 +230,30 @@ Page({
       wx.getLocation({
         type: 'gcj02',
         success: (res) => this.onLocation(res),
-        fail: () => {} // 定位失败静默，等待下个周期
+        fail: (err) => this.onLocationFail(err)
       })
     }
     tick()
     this.locationTimer = setInterval(tick, LOCATION_REPORT_INTERVAL)
+  },
+
+  /** 定位失败：权限被拒时提示并停止上报，其余静默等待下个周期 */
+  onLocationFail(err) {
+    const msg = (err && err.errMsg) || ''
+    if (msg.indexOf('auth deny') >= 0 || msg.indexOf('auth denied') >= 0 || msg.indexOf('authorize') >= 0) {
+      if (this.locationTimer) {
+        clearInterval(this.locationTimer)
+        this.locationTimer = null
+      }
+      wx.showModal({
+        title: '需要定位权限',
+        content: '行驶中需获取位置上报监控中心，请在设置中开启定位权限',
+        confirmText: '去设置',
+        success: (r) => {
+          if (r.confirm) wx.openSetting()
+        }
+      })
+    }
   },
 
   /** 收到一次真实定位：上报后端 + 更新速度/下一站距离/进度 */
@@ -268,14 +299,17 @@ Page({
    */
   async arriveAtStation() {
     const stops = this.shiftStops || []
-    if (!this.driverId || !this.shiftId || !stops.length) return
+    if (!this.driverId || !this.shiftId || !stops.length || this.submitting) return
     const nextIdx = Math.min(this.data.currentStopIndex + 1, stops.length - 1)
     const station = stops[nextIdx]
+    this.submitting = true
     try {
       await api.driverArrive(this.driverId, this.shiftId, station.stationId)
     } catch (e) {
+      this.submitting = false
       return
     }
+    this.submitting = false
     const isTerminal = nextIdx === stops.length - 1
     if (isTerminal) {
       // 班次完成
@@ -352,6 +386,7 @@ Page({
 
   /** 扫码并匹配待办订单，执行 action 后刷新列表 */
   scanOrder(action, successText) {
+    if (this.submitting) return
     wx.scanCode({
       scanType: ['qrCode', 'barCode'],
       success: async (res) => {
@@ -361,11 +396,14 @@ Page({
           wx.showToast({ title: '未匹配到待办订单', icon: 'none', duration: 2000 })
           return
         }
+        this.submitting = true
         try {
           await action(order)
         } catch (e) {
+          this.submitting = false
           return
         }
+        this.submitting = false
         wx.showToast({ title: successText, icon: 'success' })
         const pickups = this.data.pendingPickups.filter((p) => p.orderId !== order.orderId)
         this.refreshCargo(pickups)
@@ -415,6 +453,14 @@ Page({
       title: '语音播报已开启',
       icon: 'none'
     })
+  },
+
+  onHide() {
+    // 切后台时停掉位置上报定时器，onShow 恢复在途时重启，避免后台持续定位耗电
+    if (this.locationTimer) {
+      clearInterval(this.locationTimer)
+      this.locationTimer = null
+    }
   },
 
   onUnload() {
