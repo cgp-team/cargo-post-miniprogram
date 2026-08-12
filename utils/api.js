@@ -171,6 +171,31 @@ function getDriverTasks(driverId) {
   return request('/app-api/transport/driver/tasks', 'GET', { driverId })
 }
 
+/** 发车：创建当天班次执行记录，订单推进已发车 */
+function driverDepart(driverId, shiftId) {
+  return request('/app-api/transport/driver/depart', 'POST', { driverId, shiftId })
+}
+
+/** 到站：更新当前站点；到达终点站时完成班次 */
+function driverArrive(driverId, shiftId, stationId) {
+  return request('/app-api/transport/driver/arrive', 'POST', { driverId, shiftId, stationId })
+}
+
+/** 装车确认：货运订单推进运输中 */
+function driverPickupConfirm(driverId, orderId) {
+  return request('/app-api/transport/driver/pickup-confirm', 'POST', { driverId, orderId })
+}
+
+/** 妥投确认：货运订单推进已完成 */
+function driverDeliver(driverId, orderId) {
+  return request('/app-api/transport/driver/deliver', 'POST', { driverId, orderId })
+}
+
+/** 上报车辆位置（行驶中定时调用） */
+function reportDriverLocation(data) {
+  return request('/app-api/transport/driver/location', 'POST', data)
+}
+
 module.exports = {
   request,
   smsLogin,
@@ -194,5 +219,10 @@ module.exports = {
   getDriverShifts,
   getDriverPickups,
   getDriverEarnings,
-  getDriverTasks
+  getDriverTasks,
+  driverDepart,
+  driverArrive,
+  driverPickupConfirm,
+  driverDeliver,
+  reportDriverLocation
 }
