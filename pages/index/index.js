@@ -245,15 +245,27 @@ Page({
   },
 
   /**
-   * 加载公交数据
+   * 加载公交数据（真实实时公交；失败/未接入时保留静态演示数据）
    */
   async loadBusData() {
     try {
-      // 后续接入后端API
-      // const res = await api.request('/bus/nearby')
-      // this.setData({ nearbyBuses: res.data })
+      const buses = (await api.getRealtimeBuses()) || []
+      if (buses.length) {
+        this.setData({
+          nearbyBuses: buses.map((b) => ({
+            id: b.busId,
+            routeNumber: b.shiftCode || b.routeName,
+            startStation: b.startStation || '—',
+            endStation: b.endStation || '—',
+            nextStation: b.nextStation || '—',
+            status: b.status === 1 ? 'running' : 'arrived',
+            arriveTime: b.etaMinutes != null ? b.etaMinutes : 0
+          }))
+        })
+      }
     } catch (err) {
-      console.error('加载公交数据失败', err)
+      // 真实数据拉取失败：保留静态演示数据，等接口完善后自动替换
+      console.error('加载实时公交失败，使用演示数据', err)
     }
   },
 
