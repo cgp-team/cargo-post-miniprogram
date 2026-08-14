@@ -87,6 +87,10 @@
         <text class="parcel-eta">{{formatTime(trackResult.createTime)}}</text>
       </view>
 
+      <!-- 货运审核状态 -->
+      <view wx:if="{{trackResult.auditStatus === 0}}" class="parcel-audit warn">⏳ 审核中：货物正在等待平台审核</view>
+      <view wx:elif="{{trackResult.auditStatus === 2}}" class="parcel-audit fail">❌ 审核未通过：{{trackResult.rejectReason || '货物不符合运输要求'}}</view>
+
       <!-- 进度条 -->
       <view class="progress-bar">
         <view class="progress-fill" style="width: {{trackProgress(trackResult.status)}}%"></view>

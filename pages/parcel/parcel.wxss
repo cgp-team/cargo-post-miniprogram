@@ -293,6 +293,16 @@
   font-size: 26rpx;
   color: #666;
 }
+
+/* 货运审核状态提示 */
+.parcel-audit {
+  margin-top: 16rpx;
+  padding: 16rpx 20rpx;
+  border-radius: 12rpx;
+  font-size: 26rpx;
+}
+.parcel-audit.warn { background: #FFF8E1; color: #B8860B; }
+.parcel-audit.fail { background: #FDECEA; color: #C0392B; }
 .parcel-qr-copy {
   margin-top: 16rpx;
   padding: 12rpx 40rpx;
