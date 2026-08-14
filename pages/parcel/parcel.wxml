@@ -105,8 +105,12 @@
 
       <!-- 查件二维码：取件 / 司机扫码核销 -->
       <view class="parcel-qr-block">
+        <text class="parcel-pickup-code" wx:if="{{trackResult.pickupCode}}">取件码：{{trackResult.pickupCode}}</text>
         <canvas type="2d" id="parcelQrCanvas" class="parcel-qr-canvas"></canvas>
         <text class="parcel-qr-tip">取件 · 司机扫码核销</text>
+        <text class="parcel-qr-receiver" wx:if="{{trackResult.pickupCode && (trackResult.receiverName || trackResult.receiverMobile)}}">
+          收件人：{{trackResult.receiverName || ''}} {{trackResult.receiverMobile || ''}}
+        </text>
         <button class="parcel-qr-copy" bindtap="copyTrackNo">复制单号</button>
       </view>
     </view>

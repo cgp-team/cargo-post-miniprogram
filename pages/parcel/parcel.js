@@ -116,13 +116,15 @@ Page({
     }
   },
 
-  /** 查询成功后绘制查件二维码（取件 / 司机扫码核销） */
+  /** 查询成功后绘制查件二维码（邮快件用取件码，司机扫码核销） */
   drawParcelQr() {
     wx.nextTick(() => {
       const query = wx.createSelectorQuery().in(this)
       query.select('#parcelQrCanvas').fields({ node: true, size: true }).exec((res) => {
         if (!res[0] || !res[0].node || !this.data.trackResult) return
-        qrcodeRender.draw(res[0].node, this.data.trackResult.orderNo, res[0].width)
+        const t = this.data.trackResult
+        // 邮快件用取件码（司机核销凭码），货运用订单号
+        qrcodeRender.draw(res[0].node, t.pickupCode || t.orderNo, res[0].width)
       })
     })
   },

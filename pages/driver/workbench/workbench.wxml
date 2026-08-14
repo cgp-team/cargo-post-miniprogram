@@ -175,13 +175,13 @@
       <text class="stop-subtitle">请完成装车作业</text>
     </view>
 
-    <!-- 待装货物列表（真实货运订单） -->
+    <!-- 待装货物列表（货运 + 邮快件） -->
     <view class="pickup-list" wx:if="{{pendingPickups.length > 0}}">
       <view class="pickup-item" wx:for="{{pendingPickups}}" wx:key="orderId">
-        <text class="pickup-emoji">📦</text>
+        <text class="pickup-emoji">{{item.orderType === 3 ? '📬' : '📦'}}</text>
         <view class="pickup-info">
-          <text class="pickup-name">{{item.goodsName || '寄货'}}</text>
-          <text class="pickup-detail">{{item.weightKg}}kg · {{item.receiverName || '待定'}}</text>
+          <text class="pickup-name">{{item.orderType === 3 ? (item.mailNo || '快递') : (item.goodsName || '寄货')}}</text>
+          <text class="pickup-detail">{{item.weightKg}}kg · {{item.orderType === 3 ? ('取件码 ' + (item.pickupCode || '—')) : (item.receiverName || '待定')}}</text>
           <text class="pickup-detail">{{item.orderNo}}</text>
         </view>
         <text class="pickup-check">☐</text>
@@ -210,6 +210,13 @@
       <text class="scan-icon">✅</text>
       <text class="scan-text">扫码妥投</text>
       <text class="scan-hint">送达收件人后扫码完成派送</text>
+    </button>
+
+    <!-- 取件核销（邮快件） -->
+    <button class="scan-btn verify-btn" bindtap="scanToVerify" hover-class="hover">
+      <text class="scan-icon">📬</text>
+      <text class="scan-text">取件核销</text>
+      <text class="scan-hint">扫收件人取件码，确认取件</text>
     </button>
 
     <!-- 跳过 -->

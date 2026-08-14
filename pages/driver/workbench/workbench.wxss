@@ -717,3 +717,14 @@
 .deliver-btn:active {
   box-shadow: 0 8rpx 24rpx rgba(59,130,246,0.3);
 }
+
+/* 取件核销按钮（邮快件，次按钮） */
+.verify-btn {
+  height: 200rpx;
+  background: linear-gradient(180deg, #2E7D32, #1C4B2E);
+  box-shadow: 0 16rpx 48rpx rgba(46,125,50,0.35);
+}
+
+.verify-btn:active {
+  box-shadow: 0 8rpx 24rpx rgba(46,125,50,0.3);
+}

@@ -14,6 +14,7 @@ Page({
     goodsWeight: '',
     goodsNote: '',
     photoPath: '',
+    photoUrl: '', // 拍照后上传到服务器拿到的真实 URL
     // 站点（从后端拉取）
     stations: [],
     pickupStationId: null,
@@ -108,25 +109,40 @@ Page({
     this.setData({ step: 2 })
   },
 
-  /** 拍照（wx.chooseMedia 替代已废弃的 wx.chooseImage） */
+  /** 拍照（wx.chooseMedia）并上传到服务器拿真实 URL（快递总站核对凭证） */
   takePhoto() {
     wx.chooseMedia({
       count: 1,
       mediaType: ['image'],
       sizeType: ['compressed'],
       sourceType: ['camera'],
-      success: (res) => {
-        this.setData({ photoPath: res.tempFiles[0].tempFilePath })
+      success: async (res) => {
+        const temp = res.tempFiles[0].tempFilePath
+        this.setData({ photoPath: temp, photoUrl: '' })
+        wx.showLoading({ title: '上传照片…', mask: true })
+        try {
+          const url = await api.uploadFile(temp)
+          wx.hideLoading()
+          this.setData({ photoUrl: url })
+          wx.showToast({ title: '照片已上传', icon: 'success' })
+        } catch (e) {
+          wx.hideLoading()
+          wx.showToast({ title: '照片上传失败，请重拍', icon: 'none' })
+        }
       }
     })
   },
 
   /** 确认发布 → 真实创建货运订单 */
   async confirmSend() {
-    const { photoPath, receiverMobile } = this.data
+    const { photoPath, photoUrl, receiverMobile } = this.data
     if (this.submitting) return
     if (!photoPath) {
       wx.showToast({ title: '请先拍照确认货物', icon: 'none' })
+      return
+    }
+    if (!photoUrl) {
+      wx.showToast({ title: '照片上传中或失败，请稍后重试', icon: 'none' })
       return
     }
     if (!receiverMobile.trim()) {
@@ -142,7 +158,7 @@ Page({
         goodsName: this.data.goodsName.trim(),
         goodsWeight: Number(this.data.goodsWeight) * 0.5, // 斤 → kg
         goodsNote: this.data.goodsNote.trim(),
-        photoUrl: this.data.photoPath,
+        photoUrl,
         receiverName: this.data.receiverName.trim(),
         receiverMobile: receiverMobile.trim(),
         receiverAddress: this.data.receiverAddress.trim()

@@ -181,9 +181,9 @@ function driverArrive(driverId, shiftId, stationId) {
   return request('/app-api/transport/driver/arrive', 'POST', { driverId, shiftId, stationId })
 }
 
-/** 装车确认：货运订单推进运输中 */
-function driverPickupConfirm(driverId, orderId) {
-  return request('/app-api/transport/driver/pickup-confirm', 'POST', { driverId, orderId })
+/** 装车确认：货运订单推进运输中（货运强制带司机收件照片） */
+function driverPickupConfirm(driverId, orderId, driverPhotoUrl) {
+  return request('/app-api/transport/driver/pickup-confirm', 'POST', { driverId, orderId, driverPhotoUrl })
 }
 
 /** 妥投确认：货运订单推进已完成 */
@@ -201,6 +201,31 @@ function reportDriverLocation(data) {
 /** 实时公交列表（复用监控车辆位置，含线路起终点/下一站/ETA，免登录） */
 function getRealtimeBuses() {
   return request('/app-api/transport/bus/realtime')
+}
+
+// ==================== 取件核销 + 文件上传 ====================
+
+/** 取件核销：邮快件收件人取件，司机确认（校验取件码） */
+function driverPickupVerify(driverId, orderId, pickupCode) {
+  return request('/app-api/transport/driver/pickup-verify', 'POST', { driverId, orderId, pickupCode })
+}
+
+/** 上传文件（照片），返回文件 URL（infra app 文件上传，免登录） */
+function uploadFile(filePath) {
+  return new Promise((resolve, reject) => {
+    wx.uploadFile({
+      url: `${BASE_URL}/app-api/infra/file/upload`,
+      filePath,
+      name: 'file',
+      success(res) {
+        let body
+        try { body = JSON.parse(res.data) } catch (e) { reject({ msg: '上传响应异常' }); return }
+        if (body.code === 0) resolve(body.data)
+        else reject(body)
+      },
+      fail: reject
+    })
+  })
 }
 
 module.exports = {
@@ -232,5 +257,7 @@ module.exports = {
   driverPickupConfirm,
   driverDeliver,
   reportDriverLocation,
-  getRealtimeBuses
+  getRealtimeBuses,
+  driverPickupVerify,
+  uploadFile
 }
