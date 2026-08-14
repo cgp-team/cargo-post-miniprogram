@@ -12,7 +12,9 @@
     "pages/register/register",
     "pages/driver/workbench/workbench",
     "pages/driver/routes/routes",
-    "pages/driver/earnings/earnings"
+    "pages/driver/earnings/earnings",
+    "pages/translate/index",
+    "pages/translate/edit"
   ],
   "window": {
     "backgroundTextStyle": "light",
@@ -36,9 +38,18 @@
   },
   "style": "v2",
   "sitemapLocation": "sitemap.json",
+  "plugins": {
+    "WechatSI": {
+      "version": "0.3.5",
+      "provider": "wx069ba97219f66d99"
+    }
+  },
   "permission": {
     "scope.userLocation": {
       "desc": "用于展示公交实时位置和物流轨迹"
+    },
+    "scope.record": {
+      "desc": "用于寄货语音输入与面对面翻译（录音转文字）"
     }
   },
   "requiredPrivateInfos": [

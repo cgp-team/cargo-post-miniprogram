@@ -8,11 +8,11 @@
       <text>填写货物信息</text>
     </view>
 
-    <!-- 语音示例提示 -->
-    <view class="voice-hint">
-      <text class="voice-mic">🎤</text>
-      <text class="voice-text">语音输入开发中…支持方言识别</text>
-      <text class="voice-example">示例："我要寄50斤脆李到城里"</text>
+    <!-- 语音输入：点击说话，识别后自动填写货物信息 -->
+    <view class="voice-hint {{voiceListening ? 'listening' : ''}}" bindtap="startVoiceInput">
+      <text class="voice-mic">{{voiceListening ? '⏹' : '🎤'}}</text>
+      <text class="voice-text">{{voiceListening ? '正在聆听，请说话…' : '点击说话，自动填写货物信息'}}</text>
+      <text class="voice-example">{{voiceResult || '示例："我要寄50斤脆李到城里"'}}</text>
     </view>
 
     <view class="form-group">
@@ -144,8 +144,13 @@
     <text class="match-title">寄货已提交！</text>
 
     <view class="match-bus-card">
+      <canvas type="2d" id="qrCanvas" class="qr-canvas"></canvas>
       <text class="order-no-display">{{orderNo}}</text>
       <text class="bus-detail">寄货订单号 · 请妥善保存</text>
+      <view class="qr-actions">
+        <button class="qr-btn" bindtap="copyOrderNo">复制单号</button>
+        <button class="qr-btn" open-type="share" bindtap="noop">分享查件</button>
+      </view>
     </view>
 
     <view class="match-reminder">

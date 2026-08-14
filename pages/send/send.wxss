@@ -47,6 +47,16 @@
   margin-bottom: 30rpx;
 }
 
+.voice-hint.listening {
+  background: linear-gradient(135deg, #E3F2E6, #D0E8D5);
+  box-shadow: 0 0 0 4rpx var(--color-primary-light);
+  animation: voice-pulse 1.2s ease-in-out infinite;
+}
+@keyframes voice-pulse {
+  0%, 100% { box-shadow: 0 0 0 4rpx var(--color-primary-light); }
+  50% { box-shadow: 0 0 0 12rpx rgba(46, 125, 50, 0.15); }
+}
+
 .voice-mic { font-size: 56rpx; margin-bottom: 10rpx; }
 .voice-text { font-size: 26rpx; color: #666; margin-bottom: 6rpx; }
 .voice-example { font-size: 24rpx; color: var(--color-clay); font-weight: 600; }
@@ -322,6 +332,38 @@
   text-align: center;
   margin-bottom: 10rpx;
 }
+
+/* 订单二维码（取件/司机扫码） */
+.qr-canvas {
+  width: 320rpx;
+  height: 320rpx;
+  margin: 0 auto 20rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  display: block;
+}
+.qr-actions {
+  display: flex;
+  justify-content: center;
+  gap: 20rpx;
+  margin-top: 16rpx;
+}
+.qr-btn {
+  flex: 0 0 auto;
+  min-width: 180rpx;
+  margin: 0;
+  padding: 16rpx 0;
+  font-size: 28rpx;
+  line-height: 1.2;
+  border-radius: 999rpx;
+  border: 2rpx solid var(--color-primary);
+  color: var(--color-primary);
+  background: #fff;
+  text-align: center;
+}
+.qr-btn::after { border: none; }
+.elderly-mode .qr-canvas { width: 400rpx; height: 400rpx; }
+.elderly-mode .qr-btn { font-size: 32rpx; padding: 20rpx 0; min-width: 220rpx; }
 
 /* ============ 老年人模式：寄货页字体放大 ============ */
 .elderly-mode .step-title { font-size: 40rpx; }

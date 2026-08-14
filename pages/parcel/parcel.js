@@ -4,6 +4,7 @@
  */
 const api = require('../../utils/api')
 const appearance = require('../../utils/appearance')
+const qrcodeRender = require('../../utils/qrcode-render')
 
 /** 运输订单状态流（对应 TransportOrderStatusEnum） */
 const STATUS_FLOW = [
@@ -108,11 +109,30 @@ Page({
       const res = await api.trackParcel(no)
       wx.hideLoading()
       res.timeline = this.buildTimeline(res.status)
-      this.setData({ trackResult: res, noResult: false })
+      this.setData({ trackResult: res, noResult: false }, () => this.drawParcelQr())
     } catch (e) {
       wx.hideLoading()
       this.setData({ trackResult: null, noResult: true })
     }
+  },
+
+  /** 查询成功后绘制查件二维码（邮快件用取件码，司机扫码核销） */
+  drawParcelQr() {
+    wx.nextTick(() => {
+      const query = wx.createSelectorQuery().in(this)
+      query.select('#parcelQrCanvas').fields({ node: true, size: true }).exec((res) => {
+        if (!res[0] || !res[0].node || !this.data.trackResult) return
+        const t = this.data.trackResult
+        // 邮快件用取件码（司机核销凭码），货运用订单号
+        qrcodeRender.draw(res[0].node, t.pickupCode || t.orderNo, res[0].width)
+      })
+    })
+  },
+
+  /** 复制单号 */
+  copyTrackNo() {
+    if (!this.data.trackResult) return
+    wx.setClipboardData({ data: this.data.trackResult.orderNo })
   },
 
   reloadSendList() {

@@ -87,6 +87,10 @@
         <text class="parcel-eta">{{formatTime(trackResult.createTime)}}</text>
       </view>
 
+      <!-- 货运审核状态 -->
+      <view wx:if="{{trackResult.auditStatus === 0}}" class="parcel-audit warn">⏳ 审核中：货物正在等待平台审核</view>
+      <view wx:elif="{{trackResult.auditStatus === 2}}" class="parcel-audit fail">❌ 审核未通过：{{trackResult.rejectReason || '货物不符合运输要求'}}</view>
+
       <!-- 进度条 -->
       <view class="progress-bar">
         <view class="progress-fill" style="width: {{trackProgress(trackResult.status)}}%"></view>
@@ -101,6 +105,17 @@
             <text class="timeline-desc">{{item.desc}}</text>
           </view>
         </view>
+      </view>
+
+      <!-- 查件二维码：取件 / 司机扫码核销 -->
+      <view class="parcel-qr-block">
+        <text class="parcel-pickup-code" wx:if="{{trackResult.pickupCode}}">取件码：{{trackResult.pickupCode}}</text>
+        <canvas type="2d" id="parcelQrCanvas" class="parcel-qr-canvas"></canvas>
+        <text class="parcel-qr-tip">取件 · 司机扫码核销</text>
+        <text class="parcel-qr-receiver" wx:if="{{trackResult.pickupCode && (trackResult.receiverName || trackResult.receiverMobile)}}">
+          收件人：{{trackResult.receiverName || ''}} {{trackResult.receiverMobile || ''}}
+        </text>
+        <button class="parcel-qr-copy" bindtap="copyTrackNo">复制单号</button>
       </view>
     </view>
 

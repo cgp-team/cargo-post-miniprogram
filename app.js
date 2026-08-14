@@ -7,6 +7,17 @@ App({
     }
   },
 
+  /** 录音授权（面对面翻译 / 寄货语音输入用） */
+  getRecordAuth: function () {
+    wx.getSetting({
+      success(res) {
+        if (!res.authSetting['scope.record']) {
+          wx.authorize({ scope: 'scope.record', success() {}, fail() {} })
+        }
+      }
+    })
+  },
+
   globalData: {
     userInfo: null,
     token: null,

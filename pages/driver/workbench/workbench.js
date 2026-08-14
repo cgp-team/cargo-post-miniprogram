@@ -374,10 +374,16 @@ Page({
   },
 
   /**
-   * 扫码装车：匹配待装订单并调后端确认
+   * 扫码装车：匹配待装订单并调后端确认（货运散件强制司机收件拍照，快递总站核对凭证）
    */
   scanToLoad() {
-    this.scanOrder((order) => api.driverPickupConfirm(this.driverId, order.orderId), '装车确认成功')
+    this.scanOrder(async (order) => {
+      let photoUrl = ''
+      if (order.orderType !== 3) { // 邮快件有快递面单，不强制拍照
+        photoUrl = await this.takeCargoPhoto()
+      }
+      return api.driverPickupConfirm(this.driverId, order.orderId, photoUrl)
+    }, '装车确认成功')
   },
 
   /**
@@ -385,6 +391,65 @@ Page({
    */
   scanToDeliver() {
     this.scanOrder((order) => api.driverDeliver(this.driverId, order.orderId), '妥投成功')
+  },
+
+  /**
+   * 取件核销：扫收件人取件码二维码，司机确认取件（邮快件下行）
+   */
+  scanToVerify() {
+    if (this.submitting) return
+    wx.scanCode({
+      scanType: ['qrCode', 'barCode'],
+      success: async (res) => {
+        const code = (res.result || '').trim()
+        const order = this.data.pendingPickups.find((p) => p.pickupCode === code || p.orderNo === code)
+        if (!order) {
+          wx.showToast({ title: '未匹配到待取快递', icon: 'none', duration: 2000 })
+          return
+        }
+        this.submitting = true
+        try {
+          await api.driverPickupVerify(this.driverId, order.orderId, order.pickupCode)
+        } catch (e) {
+          this.submitting = false
+          return
+        }
+        this.submitting = false
+        feedback.tap()
+        wx.showToast({ title: '取件核销成功', icon: 'success' })
+        const pickups = this.data.pendingPickups.filter((p) => p.orderId !== order.orderId)
+        this.refreshCargo(pickups)
+      },
+      fail: () => wx.showToast({ title: '已取消扫码', icon: 'none' })
+    })
+  },
+
+  /** 拍照并上传，返回照片 URL（货运装车强制，快递总站核对凭证） */
+  takeCargoPhoto() {
+    return new Promise((resolve, reject) => {
+      wx.chooseMedia({
+        count: 1,
+        mediaType: ['image'],
+        sourceType: ['camera'],
+        success: async (res) => {
+          if (!res.tempFiles || !res.tempFiles[0]) {
+            reject(new Error('no photo'))
+            return
+          }
+          const temp = res.tempFiles[0].tempFilePath
+          wx.showLoading({ title: '上传照片…', mask: true })
+          try {
+            const url = await api.uploadFile(temp)
+            wx.hideLoading()
+            resolve(url)
+          } catch (e) {
+            wx.hideLoading()
+            reject(e)
+          }
+        },
+        fail: () => reject(new Error('cancelled'))
+      })
+    })
   },
 
   /** 扫码并匹配待办订单，执行 action 后刷新列表 */

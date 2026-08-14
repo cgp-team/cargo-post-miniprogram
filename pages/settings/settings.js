@@ -8,7 +8,8 @@ Page({
     themeList: [
       { key: 'green', name: appearance.THEMES.green.name, color: appearance.THEMES.green.primary, desc: '默认主题' },
       { key: 'orange', name: appearance.THEMES.orange.name, color: appearance.THEMES.orange.primary, desc: '热情温暖' },
-      { key: 'blue', name: appearance.THEMES.blue.name, color: appearance.THEMES.blue.primary, desc: '沉稳冷静' }
+      { key: 'blue', name: appearance.THEMES.blue.name, color: appearance.THEMES.blue.primary, desc: '沉稳冷静' },
+      { key: 'red', name: appearance.THEMES.red.name, color: appearance.THEMES.red.primary, desc: '喜庆热烈' }
     ]
   },
 
