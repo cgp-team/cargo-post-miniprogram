@@ -159,48 +159,21 @@ Page({
   },
 
   /**
-   * 点击语音按钮：录音 → 上传后端识别（百度智能云 ASR）
-   * 个人主体无法用微信同声传译插件，录音走原生 wx.getRecorderManager，识别走后端 /voice/recognize
+   * 点击语音按钮：语音输入
+   * 说明：微信同声传译插件仅对企业/个人主体有限开放，本小程序为个人主体不可用，
+   * 语音识别改接第三方服务（录音走原生 wx.getRecorderManager + 后端 ASR），接入前先给友好提示。
    */
   startVoiceInput() {
     if (this.data.voiceListening) {
       this.stopVoiceInput()
       return
     }
-    const recorder = this.voiceRecorder || (this.voiceRecorder = wx.getRecorderManager())
-    recorder.onStart(() => this.setData({ voiceListening: true, voiceResult: '' }))
-    recorder.onStop((res) => {
-      this.setData({ voiceListening: false })
-      if (res.tempFilePath) {
-        this.uploadAndRecognize(res.tempFilePath)
-      }
-    })
-    recorder.onError((err) => {
-      this.setData({ voiceListening: false })
-      wx.showToast({ title: '录音失败，请检查麦克风权限', icon: 'none', duration: 2000 })
-    })
-    // wav 16k 单声道（百度短语音识别支持格式）
-    recorder.start({ duration: 30000, sampleRate: 16000, numberOfChannels: 1, encodeBitRate: 48000, format: 'wav' })
+    wx.showToast({ title: '语音功能正在接入，敬请期待', icon: 'none', duration: 2000 })
   },
 
-  /** 停止录音（松开/再次点击） */
+  /** 预留：停止录音（接入第三方 ASR 后实现） */
   stopVoiceInput() {
-    if (this.voiceRecorder) {
-      try { this.voiceRecorder.stop() } catch (e) { /* 已停止 */ }
-    }
-  },
-
-  /** 录音完成：上传后端识别 */
-  async uploadAndRecognize(filePath) {
-    wx.showLoading({ title: '识别中…', mask: true })
-    try {
-      const text = await api.recognizeVoice(filePath, 'zh')
-      wx.hideLoading()
-      this.handleVoiceResult(text)
-    } catch (e) {
-      wx.hideLoading()
-      // 错误提示已由 api 统一处理；若语音服务未配置会有对应提示
-    }
+    this.setData({ voiceListening: false })
   },
 
   /** 解析识别文本：提取重量、货物名称，原文存备注 */

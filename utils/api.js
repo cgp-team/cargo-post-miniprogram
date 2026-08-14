@@ -203,32 +203,6 @@ function getRealtimeBuses() {
   return request('/app-api/transport/bus/realtime')
 }
 
-// ==================== 语音服务（寄货语音输入 + 面对面翻译） ====================
-
-/** 语音识别：上传录音文件 → 文本（免登录） */
-function recognizeVoice(filePath, lang) {
-  return new Promise((resolve, reject) => {
-    wx.uploadFile({
-      url: `${BASE_URL}/app-api/transport/voice/recognize`,
-      filePath,
-      name: 'file',
-      formData: { lang: lang || 'zh' },
-      success(res) {
-        let body
-        try { body = JSON.parse(res.data) } catch (e) { reject({ msg: '识别服务响应异常' }); return }
-        if (body.code === 0) resolve(body.data.text)
-        else reject(body)
-      },
-      fail: reject
-    })
-  })
-}
-
-/** 文本翻译：中英文互译（免登录） */
-function translateText(text, from, to) {
-  return request('/app-api/transport/voice/translate', 'POST', { text, from, to })
-}
-
 module.exports = {
   request,
   smsLogin,
@@ -258,7 +232,5 @@ module.exports = {
   driverPickupConfirm,
   driverDeliver,
   reportDriverLocation,
-  getRealtimeBuses,
-  recognizeVoice,
-  translateText
+  getRealtimeBuses
 }
