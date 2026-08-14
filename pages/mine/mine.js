@@ -15,7 +15,8 @@ Page({
     themeList: [
       { key: 'green', name: appearance.THEMES.green.name, color: appearance.THEMES.green.primary },
       { key: 'orange', name: appearance.THEMES.orange.name, color: appearance.THEMES.orange.primary },
-      { key: 'blue', name: appearance.THEMES.blue.name, color: appearance.THEMES.blue.primary }
+      { key: 'blue', name: appearance.THEMES.blue.name, color: appearance.THEMES.blue.primary },
+      { key: 'red', name: appearance.THEMES.red.name, color: appearance.THEMES.red.primary }
     ]
   },
 

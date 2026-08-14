@@ -260,3 +260,37 @@
 .elderly-mode .timeline-desc { font-size: 30rpx; }
 .elderly-mode .timeline-time { font-size: 26rpx; }
 .elderly-mode .empty-text { font-size: 32rpx; }
+
+/* 查件二维码 */
+.parcel-qr-block {
+  margin-top: 28rpx;
+  padding-top: 28rpx;
+  border-top: 2rpx dashed rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.parcel-qr-canvas {
+  width: 300rpx;
+  height: 300rpx;
+  background: #fff;
+  border-radius: 16rpx;
+}
+.parcel-qr-tip {
+  margin-top: 16rpx;
+  font-size: 24rpx;
+  color: #999;
+}
+.parcel-qr-copy {
+  margin-top: 16rpx;
+  padding: 12rpx 40rpx;
+  font-size: 28rpx;
+  line-height: 1.4;
+  border-radius: 999rpx;
+  border: 2rpx solid var(--color-primary);
+  color: var(--color-primary);
+  background: #fff;
+}
+.parcel-qr-copy::after { border: none; }
+.elderly-mode .parcel-qr-canvas { width: 360rpx; height: 360rpx; }
+.elderly-mode .parcel-qr-copy { font-size: 32rpx; padding: 16rpx 48rpx; }

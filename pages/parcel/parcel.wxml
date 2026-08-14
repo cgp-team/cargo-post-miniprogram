@@ -102,6 +102,13 @@
           </view>
         </view>
       </view>
+
+      <!-- 查件二维码：取件 / 司机扫码核销 -->
+      <view class="parcel-qr-block">
+        <canvas type="2d" id="parcelQrCanvas" class="parcel-qr-canvas"></canvas>
+        <text class="parcel-qr-tip">取件 · 司机扫码核销</text>
+        <button class="parcel-qr-copy" bindtap="copyTrackNo">复制单号</button>
+      </view>
     </view>
 
     <view wx:elif="{{noResult}}" class="empty-state">
