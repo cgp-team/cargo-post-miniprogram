@@ -12,7 +12,8 @@
     "pages/register/register",
     "pages/driver/workbench/workbench",
     "pages/driver/routes/routes",
-    "pages/driver/earnings/earnings"
+    "pages/driver/earnings/earnings",
+    "pages/translate/index"
   ],
   "window": {
     "backgroundTextStyle": "light",

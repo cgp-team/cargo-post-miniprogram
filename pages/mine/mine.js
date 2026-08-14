@@ -79,6 +79,11 @@ Page({
     wx.showToast({ title: '公交收藏开发中', icon: 'none' })
   },
 
+  /** 面对面翻译 */
+  goToTranslate() {
+    wx.navigateTo({ url: '/pages/translate/index' })
+  },
+
   /** 设置 */
   goToSettings() {
     wx.navigateTo({ url: '/pages/settings/settings' })
