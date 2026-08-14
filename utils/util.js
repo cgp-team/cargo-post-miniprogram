@@ -49,10 +49,22 @@ function formatNumber(n) {
   return n[1] ? n : `0${n}`
 }
 
+/**
+ * 对话时间（月/日 时:分，面对面翻译页用）
+ */
+function recordTime(date) {
+  const month = date.getMonth() + 1
+  const day = date.getDate()
+  const hour = date.getHours()
+  const minute = date.getMinutes()
+  return `${[month, day].map(formatNumber).join('/')} ${[hour, minute].map(formatNumber).join(':')}`
+}
+
 module.exports = {
   validatePhone,
   validateIdCard,
   validatePassword,
   validatePlateNumber,
-  formatTime
+  formatTime,
+  recordTime
 }
