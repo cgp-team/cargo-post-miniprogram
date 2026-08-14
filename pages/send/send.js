@@ -158,38 +158,22 @@ Page({
     }
   },
 
-  /** 点击语音按钮：开始/停止录音识别（依赖微信同声传译插件 WechatSI） */
+  /**
+   * 点击语音按钮：语音输入
+   * 说明：微信同声传译插件仅对企业/个人主体有限开放，本小程序为个人主体不可用，
+   * 语音识别改接第三方服务（录音走原生 wx.getRecorderManager + 后端 ASR），接入前先给友好提示。
+   */
   startVoiceInput() {
     if (this.data.voiceListening) {
       this.stopVoiceInput()
       return
     }
-    let plugin
-    try {
-      plugin = requirePlugin('WechatSI')
-    } catch (e) {
-      wx.showToast({ title: '语音需先在后台添加"同声传译"插件', icon: 'none', duration: 2500 })
-      return
-    }
-    if (!this.voiceManager) {
-      this.voiceManager = plugin.getRecordRecognitionManager()
-      this.voiceManager.onStart = () => this.setData({ voiceListening: true, voiceResult: '' })
-      this.voiceManager.onStop = (res) => {
-        this.setData({ voiceListening: false })
-        this.handleVoiceResult((res && res.result) || '')
-      }
-      this.voiceManager.onError = () => {
-        this.setData({ voiceListening: false })
-        wx.showToast({ title: '语音识别失败，请重试', icon: 'none' })
-      }
-    }
-    this.voiceManager.start({ duration: 30000, lang: 'zh_CN' })
+    wx.showToast({ title: '语音功能正在接入，敬请期待', icon: 'none', duration: 2000 })
   },
 
+  /** 预留：停止录音（接入第三方 ASR 后实现） */
   stopVoiceInput() {
-    if (this.voiceManager) {
-      try { this.voiceManager.stop() } catch (e) { /* 已停止 */ }
-    }
+    this.setData({ voiceListening: false })
   },
 
   /** 解析识别文本：提取重量、货物名称，原文存备注 */
