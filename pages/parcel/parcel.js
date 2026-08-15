@@ -33,6 +33,8 @@ Page({
     total: 0,
     hasMore: true,
     loading: false,
+    // 乘车安排（村民到站通知）
+    arrangements: [],
     // 单号查询结果
     trackResult: null,
     noResult: false
@@ -71,6 +73,20 @@ Page({
     if (this.data.activeTab === 0) {
       this.reloadSendList()
     }
+    this.loadArrangements()
+  },
+
+  /** 我的乘车安排（客运订单已派车，含承运车辆与实时位置入口） */
+  async loadArrangements() {
+    try {
+      const arrangements = (await api.getMyArrangements()) || []
+      this.setData({ arrangements })
+    } catch (e) { /* api 已 toast */ }
+  },
+
+  /** 跳实时公交（查看车辆位置） */
+  goToBusTracking() {
+    wx.navigateTo({ url: '/pages/bus/index' })
   },
 
   onPullDownRefresh() {

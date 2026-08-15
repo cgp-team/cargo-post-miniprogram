@@ -30,6 +30,24 @@
     </view>
   </view>
 
+  <!-- 乘车安排（村民到站通知：客运订单已派车，含车辆与实时位置入口） -->
+  <view wx:if="{{arrangements.length}}" class="arrange-section">
+    <view class="arrange-header">
+      <text class="arrange-title">🚌 我的乘车安排</text>
+      <text class="arrange-sub" bindtap="goToBusTracking">实时公交 ›</text>
+    </view>
+    <view class="arrange-card" wx:for="{{arrangements}}" wx:key="orderId">
+      <view class="arrange-top">
+        <text class="arrange-route">{{item.boardingStationName || '—'}} → {{item.alightingStationName || '—'}}</text>
+        <text class="arrange-status">{{item.planStatus === 1 || item.planStatus === 2 ? '在途' : item.statusName}}</text>
+      </view>
+      <view class="arrange-bottom">
+        <text class="arrange-no">{{item.orderNo}} · {{item.vehiclePlateNo || '待派车'}}</text>
+        <text class="arrange-bus" bindtap="goToBusTracking">📍 查看车辆实时位置 ›</text>
+      </view>
+    </view>
+  </view>
+
   <!-- 状态切换 -->
   <view class="tab-row">
     <view
