@@ -1,0 +1,77 @@
+<!-- 实时公交 - 车来了式 -->
+<view class="bus-page {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
+  <block wx:if="{{lines.length}}">
+  <!-- 线路选择 -->
+  <scroll-view class="line-tabs" scroll-x enable-flex>
+    <view
+      class="line-tab {{activeLineIndex === index ? 'active' : ''}}"
+      wx:for="{{lines}}"
+      wx:key="routeId"
+      bindtap="selectLine"
+      data-index="{{index}}"
+    >
+      <text class="line-name">{{item.routeName}}</text>
+      <text class="line-sub">{{item.startStation}} ⇄ {{item.endStation}}</text>
+    </view>
+  </scroll-view>
+
+  <!-- 地图 -->
+  <view class="map-wrap">
+    <map
+      id="busMap"
+      class="bus-map"
+      longitude="{{mapCenter.lng}}"
+      latitude="{{mapCenter.lat}}"
+      scale="{{mapScale}}"
+      markers="{{markers}}"
+      polyline="{{polyline}}"
+      bindmarkertap="goToBusDetail"
+    ></map>
+    <view class="map-legend">
+      <text class="legend-dot"></text>
+      <text>在线车辆</text>
+    </view>
+  </view>
+
+  <!-- 车辆列表 -->
+  <view class="bus-list">
+    <view class="section-header">
+      <text class="section-title">🚌 {{currentLineName}}</text>
+      <text class="section-sub" bindtap="loadLines">刷新 ↻</text>
+    </view>
+    <view wx:if="{{hasError}}" class="empty">加载失败，请下拉刷新重试</view>
+    <view wx:elif="{{!buses.length}}" class="empty">该线路当前暂无车辆在线</view>
+    <view
+      class="bus-card"
+      wx:for="{{buses}}"
+      wx:key="busId"
+      bindtap="goToBusDetail"
+      data-bus="{{item.busId}}"
+    >
+      <view class="bus-left">
+        <text class="bus-plate">{{item.plateNo}}</text>
+        <text class="bus-shift">{{item.shiftCode}}</text>
+      </view>
+      <view class="bus-mid">
+        <view class="bus-route">
+          <text>{{item.startStation}}</text>
+          <text class="arrow">→</text>
+          <text>{{item.endStation}}</text>
+        </view>
+        <view class="bus-next">下一站：{{item.nextStation || '—'}}</view>
+        <view class="bus-progress-bar">
+          <view class="bus-progress-fill" style="width: {{item.progress || 0}}%"></view>
+        </view>
+      </view>
+      <view class="bus-right">
+        <text class="bus-status {{item.status === 1 ? 'running' : ''}}">{{item.status === 1 ? '行驶中' : '待发车'}}</text>
+        <text class="bus-eta">{{item.status === 1 ? '约' + item.etaMinutes + '分钟' : '待发'}}</text>
+      </view>
+    </view>
+  </view>
+  </block>
+  <view wx:else class="empty-page">
+    <text class="empty-emoji">🚏</text>
+    <text class="empty-text">{{hasError ? '加载失败，请下拉刷新重试' : '暂无公交线路数据'}}</text>
+  </view>
+</view>

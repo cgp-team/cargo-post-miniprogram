@@ -316,3 +316,110 @@
 .parcel-qr-copy::after { border: none; }
 .elderly-mode .parcel-qr-canvas { width: 360rpx; height: 360rpx; }
 .elderly-mode .parcel-qr-copy { font-size: 32rpx; padding: 16rpx 48rpx; }
+
+/* 乘车安排（村民到站通知） */
+.arrange-section {
+  margin: 20rpx 24rpx 0;
+}
+.arrange-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12rpx;
+}
+.arrange-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.arrange-sub {
+  font-size: 24rpx;
+  color: var(--color-primary);
+}
+.arrange-card {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.04);
+}
+/* 上下车站路线（虚线连接 + 大巴） */
+.arrange-route {
+  display: flex;
+  align-items: center;
+  padding: 4rpx 0 20rpx;
+}
+.arrange-station {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+.station-name {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--color-ink);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.station-label {
+  font-size: 20rpx;
+  color: #999;
+  margin-top: 4rpx;
+}
+.arrange-mid {
+  display: flex;
+  align-items: center;
+  flex: 1.2;
+  padding: 0 12rpx;
+}
+.mid-line {
+  flex: 1;
+  height: 2rpx;
+  background: repeating-linear-gradient(90deg, var(--color-primary-light) 0 8rpx, transparent 8rpx 14rpx);
+}
+.mid-bus {
+  margin-left: 10rpx;
+  font-size: 30rpx;
+}
+.arrange-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16rpx;
+  border-top: 1rpx dashed #e8e4da;
+}
+.arrange-no {
+  font-size: 22rpx;
+  color: #888;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 12rpx;
+}
+.arrange-status {
+  font-size: 22rpx;
+  color: #999;
+  flex-shrink: 0;
+}
+.arrange-status.live {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+/* 查看车辆位置 CTA */
+.arrange-cta {
+  margin-top: 16rpx;
+  text-align: center;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  font-size: 24rpx;
+  font-weight: 600;
+  border-radius: 999rpx;
+  padding: 14rpx 0;
+}
+.elderly-mode .arrange-title { font-size: 34rpx; }
+.elderly-mode .station-name { font-size: 32rpx; }
+.elderly-mode .arrange-cta { font-size: 28rpx; padding: 16rpx 0; }

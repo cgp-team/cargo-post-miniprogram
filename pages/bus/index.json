@@ -1,0 +1,6 @@
+{
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#F5F5F5",
+  "navigationBarTitleText": "实时公交",
+  "usingComponents": {}
+}

@@ -291,10 +291,10 @@ Page({
   },
 
   /**
-   * 跳转实时公交
+   * 跳转实时公交（车来了式地图+列表）
    */
   goToBusTracking() {
-    wx.showToast({ title: '实时公交页面开发中，请查看下方公交信息', icon: 'none' })
+    wx.navigateTo({ url: '/pages/bus/index' })
   },
 
   /**
@@ -302,7 +302,7 @@ Page({
    */
   goToBusDetail(e) {
     const busId = e.currentTarget.dataset.id
-    wx.showToast({ title: `公交${busId}详情页面开发中`, icon: 'none' })
+    wx.navigateTo({ url: `/pages/bus/detail?id=${busId}` })
   },
 
   /**
