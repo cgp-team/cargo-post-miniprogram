@@ -37,14 +37,27 @@
       <text class="arrange-sub" bindtap="goToBusTracking">实时公交 ›</text>
     </view>
     <view class="arrange-card" wx:for="{{arrangements}}" wx:key="orderId">
-      <view class="arrange-top">
-        <text class="arrange-route">{{item.boardingStationName || '—'}} → {{item.alightingStationName || '—'}}</text>
-        <text class="arrange-status">{{item.planStatus === 1 || item.planStatus === 2 ? '在途' : item.statusName}}</text>
+      <view class="arrange-route">
+        <view class="arrange-station">
+          <text class="station-name">{{item.boardingStationName || '—'}}</text>
+          <text class="station-label">上车站</text>
+        </view>
+        <view class="arrange-mid">
+          <view class="mid-line"></view>
+          <text class="mid-bus">🚌</text>
+        </view>
+        <view class="arrange-station">
+          <text class="station-name">{{item.alightingStationName || '—'}}</text>
+          <text class="station-label">下车站</text>
+        </view>
       </view>
-      <view class="arrange-bottom">
+      <view class="arrange-footer">
         <text class="arrange-no">{{item.orderNo}} · {{item.vehiclePlateNo || '待派车'}}</text>
-        <text class="arrange-bus" bindtap="goToBusTracking">📍 查看车辆实时位置 ›</text>
+        <text class="arrange-status {{item.planStatus === 1 || item.planStatus === 2 ? 'live' : ''}}">
+          {{item.planStatus === 1 || item.planStatus === 2 ? '在途' : item.statusName}}
+        </text>
       </view>
+      <view class="arrange-cta" bindtap="goToBusTracking">📍 查看车辆实时位置 ›</view>
     </view>
   </view>
 

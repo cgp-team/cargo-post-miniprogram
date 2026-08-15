@@ -159,11 +159,41 @@
   margin-top: 8rpx;
   font-weight: 600;
 }
+/* 线路进度条（行驶中直观反映到站进度） */
+.bus-progress-bar {
+  height: 8rpx;
+  background: var(--color-primary-light);
+  border-radius: 4rpx;
+  margin-top: 12rpx;
+  overflow: hidden;
+}
+.bus-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-primary));
+  border-radius: 4rpx;
+  transition: width 0.6s ease-out;
+}
 .empty {
   text-align: center;
   color: #999;
   font-size: 24rpx;
   padding: 60rpx 0;
+}
+
+/* 无线路数据整页空态 */
+.empty-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 160rpx 60rpx;
+}
+.empty-emoji {
+  font-size: 88rpx;
+  margin-bottom: 20rpx;
+}
+.empty-text {
+  font-size: 26rpx;
+  color: #999;
 }
 
 /* 老年模式放大 */

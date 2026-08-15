@@ -87,12 +87,30 @@
   align-items: flex-start;
 }
 .stop-rail {
+  position: relative;
   width: 40rpx;
   display: flex;
   justify-content: center;
   padding-top: 30rpx;
 }
+/* 站台时间轴纵向连接线 */
+.stop-rail::after {
+  content: '';
+  position: absolute;
+  top: 46rpx;
+  bottom: 0;
+  width: 2rpx;
+  background: #e8e4da;
+}
+.stop-item.passed .stop-rail::after {
+  background: var(--color-accent);
+}
+.stop-item:last-child .stop-rail::after {
+  display: none;
+}
 .stop-dot {
+  position: relative;
+  z-index: 1;
   width: 20rpx;
   height: 20rpx;
   border-radius: 50%;
