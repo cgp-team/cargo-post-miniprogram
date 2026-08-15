@@ -27,9 +27,6 @@ Page({
     receiverAddress: '',
     // 提交结果
     orderNo: '',
-    // 语音输入
-    voiceListening: false,
-    voiceResult: '',
     elderlyMode: false,
     themeColor: 'green',
     themeStyle: ''
@@ -38,11 +35,6 @@ Page({
   async onLoad() {
     appearance.apply(this)
     this.loadStations()
-  },
-
-  /** 页面卸载时停止录音，避免后台占用麦克风 */
-  onUnload() {
-    this.stopVoiceInput()
   },
 
   /** 加载寄货站点列表 */
@@ -172,71 +164,6 @@ Page({
       wx.hideLoading()
       // 错误提示已由 api.js 统一处理，保留当前页面现场
     }
-  },
-
-  /**
-   * 点击语音按钮：开始/停止录音识别（微信同声传译插件 WechatSI）
-   * 说明：该插件仅企业/组织主体可用，当前个人主体无法声明（编译报 89260），
-   * 代码按插件方案就位，换组织主体 + 后台添加插件后即启用；未就绪时 try-catch 降级提示。
-   */
-  startVoiceInput() {
-    if (this.data.voiceListening) {
-      this.stopVoiceInput()
-      return
-    }
-    let plugin
-    try {
-      plugin = requirePlugin('WechatSI')
-    } catch (e) {
-      wx.showToast({ title: '语音需企业主体小程序', icon: 'none', duration: 2500 })
-      return
-    }
-    if (!this.voiceManager) {
-      this.voiceManager = plugin.getRecordRecognitionManager()
-      this.voiceManager.onStart = () => this.setData({ voiceListening: true, voiceResult: '' })
-      this.voiceManager.onStop = (res) => {
-        this.setData({ voiceListening: false })
-        this.handleVoiceResult((res && res.result) || '')
-      }
-      this.voiceManager.onError = () => {
-        this.setData({ voiceListening: false })
-        wx.showToast({ title: '语音识别失败，请重试', icon: 'none' })
-      }
-    }
-    this.voiceManager.start({ duration: 30000, lang: 'zh_CN' })
-  },
-
-  /** 停止录音 */
-  stopVoiceInput() {
-    if (this.voiceManager) {
-      try { this.voiceManager.stop() } catch (e) { /* 已停止 */ }
-    }
-  },
-
-  /** 解析识别文本：提取重量、货物名称，原文存备注 */
-  handleVoiceResult(text) {
-    const cleaned = (text || '').trim()
-    if (!cleaned) {
-      wx.showToast({ title: '未听清，请再试一次', icon: 'none' })
-      return
-    }
-    let goodsName = this.data.goodsName
-    let goodsWeight = this.data.goodsWeight
-    // 重量：数字 + 斤/公斤
-    const wm = cleaned.match(/(\d+(?:\.\d+)?)\s*(斤|公斤|千克)/)
-    if (wm) {
-      goodsWeight = wm[1] + wm[2]
-    }
-    // 货物名称：在"寄/要寄/发"与重量(或"到")之间
-    const nm = cleaned.match(/(?:寄|寄送|要寄|发)(.+?)(?:\d+(?:\.\d+)?\s*(?:斤|公斤|千克)|\s*到|$)/)
-    if (nm && nm[1]) {
-      const name = nm[1].replace(/我|要|把|这个|那个|的东西|东西|货物/g, '').trim()
-      if (name && !/\d/.test(name) && name.length <= 20) {
-        goodsName = name
-      }
-    }
-    this.setData({ voiceResult: cleaned, goodsName, goodsWeight, goodsNote: cleaned })
-    wx.showToast({ title: '已识别，可修改', icon: 'none' })
   },
 
   /** 提交成功后绘制订单二维码（取件/司机扫码用） */

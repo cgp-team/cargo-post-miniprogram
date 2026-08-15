@@ -63,11 +63,6 @@
         <text class="menu-text">公交收藏</text>
         <text class="menu-arrow">›</text>
       </view>
-      <view class="menu-item" bindtap="goToTranslate" hover-class="hover">
-        <text class="menu-emoji">🌐</text>
-        <text class="menu-text">面对面翻译</text>
-        <text class="menu-arrow">›</text>
-      </view>
       <view class="menu-item" bindtap="switchToDriver" hover-class="hover">
         <text class="menu-emoji">🚐</text>
         <text class="menu-text">切换为司机模式</text>

@@ -8,13 +8,6 @@
       <text>填写货物信息</text>
     </view>
 
-    <!-- 语音输入：点击说话，识别后自动填写货物信息 -->
-    <view class="voice-hint {{voiceListening ? 'listening' : ''}}" bindtap="startVoiceInput">
-      <text class="voice-mic">{{voiceListening ? '⏹' : '🎤'}}</text>
-      <text class="voice-text">{{voiceListening ? '正在聆听，请说话…' : '点击说话，自动填写货物信息'}}</text>
-      <text class="voice-example">{{voiceResult || '示例："我要寄50斤脆李到城里"'}}</text>
-    </view>
-
     <view class="form-group">
       <text class="form-label">货物名称 *</text>
       <input
