@@ -1,0 +1,157 @@
+.detail-page {
+  min-height: 100vh;
+  background: var(--color-paper);
+  padding: 24rpx;
+}
+
+.bus-head {
+  background: var(--color-primary);
+  border-radius: 24rpx;
+  padding: 32rpx;
+  color: #fff;
+}
+.head-plate {
+  font-size: 44rpx;
+  font-weight: 700;
+}
+.head-route {
+  font-size: 26rpx;
+  opacity: 0.9;
+  margin-top: 8rpx;
+}
+.head-tags {
+  display: flex;
+  margin-top: 20rpx;
+}
+.tag {
+  font-size: 22rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10rpx;
+  padding: 6rpx 16rpx;
+  margin-right: 12rpx;
+}
+.tag.status.running {
+  background: var(--color-gold);
+}
+.head-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 24rpx;
+  margin-top: 20rpx;
+  opacity: 0.95;
+}
+
+.progress-card {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 28rpx;
+  margin-top: 20rpx;
+}
+.progress-track {
+  height: 16rpx;
+  background: var(--color-primary-light);
+  border-radius: 8rpx;
+  position: relative;
+}
+.progress-fill {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 8rpx;
+}
+.progress-thumb {
+  position: absolute;
+  top: -6rpx;
+  width: 28rpx;
+  height: 28rpx;
+  border-radius: 50%;
+  background: #fff;
+  border: 4rpx solid var(--color-primary);
+  margin-left: -14rpx;
+}
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 22rpx;
+  color: #888;
+  margin-top: 16rpx;
+}
+
+.stops {
+  margin-top: 20rpx;
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 16rpx 24rpx;
+}
+.stop-item {
+  display: flex;
+  align-items: flex-start;
+}
+.stop-rail {
+  width: 40rpx;
+  display: flex;
+  justify-content: center;
+  padding-top: 30rpx;
+}
+.stop-dot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  background: #ddd;
+}
+.stop-item.passed .stop-dot {
+  background: var(--color-accent);
+}
+.stop-item.current .stop-dot {
+  background: var(--color-primary);
+  box-shadow: 0 0 0 8rpx var(--color-primary-light);
+}
+.stop-body {
+  flex: 1;
+  padding: 22rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+.stop-item:last-child .stop-body {
+  border-bottom: none;
+}
+.stop-name {
+  font-size: 28rpx;
+  color: var(--color-ink);
+}
+.stop-item.passed .stop-name {
+  color: #aaa;
+  text-decoration: line-through;
+}
+.stop-item.current .stop-name {
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+.stop-min {
+  font-size: 20rpx;
+  color: #bbb;
+  margin-left: 12rpx;
+}
+.stop-state {
+  font-size: 20rpx;
+  color: #999;
+  padding-top: 26rpx;
+  width: 90rpx;
+  text-align: right;
+}
+
+.empty {
+  text-align: center;
+  color: #999;
+  font-size: 24rpx;
+  padding: 100rpx 0;
+}
+
+/* 老年模式放大 */
+.elderly-mode .head-plate {
+  font-size: 50rpx;
+}
+.elderly-mode .stop-name {
+  font-size: 32rpx;
+}
+.elderly-mode .stop-state {
+  font-size: 24rpx;
+}

@@ -1,0 +1,184 @@
+.bus-page {
+  min-height: 100vh;
+  background: var(--color-paper);
+  padding-bottom: 40rpx;
+}
+
+/* 线路横向选择 */
+.line-tabs {
+  white-space: nowrap;
+  background: #fff;
+  padding: 20rpx 16rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.line-tab {
+  display: inline-flex;
+  flex-direction: column;
+  padding: 12rpx 24rpx;
+  margin-right: 16rpx;
+  background: var(--color-primary-light);
+  border-radius: 16rpx;
+  align-items: center;
+}
+.line-tab.active {
+  background: var(--color-primary);
+}
+.line-name {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.line-tab.active .line-name {
+  color: #fff;
+}
+.line-sub {
+  font-size: 20rpx;
+  color: #888;
+  margin-top: 4rpx;
+}
+.line-tab.active .line-sub {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* 地图 */
+.map-wrap {
+  position: relative;
+  margin: 20rpx 24rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.08);
+}
+.bus-map {
+  width: 100%;
+  height: 480rpx;
+}
+.map-legend {
+  position: absolute;
+  left: 16rpx;
+  bottom: 16rpx;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 12rpx;
+  padding: 6rpx 14rpx;
+  font-size: 20rpx;
+  color: #666;
+  display: flex;
+  align-items: center;
+}
+.legend-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background: var(--color-primary);
+  margin-right: 8rpx;
+}
+
+/* 车辆列表 */
+.bus-list {
+  padding: 0 24rpx;
+}
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+.section-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+.section-sub {
+  font-size: 24rpx;
+  color: var(--color-primary);
+  padding: 8rpx 12rpx;
+}
+.bus-card {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.04);
+}
+.bus-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 20rpx;
+}
+.bus-plate {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+.bus-shift {
+  font-size: 20rpx;
+  color: #999;
+  margin-top: 4rpx;
+}
+.bus-mid {
+  flex: 1;
+  min-width: 0;
+}
+.bus-route {
+  font-size: 26rpx;
+  color: var(--color-ink);
+  display: flex;
+  align-items: center;
+}
+.bus-route .arrow {
+  color: var(--color-gold);
+  margin: 0 8rpx;
+}
+.bus-next {
+  font-size: 22rpx;
+  color: #888;
+  margin-top: 8rpx;
+}
+.bus-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-left: 16rpx;
+}
+.bus-status {
+  font-size: 22rpx;
+  color: #999;
+}
+.bus-status.running {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+.bus-eta {
+  font-size: 24rpx;
+  color: var(--color-clay);
+  margin-top: 8rpx;
+  font-weight: 600;
+}
+.empty {
+  text-align: center;
+  color: #999;
+  font-size: 24rpx;
+  padding: 60rpx 0;
+}
+
+/* 老年模式放大 */
+.elderly-mode .line-name {
+  font-size: 30rpx;
+}
+.elderly-mode .bus-plate {
+  font-size: 30rpx;
+}
+.elderly-mode .bus-route {
+  font-size: 30rpx;
+}
+.elderly-mode .bus-next {
+  font-size: 26rpx;
+}
+.elderly-mode .bus-eta {
+  font-size: 28rpx;
+}

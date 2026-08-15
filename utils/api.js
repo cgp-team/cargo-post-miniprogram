@@ -144,6 +144,11 @@ function listSendStations() {
   return request('/app-api/transport/send/stations')
 }
 
+/** 我的乘车安排（客运订单已分配/在途/完成，含承运车辆，供村民到站通知） */
+function getMyArrangements() {
+  return request('/app-api/transport/send/arrangements')
+}
+
 // ==================== 司机端 ====================
 
 /** 司机档案（登录会员识别身份） */
@@ -198,9 +203,14 @@ function reportDriverLocation(data) {
 
 // ==================== 实时公交 ====================
 
-/** 实时公交列表（复用监控车辆位置，含线路起终点/下一站/ETA，免登录） */
+/** 实时公交列表（复用监控车辆位置，含线路起终点/下一站/ETA/位置，免登录） */
 function getRealtimeBuses() {
   return request('/app-api/transport/bus/realtime')
+}
+
+/** 实时公交线路（含经停点与该线在线车辆，车来了式地图+列表，免登录） */
+function getRealtimeBusLines() {
+  return request('/app-api/transport/bus/lines')
 }
 
 // ==================== 取件核销 + 文件上传 ====================
@@ -247,6 +257,7 @@ module.exports = {
   pageMySendOrders,
   trackParcel,
   listSendStations,
+  getMyArrangements,
   getDriverProfile,
   getDriverShifts,
   getDriverPickups,
@@ -258,6 +269,7 @@ module.exports = {
   driverDeliver,
   reportDriverLocation,
   getRealtimeBuses,
+  getRealtimeBusLines,
   driverPickupVerify,
   uploadFile
 }
