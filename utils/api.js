@@ -125,6 +125,25 @@ function getAreaTree() {
   return request('/app-api/system/area/tree', 'GET')
 }
 
+// ==================== 平台公告 ====================
+
+/** 上架公告列表（免登录），[{id,title,content}] */
+function listNotices() {
+  return request('/app-api/transport/notice/list', 'GET')
+}
+
+// ==================== 意见反馈 ====================
+
+/** 提交意见反馈 { content, name?, mobile? } */
+function createFeedback(data) {
+  return request('/app-api/transport/feedback/create', 'POST', data)
+}
+
+/** 我的反馈分页 { pageNo, pageSize } */
+function pageMyFeedback(params) {
+  return request('/app-api/transport/feedback/page', 'GET', params)
+}
+
 // ==================== 商品 ====================
 
 /** 获取上架商品列表 */
@@ -292,6 +311,9 @@ module.exports = {
   deleteAddress,
   getDefaultAddress,
   getAreaTree,
+  listNotices,
+  createFeedback,
+  pageMyFeedback,
   listProducts,
   getProduct,
   createProductOrder,
