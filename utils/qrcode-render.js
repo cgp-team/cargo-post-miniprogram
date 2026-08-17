@@ -27,7 +27,7 @@ function draw(canvas, text, sizePx, darkColor) {
   qr.addData(String(text))
   qr.make()
 
-  const dpr = (wx.getSystemInfoSync().pixelRatio) || 2
+  const dpr = (wx.getWindowInfo().pixelRatio) || 2
   canvas.width = sizePx * dpr
   canvas.height = sizePx * dpr
   const ctx = canvas.getContext('2d')
@@ -37,10 +37,10 @@ function draw(canvas, text, sizePx, darkColor) {
   ctx.fillStyle = '#ffffff'
   ctx.fillRect(0, 0, sizePx, sizePx)
 
-  // 深色模块（四周各留 2 模块 quiet zone）
+  // 深色模块（四周各留 4 模块 quiet zone，QR 标准要求）
   const count = qr.getModuleCount()
-  const cell = sizePx / (count + 4)
-  const offset = 2 * cell
+  const cell = sizePx / (count + 8)
+  const offset = 4 * cell
   ctx.fillStyle = darkColor || '#2B2B28'
   for (let r = 0; r < count; r++) {
     for (let c = 0; c < count; c++) {

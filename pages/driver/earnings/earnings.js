@@ -68,6 +68,13 @@ Page({
   },
 
   formatTime(t) {
-    return (t || '').replace('T', ' ').substring(0, 16)
+    if (!t) return ''
+    // 后端 LocalDateTime 全局序列化为毫秒时间戳，兼容字符串格式
+    if (typeof t === 'number') {
+      const d = new Date(t)
+      const p = (n) => (n < 10 ? '0' + n : '' + n)
+      return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`
+    }
+    return String(t).replace('T', ' ').substring(0, 16)
   }
 })

@@ -444,6 +444,7 @@ Page({
             resolve(url)
           } catch (e) {
             wx.hideLoading()
+            wx.showToast({ title: '照片上传失败，请重拍', icon: 'none' })
             reject(e)
           }
         },

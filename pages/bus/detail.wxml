@@ -12,7 +12,7 @@
       </view>
       <view class="head-meta">
         <text>下一站：{{bus.nextStation || '—'}}</text>
-        <text>约{{bus.etaMinutes}}分钟后到站</text>
+        <text wx:if="{{bus.status === 1}}">约{{bus.etaMinutes}}分钟后到站</text>
       </view>
     </view>
 
@@ -24,7 +24,7 @@
       </view>
       <view class="progress-label">
         <text>已完成 {{progress}}%</text>
-        <text>剩余约{{bus.etaMinutes}}分钟</text>
+        <text wx:if="{{bus.status === 1}}">剩余约{{bus.etaMinutes}}分钟</text>
       </view>
     </view>
 

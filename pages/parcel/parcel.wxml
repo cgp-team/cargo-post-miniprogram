@@ -86,11 +86,11 @@
             <text class="parcel-no">单号: {{item.orderNo}}</text>
           </view>
         </view>
-        <view class="parcel-status" style="color: {{statusColor(item.status)}}">{{item.statusName}}</view>
+        <view class="parcel-status" style="color: {{item.statusColorText}}">{{item.statusName}}</view>
       </view>
       <view class="parcel-route">
         <text>🚌 重量 {{item.goodsWeight}}kg</text>
-        <text class="parcel-eta">{{formatTime(item.createTime)}}</text>
+        <text class="parcel-eta">{{item.createTimeText}}</text>
       </view>
     </view>
 
@@ -111,11 +111,11 @@
             <text class="parcel-no">单号: {{trackResult.orderNo}}</text>
           </view>
         </view>
-        <view class="parcel-status" style="color: {{statusColor(trackResult.status)}}">{{trackResult.statusName}}</view>
+        <view class="parcel-status" style="color: {{trackResult.statusColorText}}">{{trackResult.statusName}}</view>
       </view>
       <view class="parcel-route">
         <text>🚌 重量 {{trackResult.goodsWeight}}kg</text>
-        <text class="parcel-eta">{{formatTime(trackResult.createTime)}}</text>
+        <text class="parcel-eta">{{trackResult.createTimeText}}</text>
       </view>
 
       <!-- 货运审核状态 -->
@@ -124,7 +124,7 @@
 
       <!-- 进度条 -->
       <view class="progress-bar">
-        <view class="progress-fill" style="width: {{trackProgress(trackResult.status)}}%"></view>
+        <view class="progress-fill" style="width: {{trackResult.progress}}%"></view>
       </view>
 
       <!-- 时间轴 -->
