@@ -37,6 +37,24 @@ Page({
     this.loadStations()
   },
 
+  onShow() {
+    // 从地址簿选择后回填收货信息
+    const selected = getApp().globalData.selectedAddress
+    if (selected) {
+      getApp().globalData.selectedAddress = null
+      this.setData({
+        receiverName: selected.name,
+        receiverMobile: selected.mobile,
+        receiverAddress: selected.address
+      })
+    }
+  },
+
+  /** 打开地址簿选择收货人 */
+  goToAddressBook() {
+    wx.navigateTo({ url: '/pages/mine/address/address?from=send' })
+  },
+
   /** 加载寄货站点列表 */
   async loadStations() {
     try {

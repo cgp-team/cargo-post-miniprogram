@@ -118,6 +118,15 @@ Page({
     wx.navigateTo({ url: '/pages/mine/profile/profile' })
   },
 
+  /** 收货地址管理 */
+  goToAddress() {
+    if (!this.data.isLoggedIn) {
+      wx.reLaunch({ url: '/pages/login/login' })
+      return
+    }
+    wx.navigateTo({ url: '/pages/mine/address/address' })
+  },
+
   /** 老年人模式 */
   toggleElderly() {
     const next = !this.data.elderlyMode

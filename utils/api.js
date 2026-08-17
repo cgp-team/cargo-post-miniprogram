@@ -93,6 +93,38 @@ function updatePassword(data) {
   return request('/app-api/member/user/update-password', 'PUT', data)
 }
 
+// ==================== 收货地址 ====================
+
+/** 地址列表 */
+function listAddresses() {
+  return request('/app-api/member/address/list', 'GET')
+}
+
+/** 新增地址 { name, mobile, areaId, detailAddress, defaultStatus } */
+function createAddress(data) {
+  return request('/app-api/member/address/create', 'POST', data)
+}
+
+/** 更新地址（含 id） */
+function updateAddress(data) {
+  return request('/app-api/member/address/update', 'PUT', data)
+}
+
+/** 删除地址 */
+function deleteAddress(id) {
+  return request(`/app-api/member/address/delete?id=${id}`, 'DELETE')
+}
+
+/** 获取默认地址 */
+function getDefaultAddress() {
+  return request('/app-api/member/address/get-default', 'GET')
+}
+
+/** 地区树（省市区三级，免登录） */
+function getAreaTree() {
+  return request('/app-api/system/area/tree', 'GET')
+}
+
 // ==================== 商品 ====================
 
 /** 获取上架商品列表 */
@@ -254,6 +286,12 @@ module.exports = {
   getUserInfo,
   updateUser,
   updatePassword,
+  listAddresses,
+  createAddress,
+  updateAddress,
+  deleteAddress,
+  getDefaultAddress,
+  getAreaTree,
   listProducts,
   getProduct,
   createProductOrder,
