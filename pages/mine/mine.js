@@ -127,6 +127,15 @@ Page({
     wx.navigateTo({ url: '/pages/mine/address/address' })
   },
 
+  /** 意见反馈 */
+  goToFeedback() {
+    if (!this.data.isLoggedIn) {
+      wx.reLaunch({ url: '/pages/login/login' })
+      return
+    }
+    wx.navigateTo({ url: '/pages/mine/feedback/feedback' })
+  },
+
   /** 老年人模式 */
   toggleElderly() {
     const next = !this.data.elderlyMode

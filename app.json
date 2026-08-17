@@ -8,6 +8,7 @@
     "pages/mine/mine",
     "pages/mine/profile/profile",
     "pages/mine/address/address",
+    "pages/mine/feedback/feedback",
     "pages/send/send",
     "pages/orders/orders",
     "pages/settings/settings",

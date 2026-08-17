@@ -78,6 +78,11 @@
         <text class="menu-text">收货地址</text>
         <text class="menu-arrow">›</text>
       </view>
+      <view class="menu-item" bindtap="goToFeedback" hover-class="hover">
+        <text class="menu-emoji">✉️</text>
+        <text class="menu-text">意见反馈</text>
+        <text class="menu-arrow">›</text>
+      </view>
       <view class="menu-item" bindtap="goToProfile" hover-class="hover">
         <text class="menu-emoji">👤</text>
         <text class="menu-text">个人资料</text>

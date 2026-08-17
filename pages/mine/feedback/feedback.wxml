@@ -1,0 +1,46 @@
+<!-- 意见反馈页 -->
+<view class="page-feedback {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
+
+  <!-- 提交表单 -->
+  <view class="section-label">✍️ 我要反馈</view>
+  <view class="card">
+    <textarea
+      class="content-input"
+      value="{{content}}"
+      maxlength="500"
+      placeholder="请描述您遇到的问题或建议（500 字以内）"
+      bindinput="onContentInput"
+    />
+    <view class="form-item">
+      <text class="form-label">称呼</text>
+      <input class="form-input" value="{{name}}" placeholder="选填" bindinput="onNameInput" />
+    </view>
+    <view class="form-item">
+      <text class="form-label">手机号</text>
+      <input class="form-input" type="number" maxlength="11" value="{{mobile}}" placeholder="选填，便于我们联系您" bindinput="onMobileInput" />
+    </view>
+    <button class="primary-btn" bindtap="submit" disabled="{{submitting}}" loading="{{submitting}}">提交反馈</button>
+  </view>
+
+  <!-- 我的反馈 -->
+  <view class="section-label">📨 我的反馈</view>
+  <view class="fb-list">
+    <view class="fb-card" wx:for="{{list}}" wx:key="id">
+      <view class="fb-head">
+        <text class="fb-status {{item.status === 1 ? 'replied' : ''}}">{{item.status === 1 ? '已回复' : '待处理'}}</text>
+        <text class="fb-time">{{item.createTimeText}}</text>
+      </view>
+      <text class="fb-content">{{item.content}}</text>
+      <view wx:if="{{item.reply}}" class="fb-reply">
+        <text class="fb-reply-tag">平台回复</text>
+        <text class="fb-reply-text">{{item.reply}}</text>
+      </view>
+    </view>
+    <view class="empty-state" wx:if="{{!list.length && !loading}}">
+      <text class="empty-emoji">📭</text>
+      <text class="empty-text">还没有反馈记录</text>
+    </view>
+  </view>
+
+  <view class="safe-area-bottom"></view>
+</view>
