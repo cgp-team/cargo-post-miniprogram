@@ -125,6 +125,10 @@ Page({
       const res = await api.trackParcel(no)
       wx.hideLoading()
       res.timeline = this.buildTimeline(res.status)
+      // WXML 不支持调用 Page 方法，进度/时间/颜色在此预计算后绑定
+      res.progress = this.trackProgress(res.status)
+      res.createTimeText = this.formatTime(res.createTime)
+      res.statusColorText = this.statusColor(res.status)
       this.setData({ trackResult: res, noResult: false }, () => this.drawParcelQr())
     } catch (e) {
       wx.hideLoading()
@@ -162,7 +166,9 @@ Page({
       const res = await api.pageMySendOrders({ pageNo: this.data.pageNo, pageSize: this.data.pageSize })
       const list = (res.list || []).map((o) => ({
         ...o,
-        statusName: o.statusName || this.statusText(o.status)
+        statusName: o.statusName || this.statusText(o.status),
+        statusColorText: this.statusColor(o.status),
+        createTimeText: this.formatTime(o.createTime)
       }))
       const merged = this.data.pageNo === 1 ? list : this.data.sendList.concat(list)
       const total = res.total || 0
@@ -208,7 +214,14 @@ Page({
   },
 
   formatTime(t) {
-    return (t || '').replace('T', ' ').substring(0, 16)
+    if (!t) return ''
+    // 后端 LocalDateTime 全局序列化为毫秒时间戳，兼容字符串格式
+    if (typeof t === 'number') {
+      const d = new Date(t)
+      const p = (n) => (n < 10 ? '0' + n : '' + n)
+      return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`
+    }
+    return String(t).replace('T', ' ').substring(0, 16)
   },
 
   /** 切换村庄 */

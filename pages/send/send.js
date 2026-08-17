@@ -186,6 +186,10 @@ Page({
 
   /** 转发给收货人查件 */
   onShareAppMessage() {
+    // step 1/2 未提交时无单号，转发通用文案
+    if (!this.data.orderNo) {
+      return { title: '客货邮便民服务平台', path: '/pages/parcel/parcel' }
+    }
     return {
       title: `寄货单 ${this.data.orderNo} 已提交，点击查看物流进度`,
       path: '/pages/parcel/parcel'
@@ -200,6 +204,7 @@ Page({
       goodsWeight: '',
       goodsNote: '',
       photoPath: '',
+      photoUrl: '',
       receiverName: '',
       receiverMobile: '',
       receiverAddress: '',

@@ -233,7 +233,13 @@ function uploadFile(filePath) {
         if (body.code === 0) resolve(body.data)
         else reject(body)
       },
-      fail: reject
+      fail(err) {
+        // 用户取消不提示，其余失败统一 toast（与 request() 一致）
+        if (!err || !err.errMsg || err.errMsg.indexOf('cancel') === -1) {
+          wx.showToast({ title: '上传失败，请重试', icon: 'none' })
+        }
+        reject(err)
+      }
     })
   })
 }

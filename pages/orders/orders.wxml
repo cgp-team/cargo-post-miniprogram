@@ -16,7 +16,7 @@
     <view class="order-card" wx:for="{{list}}" wx:key="id">
       <view class="order-head">
         <text class="order-no">单号 {{item.orderNo}}</text>
-        <text class="order-status" style="color: {{statusColor(item.status)}}">{{item.statusName}}</text>
+        <text class="order-status" style="color: {{item.statusColorText}}">{{item.statusName}}</text>
       </view>
       <view class="order-goods" wx:for="{{item.items}}" wx:for-item="g" wx:key="productId">
         <text class="order-emoji">{{g.productImage}}</text>
@@ -27,7 +27,7 @@
         <text class="order-goods-amount">¥{{g.amount}}</text>
       </view>
       <view class="order-foot">
-        <text class="order-time">{{formatTime(item.createTime)}}</text>
+        <text class="order-time">{{item.createTimeText}}</text>
         <view class="order-foot-right">
           <text class="order-total">合计 ¥{{item.totalAmount}}</text>
           <view wx:if="{{item.status === 0}}" class="order-cancel" data-id="{{item.id}}" bindtap="cancelOrder" hover-class="hover">取消订单</view>

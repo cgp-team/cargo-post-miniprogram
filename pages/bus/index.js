@@ -45,7 +45,7 @@ Page({
   /** 每 15s 静默刷新，保持车辆位置接近实时 */
   startTimer() {
     this.stopTimer()
-    this._timer = setInterval(() => this.loadLines(true), REFRESH_MS)
+    this._timer = setInterval(() => this.loadLines(), REFRESH_MS)
   },
 
   stopTimer() {
@@ -56,7 +56,7 @@ Page({
   },
 
   /** 拉取线路 + 车辆，重建当前线路地图数据 */
-  async loadLines(silent) {
+  async loadLines() {
     if (this._loading) return
     this._loading = true
     try {
@@ -149,6 +149,6 @@ Page({
   },
 
   onPullDownRefresh() {
-    this.loadLines(true).finally(() => wx.stopPullDownRefresh())
+    this.loadLines().finally(() => wx.stopPullDownRefresh())
   }
 })
