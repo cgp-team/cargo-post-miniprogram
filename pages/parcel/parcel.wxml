@@ -133,6 +133,12 @@
       <view wx:if="{{trackResult.auditStatus === 0}}" class="parcel-audit warn">⏳ 审核中：货物正在等待平台审核</view>
       <view wx:elif="{{trackResult.auditStatus === 2}}" class="parcel-audit fail">❌ 审核未通过：{{trackResult.rejectReason || '货物不符合运输要求'}}</view>
 
+      <!-- 承运班次与到达预估（已分配/已发车时由后端返回） -->
+      <view wx:if="{{trackResult.vehiclePlate || trackResult.etaText}}" class="parcel-carrier">
+        <text wx:if="{{trackResult.vehiclePlate}}">🚌 {{trackResult.shiftCode || '班车'}} · {{trackResult.vehiclePlate}}</text>
+        <text wx:if="{{trackResult.etaText}}" class="parcel-carrier-eta">⏱ {{trackResult.etaText}}</text>
+      </view>
+
       <!-- 进度条 -->
       <view class="progress-bar">
         <view class="progress-fill" style="width: {{trackResult.progress}}%"></view>

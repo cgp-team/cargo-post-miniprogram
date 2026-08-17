@@ -129,6 +129,7 @@ Page({
       res.progress = this.trackProgress(res.status)
       res.createTimeText = this.formatTime(res.createTime)
       res.statusColorText = this.statusColor(res.status)
+      res.etaText = this.buildEtaText(res)
       this.setData({ trackResult: res, noResult: false }, () => this.drawParcelQr())
     } catch (e) {
       wx.hideLoading()
@@ -207,6 +208,24 @@ Page({
 
   trackProgress(s) {
     return { 0: 15, 1: 30, 2: 45, 3: 70, 4: 100, 5: 15 }[s] || 10
+  },
+
+  /** 到达预估文案：优先「预计 HH:mm 到达 X站」，否则「约 N 分钟后到达 X站」 */
+  buildEtaText(res) {
+    if (!res) return ''
+    const station = res.targetStation || ''
+    if (res.estimatedArrivalTime) {
+      const t = typeof res.estimatedArrivalTime === 'number' ? new Date(res.estimatedArrivalTime) : null
+      if (t) {
+        const p = (n) => (n < 10 ? '0' + n : '' + n)
+        return `预计 ${p(t.getHours())}:${p(t.getMinutes())} 到达${station ? ' ' + station : ''}`
+      }
+      return `预计 ${String(res.estimatedArrivalTime).replace('T', ' ').substring(5, 16)} 到达${station ? ' ' + station : ''}`
+    }
+    if (res.etaMinutes != null && res.etaMinutes > 0) {
+      return `约 ${res.etaMinutes} 分钟后到达${station ? ' ' + station : ''}`
+    }
+    return ''
   },
 
   /** 按状态生成时间轴 */
