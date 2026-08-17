@@ -139,6 +139,15 @@
   padding: 8rpx 24rpx;
 }
 
+.order-trace {
+  font-size: 26rpx;
+  color: var(--color-primary, #2E7D32);
+  border: 1rpx solid var(--color-primary, #2E7D32);
+  border-radius: 28rpx;
+  padding: 8rpx 24rpx;
+  margin-right: 16rpx;
+}
+
 .order-nomore {
   text-align: center;
   font-size: 24rpx;
@@ -183,3 +192,4 @@
 .elderly-mode .order-status { font-size: 30rpx; }
 .elderly-mode .order-total { font-size: 32rpx; }
 .elderly-mode .order-cancel { font-size: 30rpx; padding: 12rpx 28rpx; }
+.elderly-mode .order-trace { font-size: 30rpx; padding: 12rpx 28rpx; }

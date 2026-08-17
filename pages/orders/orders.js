@@ -121,6 +121,12 @@ Page({
     })
   },
 
+  /** 商品溯源（大巴轨迹） */
+  goToTrace(e) {
+    const id = e.currentTarget.dataset.id
+    wx.navigateTo({ url: `/pages/goods/trace/trace?id=${id}` })
+  },
+
   goHome() {
     wx.switchTab({ url: '/pages/index/index' })
   }

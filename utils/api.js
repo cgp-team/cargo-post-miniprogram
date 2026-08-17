@@ -144,6 +144,11 @@ function pageMyFeedback(params) {
   return request('/app-api/transport/feedback/page', 'GET', params)
 }
 
+/** 商城订单溯源（承运车辆 + 大巴轨迹 + 线路站点） */
+function getProductOrderTrace(id) {
+  return request(`/app-api/transport/product-order/trace?id=${id}`, 'GET')
+}
+
 // ==================== 商品 ====================
 
 /** 获取上架商品列表 */
@@ -314,6 +319,7 @@ module.exports = {
   listNotices,
   createFeedback,
   pageMyFeedback,
+  getProductOrderTrace,
   listProducts,
   getProduct,
   createProductOrder,

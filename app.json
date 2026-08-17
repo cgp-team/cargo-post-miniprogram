@@ -4,6 +4,7 @@
     "pages/index/index",
     "pages/goods/goods",
     "pages/goods/detail/detail",
+    "pages/goods/trace/trace",
     "pages/parcel/parcel",
     "pages/mine/mine",
     "pages/mine/profile/profile",
