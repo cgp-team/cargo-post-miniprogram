@@ -92,6 +92,17 @@
         <text>🚌 重量 {{item.goodsWeight}}kg</text>
         <text class="parcel-eta">{{item.createTimeText}}</text>
       </view>
+      <!-- 邮快件取件码直显（点击复制，司机核销凭码） -->
+      <view
+        wx:if="{{item.pickupCode}}"
+        class="parcel-code-row"
+        data-code="{{item.pickupCode}}"
+        bindtap="copyPickupCode" hover-class="hover"
+      >
+        <text class="parcel-code-label">取件码</text>
+        <text class="parcel-code-value">{{item.pickupCode}}</text>
+        <text class="parcel-code-copy">点击复制</text>
+      </view>
     </view>
 
     <view class="empty-state" wx:if="{{!sendList.length && !loading}}">

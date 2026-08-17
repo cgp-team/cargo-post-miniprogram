@@ -155,6 +155,12 @@ Page({
     wx.setClipboardData({ data: this.data.trackResult.orderNo })
   },
 
+  /** 列表项取件码点击复制 */
+  copyPickupCode(e) {
+    const code = e.currentTarget.dataset.code
+    if (code) wx.setClipboardData({ data: String(code) })
+  },
+
   reloadSendList() {
     this.setData({ pageNo: 1, sendList: [], total: 0, hasMore: true })
     return this.loadSendList()

@@ -163,6 +163,31 @@
   font-weight: 600;
 }
 
+/* 列表项取件码直显 */
+.parcel-code-row {
+  display: flex;
+  align-items: center;
+  padding: 14rpx 20rpx;
+  background: #F0F7F0;
+  border-radius: 14rpx;
+  font-size: 24rpx;
+}
+.parcel-code-label {
+  color: #666;
+  margin-right: 16rpx;
+}
+.parcel-code-value {
+  flex: 1;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: 4rpx;
+}
+.parcel-code-copy {
+  color: #999;
+  font-size: 22rpx;
+}
+
 /* 进度条 */
 .progress-bar {
   height: 8rpx;
@@ -257,6 +282,8 @@
 .elderly-mode .parcel-no { font-size: 26rpx; }
 .elderly-mode .parcel-status { font-size: 26rpx; }
 .elderly-mode .parcel-route { font-size: 28rpx; }
+.elderly-mode .parcel-code-row { font-size: 28rpx; }
+.elderly-mode .parcel-code-value { font-size: 38rpx; }
 .elderly-mode .timeline-desc { font-size: 30rpx; }
 .elderly-mode .timeline-time { font-size: 26rpx; }
 .elderly-mode .empty-text { font-size: 32rpx; }
