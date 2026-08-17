@@ -6,6 +6,7 @@
     "pages/goods/detail/detail",
     "pages/parcel/parcel",
     "pages/mine/mine",
+    "pages/mine/profile/profile",
     "pages/send/send",
     "pages/orders/orders",
     "pages/settings/settings",

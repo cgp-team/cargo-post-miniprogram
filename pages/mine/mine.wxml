@@ -17,9 +17,10 @@
     <view class="user-banner">
       <view class="banner-safe" style="height: {{statusBarHeight || 0}}px"></view>
       <view class="banner-bg"></view>
-      <view class="banner-content">
+      <view class="banner-content" bindtap="goToProfile" hover-class="hover">
         <view class="user-avatar-wrap">
-          <text class="user-avatar-emoji">👤</text>
+          <image wx:if="{{userInfo.avatar}}" class="user-avatar-img" src="{{userInfo.avatar}}" mode="aspectFill" />
+          <text wx:else class="user-avatar-emoji">👤</text>
         </view>
         <view class="user-detail">
           <text class="user-name">{{userInfo.nickname || '用户'}}</text>
@@ -72,6 +73,11 @@
 
     <!-- 设置区 -->
     <view class="menu-section">
+      <view class="menu-item" bindtap="goToProfile" hover-class="hover">
+        <text class="menu-emoji">👤</text>
+        <text class="menu-text">个人资料</text>
+        <text class="menu-arrow">›</text>
+      </view>
       <view class="menu-item" bindtap="toggleElderly" hover-class="hover">
         <text class="menu-emoji">🔍</text>
         <view class="menu-item-body">
