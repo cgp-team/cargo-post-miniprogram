@@ -94,7 +94,10 @@
     </view>
 
     <view class="receiver-section">
-      <text class="receiver-title">收货信息</text>
+      <view class="receiver-head">
+        <text class="receiver-title">收货信息</text>
+        <text class="receiver-addr-book" bindtap="goToAddressBook" hover-class="hover">📖 地址簿</text>
+      </view>
       <view class="form-group">
         <text class="form-label">收货电话 *</text>
         <input

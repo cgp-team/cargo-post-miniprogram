@@ -297,6 +297,20 @@
   margin-bottom: 20rpx;
 }
 
+.receiver-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20rpx;
+}
+.receiver-head .receiver-title {
+  margin-bottom: 0;
+}
+.receiver-addr-book {
+  font-size: 26rpx;
+  color: var(--color-primary);
+}
+
 /* 提交成功 - 订单号 */
 .order-no-display {
   font-size: 32rpx;

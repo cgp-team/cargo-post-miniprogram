@@ -1,0 +1,133 @@
+/* 商品溯源页 */
+.page-trace {
+  min-height: 100vh;
+  background: #F5F7F5;
+  padding-bottom: 40rpx;
+}
+
+.carrier-card {
+  margin: 24rpx;
+  padding: 28rpx;
+  background: #fff;
+  border-radius: 20rpx;
+}
+.carrier-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+.carrier-row {
+  display: flex;
+  padding: 8rpx 0;
+  font-size: 26rpx;
+}
+.carrier-label {
+  width: 140rpx;
+  color: #999;
+  flex-shrink: 0;
+}
+.carrier-value {
+  flex: 1;
+  color: #333;
+  font-weight: 500;
+}
+
+.map-wrap {
+  margin: 0 24rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+  position: relative;
+}
+.trace-map {
+  width: 100%;
+  height: 560rpx;
+}
+.map-legend {
+  position: absolute;
+  left: 20rpx;
+  bottom: 20rpx;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 12rpx;
+  padding: 10rpx 18rpx;
+  display: flex;
+  align-items: center;
+  font-size: 22rpx;
+  color: #666;
+}
+.legend-line {
+  display: inline-block;
+  width: 40rpx;
+  height: 6rpx;
+  margin-right: 10rpx;
+  vertical-align: middle;
+}
+.legend-line.solid { background: #2E7D32; }
+.legend-line.dotted { background: repeating-linear-gradient(90deg, #9E9E9E 0, #9E9E9E 8rpx, transparent 8rpx, transparent 16rpx); }
+.legend-text { margin-right: 20rpx; }
+.legend-text:last-child { margin-right: 0; }
+
+.stops-card {
+  margin: 24rpx;
+  padding: 28rpx;
+  background: #fff;
+  border-radius: 20rpx;
+}
+.stops-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+.stop-item {
+  display: flex;
+  align-items: center;
+  padding: 14rpx 0;
+}
+.stop-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  background: var(--color-primary, #2E7D32);
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+.stop-name {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+}
+.stop-min {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.empty-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 160rpx 0;
+}
+.empty-emoji {
+  font-size: 90rpx;
+  margin-bottom: 24rpx;
+}
+.empty-text {
+  font-size: 30rpx;
+  color: #666;
+  margin-bottom: 12rpx;
+}
+.empty-sub {
+  font-size: 26rpx;
+  color: #999;
+}
+
+.safe-area-bottom {
+  height: calc(env(safe-area-inset-bottom) + 20rpx);
+}
+
+/* 老年人模式 */
+.elderly-mode .carrier-title { font-size: 36rpx; }
+.elderly-mode .carrier-row { font-size: 30rpx; }
+.elderly-mode .stop-name { font-size: 32rpx; }
+.elderly-mode .stop-min { font-size: 28rpx; }

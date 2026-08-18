@@ -1,0 +1,71 @@
+<!-- 收货地址管理页 -->
+<view class="page-address {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
+
+  <view wx:if="{{from === 'send'}}" class="select-tip">点击地址即可填入寄件单</view>
+
+  <!-- 地址列表 -->
+  <view class="addr-list">
+    <view class="addr-card" wx:for="{{list}}" wx:key="id" data-item="{{item}}" bindtap="selectAddress" hover-class="hover">
+      <view class="addr-main">
+        <view class="addr-head">
+          <text class="addr-name">{{item.name}}</text>
+          <text class="addr-mobile">{{item.mobile}}</text>
+          <text wx:if="{{item.defaultStatus}}" class="addr-default">默认</text>
+        </view>
+        <text class="addr-detail">{{item.regionText}} {{item.detailAddress}}</text>
+      </view>
+      <view class="addr-actions">
+        <text wx:if="{{!item.defaultStatus}}" class="addr-action" catchtap="setDefault" data-item="{{item}}">设为默认</text>
+        <text class="addr-action" catchtap="openForm" data-item="{{item}}">编辑</text>
+        <text class="addr-action danger" catchtap="removeAddress" data-id="{{item.id}}">删除</text>
+      </view>
+    </view>
+
+    <view class="empty-state" wx:if="{{!list.length && !loading}}">
+      <text class="empty-emoji">📍</text>
+      <text class="empty-text">还没有收货地址，点击下方新增</text>
+    </view>
+  </view>
+
+  <!-- 新增按钮 -->
+  <view class="add-btn" bindtap="openForm" hover-class="hover">＋ 新增收货地址</view>
+
+  <!-- 编辑弹层 -->
+  <view class="form-mask" wx:if="{{showForm}}" bindtap="closeForm">
+    <view class="form-panel" catchtap="noop">
+      <view class="form-title">{{formId ? '编辑地址' : '新增地址'}}</view>
+      <view class="form-item">
+        <text class="form-label">收件人</text>
+        <input class="form-input" value="{{formName}}" placeholder="姓名" bindinput="onFormNameInput" />
+      </view>
+      <view class="form-item">
+        <text class="form-label">手机号</text>
+        <input class="form-input" type="number" maxlength="11" value="{{formMobile}}" placeholder="11 位手机号" bindinput="onFormMobileInput" />
+      </view>
+      <view class="form-item">
+        <text class="form-label">地区</text>
+        <picker
+          class="form-picker"
+          mode="multiSelector"
+          range="{{areaColumns}}"
+          value="{{areaIndex}}"
+          bindchange="onAreaChange"
+          bindcolumnchange="onAreaColumnChange"
+        >
+          <view class="picker-text {{regionText ? '' : 'placeholder'}}">{{regionText || '请选择省 / 市 / 区'}}</view>
+        </picker>
+      </view>
+      <view class="form-item">
+        <text class="form-label">详细地址</text>
+        <input class="form-input" value="{{formDetail}}" placeholder="村组、门牌号等" bindinput="onFormDetailInput" />
+      </view>
+      <view class="form-item">
+        <text class="form-label">默认地址</text>
+        <switch checked="{{formDefault}}" bindchange="onFormDefaultChange" color="#2E7D32" />
+      </view>
+      <button class="primary-btn" bindtap="saveAddress">保存</button>
+    </view>
+  </view>
+
+  <view class="safe-area-bottom"></view>
+</view>

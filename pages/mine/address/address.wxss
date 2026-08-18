@@ -1,0 +1,160 @@
+/* 收货地址管理页 */
+.page-address {
+  min-height: 100vh;
+  background: #F5F7F5;
+  padding-bottom: 40rpx;
+}
+
+.select-tip {
+  padding: 20rpx 32rpx;
+  background: #FFF8E1;
+  color: #B8860B;
+  font-size: 26rpx;
+}
+
+.addr-list {
+  padding: 24rpx;
+}
+.addr-card {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 26rpx 28rpx;
+  margin-bottom: 20rpx;
+}
+.addr-head {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10rpx;
+}
+.addr-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  margin-right: 20rpx;
+}
+.addr-mobile {
+  font-size: 26rpx;
+  color: #888;
+  flex: 1;
+}
+.addr-default {
+  font-size: 20rpx;
+  color: var(--color-primary, #2E7D32);
+  border: 2rpx solid var(--color-primary, #2E7D32);
+  border-radius: 8rpx;
+  padding: 2rpx 12rpx;
+}
+.addr-detail {
+  font-size: 26rpx;
+  color: #666;
+  line-height: 1.5;
+}
+.addr-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 32rpx;
+  margin-top: 18rpx;
+  padding-top: 18rpx;
+  border-top: 1rpx solid #F0F0F0;
+}
+.addr-action {
+  font-size: 26rpx;
+  color: #666;
+}
+.addr-action.danger {
+  color: #C0392B;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120rpx 0;
+}
+.empty-emoji {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+.add-btn {
+  margin: 10rpx 24rpx;
+  padding: 26rpx;
+  text-align: center;
+  background: var(--color-primary, #2E7D32);
+  color: #fff;
+  font-size: 30rpx;
+  border-radius: 999rpx;
+}
+
+/* 编辑弹层 */
+.form-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: flex-end;
+  z-index: 100;
+}
+.form-panel {
+  width: 100%;
+  background: #fff;
+  border-radius: 28rpx 28rpx 0 0;
+  padding: 32rpx 32rpx calc(env(safe-area-inset-bottom) + 32rpx);
+}
+.form-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 20rpx;
+}
+.form-item {
+  display: flex;
+  align-items: center;
+  padding: 24rpx 0;
+  border-bottom: 1rpx solid #F0F0F0;
+  font-size: 28rpx;
+}
+.form-label {
+  width: 150rpx;
+  color: #333;
+  flex-shrink: 0;
+}
+.form-input {
+  flex: 1;
+  font-size: 28rpx;
+}
+.form-picker {
+  flex: 1;
+}
+.picker-text {
+  font-size: 28rpx;
+  color: #333;
+}
+.picker-text.placeholder {
+  color: #999;
+}
+.primary-btn {
+  margin-top: 32rpx;
+  background: var(--color-primary, #2E7D32);
+  color: #fff;
+  font-size: 30rpx;
+  border-radius: 999rpx;
+}
+
+.safe-area-bottom {
+  height: calc(env(safe-area-inset-bottom) + 20rpx);
+}
+
+/* 老年人模式 */
+.elderly-mode .addr-name { font-size: 34rpx; }
+.elderly-mode .addr-mobile { font-size: 30rpx; }
+.elderly-mode .addr-detail { font-size: 30rpx; }
+.elderly-mode .addr-action { font-size: 30rpx; }
+.elderly-mode .add-btn { font-size: 34rpx; padding: 30rpx; }
+.elderly-mode .form-item { font-size: 32rpx; padding: 30rpx 0; }
+.elderly-mode .form-input { font-size: 32rpx; }
+.elderly-mode .picker-text { font-size: 32rpx; }

@@ -66,7 +66,7 @@
   <!-- 公告横幅 -->
   <swiper class="notice-swiper" autoplay interval="3000" circular>
     <swiper-item wx:for="{{notices}}" wx:key="id">
-      <view class="notice-item">
+      <view class="notice-item" data-item="{{item}}" bindtap="showNotice" hover-class="hover">
         <text class="notice-tag">📢 公告</text>
         <text class="notice-text">{{item.title}}</text>
       </view>

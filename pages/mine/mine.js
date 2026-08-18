@@ -3,6 +3,7 @@
  * 含【我要寄货】核心功能入口（适配农户适老化大按钮设计）
  */
 const appearance = require('../../utils/appearance')
+const api = require('../../utils/api')
 
 Page({
   data: {
@@ -89,13 +90,14 @@ Page({
     wx.reLaunch({ url: '/pages/driver/workbench/workbench' })
   },
 
-  /** 退出登录 */
+  /** 退出登录（先调后端注销 token，再清本地缓存） */
   handleLogout() {
     wx.showModal({
       title: '退出登录',
       content: '确定要退出登录吗？',
-      success: (res) => {
+      success: async (res) => {
         if (res.confirm) {
+          try { await api.logout() } catch (e) { /* 注销失败不阻塞本地退出 */ }
           wx.removeStorageSync('token')
           wx.removeStorageSync('userInfo')
           wx.removeStorageSync('refreshToken')
@@ -105,6 +107,33 @@ Page({
         }
       }
     })
+  },
+
+  /** 编辑个人资料 */
+  goToProfile() {
+    if (!this.data.isLoggedIn) {
+      wx.reLaunch({ url: '/pages/login/login' })
+      return
+    }
+    wx.navigateTo({ url: '/pages/mine/profile/profile' })
+  },
+
+  /** 收货地址管理 */
+  goToAddress() {
+    if (!this.data.isLoggedIn) {
+      wx.reLaunch({ url: '/pages/login/login' })
+      return
+    }
+    wx.navigateTo({ url: '/pages/mine/address/address' })
+  },
+
+  /** 意见反馈 */
+  goToFeedback() {
+    if (!this.data.isLoggedIn) {
+      wx.reLaunch({ url: '/pages/login/login' })
+      return
+    }
+    wx.navigateTo({ url: '/pages/mine/feedback/feedback' })
   },
 
   /** 老年人模式 */

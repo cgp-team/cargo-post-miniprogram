@@ -226,6 +226,8 @@ Page({
    * 加载首页数据
    */
   async loadHomeData() {
+    // 平台公告：真实接口，失败/为空时保留静态演示公告
+    this.loadNotices()
     try {
       // 推荐商品：拉取后端上架商品，取前 4 条
       const list = (await api.listProducts()) || []
@@ -242,6 +244,28 @@ Page({
     } catch (err) {
       console.error('加载推荐商品失败', err)
     }
+  },
+
+  /** 平台公告（真实接口；失败/为空时保留静态演示数据） */
+  async loadNotices() {
+    try {
+      const notices = (await api.listNotices()) || []
+      if (notices.length) this.setData({ notices })
+    } catch (err) {
+      console.error('加载平台公告失败，使用演示数据', err)
+    }
+  },
+
+  /** 点击公告查看详情内容 */
+  showNotice(e) {
+    const item = e.currentTarget.dataset.item
+    if (!item) return
+    wx.showModal({
+      title: item.title,
+      content: item.content || '暂无详细内容',
+      showCancel: false,
+      confirmText: '知道了'
+    })
   },
 
   /**
