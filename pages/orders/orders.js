@@ -3,6 +3,7 @@
  */
 const api = require('../../utils/api')
 const appearance = require('../../utils/appearance')
+const productImg = require('../../utils/product-img')
 
 Page({
   data: {
@@ -66,8 +67,12 @@ Page({
       })
       const list = (res.list || []).map((o) => ({
         ...o,
-        statusColorText: this.statusColor(o.status),
-        createTimeText: this.formatTime(o.createTime)
+        statusClass: this.statusClass(o.status),
+        createTimeText: this.formatTime(o.createTime),
+        items: (o.items || []).map((g) => ({
+          ...g,
+          imageUrl: productImg.resolve({ name: g.productName, image: g.productImage })
+        }))
       }))
       const total = res.total || 0
       const merged = pageNo === 1 ? list : this.data.list.concat(list)
@@ -100,8 +105,9 @@ Page({
     return String(t).replace('T', ' ').substring(0, 16)
   },
 
-  statusColor(s) {
-    return { 0: '#C75B2A', 1: '#1565C0', 2: '#2E7D32', 3: '#999' }[s] || '#666'
+  /** 订单状态 → 语义 class（chip 配色在 wxss，不再内联色值）：0 待发货 1 已发货 2 已完成 3 已取消 */
+  statusClass(s) {
+    return { 0: 'status-pending', 1: 'status-shipping', 2: 'status-done', 3: 'status-done' }[s] || 'status-done'
   },
 
   /** 取消订单（仅待发货） */

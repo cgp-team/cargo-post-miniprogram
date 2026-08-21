@@ -16,10 +16,11 @@
     <view class="order-card" wx:for="{{list}}" wx:key="id">
       <view class="order-head">
         <text class="order-no">单号 {{item.orderNo}}</text>
-        <text class="order-status" style="color: {{item.statusColorText}}">{{item.statusName}}</text>
+        <text class="order-status {{item.statusClass}}">{{item.statusName}}</text>
       </view>
       <view class="order-goods" wx:for="{{item.items}}" wx:for-item="g" wx:key="productId">
-        <text class="order-emoji">{{g.productImage}}</text>
+        <image wx:if="{{g.imageUrl}}" class="order-goods-img" src="{{g.imageUrl}}" mode="aspectFill" />
+        <view wx:else class="order-goods-img-ph"><icon name="leaf" size="44" color="#2E7D32" /></view>
         <view class="order-goods-info">
           <text class="order-goods-name">{{g.productName}}</text>
           <text class="order-goods-sub">¥{{g.productPrice}} × {{g.quantity}}</text>
@@ -30,7 +31,7 @@
         <text class="order-time">{{item.createTimeText}}</text>
         <view class="order-foot-right">
           <text class="order-total">合计 ¥{{item.totalAmount}}</text>
-          <view wx:if="{{item.status === 1 || item.status === 2}}" class="order-trace" data-id="{{item.id}}" bindtap="goToTrace" hover-class="hover">溯源</view>
+          <view wx:if="{{item.status === 1 || item.status === 2}}" class="order-trace" data-id="{{item.id}}" bindtap="goToTrace" hover-class="hover">产地溯源</view>
           <view wx:if="{{item.status === 0}}" class="order-cancel" data-id="{{item.id}}" bindtap="cancelOrder" hover-class="hover">取消订单</view>
         </view>
       </view>
@@ -40,7 +41,7 @@
 
   <!-- 空状态 -->
   <view wx:if="{{!list.length && !loading}}" class="order-empty">
-    <text class="empty-emoji">📦</text>
+    <icon class="empty-icon" name="box" size="120" color="#C9C2B0" />
     <text class="empty-text">还没有订单</text>
     <view class="empty-btn" bindtap="goHome">去逛逛</view>
   </view>
