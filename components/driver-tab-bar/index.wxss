@@ -27,7 +27,11 @@
 }
 
 .tab-icon {
-  font-size: 40rpx;
+  width: 40rpx;
+  height: 40rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin-bottom: 4rpx;
   line-height: 1;
   transition: all 0.3s;
@@ -36,9 +40,9 @@
 /* 激活：图标变深站牌绿块白字 */
 .tab-item.active .tab-icon {
   background: #1C4B2E;
-  color: #ffffff;
   border-radius: 22rpx;
   padding: 8rpx 26rpx;
+  box-sizing: content-box;
   box-shadow: inset 0 4rpx 0 rgba(255, 255, 255, 0.16), 0 4rpx 12rpx rgba(0, 0, 0, 0.4);
 }
 

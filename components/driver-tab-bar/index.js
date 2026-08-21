@@ -11,10 +11,10 @@ Component({
 
   data: {
     tabs: [
-      { key: 'workbench', label: '工作台', icon: '🚌' },
-      { key: 'routes', label: '我的路线', icon: '🛣️' },
-      { key: 'earnings', label: '我的收益', icon: '💰' },
-      { key: 'exit', label: '用户版', icon: '🏠' }
+      { key: 'workbench', label: '工作台', icon: 'bus' },
+      { key: 'routes', label: '我的路线', icon: 'road' },
+      { key: 'earnings', label: '我的收益', icon: 'wallet' },
+      { key: 'exit', label: '用户版', icon: 'user' }
     ]
   },
 

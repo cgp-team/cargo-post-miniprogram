@@ -12,10 +12,10 @@ Component({
     selected: 0,
     themeStyle: '',
     list: [
-      { pagePath: '/pages/index/index',  text: '首页', icon: '🏠' },
-      { pagePath: '/pages/goods/goods',  text: '商城', icon: '🛒' },
-      { pagePath: '/pages/parcel/parcel', text: '快递', icon: '📦' },
-      { pagePath: '/pages/mine/mine',   text: '我的', icon: '👤' }
+      { pagePath: '/pages/index/index',  text: '首页', icon: 'home' },
+      { pagePath: '/pages/goods/goods',  text: '商城', icon: 'shop' },
+      { pagePath: '/pages/parcel/parcel', text: '快递', icon: 'box' },
+      { pagePath: '/pages/mine/mine',   text: '我的', icon: 'user' }
     ]
   },
 

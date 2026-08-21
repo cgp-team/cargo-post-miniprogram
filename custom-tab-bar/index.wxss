@@ -38,25 +38,28 @@
   opacity: 0.7;
 }
 
-.tab-emoji {
-  font-size: 42rpx;
+.tab-icon {
+  width: 44rpx;
+  height: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   line-height: 1;
-  display: block;
   transition: all 0.18s ease;
 }
 
 /* 激活：图标变站牌绿块白字（落款横档 + 微投影） */
-.tab-item.active .tab-emoji {
+.tab-item.active .tab-icon {
   background: var(--color-primary);
-  color: #ffffff;
   border-radius: 22rpx;
   padding: 8rpx 26rpx;
+  box-sizing: content-box;
   box-shadow: inset 0 4rpx 0 rgba(255, 255, 255, 0.18), 0 4rpx 12rpx rgba(0, 0, 0, 0.14);
   transform: translateY(-2rpx);
 }
 
 .tab-text {
-  font-size: 20rpx;
+  font-size: 22rpx;
   font-weight: 500;
   margin-top: 6rpx;
   line-height: 1;
