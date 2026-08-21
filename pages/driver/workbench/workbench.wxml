@@ -184,7 +184,9 @@
           <text class="pickup-detail">{{item.weightKg}}kg · {{item.orderType === 3 ? ('取件码 ' + (item.pickupCode || '—')) : (item.receiverName || '待定')}}</text>
           <text class="pickup-detail">{{item.orderNo}}</text>
         </view>
-        <text class="pickup-check">☐</text>
+        <view class="pickup-check {{item.checked ? 'checked' : ''}}">
+          <icon wx:if="{{item.checked}}" name="check" size="28" color="#FFFFFF" />
+        </view>
       </view>
     </view>
 

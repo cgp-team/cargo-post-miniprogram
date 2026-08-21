@@ -3,6 +3,7 @@
  */
 const api = require('../../../utils/api')
 const appearance = require('../../../utils/appearance')
+const productImg = require('../../../utils/product-img')
 
 Page({
   data: {
@@ -45,7 +46,9 @@ Page({
     try {
       const p = await api.getProduct(id)
       if (p) {
-        this.setData({ product: { ...p, price: Number(p.price).toFixed(2) } })
+        this.setData({
+          product: { ...p, price: Number(p.price).toFixed(2), imageUrl: productImg.resolve(p) }
+        })
       }
     } catch (e) {
       // 错误提示已由 api.js 统一处理

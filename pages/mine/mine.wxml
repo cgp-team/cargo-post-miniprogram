@@ -35,12 +35,12 @@
       <view class="farmer-title">🧑‍🌾 农户服务</view>
       <view class="farmer-buttons">
         <view class="farmer-btn send-btn" bindtap="goToSend" hover-class="hover">
-          <text class="farmer-btn-emoji">📮</text>
+          <icon class="farmer-btn-emoji" name="send" size="64" color="#FFFFFF" />
           <text class="farmer-btn-text">我要寄货</text>
           <text class="farmer-btn-desc">语音下单 · 大巴承运 · 直达城里</text>
         </view>
         <view class="farmer-btn ledger-btn" bindtap="goToLedger" hover-class="hover">
-          <text class="farmer-btn-emoji">📒</text>
+          <icon class="farmer-btn-emoji" name="wallet" size="64" color="#FFFFFF" />
           <text class="farmer-btn-text">我的账本</text>
           <text class="farmer-btn-desc">查看收入 · 寄货记录</text>
         </view>
@@ -50,22 +50,22 @@
     <!-- 功能菜单 -->
     <view class="menu-section">
       <view class="menu-item" bindtap="goToOrders" hover-class="hover">
-        <text class="menu-emoji">📋</text>
+        <icon class="menu-emoji" name="list" size="{{elderlyMode ? 48 : 40}}" color="#2E7D32" />
         <text class="menu-text">我的订单</text>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-item" bindtap="goToMySend" hover-class="hover">
-        <text class="menu-emoji">📮</text>
+        <icon class="menu-emoji" name="send" size="{{elderlyMode ? 48 : 40}}" color="#2E7D32" />
         <text class="menu-text">我的寄货</text>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-item" bindtap="goToBusFavorites" hover-class="hover">
-        <text class="menu-emoji">🚌</text>
+        <icon class="menu-emoji" name="bus" size="{{elderlyMode ? 48 : 40}}" color="#2E7D32" />
         <text class="menu-text">公交收藏</text>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-item" bindtap="switchToDriver" hover-class="hover">
-        <text class="menu-emoji">🚐</text>
+        <icon class="menu-emoji" name="bus" size="{{elderlyMode ? 48 : 40}}" color="#2E7D32" />
         <text class="menu-text">切换为司机模式</text>
         <text class="menu-arrow">›</text>
       </view>
@@ -74,22 +74,22 @@
     <!-- 设置区 -->
     <view class="menu-section">
       <view class="menu-item" bindtap="goToAddress" hover-class="hover">
-        <text class="menu-emoji">📍</text>
+        <icon class="menu-emoji" name="pin" size="{{elderlyMode ? 48 : 40}}" color="#2E7D32" />
         <text class="menu-text">收货地址</text>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-item" bindtap="goToFeedback" hover-class="hover">
-        <text class="menu-emoji">✉️</text>
+        <icon class="menu-emoji" name="edit" size="{{elderlyMode ? 48 : 40}}" color="#2E7D32" />
         <text class="menu-text">意见反馈</text>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-item" bindtap="goToProfile" hover-class="hover">
-        <text class="menu-emoji">👤</text>
+        <icon class="menu-emoji" name="user" size="{{elderlyMode ? 48 : 40}}" color="#2E7D32" />
         <text class="menu-text">个人资料</text>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-item" bindtap="toggleElderly" hover-class="hover">
-        <text class="menu-emoji">🔍</text>
+        <icon class="menu-emoji" name="font" size="{{elderlyMode ? 48 : 40}}" color="#2E7D32" />
         <view class="menu-item-body">
           <text class="menu-text">老年人模式</text>
           <text class="menu-sub">更大字体，方便长辈使用</text>
@@ -114,7 +114,7 @@
 
     <view class="menu-section">
       <view class="menu-item logout" bindtap="handleLogout" hover-class="hover">
-        <text class="menu-emoji">🚪</text>
+        <icon class="menu-emoji" name="logout" size="{{elderlyMode ? 48 : 40}}" color="#C0392B" />
         <text class="menu-text">退出登录</text>
         <text class="menu-arrow">›</text>
       </view>

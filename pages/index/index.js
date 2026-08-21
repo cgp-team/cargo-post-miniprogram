@@ -4,6 +4,7 @@
 const api = require('../../utils/api')
 const weatherApi = require('../../utils/weather')
 const appearance = require('../../utils/appearance')
+const productImg = require('../../utils/product-img')
 
 Page({
   data: {
@@ -12,6 +13,7 @@ Page({
     weather: {},
     weatherLoading: false,   // 真实天气请求中
     weatherUpdateTime: '',   // 更新时间提示
+    weatherExpanded: false,  // 天气详情卡展开态（默认只显示头部胶囊）
     elderlyMode: false,
     themeColor: 'green',
     themeStyle: '',
@@ -56,7 +58,7 @@ Page({
         fromVillage: '云山村',
         price: '68.00',
         unit: '斤',
-        image: '🍵'
+        imageUrl: '/images/product-tea.png'
       },
       {
         id: 2,
@@ -64,7 +66,7 @@ Page({
         fromVillage: '大湾村',
         price: '45.00',
         unit: '箱',
-        image: '🥚'
+        imageUrl: '/images/product-egg.png'
       },
       {
         id: 3,
@@ -72,7 +74,7 @@ Page({
         fromVillage: '竹林乡',
         price: '28.00',
         unit: '袋',
-        image: '🍜'
+        imageUrl: '/images/product-noodle.png'
       },
       {
         id: 4,
@@ -80,7 +82,7 @@ Page({
         fromVillage: '青山镇',
         price: '55.00',
         unit: '斤',
-        image: '🥜'
+        imageUrl: '/images/product-nut.png'
       }
     ]
   },
@@ -238,7 +240,7 @@ Page({
           fromVillage: p.fromVillage,
           price: Number(p.price).toFixed(2),
           unit: p.unit,
-          image: p.image
+          imageUrl: productImg.resolve(p)
         }))
       })
     } catch (err) {
@@ -291,6 +293,11 @@ Page({
       // 真实数据拉取失败：保留静态演示数据，等接口完善后自动替换
       console.error('加载实时公交失败，使用演示数据', err)
     }
+  },
+
+  /** 展开/收起天气详情卡（默认只显示头部胶囊） */
+  toggleWeather() {
+    this.setData({ weatherExpanded: !this.data.weatherExpanded })
   },
 
   /**

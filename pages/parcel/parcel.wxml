@@ -4,7 +4,7 @@
   <view class="top-bar" style="padding-top: {{statusBarHeight + 16}}px">
     <view class="top-bar-main">
       <view class="location-info" bindtap="switchVillage" hover-class="hover">
-        <text class="loc-emoji">📌</text>
+        <icon name="pin" size="30" color="#FFFFFF" />
         <text class="village-name">{{currentVillage}}</text>
         <text class="arrow-down">▾</text>
       </view>
@@ -16,7 +16,7 @@
 
     <!-- 单号查询 -->
     <view class="search-bar">
-      <text class="search-emoji">📦</text>
+      <icon name="box" size="36" color="#8A8778" class="search-icon" />
       <input
         class="search-input"
         type="text"
@@ -33,7 +33,7 @@
   <!-- 乘车安排（村民到站通知：客运订单已派车，含车辆与实时位置入口） -->
   <view wx:if="{{arrangements.length}}" class="arrange-section">
     <view class="arrange-header">
-      <text class="arrange-title">🚌 我的乘车安排</text>
+      <view class="arrange-title"><icon name="bus" size="32" color="#2B2B28" /><text>我的乘车安排</text></view>
       <text class="arrange-sub" bindtap="goToBusTracking">实时公交 ›</text>
     </view>
     <view class="arrange-card" wx:for="{{arrangements}}" wx:key="orderId">
@@ -44,7 +44,7 @@
         </view>
         <view class="arrange-mid">
           <view class="mid-line"></view>
-          <text class="mid-bus">🚌</text>
+          <icon name="bus" size="30" color="#2E7D32" class="mid-bus" />
         </view>
         <view class="arrange-station">
           <text class="station-name">{{item.alightingStationName || '—'}}</text>
@@ -57,7 +57,7 @@
           {{item.planStatus === 1 || item.planStatus === 2 ? '在途' : item.statusName}}
         </text>
       </view>
-      <view class="arrange-cta" bindtap="goToBusTracking">📍 查看车辆实时位置 ›</view>
+      <view class="arrange-cta" bindtap="goToBusTracking"><icon name="pin" size="24" color="#2E7D32" />查看车辆实时位置 ›</view>
     </view>
   </view>
 
@@ -80,33 +80,34 @@
     <view class="parcel-card" wx:for="{{sendList}}" wx:key="id">
       <view class="parcel-header">
         <view class="parcel-title-row">
-          <text class="parcel-icon">📦</text>
+          <icon name="box" size="48" color="#2E7D32" />
           <view class="parcel-info">
             <text class="parcel-name">{{item.goodsName || '寄货'}}</text>
             <text class="parcel-no">单号: {{item.orderNo}}</text>
           </view>
         </view>
-        <view class="parcel-status" style="color: {{item.statusColorText}}">{{item.statusName}}</view>
+        <view class="parcel-status {{item.statusClass}}">{{item.statusName}}</view>
       </view>
       <view class="parcel-route">
-        <text>🚌 重量 {{item.goodsWeight}}kg</text>
+        <view class="route-weight"><icon name="bus" size="26" color="#6B675C" /><text>重量 {{item.goodsWeight}}kg</text></view>
         <text class="parcel-eta">{{item.createTimeText}}</text>
       </view>
-      <!-- 邮快件取件码直显（点击复制，司机核销凭码） -->
-      <view
-        wx:if="{{item.pickupCode}}"
-        class="parcel-code-row"
-        data-code="{{item.pickupCode}}"
-        bindtap="copyPickupCode" hover-class="hover"
-      >
+      <!-- 邮快件取件码默认打码，点「查看」展开明文（点明文复制，司机核销凭码） -->
+      <view wx:if="{{item.pickupCode}}" class="parcel-code-row">
         <text class="parcel-code-label">取件码</text>
-        <text class="parcel-code-value">{{item.pickupCode}}</text>
-        <text class="parcel-code-copy">点击复制</text>
+        <text
+          wx:if="{{item.showCode}}"
+          class="parcel-code-value"
+          data-code="{{item.pickupCode}}"
+          bindtap="copyPickupCode" hover-class="hover"
+        >{{item.pickupCode}}</text>
+        <text wx:else class="parcel-code-value masked">＊＊＊＊</text>
+        <text class="parcel-code-toggle" data-index="{{index}}" bindtap="toggleCode" hover-class="hover">{{item.showCode ? '收起' : '查看'}}</text>
       </view>
     </view>
 
     <view class="empty-state" wx:if="{{!sendList.length && !loading}}">
-      <text class="empty-emoji">📭</text>
+      <view class="empty-icon"><icon name="box" size="96" color="#8A8778" /></view>
       <text class="empty-text">还没有寄货记录</text>
     </view>
   </view>
@@ -116,27 +117,27 @@
     <view wx:if="{{trackResult}}" class="parcel-card">
       <view class="parcel-header">
         <view class="parcel-title-row">
-          <text class="parcel-icon">📦</text>
+          <icon name="box" size="48" color="#2E7D32" />
           <view class="parcel-info">
             <text class="parcel-name">{{trackResult.goodsName || '寄货'}}</text>
             <text class="parcel-no">单号: {{trackResult.orderNo}}</text>
           </view>
         </view>
-        <view class="parcel-status" style="color: {{trackResult.statusColorText}}">{{trackResult.statusName}}</view>
+        <view class="parcel-status {{trackResult.statusClass}}">{{trackResult.statusName}}</view>
       </view>
       <view class="parcel-route">
-        <text>🚌 重量 {{trackResult.goodsWeight}}kg</text>
+        <view class="route-weight"><icon name="bus" size="26" color="#6B675C" /><text>重量 {{trackResult.goodsWeight}}kg</text></view>
         <text class="parcel-eta">{{trackResult.createTimeText}}</text>
       </view>
 
       <!-- 货运审核状态 -->
-      <view wx:if="{{trackResult.auditStatus === 0}}" class="parcel-audit warn">⏳ 审核中：货物正在等待平台审核</view>
-      <view wx:elif="{{trackResult.auditStatus === 2}}" class="parcel-audit fail">❌ 审核未通过：{{trackResult.rejectReason || '货物不符合运输要求'}}</view>
+      <view wx:if="{{trackResult.auditStatus === 0}}" class="parcel-audit warn"><icon name="clock" size="28" color="#B27A12" /><text>审核中：货物正在等待平台审核</text></view>
+      <view wx:elif="{{trackResult.auditStatus === 2}}" class="parcel-audit fail"><icon name="info" size="28" color="#C0392B" /><text>审核未通过：{{trackResult.rejectReason || '货物不符合运输要求'}}</text></view>
 
       <!-- 承运班次与到达预估（已分配/已发车时由后端返回） -->
       <view wx:if="{{trackResult.vehiclePlate || trackResult.etaText}}" class="parcel-carrier">
-        <text wx:if="{{trackResult.vehiclePlate}}">🚌 {{trackResult.shiftCode || '班车'}} · {{trackResult.vehiclePlate}}</text>
-        <text wx:if="{{trackResult.etaText}}" class="parcel-carrier-eta">⏱ {{trackResult.etaText}}</text>
+        <view wx:if="{{trackResult.vehiclePlate}}" class="carrier-row"><icon name="bus" size="28" color="#2E7D32" /><text>{{trackResult.shiftCode || '班车'}} · {{trackResult.vehiclePlate}}</text></view>
+        <view wx:if="{{trackResult.etaText}}" class="carrier-row parcel-carrier-eta"><icon name="clock" size="28" color="#2E7D32" /><text>{{trackResult.etaText}}</text></view>
       </view>
 
       <!-- 进度条 -->
@@ -168,11 +169,11 @@
     </view>
 
     <view wx:elif="{{noResult}}" class="empty-state">
-      <text class="empty-emoji">🔍</text>
+      <view class="empty-icon"><icon name="search" size="96" color="#8A8778" /></view>
       <text class="empty-text">未查询到该单号，请确认后重试</text>
     </view>
     <view wx:else class="empty-state">
-      <text class="empty-emoji">🔎</text>
+      <view class="empty-icon"><icon name="search" size="96" color="#8A8778" /></view>
       <text class="empty-text">输入上方的运单号，查询物流进度</text>
     </view>
   </view>

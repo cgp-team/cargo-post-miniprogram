@@ -9,7 +9,8 @@
     bindtap="switchTab"
     hover-class="tab-hover"
   >
-    <text class="tab-emoji">{{item.icon}}</text>
+    <icon class="tab-icon" name="{{item.icon}}" size="44"
+      color="{{selected === index ? '#FFFFFF' : '#8A8578'}}" />
     <text class="tab-text">{{item.text}}</text>
   </view>
 </view>

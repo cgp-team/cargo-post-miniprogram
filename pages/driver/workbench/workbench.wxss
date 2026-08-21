@@ -555,8 +555,21 @@
 }
 
 .pickup-check {
-  font-size: 36rpx;
-  color: #555;
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 8rpx;
+  border: 2rpx solid rgba(255,255,255,0.4);
+  background: transparent;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pickup-check.checked {
+  background: #6FBF7A;
+  border-color: #6FBF7A;
 }
 
 /* 巨大扫码按钮 */
@@ -597,9 +610,9 @@
 }
 
 .skip-btn {
-  font-size: 30rpx;
-  color: #666;
-  padding: 20rpx;
+  font-size: 32rpx;
+  color: #9AA39B;
+  padding: 24rpx 40rpx;
 }
 
 /* 司机信息栏 */
@@ -710,12 +723,12 @@
 /* 妥投扫码按钮（停靠中，次按钮） */
 .deliver-btn {
   height: 200rpx;
-  background: linear-gradient(180deg, #3B82F6, #1D4ED8);
-  box-shadow: 0 16rpx 48rpx rgba(59,130,246,0.35);
+  background: var(--color-gold);
+  box-shadow: 0 16rpx 48rpx rgba(217,164,65,0.35);
 }
 
 .deliver-btn:active {
-  box-shadow: 0 8rpx 24rpx rgba(59,130,246,0.3);
+  box-shadow: 0 8rpx 24rpx rgba(217,164,65,0.3);
 }
 
 /* 取件核销按钮（邮快件，次按钮） */

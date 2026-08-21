@@ -24,8 +24,14 @@
   height: 60rpx;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-  font-size: 34rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* arrow 图标朝右，镜像翻转为返回方向 */
+.nav-back-flip {
+  transform: scaleX(-1);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -54,16 +60,16 @@
   overflow: hidden;
 }
 
-.hero-emoji {
-  font-size: 180rpx;
-  line-height: 1;
+.hero-img-real {
+  width: 100%;
+  height: 100%;
 }
 
 .hero-badge {
   position: absolute;
   top: 20rpx;
   left: 20rpx;
-  background: linear-gradient(135deg, var(--color-clay), var(--color-clay));
+  background: var(--color-clay);
   color: #fff;
   font-size: 22rpx;
   font-weight: 600;
@@ -90,12 +96,12 @@
 .detail-price {
   font-size: 48rpx;
   font-weight: 800;
-  color: #E53935;
+  color: var(--color-price);
 }
 
 .detail-unit {
   font-size: 26rpx;
-  color: #757575;
+  color: var(--color-text-secondary);
 }
 
 .detail-name {
@@ -115,7 +121,13 @@
 
 .meta-item {
   font-size: 24rpx;
-  color: #757575;
+  color: var(--color-text-secondary);
+}
+
+.meta-flex {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
 }
 
 /* 商品介绍 */
@@ -173,7 +185,7 @@
 }
 
 .buy-btn {
-  background: linear-gradient(135deg, var(--color-clay), var(--color-clay));
+  background: var(--color-clay);
   color: #fff;
 }
 
@@ -219,7 +231,7 @@
 
 .popup-close {
   font-size: 32rpx;
-  color: #999;
+  color: var(--color-text-secondary);
   padding: 8rpx;
 }
 
@@ -233,8 +245,20 @@
   margin-bottom: 24rpx;
 }
 
-.popup-emoji {
-  font-size: 64rpx;
+.popup-img {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 12rpx;
+  background: var(--color-primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.popup-img image {
+  width: 100%;
+  height: 100%;
 }
 
 .popup-product-info {
@@ -251,7 +275,7 @@
 .popup-price {
   font-size: 30rpx;
   font-weight: 700;
-  color: #E53935;
+  color: var(--color-price);
 }
 
 .popup-row {
@@ -323,13 +347,13 @@
 .popup-total-amount {
   font-size: 40rpx;
   font-weight: 800;
-  color: #E53935;
+  color: var(--color-price);
 }
 
 .popup-submit {
   height: 92rpx;
   border-radius: 46rpx;
-  background: linear-gradient(135deg, var(--color-clay), var(--color-clay));
+  background: var(--color-clay);
   color: #fff;
   font-size: 32rpx;
   font-weight: 700;

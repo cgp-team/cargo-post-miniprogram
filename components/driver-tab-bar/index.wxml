@@ -7,7 +7,8 @@
     bindtap="switchTab"
     data-key="{{item.key}}"
   >
-    <text class="tab-icon">{{item.icon}}</text>
+    <icon class="tab-icon" name="{{item.icon}}" size="40"
+      color="{{current === item.key ? '#FFFFFF' : '#8A8578'}}" />
     <text class="tab-label">{{item.label}}</text>
   </view>
 </view>

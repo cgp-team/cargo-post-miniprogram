@@ -1,5 +1,7 @@
 {
   "navigationStyle": "custom",
-  "backgroundColor": "#F5F5F5",
-  "usingComponents": {}
+  "backgroundColor": "#F6F2E9",
+  "usingComponents": {
+    "icon": "/components/icon/index"
+  }
 }

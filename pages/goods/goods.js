@@ -4,6 +4,7 @@
  */
 const api = require('../../utils/api')
 const appearance = require('../../utils/appearance')
+const productImg = require('../../utils/product-img')
 
 Page({
   data: {
@@ -51,13 +52,22 @@ Page({
     try {
       const list = (await api.listProducts()) || []
       this.setData({
-        products: list.map((p) => ({ ...p, price: Number(p.price).toFixed(2) }))
+        products: list.map((p) => ({
+          ...p,
+          price: Number(p.price).toFixed(2),
+          imageUrl: productImg.resolve(p)
+        }))
       })
     } catch (e) {
       // 错误提示已由 api.js 统一处理
     } finally {
       this.setData({ loading: false })
     }
+  },
+
+  /** 点击搜索条（入口占位） */
+  goToSearch() {
+    wx.showToast({ title: '搜索功能开发中', icon: 'none' })
   },
 
   /** 切换分类 */

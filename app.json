@@ -22,10 +22,10 @@
   ],
   "window": {
     "backgroundTextStyle": "light",
-    "navigationBarBackgroundColor": "#1A1A1A",
+    "navigationBarBackgroundColor": "#1C4B2E",
     "navigationBarTitleText": "农村客货邮",
     "navigationBarTextStyle": "white",
-    "backgroundColor": "#1A1A1A"
+    "backgroundColor": "#F6F2E9"
   },
   "tabBar": {
     "custom": true,

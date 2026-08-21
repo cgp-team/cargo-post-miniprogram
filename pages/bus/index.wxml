@@ -36,23 +36,27 @@
   <!-- 车辆列表 -->
   <view class="bus-list">
     <view class="section-header">
-      <text class="section-title">🚌 {{currentLineName}}</text>
+      <view class="section-title-wrap">
+        <icon name="bus" size="30" color="#1C4B2E" />
+        <text class="section-title">{{currentLineName}}</text>
+      </view>
       <text class="section-sub" bindtap="loadLines">刷新 ↻</text>
     </view>
     <view wx:if="{{hasError}}" class="empty">加载失败，请下拉刷新重试</view>
     <view wx:elif="{{!buses.length}}" class="empty">该线路当前暂无车辆在线</view>
     <view
-      class="bus-card"
+      class="bus-card ticket-card"
       wx:for="{{buses}}"
       wx:key="busId"
       bindtap="goToBusDetail"
       data-bus="{{item.busId}}"
     >
-      <view class="bus-left">
-        <text class="bus-plate">{{item.plateNo}}</text>
-        <text class="bus-shift">{{item.shiftCode}}</text>
-      </view>
-      <view class="bus-mid">
+      <view class="ticket-card__main">
+        <view class="ticket-card__serial">山乡巴士 · {{item.shiftCode}}</view>
+        <view class="bus-row-top">
+          <text class="bus-plate">{{item.plateNo}}</text>
+          <text class="bus-status {{item.status === 1 ? 'running' : ''}}">{{item.status === 1 ? '行驶中' : '待发车'}}</text>
+        </view>
         <view class="bus-route">
           <text>{{item.startStation}}</text>
           <text class="arrow">→</text>
@@ -63,15 +67,21 @@
           <view class="bus-progress-fill" style="width: {{item.progress || 0}}%"></view>
         </view>
       </view>
-      <view class="bus-right">
-        <text class="bus-status {{item.status === 1 ? 'running' : ''}}">{{item.status === 1 ? '行驶中' : '待发车'}}</text>
-        <text class="bus-eta">{{item.status === 1 ? '约' + item.etaMinutes + '分钟' : '待发'}}</text>
+      <view class="ticket-card__stub">
+        <block wx:if="{{item.status === 1}}">
+          <text class="ticket-card__stub-value">{{item.etaMinutes}}</text>
+          <text class="ticket-card__stub-label">分钟到站</text>
+        </block>
+        <block wx:else>
+          <text class="ticket-card__stub-value">待发</text>
+          <text class="ticket-card__stub-label">待发车</text>
+        </block>
       </view>
     </view>
   </view>
   </block>
   <view wx:else class="empty-page">
-    <text class="empty-emoji">🚏</text>
+    <icon name="bus" size="96" color="#C9C2B0" />
     <text class="empty-text">{{hasError ? '加载失败，请下拉刷新重试' : '暂无公交线路数据'}}</text>
   </view>
 </view>

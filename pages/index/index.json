@@ -1,6 +1,8 @@
 {
-  "usingComponents": {},
+  "usingComponents": {
+    "icon": "/components/icon/index"
+  },
   "navigationStyle": "custom",
   "enablePullDownRefresh": true,
-  "backgroundColor": "#F5F5F5"
+  "backgroundColor": "#F6F2E9"
 }

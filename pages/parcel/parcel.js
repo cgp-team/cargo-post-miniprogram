@@ -128,7 +128,7 @@ Page({
       // WXML 不支持调用 Page 方法，进度/时间/颜色在此预计算后绑定
       res.progress = this.trackProgress(res.status)
       res.createTimeText = this.formatTime(res.createTime)
-      res.statusColorText = this.statusColor(res.status)
+      res.statusClass = this.statusClass(res.status)
       res.etaText = this.buildEtaText(res)
       this.setData({ trackResult: res, noResult: false }, () => this.drawParcelQr())
     } catch (e) {
@@ -156,10 +156,18 @@ Page({
     wx.setClipboardData({ data: this.data.trackResult.orderNo })
   },
 
-  /** 列表项取件码点击复制 */
+  /** 列表项取件码：点击明文复制（司机核销凭码） */
   copyPickupCode(e) {
     const code = e.currentTarget.dataset.code
     if (code) wx.setClipboardData({ data: String(code) })
+  },
+
+  /** 列表项取件码明文显隐切换（默认打码降层级） */
+  toggleCode(e) {
+    const idx = e.currentTarget.dataset.index
+    const item = this.data.sendList[idx]
+    if (!item) return
+    this.setData({ [`sendList[${idx}].showCode`]: !item.showCode })
   },
 
   reloadSendList() {
@@ -174,7 +182,8 @@ Page({
       const list = (res.list || []).map((o) => ({
         ...o,
         statusName: o.statusName || this.statusText(o.status),
-        statusColorText: this.statusColor(o.status),
+        statusClass: this.statusClass(o.status),
+        showCode: false,
         createTimeText: this.formatTime(o.createTime)
       }))
       const merged = this.data.pageNo === 1 ? list : this.data.sendList.concat(list)
@@ -202,8 +211,13 @@ Page({
     return item ? item.label : ''
   },
 
-  statusColor(s) {
-    return { 0: '#C75B2A', 1: '#C75B2A', 2: '#1565C0', 3: '#1565C0', 4: '#2E7D32', 5: '#999' }[s] || '#666'
+  /** 运输状态 → 语义 class（chip 配色在 wxss，不再内联色值） */
+  statusClass(s) {
+    return {
+      0: 'status-pending', 1: 'status-pending',
+      2: 'status-shipping', 3: 'status-shipping',
+      4: 'status-done', 5: 'status-done'
+    }[s] || 'status-done'
   },
 
   trackProgress(s) {

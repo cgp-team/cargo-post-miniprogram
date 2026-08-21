@@ -8,10 +8,7 @@
 /* 顶部栏 —— 站牌式：深绿实板 + 落款横档 + 线路号 chip */
 .top-bar {
   background: linear-gradient(160deg, var(--color-primary-dark) 0%, var(--color-primary) 60%, #2E5A2E 100%);
-  padding: 20rpx 30rpx 30rpx;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
+  padding: 20rpx 30rpx 48rpx;
   position: relative;
   overflow: hidden;
 }
@@ -41,9 +38,15 @@
   pointer-events: none;
 }
 
-.top-left {
+.top-row {
   position: relative;
   z-index: 1;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.top-left {
   display: flex;
   flex-direction: column;
 }
@@ -88,20 +91,49 @@
 .user-avatar {
   position: relative;
   z-index: 1;
-}
-
-.user-avatar text {
-  display: inline-block;
-  font-size: 44rpx;
+  width: 76rpx;
+  height: 76rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  border: 3rpx solid rgba(255,255,255,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
 .user-avatar image {
   width: 76rpx;
   height: 76rpx;
-  border-radius: 50%;
-  border: 3rpx solid rgba(255,255,255,0.6);
-  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.15);
-  background: var(--color-primary-light);
+}
+
+/* 天气胶囊：头部内一行浓缩天气，点击展开详情卡 */
+.weather-pill {
+  position: relative;
+  z-index: 1;
+  margin-top: 20rpx;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1rpx solid rgba(255, 255, 255, 0.22);
+  border-radius: var(--radius-pill);
+  padding: 12rpx 24rpx;
+}
+
+.weather-pill-text {
+  flex: 1;
+  font-size: 26rpx;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.weather-pill-more {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.85);
+  flex-shrink: 0;
 }
 
 /* 搜索栏 */
@@ -111,17 +143,12 @@
   z-index: 3;
   display: flex;
   align-items: center;
+  gap: 14rpx;
   padding: 20rpx 28rpx;
   border-radius: 14rpx;
   border: 1rpx solid rgba(60, 50, 30, 0.06);
   box-shadow: 0 8rpx 28rpx rgba(60, 50, 30, 0.12);
   background: #FFFDF8;
-}
-
-.search-emoji {
-  font-size: 36rpx;
-  margin-right: 14rpx;
-  opacity: 0.45;
 }
 
 .search-input {
@@ -131,16 +158,17 @@
 }
 
 .search-input::placeholder {
-  color: #BDBDBD;
+  color: var(--color-text-tertiary);
 }
 
-/* 天气卡片 */
+/* 天气详情卡（点击胶囊展开；主题色系：米纸底 + 深绿字 + 金色点缀） */
 .weather-card {
-  margin: 20rpx 28rpx;
-  background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+  margin: 20rpx 28rpx 0;
+  background: #FFFDF8;
   border-radius: 20rpx;
   padding: 24rpx 28rpx;
-  box-shadow: 0 4rpx 16rpx rgba(33,150,243,0.16), 0 12rpx 32rpx rgba(33,150,243,0.08);
+  border: 1rpx solid rgba(217, 164, 65, 0.28);
+  box-shadow: var(--shadow-card);
 }
 
 .weather-main {
@@ -160,12 +188,12 @@
   width: 96rpx;
   height: 96rpx;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.55);
+  background: #FBF3DF;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  box-shadow: inset 0 0 0 1rpx rgba(255, 255, 255, 0.6);
+  box-shadow: inset 0 0 0 1rpx rgba(217, 164, 65, 0.30);
 }
 
 .weather-icon { font-size: 56rpx; line-height: 1; }
@@ -185,26 +213,19 @@
 .weather-temp {
   font-size: 52rpx;
   font-weight: 700;
-  color: #1565C0;
+  color: var(--color-primary-dark);
   line-height: 1;
 }
 
 .weather-condition {
   font-size: 28rpx;
-  color: #1976D2;
+  color: var(--color-primary);
   font-weight: 600;
-}
-
-.weather-location {
-  font-size: 22rpx;
-  color: #1565C0;
-  font-weight: 500;
-  margin-bottom: 2rpx;
 }
 
 .weather-detail {
   font-size: 22rpx;
-  color: #54708E;
+  color: var(--color-text-secondary);
 }
 
 .weather-meta {
@@ -212,8 +233,8 @@
 }
 
 .weather-refresh {
-  font-size: 20rpx;
-  color: #6E8CA8;
+  font-size: 22rpx;
+  color: var(--color-text-tertiary);
 }
 
 .weather-refresh.warn {
@@ -223,10 +244,10 @@
 .weather-tips {
   max-width: 220rpx;
   font-size: 22rpx;
-  color: #1565C0;
+  color: #8A6A1F;
   text-align: right;
   line-height: 1.5;
-  background: rgba(255,255,255,0.5);
+  background: #FBF3DF;
   padding: 10rpx 16rpx;
   border-radius: 12rpx;
 }
@@ -236,7 +257,7 @@
   display: flex;
   justify-content: space-around;
   padding-top: 18rpx;
-  border-top: 1rpx solid rgba(255,255,255,0.6);
+  border-top: 1rpx solid #F0E8D5;
 }
 
 .forecast-item {
@@ -248,7 +269,7 @@
 
 .forecast-day {
   font-size: 22rpx;
-  color: #1565C0;
+  color: var(--color-text-secondary);
   font-weight: 500;
 }
 
@@ -256,7 +277,7 @@
 
 .forecast-temp {
   font-size: 22rpx;
-  color: #1976D2;
+  color: var(--color-primary);
   font-weight: 600;
 }
 
@@ -279,6 +300,9 @@
 }
 
 .notice-tag {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
   background: linear-gradient(135deg, var(--color-gold), #C8952F);
   color: #fff;
   font-size: 22rpx;
@@ -332,64 +356,16 @@
   transition: all 0.15s ease;
 }
 
-.green-bg { background: linear-gradient(135deg, var(--color-accent), #388E3C); box-shadow: 0 6rpx 18rpx rgba(76,175,80,0.22); }
-.orange-bg { background: linear-gradient(135deg, var(--color-clay), #A64A1F); box-shadow: 0 6rpx 18rpx rgba(199,91,42,0.24); }
-.blue-bg { background: linear-gradient(135deg, #42A5F5, #1E88E5); box-shadow: 0 6rpx 18rpx rgba(30,136,229,0.22); }
-.red-bg { background: linear-gradient(135deg, #D8602F, #B84A1E); box-shadow: 0 6rpx 18rpx rgba(184,74,30,0.24); }
-
-.feature-icon {
-  width: 54rpx;
-  height: 54rpx;
-  filter: brightness(0) invert(1);
-}
-
-.feature-emoji {
-  font-size: 48rpx;
-  line-height: 1;
-}
+/* 四宫格配色全部取自主题板：站牌绿 / 稻谷金 / 深站牌绿 / 陶土橙 */
+.green-bg { background: linear-gradient(135deg, var(--color-primary), var(--color-accent)); box-shadow: 0 6rpx 18rpx rgba(46,125,50,0.22); }
+.gold-bg { background: linear-gradient(135deg, var(--color-gold), #B98A2E); box-shadow: 0 6rpx 18rpx rgba(217,164,65,0.24); }
+.deep-bg { background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary)); box-shadow: 0 6rpx 18rpx rgba(28,75,46,0.24); }
+.clay-bg { background: linear-gradient(135deg, var(--color-clay), #A64A1F); box-shadow: 0 6rpx 18rpx rgba(199,91,42,0.24); }
 
 .feature-name {
   font-size: 24rpx;
   font-weight: 600;
   color: #333;
-  margin-bottom: 4rpx;
-}
-
-.feature-desc {
-  font-size: 20rpx;
-  color: #757575;
-}
-
-/* 快捷操作栏 */
-.quick-actions {
-  display: flex;
-  margin: 8rpx 24rpx 16rpx;
-  gap: 16rpx;
-}
-
-.quick-action-item {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8rpx;
-  padding: 20rpx;
-  background: #fff;
-  border-radius: 16rpx;
-  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
-  font-size: 26rpx;
-  color: #555;
-  font-weight: 500;
-  transition: all 0.15s ease;
-}
-
-.quick-action-item:active {
-  background: var(--color-primary-light);
-  transform: scale(0.96);
-}
-
-.quick-action-emoji {
-  font-size: 32rpx;
 }
 
 /* 通用section */
@@ -402,6 +378,12 @@
   justify-content: space-between;
   align-items: center;
   padding: 32rpx 4rpx 20rpx;
+}
+
+.section-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
 }
 
 .section-title {
@@ -421,24 +403,11 @@
   transition: all 0.15s ease;
 }
 
-/* 公交列表 */
+/* 公交列表（卡片本体样式由全局 .ticket-card 提供：主券+副券+打孔撕票线） */
 .bus-list {
   display: flex;
   flex-direction: column;
   gap: 14rpx;
-}
-
-.bus-card {
-  background: #FFFDF8;
-  border-radius: 16rpx 8rpx 8rpx 16rpx;
-  padding: 28rpx 30rpx;
-  box-shadow: 0 2rpx 8rpx rgba(60, 50, 30, 0.05), 0 6rpx 20rpx rgba(60, 50, 30, 0.06);
-  transition: all 0.15s ease;
-}
-
-.bus-card:active {
-  background: #FAF7EE;
-  transform: scale(0.98);
 }
 
 .bus-header {
@@ -457,7 +426,7 @@
 
 .bus-status {
   font-size: 22rpx;
-  color: #757575;
+  color: var(--color-text-secondary);
   padding: 6rpx 18rpx;
   background: #EFEAE0;
   border-radius: 20rpx;
@@ -465,7 +434,7 @@
 }
 
 .bus-status.running {
-  color: var(--color-primary);
+  color: var(--color-status-shipping);
   background: var(--color-primary-light);
   position: relative;
 }
@@ -488,16 +457,11 @@
 
 .bus-route {
   font-size: 26rpx;
-  color: #666;
+  color: var(--color-text-secondary);
   margin-bottom: 16rpx;
   display: flex;
   align-items: center;
   gap: 8rpx;
-}
-
-.bus-route::before {
-  content: '📍';
-  font-size: 24rpx;
 }
 
 .bus-info {
@@ -509,9 +473,8 @@
   border-top: 1rpx solid #F0F0F0;
 }
 
-.bus-info .text-orange {
-  color: var(--color-clay);
-  font-weight: 600;
+.bus-next {
+  color: var(--color-text-secondary);
 }
 
 /* 推荐产品 */
@@ -544,8 +507,9 @@
   justify-content: center;
 }
 
-.product-img-emoji {
-  font-size: 96rpx;
+.product-img-real {
+  width: 100%;
+  height: 100%;
 }
 
 .product-info {
@@ -565,16 +529,11 @@
 
 .product-from {
   font-size: 22rpx;
-  color: #757575;
+  color: var(--color-text-secondary);
   display: flex;
   align-items: center;
   gap: 4rpx;
   margin-bottom: 10rpx;
-}
-
-.product-from::before {
-  content: '🏘️';
-  font-size: 20rpx;
 }
 
 .product-price-row {
@@ -586,39 +545,12 @@
 .product-price {
   font-size: 34rpx;
   font-weight: 700;
-  color: var(--color-clay);
+  color: var(--color-price);
 }
 
 .product-unit {
   font-size: 22rpx;
-  color: #757575;
-}
-
-/* 悬浮寄货按钮 —— 陶土橙站牌圆钮 */
-.fab-send {
-  position: fixed;
-  right: 36rpx;
-  bottom: calc(140rpx + env(safe-area-inset-bottom));
-  width: 112rpx;
-  height: 112rpx;
-  border-radius: 50%;
-  background: linear-gradient(160deg, var(--color-clay), #A64A1F);
-  box-shadow: inset 0 6rpx 0 rgba(255,255,255,0.16), 0 8rpx 28rpx rgba(199, 91, 42, 0.40);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 99;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.fab-send:active {
-  transform: scale(0.92);
-  box-shadow: inset 0 3rpx 0 rgba(255,255,255,0.14), 0 4rpx 14rpx rgba(199, 91, 42, 0.30);
-}
-
-.fab-icon {
-  font-size: 52rpx;
-  line-height: 1;
+  color: var(--color-text-tertiary);
 }
 
 /* 底部安全区 */
@@ -629,6 +561,8 @@
 /* ============ 老年人模式：首页字体放大 ============ */
 .elderly-mode .village-name { font-size: 38rpx; }
 .elderly-mode .search-input { font-size: 32rpx; }
+.elderly-mode .weather-pill-text { font-size: 30rpx; }
+.elderly-mode .weather-pill-more { font-size: 26rpx; }
 .elderly-mode .weather-temp { font-size: 60rpx; }
 .elderly-mode .weather-condition { font-size: 32rpx; }
 .elderly-mode .weather-detail { font-size: 26rpx; }
@@ -638,10 +572,7 @@
 .elderly-mode .forecast-temp { font-size: 26rpx; }
 .elderly-mode .notice-text { font-size: 30rpx; }
 .elderly-mode .feature-name { font-size: 28rpx; }
-.elderly-mode .feature-desc { font-size: 24rpx; }
 .elderly-mode .feature-icon-box { width: 112rpx; height: 112rpx; }
-.elderly-mode .feature-emoji { font-size: 54rpx; }
-.elderly-mode .quick-action-item { font-size: 30rpx; padding: 24rpx; }
 .elderly-mode .section-title { font-size: 38rpx; }
 .elderly-mode .section-more { font-size: 30rpx; }
 .elderly-mode .bus-number { font-size: 44rpx; }

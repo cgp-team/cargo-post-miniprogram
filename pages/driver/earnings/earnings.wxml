@@ -38,12 +38,15 @@
 
   <!-- 收益明细 -->
   <view class="records-section">
-    <text class="section-title">📋 收益明细</text>
+    <view class="section-title section-title-flex">
+      <icon name="list" size="32" color="#E8E6DE" />
+      <text>收益明细</text>
+    </view>
 
     <view class="record-item" wx:for="{{records}}" wx:key="id">
       <view class="record-left">
         <view class="record-type-icon">
-          <text>{{item.type === '货运订单' ? '🥬' : '📦'}}</text>
+          <icon name="{{item.type === '货运订单' ? 'leaf' : 'box'}}" size="40" color="#FFFFFF" />
         </view>
         <view class="record-info">
           <text class="record-type">{{item.type}}</text>

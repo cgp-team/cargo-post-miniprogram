@@ -2,33 +2,41 @@
 <view class="home-page {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
   <!-- 顶部站牌栏 -->
   <view class="top-bar" style="padding-top: {{statusBarHeight + 16}}px">
-    <view class="top-left">
-      <view class="location-info" bindtap="switchVillage" hover-class="hover">
-        <text class="village-name">{{currentVillage}}</text>
-        <text class="arrow-down">▾</text>
-        <text class="top-badge">县城⇄乡村</text>
+    <view class="top-row">
+      <view class="top-left">
+        <view class="location-info" bindtap="switchVillage" hover-class="hover">
+          <text class="village-name">{{currentVillage}}</text>
+          <text class="arrow-down">▾</text>
+          <text class="top-badge">县城⇄乡村</text>
+        </view>
+        <text class="top-sub">客货邮 · 城乡直达</text>
       </view>
-      <text class="top-sub">客货邮 · 城乡直达</text>
+      <view class="user-avatar" bindtap="goToProfile" hover-class="hover">
+        <image wx:if="{{userInfo.avatarUrl}}" src="{{userInfo.avatarUrl}}" mode="aspectFill" />
+        <icon wx:else name="user" size="40" color="#FFFFFF" />
+      </view>
     </view>
-    <view class="user-avatar" bindtap="goToProfile" hover-class="hover">
-      <text>{{userInfo.avatarUrl || '👤'}}</text>
+    <!-- 天气胶囊：一行浓缩，点击展开完整预报卡 -->
+    <view wx:if="{{weather.temp != null}}" class="weather-pill" bindtap="toggleWeather" hover-class="hover">
+      <icon name="sun" size="30" color="#FFFFFF" />
+      <text class="weather-pill-text">{{weather.temp}}°C {{weather.condition}}<text wx:if="{{weather.locationName}}"> · {{weather.locationName}}</text></text>
+      <text class="weather-pill-more">{{weatherExpanded ? '收起' : '4日预报'}} ›</text>
     </view>
   </view>
 
   <!-- 搜索栏 -->
-  <view class="search-bar card">
-    <text class="search-emoji">🔍</text>
+  <view class="search-bar card" bindtap="goToSearch" hover-class="hover">
+    <icon name="search" size="32" color="#8A8778" />
     <input
       class="search-input"
       type="text"
       placeholder="搜索公交线路、农产品、快递单号..."
-      bindtap="goToSearch" hover-class="hover"
       disabled
     />
   </view>
 
-  <!-- 天气卡片（秒开：先渲染缓存/兜底，再刷新真实数据） -->
-  <view wx:if="{{weather.temp != null}}" class="weather-card">
+  <!-- 天气详情卡（默认收起，点胶囊展开；主题色系） -->
+  <view wx:if="{{weatherExpanded && weather.temp != null}}" class="weather-card">
     <view class="weather-main">
       <view class="weather-left">
         <view class="weather-icon-circle">
@@ -39,7 +47,6 @@
             <text class="weather-temp">{{weather.temp}}°</text>
             <text class="weather-condition">{{weather.condition}}</text>
           </view>
-          <text wx:if="{{weather.locationName}}" class="weather-location">📍 {{weather.locationName}}</text>
           <view class="weather-detail">
             <text>💧 {{weather.humidity}}%  🌬 {{weather.wind}}</text>
           </view>
@@ -67,7 +74,10 @@
   <swiper class="notice-swiper" autoplay interval="3000" circular>
     <swiper-item wx:for="{{notices}}" wx:key="id">
       <view class="notice-item" data-item="{{item}}" bindtap="showNotice" hover-class="hover">
-        <text class="notice-tag">📢 公告</text>
+        <view class="notice-tag">
+          <icon name="notice" size="24" color="#FFFFFF" />
+          <text>公告</text>
+        </view>
         <text class="notice-text">{{item.title}}</text>
       </view>
     </swiper-item>
@@ -77,57 +87,40 @@
   <view class="feature-grid">
     <view class="feature-item" bindtap="goToBusTracking" hover-class="hover">
       <view class="feature-icon-box green-bg">
-        <text class="feature-emoji">🚌</text>
+        <icon name="bus" size="50" color="#FFFFFF" />
       </view>
       <text class="feature-name">实时公交</text>
-      <text class="feature-desc">查看车辆位置</text>
     </view>
 
     <view class="feature-item" bindtap="goToProducts" hover-class="hover">
-      <view class="feature-icon-box orange-bg">
-        <text class="feature-emoji">🥬</text>
+      <view class="feature-icon-box gold-bg">
+        <icon name="leaf" size="50" color="#FFFFFF" />
       </view>
-      <text class="feature-name">农产品选购</text>
-      <text class="feature-desc">新鲜直达餐桌</text>
+      <text class="feature-name">农产品</text>
     </view>
 
     <view class="feature-item" bindtap="goToParcel" hover-class="hover">
-      <view class="feature-icon-box blue-bg">
-        <text class="feature-emoji">📦</text>
+      <view class="feature-icon-box deep-bg">
+        <icon name="box" size="50" color="#FFFFFF" />
       </view>
       <text class="feature-name">我的快递</text>
-      <text class="feature-desc">物流全程追踪</text>
     </view>
 
     <view class="feature-item" bindtap="goToSend" hover-class="hover">
-      <view class="feature-icon-box red-bg">
-        <text class="feature-emoji">📮</text>
+      <view class="feature-icon-box clay-bg">
+        <icon name="send" size="50" color="#FFFFFF" />
       </view>
       <text class="feature-name">我要寄货</text>
-      <text class="feature-desc">一键寄送农产品</text>
-    </view>
-  </view>
-
-  <!-- 快捷操作 -->
-  <view class="quick-actions">
-    <view class="quick-action-item" bindtap="goToBusTracking" hover-class="hover">
-      <text class="quick-action-emoji">🕐</text>
-      <text>实时到站</text>
-    </view>
-    <view class="quick-action-item" bindtap="goToParcel" hover-class="hover">
-      <text class="quick-action-emoji">📍</text>
-      <text>物流追踪</text>
-    </view>
-    <view class="quick-action-item" bindtap="goToProducts" hover-class="hover">
-      <text class="quick-action-emoji">🔥</text>
-      <text>今日特惠</text>
     </view>
   </view>
 
   <!-- 公交实时到站 -->
   <view class="section">
     <view class="section-header">
-      <text class="section-title">🚌 附近公交 · 实时到站</text>
+      <view class="section-title-wrap">
+        <icon name="bus" size="32" color="#1C4B2E" />
+        <text class="section-title">附近公交 · 实时到站</text>
+      </view>
       <text class="section-more" bindtap="goToBusTracking" hover-class="hover">更多 ›</text>
     </view>
 
@@ -139,20 +132,33 @@
         bindtap="goToBusDetail" hover-class="hover"
         data-id="{{item.id}}"
       >
-        <view class="bus-header">
-          <text class="bus-number">{{item.routeNumber}}</text>
-          <text class="bus-status {{item.status === 'running' ? 'running' : ''}}">
-            {{item.status === 'running' ? '行驶中' : '已到站'}}
-          </text>
+        <view class="ticket-card__main">
+          <view class="ticket-card__serial">山乡巴士 · 城乡班线</view>
+          <view class="bus-header">
+            <text class="bus-number">{{item.routeNumber}}</text>
+            <text class="bus-status {{item.status === 'running' ? 'running' : ''}}">
+              {{item.status === 'running' ? '行驶中' : '已到站'}}
+            </text>
+          </view>
+          <view class="bus-route">
+            <icon name="pin" size="24" color="#8A8778" />
+            <text>{{item.startStation}} → {{item.endStation}}</text>
+          </view>
+          <!-- 山路线：本站到下站之间的路 -->
+          <view class="road-line"></view>
+          <view class="bus-info">
+            <text class="bus-next">下一站：{{item.nextStation}}</text>
+          </view>
         </view>
-        <view class="bus-route">
-          <text>{{item.startStation}} → {{item.endStation}}</text>
-        </view>
-        <!-- 山路线：本站到下站之间的路 -->
-        <view class="road-line"></view>
-        <view class="bus-info">
-          <text class="text-gray">下一站: {{item.nextStation}}</text>
-          <text class="text-orange">⏱ 约{{item.arriveTime}}分钟</text>
+        <view class="ticket-card__stub">
+          <block wx:if="{{item.arriveTime > 0}}">
+            <text class="ticket-card__stub-value">{{item.arriveTime}}</text>
+            <text class="ticket-card__stub-label">分钟到站</text>
+          </block>
+          <block wx:else>
+            <text class="ticket-card__stub-value">已到</text>
+            <text class="ticket-card__stub-label">本站</text>
+          </block>
         </view>
       </view>
     </view>
@@ -161,7 +167,10 @@
   <!-- 推荐农产品 -->
   <view class="section">
     <view class="section-header">
-      <text class="section-title">🌽 优质农产品 · 村里直发</text>
+      <view class="section-title-wrap">
+        <icon name="leaf" size="32" color="#1C4B2E" />
+        <text class="section-title">优质农产品 · 村里直发</text>
+      </view>
       <text class="section-more" bindtap="goToProducts" hover-class="hover">更多 ›</text>
     </view>
 
@@ -173,10 +182,16 @@
         bindtap="goToProductDetail" hover-class="hover"
         data-id="{{item.id}}"
       >
-        <view class="product-img"><text class="product-img-emoji">{{item.image}}</text></view>
+        <view class="product-img">
+          <image wx:if="{{item.imageUrl}}" class="product-img-real" src="{{item.imageUrl}}" mode="aspectFill" />
+          <icon wx:else name="leaf" size="72" color="#4CAF50" />
+        </view>
         <view class="product-info">
           <text class="product-name">{{item.name}}</text>
-          <text class="product-from">{{item.fromVillage}}</text>
+          <view class="product-from">
+            <icon name="pin" size="20" color="#8A8778" />
+            <text>{{item.fromVillage}}</text>
+          </view>
           <view class="product-price-row">
             <text class="product-price">¥{{item.price}}</text>
             <text class="product-unit">/{{item.unit}}</text>
@@ -184,11 +199,6 @@
         </view>
       </view>
     </scroll-view>
-  </view>
-
-  <!-- 悬浮寄货按钮 -->
-  <view class="fab-send" bindtap="goToSend" hover-class="hover">
-    <text class="fab-icon">📮</text>
   </view>
 
   <!-- 底部安全区 -->

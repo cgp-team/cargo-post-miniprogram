@@ -64,12 +64,30 @@
 
 .order-no {
   font-size: 24rpx;
-  color: #999;
+  color: var(--color-text-tertiary);
 }
 
 .order-status {
   font-size: 26rpx;
   font-weight: 700;
+  padding: 6rpx 20rpx;
+  border-radius: var(--radius-pill);
+}
+
+/* 状态 chip：浅底深字 */
+.order-status.status-pending {
+  color: var(--color-status-pending);
+  background: #F9E9E0;
+}
+
+.order-status.status-shipping {
+  color: var(--color-status-shipping);
+  background: var(--color-primary-light);
+}
+
+.order-status.status-done {
+  color: var(--color-status-done);
+  background: #F2F0EA;
 }
 
 .order-goods {
@@ -79,8 +97,22 @@
   padding: 20rpx 0;
 }
 
-.order-emoji {
-  font-size: 56rpx;
+.order-goods-img {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: var(--radius-s);
+  flex-shrink: 0;
+}
+
+.order-goods-img-ph {
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: var(--radius-s);
+  background: var(--color-primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .order-goods-info {
@@ -97,7 +129,7 @@
 
 .order-goods-sub {
   font-size: 24rpx;
-  color: #999;
+  color: var(--color-text-tertiary);
 }
 
 .order-goods-amount {
@@ -116,7 +148,7 @@
 
 .order-time {
   font-size: 24rpx;
-  color: #999;
+  color: var(--color-text-tertiary);
 }
 
 .order-foot-right {
@@ -151,7 +183,7 @@
 .order-nomore {
   text-align: center;
   font-size: 24rpx;
-  color: #bbb;
+  color: var(--color-text-tertiary);
   padding: 20rpx 0;
 }
 
@@ -163,14 +195,13 @@
   padding-top: 160rpx;
 }
 
-.empty-emoji {
-  font-size: 120rpx;
+.empty-icon {
   margin-bottom: 20rpx;
 }
 
 .empty-text {
   font-size: 28rpx;
-  color: #999;
+  color: var(--color-text-secondary);
   margin-bottom: 32rpx;
 }
 

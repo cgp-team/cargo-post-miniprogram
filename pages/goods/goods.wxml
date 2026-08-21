@@ -10,13 +10,14 @@
       </view>
       <text class="header-title">商城</text>
       <view class="user-avatar" bindtap="goToProfile" hover-class="hover">
-        <text>{{userInfo.nickname || '👤'}}</text>
+        <text wx:if="{{userInfo.nickname}}">{{userInfo.nickname}}</text>
+        <icon wx:else name="user" size="40" color="#FFFFFF" />
       </view>
     </view>
 
     <!-- 搜索栏 -->
-    <view class="search-bar card">
-      <text class="search-emoji">🔍</text>
+    <view class="search-bar card" bindtap="goToSearch" hover-class="hover">
+      <icon name="search" size="32" color="#8A8778" />
       <input class="search-input" type="text" placeholder="搜索农产品…" disabled />
     </view>
   </view>
@@ -42,7 +43,7 @@
 
   <!-- 空列表 -->
   <view wx:elif="{{!products.length}}" class="goods-state">
-    <text class="state-emoji">📦</text>
+    <icon class="state-icon" name="box" size="96" color="#C9C2B0" />
     <text class="state-text">暂无上架商品</text>
   </view>
 
@@ -56,7 +57,8 @@
       data-id="{{item.id}}"
     >
       <view class="product-img-wrap">
-        <text class="product-emoji">{{item.image}}</text>
+        <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" class="goods-img-real" mode="aspectFill" />
+        <icon wx:else name="leaf" size="72" color="#4CAF50" />
         <view wx:if="{{item.badge}}" class="product-badge">
           <text>🚌 {{item.badge}}</text>
         </view>

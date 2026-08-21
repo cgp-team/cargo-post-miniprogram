@@ -77,9 +77,27 @@ function getSettings() {
   return { elderlyMode, themeColor }
 }
 
+/**
+ * 语义变量（随主题派生；价格/危险色/中性文字色各主题一致）
+ * shipping 跟随主题主色，warn 用深金，保证状态色也参与换肤。
+ */
+function semanticVars(t) {
+  return {
+    price: t.clay,
+    danger: '#C0392B',
+    textSecondary: '#6B675C',
+    textTertiary: '#8A8778',
+    statusPending: t.clay,
+    statusShipping: t.primary,
+    statusDone: '#8A8778',
+    statusWarn: '#B27A12'
+  }
+}
+
 /** 生成主题 CSS 变量内联样式字符串 */
 function themeStyle(color) {
   const t = THEMES[color] || THEMES[DEFAULT_THEME]
+  const s = semanticVars(t)
   return [
     `--color-primary:${t.primary};`,
     `--color-primary-dark:${t.dark};`,
@@ -89,7 +107,15 @@ function themeStyle(color) {
     `--color-clay:${t.clay};`,
     `--color-gold:${t.gold};`,
     `--color-paper:${t.paper};`,
-    `--color-ink:${t.ink};`
+    `--color-ink:${t.ink};`,
+    `--color-price:${s.price};`,
+    `--color-danger:${s.danger};`,
+    `--color-text-secondary:${s.textSecondary};`,
+    `--color-text-tertiary:${s.textTertiary};`,
+    `--color-status-pending:${s.statusPending};`,
+    `--color-status-shipping:${s.statusShipping};`,
+    `--color-status-done:${s.statusDone};`,
+    `--color-status-warn:${s.statusWarn};`
   ].join('')
 }
 
