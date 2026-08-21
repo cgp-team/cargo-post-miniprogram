@@ -121,7 +121,7 @@
   justify-content: center;
 }
 
-.photo-camera { font-size: 80rpx; margin-bottom: 16rpx; }
+.photo-camera { margin-bottom: 16rpx; }
 .photo-hint { font-size: 30rpx; color: #333; font-weight: 600; margin-bottom: 8rpx; }
 .photo-sub { font-size: 24rpx; color: #757575; }
 
@@ -161,7 +161,7 @@
   text-align: center;
 }
 
-.match-emoji { font-size: 100rpx; margin-bottom: 16rpx; }
+.match-emoji { margin-bottom: 16rpx; }
 .match-title { font-size: 38rpx; font-weight: 700; color: var(--color-primary); margin-bottom: 30rpx; }
 
 .match-bus-card {
@@ -172,62 +172,7 @@
   margin-bottom: 24rpx;
 }
 
-.bus-icon-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  margin-bottom: 16rpx;
-}
-
-.bus-emoji { font-size: 52rpx; }
-.bus-line {
-  width: 120rpx;
-  height: 3rpx;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
-  margin: 0 10rpx;
-}
-.bus-stop { font-size: 36rpx; }
-
-.bus-route-text {
-  font-size: 48rpx;
-  font-weight: 800;
-  color: var(--color-primary);
-  display: block;
-  margin-bottom: 8rpx;
-}
-
 .bus-detail { font-size: 26rpx; color: #666; display: block; margin-bottom: 24rpx; }
-
-.countdown-box {
-  display: inline-flex;
-  align-items: baseline;
-  gap: 6rpx;
-  background: #fff;
-  padding: 20rpx 50rpx;
-  border-radius: 20rpx;
-  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.08);
-}
-
-.countdown-num {
-  font-size: 80rpx;
-  font-weight: 800;
-  color: var(--color-clay);
-  line-height: 1;
-}
-
-.countdown-unit {
-  font-size: 36rpx;
-  color: var(--color-clay);
-  font-weight: 600;
-}
-
-.countdown-hint {
-  display: block;
-  font-size: 26rpx;
-  color: #666;
-  margin-top: 16rpx;
-}
 
 /* 温馨提示 */
 .match-reminder {
@@ -243,7 +188,9 @@
   font-size: 28rpx;
   font-weight: 700;
   color: var(--color-clay);
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
   margin-bottom: 10rpx;
 }
 
@@ -279,7 +226,7 @@
 
 .station-arrow {
   font-size: 26rpx;
-  color: #999;
+  color: var(--color-text-tertiary);
 }
 
 /* 收货信息 */
@@ -309,6 +256,9 @@
 .receiver-addr-book {
   font-size: 26rpx;
   color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
 }
 
 /* 提交成功 - 订单号 */
@@ -362,7 +312,5 @@
 .elderly-mode .photo-hint { font-size: 36rpx; }
 .elderly-mode .photo-sub { font-size: 28rpx; }
 .elderly-mode .match-title { font-size: 44rpx; }
-.elderly-mode .bus-route-text { font-size: 56rpx; }
 .elderly-mode .bus-detail { font-size: 30rpx; }
-.elderly-mode .countdown-hint { font-size: 30rpx; }
 .elderly-mode .reminder-text { font-size: 28rpx; }

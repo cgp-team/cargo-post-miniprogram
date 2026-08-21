@@ -157,7 +157,13 @@
 }
 
 .ov-num.blue {
-  color: #1565C0;
+  color: var(--color-gold);
+}
+
+.section-title-flex {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
 }
 
 .overview-sub {

@@ -186,7 +186,7 @@
 }
 
 .required {
-  color: #E53935;
+  color: var(--color-danger);
   font-weight: 600;
 }
 
