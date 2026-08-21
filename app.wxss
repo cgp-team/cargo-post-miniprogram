@@ -236,36 +236,79 @@ page {
   letter-spacing: 1rpx;
 }
 
-/* 车票卡：暖白底 + 右侧虚线撕口 + 左上角票号位 */
+/* 车票卡：主券 + 右侧副券，虚线撕票口上下打孔——像一张真的汽车票 */
 .ticket-card {
   position: relative;
+  display: flex;
   background: #FFFDF8;
-  border-radius: 16rpx 8rpx 8rpx 16rpx;
-  padding: 28rpx 30rpx;
-  box-shadow: 0 2rpx 8rpx rgba(60, 50, 30, 0.05), 0 8rpx 24rpx rgba(60, 50, 30, 0.06);
-  overflow: hidden;
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow-card);
+  overflow: hidden; /* 配合打孔圆：探出卡片边缘的半圆被裁掉，留下缺口 */
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.ticket-card::after {
-  /* 右侧锯齿撕口：半圆向左凸入卡片，米纸底色透出（每 16rpx 一个） */
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  width: 16rpx;
-  background: radial-gradient(circle at 0% 50%, #F6F2E9 8rpx, transparent 8.5rpx) 0 0 / 16rpx 16rpx repeat-y;
+.ticket-card:active {
+  transform: translateY(2rpx);
+  box-shadow: 0 1rpx 4rpx rgba(60, 50, 30, 0.05), 0 4rpx 12rpx rgba(60, 50, 30, 0.06);
 }
 
-.ticket-card::before {
-  /* 撕口内侧虚线（车票副券线） */
+/* 主券：票面内容区 */
+.ticket-card__main {
+  flex: 1;
+  min-width: 0;
+  padding: 24rpx 28rpx;
+}
+
+/* 票号位：票面顶部的小字编号行（可选） */
+.ticket-card__serial {
+  font-size: 20rpx;
+  letter-spacing: 3rpx;
+  color: var(--color-text-tertiary);
+  margin-bottom: 12rpx;
+}
+
+/* 副券：右侧撕票联 */
+.ticket-card__stub {
+  position: relative;
+  flex: none;
+  width: 148rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4rpx;
+  padding: 20rpx 12rpx;
+  background: #FCF8EC; /* 副券略泛黄，与主券区分 */
+  border-left: 2rpx dashed #D8D2C4; /* 撕票线 */
+}
+
+/* 撕票线两端的打孔缺口（车票的标志性特征） */
+.ticket-card__stub::before,
+.ticket-card__stub::after {
   content: '';
   position: absolute;
-  top: 0;
-  bottom: 0;
-  right: 16rpx;
-  width: 2rpx;
-  background: repeating-linear-gradient(180deg, #D8D2C4 0, #D8D2C4 8rpx, transparent 8rpx, transparent 16rpx);
+  left: -13rpx;
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 50%;
+  background: var(--color-paper); /* 透出页底色，形成被撕掉的缺口 */
+  box-shadow: inset 0 1rpx 3rpx rgba(60, 50, 30, 0.10);
+}
+
+.ticket-card__stub::before { top: -13rpx; }
+.ticket-card__stub::after { bottom: -13rpx; }
+
+/* 副券内容：大字 + 小标签（ETA、票价、检票口等） */
+.ticket-card__stub-value {
+  font-size: 38rpx;
+  font-weight: 800;
+  color: var(--color-clay);
+  line-height: 1.1;
+}
+
+.ticket-card__stub-label {
+  font-size: 22rpx;
+  color: var(--color-text-secondary);
 }
 
 /* 山路线：虚线道路 + 站点圆点（时间线/进度用） */
@@ -365,4 +408,13 @@ page {
 
 .elderly-mode .card {
   padding: 34rpx;
+}
+
+.elderly-mode .ticket-card__stub-value {
+  font-size: 46rpx;
+}
+
+.elderly-mode .ticket-card__stub-label,
+.elderly-mode .ticket-card__serial {
+  font-size: 26rpx;
 }
