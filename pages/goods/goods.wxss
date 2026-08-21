@@ -53,18 +53,13 @@
   margin-top: 20rpx;
   display: flex;
   align-items: center;
+  gap: 14rpx;
   padding: 20rpx 28rpx;
   border-radius: 20rpx;
   background: #fff;
   box-shadow: 0 8rpx 28rpx rgba(0,0,0,0.10);
   position: relative;
   z-index: 3;
-}
-
-.search-emoji {
-  font-size: 36rpx;
-  margin-right: 14rpx;
-  opacity: 0.45;
 }
 
 .search-input {
@@ -90,16 +85,18 @@
   font-size: 26rpx;
   color: #666;
   background: #fff;
+  border: 3rpx solid transparent;
   border-radius: 32rpx;
   box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.04);
   transition: all 0.15s ease;
 }
 
 .category-tag.active {
-  color: var(--color-on-primary);
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-  box-shadow: 0 4rpx 14rpx rgba(46,125,50,0.3);
-  font-weight: 600;
+  color: var(--color-primary-dark);
+  background: #fff;
+  border-color: var(--color-primary-dark);
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.04);
+  font-weight: 700;
 }
 
 /* 商品网格 */
@@ -132,17 +129,18 @@
   position: relative;
 }
 
-.product-emoji {
-  font-size: 100rpx;
+.goods-img-real {
+  width: 100%;
+  height: 100%;
 }
 
 .product-badge {
   position: absolute;
   bottom: 10rpx;
   left: 10rpx;
-  background: linear-gradient(135deg, var(--color-clay), var(--color-clay));
+  background: var(--color-clay);
   color: #fff;
-  font-size: 20rpx;
+  font-size: 22rpx;
   font-weight: 600;
   padding: 6rpx 14rpx;
   border-radius: 16rpx;
@@ -162,7 +160,7 @@
 
 .product-from {
   font-size: 22rpx;
-  color: #757575;
+  color: var(--color-text-secondary);
   margin-bottom: 10rpx;
 }
 
@@ -175,12 +173,12 @@
 .product-price {
   font-size: 34rpx;
   font-weight: 700;
-  color: #E53935;
+  color: var(--color-price);
 }
 
 .product-unit {
   font-size: 22rpx;
-  color: #757575;
+  color: var(--color-text-tertiary);
 }
 
 .safe-area-bottom {
@@ -220,12 +218,11 @@
   to { transform: rotate(360deg); }
 }
 
-.state-emoji {
-  font-size: 80rpx;
+.state-icon {
   margin-bottom: 16rpx;
 }
 
 .state-text {
   font-size: 26rpx;
-  color: #757575;
+  color: var(--color-text-secondary);
 }

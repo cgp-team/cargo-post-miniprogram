@@ -2,7 +2,9 @@
 <view class="page-detail {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
   <!-- 自定义导航 -->
   <view class="detail-nav" style="padding-top: {{statusBarHeight + 8}}px">
-    <view class="nav-back" bindtap="goBack" hover-class="hover">←</view>
+    <view class="nav-back" bindtap="goBack" hover-class="hover">
+      <view class="nav-back-flip"><icon name="arrow" size="36" color="#FFFFFF" /></view>
+    </view>
     <text class="nav-title">商品详情</text>
   </view>
 
@@ -10,8 +12,9 @@
     <!-- 主图区 -->
     <view class="detail-hero">
       <view class="hero-img">
-        <text class="hero-emoji">{{product.image}}</text>
-        <view wx:if="{{product.badge}}" class="hero-badge">🚌 {{product.badge}}</view>
+        <image wx:if="{{product.imageUrl}}" src="{{product.imageUrl}}" class="hero-img-real" mode="aspectFill" />
+        <icon wx:else name="leaf" size="180" color="#4CAF50" />
+        <view wx:if="{{product.badge}}" class="hero-badge"><icon name="bus" size="24" color="#FFFFFF" /> {{product.badge}}</view>
       </view>
     </view>
 
@@ -23,7 +26,10 @@
       </view>
       <text class="detail-name">{{product.name}}</text>
       <view class="detail-meta">
-        <text class="meta-item">🏘 {{product.fromVillage}}</text>
+        <view class="meta-item meta-flex">
+          <icon name="pin" size="22" color="#6B675C" />
+          <text>{{product.fromVillage}}</text>
+        </view>
         <text class="meta-item">库存 {{product.stock}}</text>
       </view>
     </view>
@@ -51,7 +57,10 @@
       </view>
       <block wx:if="{{product}}">
         <view class="popup-product">
-          <text class="popup-emoji">{{product.image}}</text>
+          <view class="popup-img">
+            <image wx:if="{{product.imageUrl}}" src="{{product.imageUrl}}" mode="aspectFill" />
+            <icon wx:else name="leaf" size="40" color="#4CAF50" />
+          </view>
           <view class="popup-product-info">
             <text class="popup-product-name">{{product.name}}</text>
             <text class="popup-price">¥{{product.price}}/{{product.unit}}</text>
