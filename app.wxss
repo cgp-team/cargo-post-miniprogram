@@ -21,6 +21,22 @@ page {
   --color-paper: #F6F2E9;  /* 米纸底：页面底色 */
   --color-ink: #2B2B28;    /* 墨字：正文 */
 
+  /* 语义变量（appearance.js 按主题注入同组变量） */
+  --color-price: #C75B2A;          /* 价格：统一陶土橙，不再用警示红 */
+  --color-danger: #C0392B;         /* 危险操作（退出/删除）专用，与价格解耦 */
+  --color-text-secondary: #6B675C; /* 辅助文字（对比度 ≥ 4.5:1 的适老化基线） */
+  --color-text-tertiary: #8A8778;  /* 最弱辅助文字，不允许再浅 */
+  --color-status-pending: #C75B2A; /* 待付款/待处理 */
+  --color-status-shipping: #2E7D32;/* 运输中/进行中（跟随主题主色） */
+  --color-status-done: #8A8778;    /* 已完成/已结束 */
+  --color-status-warn: #B27A12;    /* 提醒/临近 */
+  --radius-s: 8rpx;
+  --radius-m: 16rpx;
+  --radius-l: 24rpx;
+  --radius-pill: 999rpx;
+  --shadow-card: 0 2rpx 8rpx rgba(60, 50, 30, 0.05), 0 8rpx 24rpx rgba(60, 50, 30, 0.06);
+  --shadow-float: 0 8rpx 24rpx rgba(60, 50, 30, 0.12);
+
   background-color: var(--color-paper);
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
     'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
@@ -295,7 +311,7 @@ page {
 }
 
 .text-gray {
-  color: #757575;
+  color: var(--color-text-secondary);
 }
 
 .text-center {
