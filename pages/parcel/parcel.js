@@ -89,6 +89,14 @@ Page({
     wx.navigateTo({ url: '/pages/bus/index' })
   },
 
+  /** 车来取货/送货提醒文案：承运车辆实时位置 → 距目标站点分钟（无实时位置返回空） */
+  buildCarrierText(o) {
+    if (!o || o.carrierEtaMinutes == null || o.carrierEtaMinutes <= 0) return ''
+    const station = o.targetStation || '站点'
+    const dist = o.carrierDistanceKm != null ? `（约 ${o.carrierDistanceKm} km）` : ''
+    return `${o.vehiclePlate || '班车'} 距${station}约 ${o.carrierEtaMinutes} 分钟${dist}`
+  },
+
   onPullDownRefresh() {
     if (this.data.activeTab === 0) {
       this.reloadSendList().finally(() => wx.stopPullDownRefresh())
@@ -184,7 +192,8 @@ Page({
         statusName: o.statusName || this.statusText(o.status),
         statusClass: this.statusClass(o.status),
         showCode: false,
-        createTimeText: this.formatTime(o.createTime)
+        createTimeText: this.formatTime(o.createTime),
+        carrierText: this.buildCarrierText(o)
       }))
       const merged = this.data.pageNo === 1 ? list : this.data.sendList.concat(list)
       const total = res.total || 0
@@ -227,6 +236,10 @@ Page({
   /** 到达预估文案：优先「预计 HH:mm 到达 X站」，否则「约 N 分钟后到达 X站」 */
   buildEtaText(res) {
     if (!res) return ''
+    // 车来取货/送货提醒：承运车辆实时位置估算优先（距目标站点分钟）
+    if (res.carrierEtaMinutes != null && res.carrierEtaMinutes > 0) {
+      return this.buildCarrierText(res)
+    }
     const station = res.targetStation || ''
     if (res.estimatedArrivalTime) {
       const t = typeof res.estimatedArrivalTime === 'number' ? new Date(res.estimatedArrivalTime) : null
