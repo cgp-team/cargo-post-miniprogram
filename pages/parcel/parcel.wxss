@@ -371,19 +371,6 @@
 .parcel-carrier-eta {
   font-weight: 600;
 }
-/* 车来取货/送货提醒：我的寄货列表行（横向图标+文案，点击进实时公交） */
-.parcel-carrier-list {
-  margin-top: 12rpx;
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-  color: var(--color-primary);
-  font-size: 26rpx;
-}
-.carrier-link {
-  color: var(--color-primary);
-  font-weight: 600;
-}
 .parcel-qr-copy {
   margin-top: 16rpx;
   padding: 12rpx 40rpx;
