@@ -5,6 +5,7 @@
 const api = require('../../utils/api')
 const appearance = require('../../utils/appearance')
 const qrcodeRender = require('../../utils/qrcode-render')
+const { formatBackendTime, VILLAGES } = require('../../utils/util')
 
 /** 运输订单状态流（对应 TransportOrderStatusEnum） */
 const STATUS_FLOW = [
@@ -266,24 +267,16 @@ Page({
   },
 
   formatTime(t) {
-    if (!t) return ''
-    // 后端 LocalDateTime 全局序列化为毫秒时间戳，兼容字符串格式
-    if (typeof t === 'number') {
-      const d = new Date(t)
-      const p = (n) => (n < 10 ? '0' + n : '' + n)
-      return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`
-    }
-    return String(t).replace('T', ' ').substring(0, 16)
+    return formatBackendTime(t)
   },
 
   /** 切换村庄 */
   switchVillage() {
-    const villages = ['云山村', '大湾村', '青山镇', '竹林乡', '溪口村', '双河镇']
     wx.showActionSheet({
-      itemList: villages,
+      itemList: VILLAGES,
       success: (res) => {
-        getApp().globalData.currentVillage = villages[res.tapIndex]
-        this.setData({ currentVillage: villages[res.tapIndex] })
+        getApp().globalData.currentVillage = VILLAGES[res.tapIndex]
+        this.setData({ currentVillage: VILLAGES[res.tapIndex] })
       }
     })
   }

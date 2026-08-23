@@ -50,14 +50,10 @@ Page({
     totalStops: 0,
     currentStopIndex: 0,
     progressPercent: 0,
-    progressFillStyle: 'width: 0%;',
-    progressDotStyle: 'left: 0%;',
 
     // 行李舱运力
     cargoCapacity: 0,        // 空余仓位百分比
     cargoUsed: 0,            // 已用仓位百分比
-    cargoFillStyle: 'height: 0%;',
-    cargoUsedStyle: 'bottom: 0%;',
 
     // 语音播报
     voiceText: '',
@@ -181,7 +177,6 @@ Page({
       cargoUsed: usedPct,
       eta: this.calcEta(current)
     })
-    this.updateComputedStyles()
 
     // 班次已在途：恢复行驶状态（重进小程序不丢进度）
     if (current.status === 1) {
@@ -220,7 +215,6 @@ Page({
       currentStopIndex: 0,
       progressPercent: 0
     })
-    this.updateComputedStyles()
     wx.showToast({ title: '车辆已出发', icon: 'success', duration: 1500 })
     this.startLocationReport()
   },
@@ -293,7 +287,6 @@ Page({
       nextStationDistance: dist,
       progressPercent: percent
     })
-    this.updateComputedStyles()
   },
 
   /**
@@ -326,7 +319,6 @@ Page({
         progressPercent: 100,
         speed: 0
       })
-      this.updateComputedStyles()
       wx.showToast({ title: '班次已完成', icon: 'success', duration: 2000 })
       this.loadAll() // 刷新班次与任务
       return
@@ -335,19 +327,6 @@ Page({
       status: 'stopped',
       currentStopIndex: nextIdx,
       currentStation: station.stationName
-    })
-    this.updateComputedStyles()
-  },
-
-  /**
-   * 更新所有计算样式
-   */
-  updateComputedStyles() {
-    this.setData({
-      progressFillStyle: 'width: ' + this.data.progressPercent + '%;',
-      progressDotStyle: 'left: ' + this.data.progressPercent + '%;',
-      cargoFillStyle: 'height: ' + this.data.cargoCapacity + '%;',
-      cargoUsedStyle: 'bottom: ' + this.data.cargoUsed + '%;'
     })
   },
 
@@ -358,7 +337,6 @@ Page({
     const value = e.detail.value || e.currentTarget.dataset.value
     if (value !== undefined) {
       this.setData({ cargoCapacity: value })
-      this.updateComputedStyles()
     }
   },
 
@@ -501,7 +479,6 @@ Page({
       cargoCapacity: pct,
       cargoUsed: usedPct
     })
-    this.updateComputedStyles()
   },
 
   /**

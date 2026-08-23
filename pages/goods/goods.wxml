@@ -57,8 +57,8 @@
       data-id="{{item.id}}"
     >
       <view class="product-img-wrap">
-        <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" class="goods-img-real" mode="aspectFill" />
-        <icon wx:else name="leaf" size="72" color="#4CAF50" />
+        <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" class="goods-img-real" mode="aspectFill" lazy-load />
+        <icon wx:else name="leaf" size="72" color="{{iconAccent}}" />
         <view wx:if="{{item.badge}}" class="product-badge">
           <text>🚌 {{item.badge}}</text>
         </view>

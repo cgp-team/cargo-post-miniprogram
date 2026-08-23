@@ -5,6 +5,25 @@
 const api = require('../../utils/api')
 const appearance = require('../../utils/appearance')
 const productImg = require('../../utils/product-img')
+const { VILLAGES } = require('../../utils/util')
+
+/** 分类名 → 商品名关键词（后端暂无分类字段，按名称归类） */
+const CATEGORY_KEYWORDS = {
+  1: ['果', '柚', '橙', '李', '桃', '果'],   // 水果（'果'兼顾泛水果名）
+  2: ['菜', '萝卜', '红薯', '土豆', '菌', '笋'], // 蔬菜（薯类归蔬菜）
+  3: ['蛋', '鸡', '鸭'],                   // 禽蛋（鸡蛋也在此类）
+  4: ['茶'],                             // 茶叶（油茶/苦丁茶同样命中）
+  5: ['粉', '面', '干货', '核桃', '坚果', '花生', '栗', '蜂蜜', '腊'] // 干货/山货（红薯粉/粉丝归干货）
+}
+
+/** 商品归属分类 id，无匹配归 0（仅“全部”可见） */
+function matchCategory(p) {
+  const text = String((p && p.name) || '')
+  for (const id in CATEGORY_KEYWORDS) {
+    if (CATEGORY_KEYWORDS[id].some((k) => text.indexOf(k) >= 0)) return Number(id)
+  }
+  return 0
+}
 
 Page({
   data: {
@@ -22,6 +41,7 @@ Page({
       { id: 4, name: '茶叶' },
       { id: 5, name: '干货' }
     ],
+    allProducts: [],
     products: [],
     loading: true
   },
@@ -51,13 +71,14 @@ Page({
     this.setData({ loading: true })
     try {
       const list = (await api.listProducts()) || []
-      this.setData({
-        products: list.map((p) => ({
-          ...p,
-          price: Number(p.price).toFixed(2),
-          imageUrl: productImg.resolve(p)
-        }))
-      })
+      const allProducts = list.map((p) => ({
+        ...p,
+        categoryId: matchCategory(p),
+        price: Number(p.price).toFixed(2),
+        imageUrl: productImg.resolve(p)
+      }))
+      this.setData({ allProducts })
+      this.applyCategory()
     } catch (e) {
       // 错误提示已由 api.js 统一处理
     } finally {
@@ -65,15 +86,31 @@ Page({
     }
   },
 
+  /** 按当前分类过滤展示列表 */
+  applyCategory() {
+    const id = this.data.activeCategory
+    const products = id === 0
+      ? this.data.allProducts
+      : this.data.allProducts.filter((p) => p.categoryId === id)
+    this.setData({ products })
+  },
+
   /** 点击搜索条（入口占位） */
   goToSearch() {
     wx.showToast({ title: '搜索功能开发中', icon: 'none' })
   },
 
-  /** 切换分类 */
+  /** 切换分类（同步过滤商品列表） */
   switchCategory(e) {
-    const id = e.currentTarget.dataset.id
+    const id = Number(e.currentTarget.dataset.id)
+    if (id === this.data.activeCategory) return
     this.setData({ activeCategory: id })
+    this.applyCategory()
+  },
+
+  /** 顶部头像 → 个人中心 */
+  goToProfile() {
+    wx.switchTab({ url: '/pages/mine/mine' })
   },
 
   /** 点击商品 → 跳详情页 */
@@ -84,12 +121,11 @@ Page({
 
   /** 切换村庄 */
   switchVillage() {
-    const villages = ['云山村', '大湾村', '青山镇', '竹林乡', '溪口村', '双河镇']
     wx.showActionSheet({
-      itemList: villages,
+      itemList: VILLAGES,
       success: (res) => {
-        getApp().globalData.currentVillage = villages[res.tapIndex]
-        this.setData({ currentVillage: villages[res.tapIndex] })
+        getApp().globalData.currentVillage = VILLAGES[res.tapIndex]
+        this.setData({ currentVillage: VILLAGES[res.tapIndex] })
       }
     })
   },

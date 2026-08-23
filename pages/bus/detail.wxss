@@ -173,3 +173,10 @@
 .elderly-mode .stop-state {
   font-size: 24rpx;
 }
+/* 补充：线路副标题/空态提示同步放大 */
+.elderly-mode .head-route {
+  font-size: 30rpx;
+}
+.elderly-mode .empty {
+  font-size: 30rpx;
+}

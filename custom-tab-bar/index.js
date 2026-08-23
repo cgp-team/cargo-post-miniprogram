@@ -10,6 +10,7 @@ const appearance = require('../utils/appearance')
 Component({
   data: {
     selected: 0,
+    elderlyMode: false,
     themeStyle: '',
     list: [
       { pagePath: '/pages/index/index',  text: '首页', icon: 'home' },
@@ -34,9 +35,12 @@ Component({
   methods: {
     /** 根据当前页面路由同步选中 tab */
     _syncSelected() {
-      // 同步主题色（含切主题后回首页的情况）
+      // 同步主题色与老年人模式（含切主题后回首页的情况）
       const s = appearance.getSettings()
-      this.setData({ themeStyle: appearance.themeStyle(s.themeColor) })
+      this.setData({
+        themeStyle: appearance.themeStyle(s.themeColor),
+        elderlyMode: s.elderlyMode
+      })
 
       const pages = getCurrentPages()
       const page = pages[pages.length - 1]

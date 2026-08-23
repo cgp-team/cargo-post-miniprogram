@@ -5,6 +5,8 @@ const api = require('../../utils/api')
 const weatherApi = require('../../utils/weather')
 const appearance = require('../../utils/appearance')
 const productImg = require('../../utils/product-img')
+const auth = require('../../utils/auth')
+const { VILLAGES } = require('../../utils/util')
 
 Page({
   data: {
@@ -305,10 +307,9 @@ Page({
    */
   switchVillage() {
     wx.showActionSheet({
-      itemList: ['云山村', '大湾村', '青山镇', '竹林乡', '溪口村', '双河镇'],
+      itemList: VILLAGES,
       success: (res) => {
-        const villages = ['云山村', '大湾村', '青山镇', '竹林乡', '溪口村', '双河镇']
-        this.setData({ currentVillage: villages[res.tapIndex] })
+        this.setData({ currentVillage: VILLAGES[res.tapIndex] })
         this.loadHomeData()
       }
     })
@@ -362,11 +363,7 @@ Page({
    * 跳转我要寄货
    */
   goToSend() {
-    const token = wx.getStorageSync('token')
-    if (!token) {
-      wx.reLaunch({ url: '/pages/login/login' })
-      return
-    }
+    if (!auth.requireLogin({ content: '登录后可发起寄货' })) return
     wx.navigateTo({ url: '/pages/send/send' })
   },
 
@@ -378,11 +375,10 @@ Page({
   },
 
   /**
-   * 下拉刷新
+   * 下拉刷新：等数据回来后再收起动画，与 goods/orders 行为一致
    */
   onPullDownRefresh() {
-    this.loadHomeData()
-    this.loadBusData()
-    wx.stopPullDownRefresh()
+    Promise.all([this.loadHomeData(), this.loadBusData()])
+      .finally(() => wx.stopPullDownRefresh())
   }
 })

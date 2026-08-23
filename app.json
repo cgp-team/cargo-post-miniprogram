@@ -13,7 +13,6 @@
     "pages/send/send",
     "pages/orders/orders",
     "pages/settings/settings",
-    "pages/register/register",
     "pages/driver/workbench/workbench",
     "pages/driver/routes/routes",
     "pages/driver/earnings/earnings",

@@ -1,5 +1,5 @@
 <!-- 司机路线页 -->
-<view class="routes-page">
+<view class="routes-page {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
   <!-- 顶部 -->
   <view class="page-header">
     <view class="header-safe" style="height: {{statusBarHeight}}px;"></view>
@@ -47,5 +47,5 @@
   </view>
 
   <!-- 底部TabBar -->
-  <driver-tab-bar current="routes"></driver-tab-bar>
+  <driver-tab-bar current="routes" elderly="{{elderlyMode}}"></driver-tab-bar>
 </view>

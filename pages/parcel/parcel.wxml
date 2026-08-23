@@ -44,7 +44,7 @@
         </view>
         <view class="arrange-mid">
           <view class="mid-line"></view>
-          <icon name="bus" size="30" color="#2E7D32" class="mid-bus" />
+          <icon name="bus" size="30" color="{{iconColor}}" class="mid-bus" />
         </view>
         <view class="arrange-station">
           <text class="station-name">{{item.alightingStationName || '—'}}</text>
@@ -57,7 +57,7 @@
           {{item.planStatus === 1 || item.planStatus === 2 ? '在途' : item.statusName}}
         </text>
       </view>
-      <view class="arrange-cta" bindtap="goToBusTracking"><icon name="pin" size="24" color="#2E7D32" />查看车辆实时位置 ›</view>
+      <view class="arrange-cta" bindtap="goToBusTracking"><icon name="pin" size="24" color="{{iconColor}}" />查看车辆实时位置 ›</view>
     </view>
   </view>
 
@@ -80,7 +80,7 @@
     <view class="parcel-card" wx:for="{{sendList}}" wx:key="id">
       <view class="parcel-header">
         <view class="parcel-title-row">
-          <icon name="box" size="48" color="#2E7D32" />
+          <icon name="box" size="48" color="{{iconColor}}" />
           <view class="parcel-info">
             <text class="parcel-name">{{item.goodsName || '寄货'}}</text>
             <text class="parcel-no">单号: {{item.orderNo}}</text>
@@ -94,7 +94,7 @@
       </view>
       <!-- 车来取货/送货提醒：承运车辆实时位置 → 距目标站点分钟 -->
       <view wx:if="{{item.carrierText}}" class="parcel-carrier-list" bindtap="goToBusTracking" hover-class="hover">
-        <icon name="bus" size="26" color="#2E7D32" />
+        <icon name="bus" size="26" color="{{iconColor}}" />
         <text>{{item.carrierText}}</text>
       </view>
       <!-- 邮快件取件码默认打码，点「查看」展开明文（点明文复制，司机核销凭码） -->
@@ -122,7 +122,7 @@
     <view wx:if="{{trackResult}}" class="parcel-card">
       <view class="parcel-header">
         <view class="parcel-title-row">
-          <icon name="box" size="48" color="#2E7D32" />
+          <icon name="box" size="48" color="{{iconColor}}" />
           <view class="parcel-info">
             <text class="parcel-name">{{trackResult.goodsName || '寄货'}}</text>
             <text class="parcel-no">单号: {{trackResult.orderNo}}</text>
@@ -141,9 +141,9 @@
 
       <!-- 承运班次与到达预估（已分配/已发车时由后端返回） -->
       <view wx:if="{{trackResult.vehiclePlate || trackResult.etaText}}" class="parcel-carrier">
-        <view wx:if="{{trackResult.vehiclePlate}}" class="carrier-row"><icon name="bus" size="28" color="#2E7D32" /><text>{{trackResult.shiftCode || '班车'}} · {{trackResult.vehiclePlate}}</text></view>
-        <view wx:if="{{trackResult.etaText}}" class="carrier-row parcel-carrier-eta"><icon name="clock" size="28" color="#2E7D32" /><text>{{trackResult.etaText}}</text></view>
-        <view wx:if="{{trackResult.carrierLongitude}}" class="carrier-row" bindtap="goToBusTracking" hover-class="hover"><icon name="pin" size="28" color="#2E7D32" /><text class="carrier-link">查看车辆实时位置 ›</text></view>
+        <view wx:if="{{trackResult.vehiclePlate}}" class="carrier-row"><icon name="bus" size="28" color="{{iconColor}}" /><text>{{trackResult.shiftCode || '班车'}} · {{trackResult.vehiclePlate}}</text></view>
+        <view wx:if="{{trackResult.etaText}}" class="carrier-row parcel-carrier-eta"><icon name="clock" size="28" color="{{iconColor}}" /><text>{{trackResult.etaText}}</text></view>
+        <view wx:if="{{trackResult.carrierLongitude}}" class="carrier-row" bindtap="goToBusTracking" hover-class="hover"><icon name="pin" size="28" color="{{iconColor}}" /><text class="carrier-link">查看车辆实时位置 ›</text></view>
       </view>
 
       <!-- 进度条 -->

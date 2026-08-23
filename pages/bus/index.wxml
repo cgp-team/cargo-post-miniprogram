@@ -37,12 +37,12 @@
   <view class="bus-list">
     <view class="section-header">
       <view class="section-title-wrap">
-        <icon name="bus" size="30" color="#1C4B2E" />
+        <icon name="bus" size="30" color="{{iconDeep}}" />
         <text class="section-title">{{currentLineName}}</text>
       </view>
       <text class="section-sub" bindtap="loadLines">刷新 ↻</text>
     </view>
-    <view wx:if="{{hasError}}" class="empty">加载失败，请下拉刷新重试</view>
+    <view wx:if="{{hasError}}" class="empty" bindtap="loadLines" hover-class="hover">加载失败，点击重试</view>
     <view wx:elif="{{!buses.length}}" class="empty">该线路当前暂无车辆在线</view>
     <view
       class="bus-card ticket-card"
@@ -82,6 +82,7 @@
   </block>
   <view wx:else class="empty-page">
     <icon name="bus" size="96" color="#C9C2B0" />
-    <text class="empty-text">{{hasError ? '加载失败，请下拉刷新重试' : '暂无公交线路数据'}}</text>
+    <text class="empty-text">{{hasError ? '加载失败' : '暂无公交线路数据'}}</text>
+    <view wx:if="{{hasError}}" class="retry-btn" bindtap="loadLines" hover-class="hover">点击重试</view>
   </view>
 </view>

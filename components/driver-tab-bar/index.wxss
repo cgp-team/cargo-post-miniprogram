@@ -55,3 +55,13 @@
   font-weight: 700;
   color: #8FE09A;
 }
+
+/* 按压反馈 */
+.tab-hover {
+  opacity: 0.7;
+}
+
+/* 老年人模式：字号放大 */
+.elderly-mode .tab-label {
+  font-size: 30rpx;
+}

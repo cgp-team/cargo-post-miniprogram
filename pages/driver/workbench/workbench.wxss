@@ -741,3 +741,14 @@
 .verify-btn:active {
   box-shadow: 0 8rpx 24rpx rgba(46,125,50,0.3);
 }
+
+/* ============ 老年人模式：司机端工作台字号放大 ============ */
+.elderly-mode .route-badge { font-size: 52rpx; }
+.elderly-mode .status-tag { font-size: 28rpx; }
+.elderly-mode .stop-label { font-size: 26rpx; }
+.elderly-mode .next-stop-name { font-size: 34rpx; }
+.elderly-mode .next-stop-dist { font-size: 32rpx; }
+.elderly-mode .cargo-title { font-size: 32rpx; }
+.elderly-mode .start-text { font-size: 52rpx; }
+.elderly-mode .speed-num { font-size: 68rpx; }
+.elderly-mode .speed-unit { font-size: 28rpx; }

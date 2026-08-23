@@ -170,6 +170,16 @@
   align-items: center;
   padding: 160rpx 60rpx;
 }
+
+/* 错误态重试按钮 */
+.retry-btn {
+  margin-top: 24rpx;
+  padding: 12rpx 48rpx;
+  border: 2rpx solid var(--color-primary, #2E7D32);
+  color: var(--color-primary, #2E7D32);
+  border-radius: 999rpx;
+  font-size: 26rpx;
+}
 .empty-text {
   font-size: 26rpx;
   color: var(--color-text-secondary);
@@ -188,4 +198,24 @@
 }
 .elderly-mode .bus-next {
   font-size: 26rpx;
+}
+/* 补充：标题/副文案/线路副标题/空态等小字号同步放大 */
+.elderly-mode .line-sub {
+  font-size: 24rpx;
+}
+.elderly-mode .section-title {
+  font-size: 36rpx;
+}
+.elderly-mode .section-sub {
+  font-size: 28rpx;
+}
+.elderly-mode .map-legend {
+  font-size: 26rpx;
+}
+.elderly-mode .empty-text {
+  font-size: 30rpx;
+}
+.elderly-mode .retry-btn {
+  font-size: 30rpx;
+  padding: 16rpx 56rpx;
 }
