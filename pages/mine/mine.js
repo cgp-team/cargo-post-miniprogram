@@ -4,6 +4,8 @@
  */
 const appearance = require('../../utils/appearance')
 const api = require('../../utils/api')
+const feedback = require('../../utils/feedback')
+const auth = require('../../utils/auth')
 
 Page({
   data: {
@@ -36,18 +38,14 @@ Page({
 
   loadUserInfo() {
     const userInfo = wx.getStorageSync('userInfo')
-    const token = wx.getStorageSync('token')
-    if (userInfo && token) {
+    if (userInfo && auth.isLogin()) {
       this.setData({ userInfo, isLoggedIn: true })
     }
   },
 
   /** 我要寄货 - 进入农户寄货流程 */
   goToSend() {
-    if (!this.data.isLoggedIn) {
-      wx.reLaunch({ url: '/pages/login/login' })
-      return
-    }
+    if (!auth.requireLogin()) return
     wx.navigateTo({ url: '/pages/send/send' })
   },
 
@@ -58,19 +56,13 @@ Page({
 
   /** 我的订单（商城购买订单） */
   goToOrders() {
-    if (!this.data.isLoggedIn) {
-      wx.reLaunch({ url: '/pages/login/login' })
-      return
-    }
+    if (!auth.requireLogin()) return
     wx.navigateTo({ url: '/pages/orders/orders' })
   },
 
   /** 我的寄货记录（parcel 是 tab 页，用 switchTab + globalData 传意图） */
   goToMySend() {
-    if (!this.data.isLoggedIn) {
-      wx.reLaunch({ url: '/pages/login/login' })
-      return
-    }
+    if (!auth.requireLogin()) return
     getApp().globalData.parcelIntent = 'my'
     wx.switchTab({ url: '/pages/parcel/parcel' })
   },
@@ -111,34 +103,26 @@ Page({
 
   /** 编辑个人资料 */
   goToProfile() {
-    if (!this.data.isLoggedIn) {
-      wx.reLaunch({ url: '/pages/login/login' })
-      return
-    }
+    if (!auth.requireLogin()) return
     wx.navigateTo({ url: '/pages/mine/profile/profile' })
   },
 
   /** 收货地址管理 */
   goToAddress() {
-    if (!this.data.isLoggedIn) {
-      wx.reLaunch({ url: '/pages/login/login' })
-      return
-    }
+    if (!auth.requireLogin()) return
     wx.navigateTo({ url: '/pages/mine/address/address' })
   },
 
   /** 意见反馈 */
   goToFeedback() {
-    if (!this.data.isLoggedIn) {
-      wx.reLaunch({ url: '/pages/login/login' })
-      return
-    }
+    if (!auth.requireLogin()) return
     wx.navigateTo({ url: '/pages/mine/feedback/feedback' })
   },
 
   /** 老年人模式 */
   toggleElderly() {
     const next = !this.data.elderlyMode
+    feedback.tap()
     wx.setStorageSync('elderlyMode', next)
     getApp().globalData.elderlyMode = next
     // 立即刷新本页显示（字体随 class 切换）
@@ -149,6 +133,7 @@ Page({
   switchTheme(e) {
     const key = e.currentTarget.dataset.key
     if (key === this.data.themeColor) return
+    feedback.tap()
     wx.setStorageSync('themeColor', key)
     getApp().globalData.themeColor = key
     // 立即刷新本页主题变量

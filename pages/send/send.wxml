@@ -72,7 +72,7 @@
     <view class="photo-area" bindtap="takePhoto" hover-class="hover">
       <image wx:if="{{photoPath}}" class="photo-preview" src="{{photoPath}}" mode="aspectFill"></image>
       <view wx:else class="photo-placeholder">
-        <icon class="photo-camera" name="camera" size="80" color="#2E7D32" />
+        <icon class="photo-camera" name="camera" size="80" color="{{iconColor}}" />
         <text class="photo-hint">点击拍照</text>
         <text class="photo-sub">拍摄货物照片，方便司机辨认</text>
       </view>
@@ -97,7 +97,7 @@
       <view class="receiver-head">
         <text class="receiver-title">收货信息</text>
         <view class="receiver-addr-book" bindtap="goToAddressBook" hover-class="hover">
-          <icon name="pin" size="28" color="#2E7D32" />
+          <icon name="pin" size="28" color="{{iconColor}}" />
           <text>地址簿</text>
         </view>
       </view>
@@ -139,7 +139,7 @@
 
   <!-- Step 3: 提交成功 -->
   <view wx:if="{{step === 3}}" class="step-card match-success">
-    <icon class="match-emoji" name="send" size="100" color="#2E7D32" />
+    <icon class="match-emoji" name="send" size="100" color="{{iconColor}}" />
     <text class="match-title">寄货已提交！</text>
 
     <view class="match-bus-card">
@@ -153,7 +153,7 @@
     </view>
 
     <view class="match-reminder">
-      <view class="reminder-title"><icon name="notice" size="30" color="#C75B2A" /><text>温馨提示</text></view>
+      <view class="reminder-title"><icon name="notice" size="30" color="{{iconClay}}" /><text>温馨提示</text></view>
       <text class="reminder-text">订单已提交，调度员将尽快为您安排班次，</text>
       <text class="reminder-text">可在「我的」→「我的寄货」查看进度。</text>
     </view>

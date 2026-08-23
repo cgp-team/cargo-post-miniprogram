@@ -172,3 +172,16 @@
   color: rgba(255, 255, 255, 0.75);
   text-align: center;
 }
+
+/* ============ 老年人模式：司机端收益页字号放大 ============ */
+.elderly-mode .page-title { font-size: 52rpx; }
+.elderly-mode .overview-label { font-size: 28rpx; }
+.elderly-mode .overview-amount { font-size: 84rpx; }
+.elderly-mode .overview-sub { font-size: 26rpx; }
+.elderly-mode .ov-num { font-size: 42rpx; }
+.elderly-mode .ov-label { font-size: 26rpx; }
+.elderly-mode .section-title { font-size: 38rpx; }
+.elderly-mode .record-type { font-size: 34rpx; }
+.elderly-mode .record-goods { font-size: 28rpx; }
+.elderly-mode .record-meta { font-size: 26rpx; }
+.elderly-mode .record-amount { font-size: 40rpx; }

@@ -118,7 +118,7 @@
   <view class="section">
     <view class="section-header">
       <view class="section-title-wrap">
-        <icon name="bus" size="32" color="#1C4B2E" />
+        <icon name="bus" size="32" color="{{iconDeep}}" />
         <text class="section-title">附近公交 · 实时到站</text>
       </view>
       <text class="section-more" bindtap="goToBusTracking" hover-class="hover">更多 ›</text>
@@ -168,7 +168,7 @@
   <view class="section">
     <view class="section-header">
       <view class="section-title-wrap">
-        <icon name="leaf" size="32" color="#1C4B2E" />
+        <icon name="leaf" size="32" color="{{iconDeep}}" />
         <text class="section-title">优质农产品 · 村里直发</text>
       </view>
       <text class="section-more" bindtap="goToProducts" hover-class="hover">更多 ›</text>
@@ -183,8 +183,8 @@
         data-id="{{item.id}}"
       >
         <view class="product-img">
-          <image wx:if="{{item.imageUrl}}" class="product-img-real" src="{{item.imageUrl}}" mode="aspectFill" />
-          <icon wx:else name="leaf" size="72" color="#4CAF50" />
+          <image wx:if="{{item.imageUrl}}" class="product-img-real" src="{{item.imageUrl}}" mode="aspectFill" lazy-load />
+          <icon wx:else name="leaf" size="72" color="{{iconAccent}}" />
         </view>
         <view class="product-info">
           <text class="product-name">{{item.name}}</text>

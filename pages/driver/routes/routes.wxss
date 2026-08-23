@@ -195,3 +195,13 @@
   color: #F0A06C;
   font-weight: 700;
 }
+
+/* ============ 老年人模式：司机端路线页字号放大 ============ */
+.elderly-mode .page-title { font-size: 52rpx; }
+.elderly-mode .page-date { font-size: 30rpx; }
+.elderly-mode .route-card-number { font-size: 50rpx; }
+.elderly-mode .route-card-direction { font-size: 32rpx; }
+.elderly-mode .route-card-status { font-size: 28rpx; }
+.elderly-mode .route-time { font-size: 34rpx; }
+.elderly-mode .timeline-name { font-size: 34rpx; }
+.elderly-mode .timeline-tag { font-size: 24rpx; }

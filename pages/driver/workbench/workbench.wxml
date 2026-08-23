@@ -1,5 +1,5 @@
 <!-- 司机工作台 - 暗黑主题 -->
-<view class="workbench {{status}}">
+<view class="workbench {{status}} {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
   <!-- ========== 顶部：班次进度条（取代标题栏）========== -->
   <view class="progress-header">
     <view class="header-safe" style="{{headerSafeStyle}}"></view>
@@ -23,8 +23,8 @@
         <text class="stop-label end">{{endStation}}</text>
       </view>
       <view class="progress-track">
-        <view class="progress-fill" style="{{progressFillStyle}}"></view>
-        <view class="progress-dot" style="{{progressDotStyle}}"></view>
+        <view class="progress-fill" style="width: {{progressPercent}}%;"></view>
+        <view class="progress-dot" style="left: {{progressPercent}}%;"></view>
       </view>
       <view class="progress-info" wx:if="{{status === 'driving'}}">
         <text class="next-stop-name">下一站：{{nextStation}}</text>
@@ -46,10 +46,10 @@
             <view class="window"></view>
           </view>
           <view class="bus-cargo-area">
-            <view class="cargo-fill" style="{{cargoFillStyle}}">
+            <view class="cargo-fill" style="height: {{cargoCapacity}}%;">
               <view class="cargo-fill-inner"></view>
             </view>
-            <view class="cargo-used-mark" style="{{cargoUsedStyle}}"></view>
+            <view class="cargo-used-mark" style="bottom: {{cargoUsed}}%;"></view>
           </view>
           <view class="bus-wheels">
             <view class="wheel"></view>
@@ -228,5 +228,5 @@
   </view>
 
   <!-- ========== 底部自定义TabBar ========== -->
-  <driver-tab-bar current="workbench"></driver-tab-bar>
+  <driver-tab-bar current="workbench" elderly="{{elderlyMode}}"></driver-tab-bar>
 </view>

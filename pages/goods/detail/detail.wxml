@@ -13,7 +13,7 @@
     <view class="detail-hero">
       <view class="hero-img">
         <image wx:if="{{product.imageUrl}}" src="{{product.imageUrl}}" class="hero-img-real" mode="aspectFill" />
-        <icon wx:else name="leaf" size="180" color="#4CAF50" />
+        <icon wx:else name="leaf" size="180" color="{{iconAccent}}" />
         <view wx:if="{{product.badge}}" class="hero-badge"><icon name="bus" size="24" color="#FFFFFF" /> {{product.badge}}</view>
       </view>
     </view>
@@ -59,7 +59,7 @@
         <view class="popup-product">
           <view class="popup-img">
             <image wx:if="{{product.imageUrl}}" src="{{product.imageUrl}}" mode="aspectFill" />
-            <icon wx:else name="leaf" size="40" color="#4CAF50" />
+            <icon wx:else name="leaf" size="40" color="{{iconAccent}}" />
           </view>
           <view class="popup-product-info">
             <text class="popup-product-name">{{product.name}}</text>

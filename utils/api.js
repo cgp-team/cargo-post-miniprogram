@@ -8,6 +8,19 @@
 const { getBaseUrl } = require('./config')
 const BASE_URL = getBaseUrl()
 
+/** 401 防抖：并发请求同时失效时，只提示/跳转一次 */
+let last401At = 0
+
+function handle401() {
+  wx.removeStorageSync('token')
+  wx.removeStorageSync('userInfo')
+  const now = Date.now()
+  if (now - last401At < 2000) return
+  last401At = now
+  wx.showToast({ title: '登录已失效，请重新登录', icon: 'none' })
+  wx.reLaunch({ url: '/pages/login/login' })
+}
+
 /**
  * 通用请求
  */
@@ -30,9 +43,7 @@ function request(url, method = 'GET', data = {}) {
         if (res.statusCode === 200 && body.code === 0) {
           resolve(body.data)
         } else if (res.statusCode === 401 || body.code === 401) {
-          wx.removeStorageSync('token')
-          wx.removeStorageSync('userInfo')
-          wx.reLaunch({ url: '/pages/login/login' })
+          handle401()
           reject(body)
         } else {
           const errMsg = body.msg || '请求失败'

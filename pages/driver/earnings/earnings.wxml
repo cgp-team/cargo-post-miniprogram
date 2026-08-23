@@ -1,5 +1,5 @@
 <!-- 司机收益页 -->
-<view class="earnings-page">
+<view class="earnings-page {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
   <!-- 顶部 -->
   <view class="page-header">
     <view class="header-safe" style="height: {{statusBarHeight}}px;"></view>
@@ -61,5 +61,5 @@
   </view>
 
   <!-- 底部TabBar -->
-  <driver-tab-bar current="earnings"></driver-tab-bar>
+  <driver-tab-bar current="earnings" elderly="{{elderlyMode}}"></driver-tab-bar>
 </view>

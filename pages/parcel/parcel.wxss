@@ -509,3 +509,11 @@
 .elderly-mode .arrange-title { font-size: 34rpx; }
 .elderly-mode .station-name { font-size: 32rpx; }
 .elderly-mode .arrange-cta { font-size: 28rpx; padding: 16rpx 0; }
+/* 补充：乘车安排/承运信息/审核提示等小字号同步放大 */
+.elderly-mode .arrange-sub { font-size: 28rpx; }
+.elderly-mode .station-label { font-size: 26rpx; }
+.elderly-mode .arrange-no { font-size: 26rpx; }
+.elderly-mode .arrange-status { font-size: 26rpx; }
+.elderly-mode .carrier-row { font-size: 30rpx; }
+.elderly-mode .parcel-carrier-list { font-size: 30rpx; }
+.elderly-mode .parcel-audit { font-size: 28rpx; padding: 20rpx 24rpx; }

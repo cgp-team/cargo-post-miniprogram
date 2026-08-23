@@ -1,13 +1,15 @@
 <!-- 司机端自定义TabBar -->
-<view class="driver-tab-bar">
+<view class="driver-tab-bar {{elderly ? 'elderly-mode' : ''}}">
   <view
     class="tab-item {{current === item.key ? 'active' : ''}}"
     wx:for="{{tabs}}"
     wx:key="key"
     bindtap="switchTab"
+    hover-class="tab-hover"
+    hover-stay-time="80"
     data-key="{{item.key}}"
   >
-    <icon class="tab-icon" name="{{item.icon}}" size="40"
+    <icon class="tab-icon" name="{{item.icon}}" size="{{elderly ? 48 : 40}}"
       color="{{current === item.key ? '#FFFFFF' : '#8A8578'}}" />
     <text class="tab-label">{{item.label}}</text>
   </view>

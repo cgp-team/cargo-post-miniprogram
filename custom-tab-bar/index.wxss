@@ -68,3 +68,13 @@
 .tab-item.active .tab-text {
   font-weight: 700;
 }
+
+/* ============ 老年人模式：TabBar 字号/图标放大 ============ */
+.elderly-mode .tab-item {
+  min-height: 116rpx;
+}
+
+.elderly-mode .tab-text {
+  font-size: 30rpx;
+  margin-top: 8rpx;
+}

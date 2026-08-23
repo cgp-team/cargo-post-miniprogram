@@ -127,6 +127,22 @@ Page({
       width: 4,
       arrowLine: true
     }]
+    // 轨迹签名：首末点 + 点数 + 线路索引。未变时只刷新车辆位置，
+    // 避免 15s 定时刷新全量 setData 导致地图中心跳回/闪烁。
+    const first = coords[0]
+    const last = coords[coords.length - 1]
+    const trackKey = `${activeLineIndex}|${coords.length}|` +
+      `${first ? first.longitude + ',' + first.latitude : ''}|` +
+      `${last ? last.longitude + ',' + last.latitude : ''}`
+    if (trackKey === this._trackKey) {
+      this.setData({
+        currentLineName: line.routeName || '',
+        markers,
+        buses
+      })
+      return
+    }
+    this._trackKey = trackKey
     this.setData({
       currentLineName: line.routeName || '',
       mapCenter: coords.length ? { lng, lat } : this.data.mapCenter,

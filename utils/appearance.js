@@ -12,6 +12,7 @@
  *     onShow() { appearance.apply(this) }
  *   })
  *   根节点：class="... {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}"
+ *   图标：  <icon color="{{iconColor}}" />（见 apply 注释）
  */
 
 const DEFAULT_THEME = 'green'
@@ -120,16 +121,25 @@ function themeStyle(color) {
 }
 
 /**
- * 将外观设置同步进页面 data，返回设置对象
- * 需在页面 onShow / onLoad 中调用
+ * 将外观设置同步进页面 data，返回设置对象（含图标色）
+ * 需在页面 onShow / onLoad 中调用；值未变化时跳过 setData，避免多余渲染。
+ * WXML 中的 <icon> 无法继承 CSS 变量，图标请绑定：
+ *   color="{{iconColor}}" 主色 / {{iconDeep}} 深色 / {{iconAccent}} 强调色 / {{iconClay}} 陶土橙（各主题固定）
  */
 function apply(page) {
   const s = getSettings()
-  page.setData({
+  const t = THEMES[s.themeColor] || THEMES[DEFAULT_THEME]
+  const patch = {
     elderlyMode: s.elderlyMode,
     themeColor: s.themeColor,
-    themeStyle: themeStyle(s.themeColor)
-  })
+    themeStyle: themeStyle(s.themeColor),
+    iconColor: t.primary,
+    iconDeep: t.dark,
+    iconAccent: t.accent,
+    iconClay: t.clay
+  }
+  const changed = Object.keys(patch).some((k) => page.data[k] !== patch[k])
+  if (changed) page.setData(patch)
   return s
 }
 

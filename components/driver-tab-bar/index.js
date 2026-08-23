@@ -1,11 +1,21 @@
 /**
- * 司机端自定义底部导航栏
+ * 司机端自定义底部导航栏（暗色）
+ * - hover 按压态 + 轻触感反馈，与用户版 TabBar 体验对齐
+ * - 非 tab 页间切换用 redirectTo：保留返回手势且无 reLaunch 的重建闪烁；
+ *   仅回用户版时用 switchTab（跳入 tab 页必须用它）
  */
+const feedback = require('../../utils/feedback')
+
 Component({
   properties: {
     current: {
       type: String,
       value: 'workbench'
+    },
+    /** 老年人模式：字号/图标放大（由页面传入） */
+    elderly: {
+      type: Boolean,
+      value: false
     }
   },
 
@@ -23,12 +33,14 @@ Component({
       const key = e.currentTarget.dataset.key
       if (key === this.data.current) return
 
+      feedback.tap()
+
       if (key === 'exit') {
         wx.switchTab({ url: '/pages/index/index' })
         return
       }
 
-      wx.reLaunch({
+      wx.redirectTo({
         url: `/pages/driver/${key}/${key}`
       })
     }

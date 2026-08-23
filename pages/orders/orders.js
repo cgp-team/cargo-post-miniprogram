@@ -4,6 +4,8 @@
 const api = require('../../utils/api')
 const appearance = require('../../utils/appearance')
 const productImg = require('../../utils/product-img')
+const feedback = require('../../utils/feedback')
+const { formatBackendTime } = require('../../utils/util')
 
 Page({
   data: {
@@ -95,14 +97,7 @@ Page({
   },
 
   formatTime(t) {
-    if (!t) return ''
-    // 后端 LocalDateTime 全局序列化为毫秒时间戳，兼容字符串格式
-    if (typeof t === 'number') {
-      const d = new Date(t)
-      const p = (n) => (n < 10 ? '0' + n : '' + n)
-      return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`
-    }
-    return String(t).replace('T', ' ').substring(0, 16)
+    return formatBackendTime(t)
   },
 
   /** 订单状态 → 语义 class（chip 配色在 wxss，不再内联色值）：0 待发货 1 已发货 2 已完成 3 已取消 */
@@ -120,6 +115,7 @@ Page({
         if (!res.confirm) return
         try {
           await api.cancelProductOrder(id)
+          feedback.tap()
           wx.showToast({ title: '已取消', icon: 'success' })
           this.reload()
         } catch (e) { /* 错误已 toast */ }

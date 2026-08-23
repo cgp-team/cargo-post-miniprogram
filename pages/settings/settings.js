@@ -1,4 +1,5 @@
 const appearance = require('../../utils/appearance')
+const feedback = require('../../utils/feedback')
 
 Page({
   data: {
@@ -25,6 +26,7 @@ Page({
   /** 老年人模式 — 整行点击切换 */
   toggleElderly() {
     const next = !this.data.elderlyMode
+    feedback.tap()
     wx.setStorageSync('elderlyMode', next)
     getApp().globalData.elderlyMode = next
     // 立即刷新本页显示
@@ -35,6 +37,7 @@ Page({
   switchTheme(e) {
     const key = e.currentTarget.dataset.key
     if (key === this.data.themeColor) return
+    feedback.tap()
     wx.setStorageSync('themeColor', key)
     getApp().globalData.themeColor = key
     // 立即刷新本页主题变量

@@ -50,22 +50,22 @@
     <!-- 功能菜单 -->
     <view class="menu-section">
       <view class="menu-item" bindtap="goToOrders" hover-class="hover">
-        <icon class="menu-emoji" name="list" size="{{elderlyMode ? 48 : 40}}" color="#2E7D32" />
+        <icon class="menu-emoji" name="list" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
         <text class="menu-text">我的订单</text>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-item" bindtap="goToMySend" hover-class="hover">
-        <icon class="menu-emoji" name="send" size="{{elderlyMode ? 48 : 40}}" color="#2E7D32" />
+        <icon class="menu-emoji" name="send" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
         <text class="menu-text">我的寄货</text>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-item" bindtap="goToBusFavorites" hover-class="hover">
-        <icon class="menu-emoji" name="bus" size="{{elderlyMode ? 48 : 40}}" color="#2E7D32" />
+        <icon class="menu-emoji" name="bus" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
         <text class="menu-text">公交收藏</text>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-item" bindtap="switchToDriver" hover-class="hover">
-        <icon class="menu-emoji" name="bus" size="{{elderlyMode ? 48 : 40}}" color="#2E7D32" />
+        <icon class="menu-emoji" name="bus" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
         <text class="menu-text">切换为司机模式</text>
         <text class="menu-arrow">›</text>
       </view>
@@ -74,22 +74,22 @@
     <!-- 设置区 -->
     <view class="menu-section">
       <view class="menu-item" bindtap="goToAddress" hover-class="hover">
-        <icon class="menu-emoji" name="pin" size="{{elderlyMode ? 48 : 40}}" color="#2E7D32" />
+        <icon class="menu-emoji" name="pin" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
         <text class="menu-text">收货地址</text>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-item" bindtap="goToFeedback" hover-class="hover">
-        <icon class="menu-emoji" name="edit" size="{{elderlyMode ? 48 : 40}}" color="#2E7D32" />
+        <icon class="menu-emoji" name="edit" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
         <text class="menu-text">意见反馈</text>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-item" bindtap="goToProfile" hover-class="hover">
-        <icon class="menu-emoji" name="user" size="{{elderlyMode ? 48 : 40}}" color="#2E7D32" />
+        <icon class="menu-emoji" name="user" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
         <text class="menu-text">个人资料</text>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-item" bindtap="toggleElderly" hover-class="hover">
-        <icon class="menu-emoji" name="font" size="{{elderlyMode ? 48 : 40}}" color="#2E7D32" />
+        <icon class="menu-emoji" name="font" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
         <view class="menu-item-body">
           <text class="menu-text">老年人模式</text>
           <text class="menu-sub">更大字体，方便长辈使用</text>

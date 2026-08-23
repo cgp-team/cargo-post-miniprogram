@@ -4,6 +4,8 @@
 const api = require('../../../utils/api')
 const appearance = require('../../../utils/appearance')
 const productImg = require('../../../utils/product-img')
+const feedback = require('../../../utils/feedback')
+const auth = require('../../../utils/auth')
 
 Page({
   data: {
@@ -69,19 +71,8 @@ Page({
   /** 立即购买 → 弹窗下单 */
   buyNow() {
     if (!this.data.product) return
-    // 未登录拦截
-    const token = wx.getStorageSync('token')
-    if (!token) {
-      wx.showModal({
-        title: '请先登录',
-        content: '登录后才能下单购买',
-        confirmText: '去登录',
-        success: (res) => {
-          if (res.confirm) wx.reLaunch({ url: '/pages/login/login' })
-        }
-      })
-      return
-    }
+    // 未登录拦截（统一入口）
+    if (!auth.requireLogin({ content: '登录后才能下单购买' })) return
     // 初始化弹窗（收货电话预填登录手机号）
     const userInfo = wx.getStorageSync('userInfo') || {}
     this.setData({
@@ -153,6 +144,7 @@ Page({
         userMobile: userInfo.mobile || ''
       })
       wx.hideLoading()
+      feedback.tap()
       this.setData({ showOrderPop: false })
       wx.showModal({
         title: '下单成功',
@@ -160,7 +152,9 @@ Page({
         showCancel: false,
         confirmText: '查看订单',
         success: () => {
-          wx.navigateTo({ url: '/pages/orders/orders' })
+          // redirectTo：避免订单页叠在详情页之上造成返回栈混乱；
+          // 若本页来自商城列表，返回时仍回到列表，体验更顺。
+          wx.redirectTo({ url: '/pages/orders/orders' })
         }
       })
     } catch (e) {

@@ -19,8 +19,8 @@
         <text class="order-status {{item.statusClass}}">{{item.statusName}}</text>
       </view>
       <view class="order-goods" wx:for="{{item.items}}" wx:for-item="g" wx:key="productId">
-        <image wx:if="{{g.imageUrl}}" class="order-goods-img" src="{{g.imageUrl}}" mode="aspectFill" />
-        <view wx:else class="order-goods-img-ph"><icon name="leaf" size="44" color="#2E7D32" /></view>
+        <image wx:if="{{g.imageUrl}}" class="order-goods-img" src="{{g.imageUrl}}" mode="aspectFill" lazy-load />
+        <view wx:else class="order-goods-img-ph"><icon name="leaf" size="44" color="{{iconColor}}" /></view>
         <view class="order-goods-info">
           <text class="order-goods-name">{{g.productName}}</text>
           <text class="order-goods-sub">¥{{g.productPrice}} × {{g.quantity}}</text>

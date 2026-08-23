@@ -43,6 +43,6 @@
     </view>
   </block>
 
-  <view wx:elif="{{!loading}}" class="empty">车辆信息加载失败，请下拉刷新</view>
+  <view wx:elif="{{!loading}}" class="empty" bindtap="loadDetail" hover-class="hover">车辆信息加载失败，点击重试</view>
   <view wx:else class="empty">加载中…</view>
 </view>
