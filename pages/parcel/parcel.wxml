@@ -92,11 +92,6 @@
         <view class="route-weight"><icon name="bus" size="26" color="#6B675C" /><text>重量 {{item.goodsWeight}}kg</text></view>
         <text class="parcel-eta">{{item.createTimeText}}</text>
       </view>
-      <!-- 车来取货/送货提醒：承运车辆实时位置 → 距目标站点分钟 -->
-      <view wx:if="{{item.carrierText}}" class="parcel-carrier-list" bindtap="goToBusTracking" hover-class="hover">
-        <icon name="bus" size="26" color="#2E7D32" />
-        <text>{{item.carrierText}}</text>
-      </view>
       <!-- 邮快件取件码默认打码，点「查看」展开明文（点明文复制，司机核销凭码） -->
       <view wx:if="{{item.pickupCode}}" class="parcel-code-row">
         <text class="parcel-code-label">取件码</text>
@@ -143,7 +138,6 @@
       <view wx:if="{{trackResult.vehiclePlate || trackResult.etaText}}" class="parcel-carrier">
         <view wx:if="{{trackResult.vehiclePlate}}" class="carrier-row"><icon name="bus" size="28" color="#2E7D32" /><text>{{trackResult.shiftCode || '班车'}} · {{trackResult.vehiclePlate}}</text></view>
         <view wx:if="{{trackResult.etaText}}" class="carrier-row parcel-carrier-eta"><icon name="clock" size="28" color="#2E7D32" /><text>{{trackResult.etaText}}</text></view>
-        <view wx:if="{{trackResult.carrierLongitude}}" class="carrier-row" bindtap="goToBusTracking" hover-class="hover"><icon name="pin" size="28" color="#2E7D32" /><text class="carrier-link">查看车辆实时位置 ›</text></view>
       </view>
 
       <!-- 进度条 -->
