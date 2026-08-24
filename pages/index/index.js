@@ -16,6 +16,7 @@ Page({
   data: {
     userInfo: {},
     currentVillage: '云山村',
+    villageManual: false, // 用户是否手动切换过村庄（手动选择优先作为区域 fallback）
     // 用户定位（统一 LocationService 结果；内部保留真实经纬度，currentVillage 只是展示文本）
     userLocation: null,
     locationDenied: false,      // 权限被拒绝（引导"去设置"）
@@ -306,7 +307,10 @@ Page({
     if (this._nearbyLoading) return // 请求去重：上一请求未返回不发送下一次
     const loc = this.data.userLocation
     const hasCoords = loc && typeof loc.latitude === 'number' && typeof loc.longitude === 'number'
-    const district = !hasCoords ? (loc && loc.district) || '' : ''
+    // 区域 fallback：无精确坐标时，手动选择的村庄优先；否则用定位逆地理区域
+    const district = !hasCoords
+      ? (this.data.villageManual ? this.data.currentVillage : ((loc && loc.district) || ''))
+      : ''
     this._nearbyLoading = true
     if (!this.data.nearbyBuses.length) {
       this.setData({ nearbyBusStatus: 'loading' })
@@ -412,8 +416,12 @@ Page({
     wx.showActionSheet({
       itemList: VILLAGES,
       success: (res) => {
-        this.setData({ currentVillage: VILLAGES[res.tapIndex] })
+        const name = VILLAGES[res.tapIndex]
+        this.setData({ currentVillage: name, villageManual: true })
+        getApp().globalData.currentVillage = name
         this.loadHomeData()
+        // 手动切换村庄后按新村庄重新查询附近公交（无精确定位时用村庄名做区域 fallback）
+        this.loadNearbyBusData()
       }
     })
   },

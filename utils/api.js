@@ -297,9 +297,15 @@ function getRealtimeBusLines() {
   return request('/app-api/transport/bus/lines')
 }
 
-/** 附近实时公交（按用户坐标 Haversine 过滤 radius 内站点/车辆；无坐标时传 district 区域 fallback） */
+/** 附近实时公交（按用户坐标 Haversine 过滤 radius 内站点/车辆；无坐标时传 district 区域 fallback）。
+ *  过滤 undefined 参数：微信 wx.request 会把 undefined 序列化成字符串 "undefined"，导致后端 Double 转换 400。 */
 function getNearbyRealtimeBuses(latitude, longitude, radius, district) {
-  return request('/app-api/transport/bus/nearby', 'GET', { latitude, longitude, radius, district })
+  const params = {}
+  if (latitude != null) params.latitude = latitude
+  if (longitude != null) params.longitude = longitude
+  if (radius != null) params.radius = radius
+  if (district) params.district = district
+  return request('/app-api/transport/bus/nearby', 'GET', params)
 }
 
 // ==================== 取件核销 + 文件上传 ====================
