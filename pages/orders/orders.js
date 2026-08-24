@@ -70,7 +70,7 @@ Page({
       const list = (res.list || []).map((o) => ({
         ...o,
         statusClass: this.statusClass(o.status),
-        createTimeText: this.formatTime(o.createTime),
+        createTimeText: formatBackendTime(o.createTime),
         items: (o.items || []).map((g) => ({
           ...g,
           imageUrl: productImg.resolve({ name: g.productName, image: g.productImage })
@@ -94,10 +94,6 @@ Page({
     if (this.data.loading || !this.data.hasMore) return
     this.setData({ pageNo: this.data.pageNo + 1 })
     this.loadOrders()
-  },
-
-  formatTime(t) {
-    return formatBackendTime(t)
   },
 
   /** 订单状态 → 语义 class（chip 配色在 wxss，不再内联色值）：0 待发货 1 已发货 2 已完成 3 已取消 */

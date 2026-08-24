@@ -39,11 +39,6 @@
           <text class="farmer-btn-text">我要寄货</text>
           <text class="farmer-btn-desc">语音下单 · 大巴承运 · 直达城里</text>
         </view>
-        <view class="farmer-btn ledger-btn" bindtap="goToLedger" hover-class="hover">
-          <icon class="farmer-btn-emoji" name="wallet" size="64" color="#FFFFFF" />
-          <text class="farmer-btn-text">我的账本</text>
-          <text class="farmer-btn-desc">查看收入 · 寄货记录</text>
-        </view>
       </view>
     </view>
 
@@ -57,11 +52,6 @@
       <view class="menu-item" bindtap="goToMySend" hover-class="hover">
         <icon class="menu-emoji" name="send" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
         <text class="menu-text">我的寄货</text>
-        <text class="menu-arrow">›</text>
-      </view>
-      <view class="menu-item" bindtap="goToBusFavorites" hover-class="hover">
-        <icon class="menu-emoji" name="bus" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
-        <text class="menu-text">公交收藏</text>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-item" bindtap="switchToDriver" hover-class="hover">
@@ -88,27 +78,10 @@
         <text class="menu-text">个人资料</text>
         <text class="menu-arrow">›</text>
       </view>
-      <view class="menu-item" bindtap="toggleElderly" hover-class="hover">
-        <icon class="menu-emoji" name="font" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
-        <view class="menu-item-body">
-          <text class="menu-text">老年人模式</text>
-          <text class="menu-sub">更大字体，方便长辈使用</text>
-        </view>
-        <view class="toggle-switch {{elderlyMode ? 'on' : 'off'}}">
-          <view class="toggle-knob"></view>
-        </view>
-      </view>
-      <view class="menu-divider"></view>
-      <view class="menu-label">🎨 主题颜色</view>
-      <view class="theme-row">
-        <view
-          wx:for="{{themeList}}"
-          wx:key="key"
-          class="theme-chip {{themeColor === item.key ? 'active' : ''}}"
-          style="background: {{themeColor === item.key ? item.color : '#F5F5F5'}}; color: {{themeColor === item.key ? '#fff' : '#666'}}"
-          data-key="{{item.key}}"
-          bindtap="switchTheme" hover-class="hover"
-        >{{item.name}}</view>
+      <view class="menu-item" bindtap="goToSettings" hover-class="hover">
+        <icon class="menu-emoji" name="gear" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
+        <text class="menu-text">设置</text>
+        <text class="menu-arrow">›</text>
       </view>
     </view>
 

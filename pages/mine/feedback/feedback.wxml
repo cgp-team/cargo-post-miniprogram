@@ -36,10 +36,8 @@
         <text class="fb-reply-text">{{item.reply}}</text>
       </view>
     </view>
-    <view class="empty-state" wx:if="{{!list.length && !loading}}">
-      <text class="empty-emoji">📭</text>
-      <text class="empty-text">还没有反馈记录</text>
-    </view>
+    <view class="loading-state" wx:if="{{loading && !list.length}}">加载中…</view>
+    <empty-state wx:if="{{!list.length && !loading}}" emoji="📭" text="还没有反馈记录" />
   </view>
 
   <view class="safe-area-bottom"></view>

@@ -3,13 +3,12 @@
  * 农产品选购，融合生鲜电商风格
  */
 const api = require('../../utils/api')
-const appearance = require('../../utils/appearance')
 const productImg = require('../../utils/product-img')
 const { VILLAGES } = require('../../utils/util')
 
 /** 分类名 → 商品名关键词（后端暂无分类字段，按名称归类） */
 const CATEGORY_KEYWORDS = {
-  1: ['果', '柚', '橙', '李', '桃', '果'],   // 水果（'果'兼顾泛水果名）
+  1: ['果', '柚', '橙', '李', '桃'],        // 水果（'果'兼顾泛水果名）
   2: ['菜', '萝卜', '红薯', '土豆', '菌', '笋'], // 蔬菜（薯类归蔬菜）
   3: ['蛋', '鸡', '鸭'],                   // 禽蛋（鸡蛋也在此类）
   4: ['茶'],                             // 茶叶（油茶/苦丁茶同样命中）
@@ -26,6 +25,7 @@ function matchCategory(p) {
 }
 
 Page({
+  behaviors: [require('../../behaviors/page-base')],
   data: {
     userInfo: {},
     currentVillage: '云山村',
@@ -47,15 +47,13 @@ Page({
   },
 
   onLoad() {
-    const sys = wx.getWindowInfo()
-    this.setData({ statusBarHeight: sys.statusBarHeight || 20 })
+    this._initPageBase()
     const userInfo = wx.getStorageSync('userInfo')
     const app = getApp()
     this.setData({
       userInfo: userInfo || {},
       currentVillage: app.globalData.currentVillage || '云山村'
     })
-    appearance.apply(this)
     this.loadProducts()
   },
 
@@ -63,7 +61,7 @@ Page({
     const app = getApp()
     this.setData({ currentVillage: app.globalData.currentVillage || '云山村' })
     // 同步老年模式 / 主题色（设置页改动后回来立即生效）
-    appearance.apply(this)
+    this._applyAppearance()
   },
 
   /** 加载上架商品（后端真实数据） */
@@ -93,11 +91,6 @@ Page({
       ? this.data.allProducts
       : this.data.allProducts.filter((p) => p.categoryId === id)
     this.setData({ products })
-  },
-
-  /** 点击搜索条（入口占位） */
-  goToSearch() {
-    wx.showToast({ title: '搜索功能开发中', icon: 'none' })
   },
 
   /** 切换分类（同步过滤商品列表） */

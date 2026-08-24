@@ -15,7 +15,7 @@
         <text class="route-card-number">{{item.routeNumber}}</text>
         <text class="route-card-direction">{{item.direction}}</text>
       </view>
-      <view class="route-card-status {{item.status === 'done' ? 'pending' : item.status}}">
+      <view class="route-card-status {{item.status}}">
         {{item.statusText}}
       </view>
     </view>
@@ -45,6 +45,10 @@
       </view>
     </view>
   </view>
+
+  <!-- 加载态 / 空态 -->
+  <view class="loading-state" wx:if="{{loading}}">加载中…</view>
+  <view class="loading-state" wx:elif="{{loaded && !todayRoutes.length}}">今日暂无班次</view>
 
   <!-- 底部TabBar -->
   <driver-tab-bar current="routes" elderly="{{elderlyMode}}"></driver-tab-bar>

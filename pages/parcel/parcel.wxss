@@ -255,7 +255,7 @@
 
 .timeline-dot.done {
   background: var(--color-accent);
-  box-shadow: 0 0 0 6rpx rgba(76,175,80,0.2);
+  box-shadow: 0 0 0 6rpx var(--color-primary-shadow);
 }
 
 .timeline-content {
@@ -274,21 +274,6 @@
   color: #555;
 }
 
-/* 空状态 */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 80rpx 0;
-}
-
-.empty-icon { margin-bottom: 20rpx; }
-.empty-text { font-size: 28rpx; color: var(--color-text-secondary); }
-
-.safe-area-bottom {
-  height: calc(40rpx + env(safe-area-inset-bottom));
-}
-
 /* ============ 老年人模式：快递页字体放大 ============ */
 .elderly-mode .village-name { font-size: 38rpx; }
 .elderly-mode .header-title { font-size: 40rpx; }
@@ -304,7 +289,6 @@
 .elderly-mode .parcel-code-toggle { font-size: 28rpx; }
 .elderly-mode .timeline-desc { font-size: 30rpx; }
 .elderly-mode .timeline-time { font-size: 26rpx; }
-.elderly-mode .empty-text { font-size: 32rpx; }
 
 /* 查件二维码 */
 .parcel-qr-block {

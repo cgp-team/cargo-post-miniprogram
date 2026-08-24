@@ -1,7 +1,7 @@
 /* 个人资料页 */
 .page-profile {
   min-height: 100vh;
-  background: #F5F7F5;
+  background: var(--color-paper);
   padding-bottom: 40rpx;
 }
 
@@ -82,7 +82,7 @@
   font-size: 26rpx;
 }
 .sex-chip.active {
-  background: var(--color-primary, #2E7D32);
+  background: var(--color-primary);
   color: #fff;
 }
 
@@ -91,8 +91,8 @@
   margin-left: 20rpx;
   padding: 12rpx 28rpx;
   border-radius: 999rpx;
-  border: 2rpx solid var(--color-primary, #2E7D32);
-  color: var(--color-primary, #2E7D32);
+  border: 2rpx solid var(--color-primary);
+  color: var(--color-primary);
   font-size: 24rpx;
 }
 .code-btn.disabled {
@@ -102,17 +102,13 @@
 
 .primary-btn {
   margin-top: 28rpx;
-  background: var(--color-primary, #2E7D32);
+  background: var(--color-primary);
   color: #fff;
   font-size: 30rpx;
   border-radius: 999rpx;
 }
 .primary-btn[disabled] {
   opacity: 0.6;
-}
-
-.safe-area-bottom {
-  height: calc(env(safe-area-inset-bottom) + 20rpx);
 }
 
 /* 老年人模式 */

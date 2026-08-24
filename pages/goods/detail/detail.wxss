@@ -189,10 +189,6 @@
   color: #fff;
 }
 
-.safe-area-bottom {
-  height: 20rpx;
-}
-
 /* 下单弹窗 */
 .popup-mask {
   position: fixed;
@@ -373,3 +369,8 @@
 .elderly-mode .popup-label { font-size: 32rpx; }
 .elderly-mode .popup-input { font-size: 32rpx; }
 .elderly-mode .popup-submit { font-size: 36rpx; height: 100rpx; }
+.elderly-mode .popup-product-name { font-size: 32rpx; }
+.elderly-mode .popup-price { font-size: 34rpx; }
+.elderly-mode .stepper-num { font-size: 36rpx; }
+.elderly-mode .popup-total-amount { font-size: 46rpx; }
+.elderly-mode .desc-title { font-size: 34rpx; }

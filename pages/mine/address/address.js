@@ -40,13 +40,16 @@ Page({
     appearance.apply(this)
   },
 
-  /** 地区树：缓存到 storage，避免每次拉全量 */
+  /** 地区树：缓存到 storage（7 天有效），避免每次拉全量 */
   async loadAreaTree() {
     try {
-      let tree = wx.getStorageSync('areaTree')
-      if (!tree || !tree.length) {
+      const cache = wx.getStorageSync('areaTree')
+      let tree
+      if (cache && cache.list && cache.list.length && cache.ts && Date.now() - cache.ts < 7 * 24 * 3600 * 1000) {
+        tree = cache.list
+      } else {
         tree = await api.getAreaTree()
-        wx.setStorageSync('areaTree', tree)
+        wx.setStorageSync('areaTree', { list: tree, ts: Date.now() })
       }
       this._provincial = tree
       const map = {}

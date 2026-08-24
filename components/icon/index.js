@@ -74,6 +74,7 @@ Component({
   data: { src: '' },
 
   observers: {
+    // size 只影响 wxml 里 image 的宽高，不参与 src 计算，无需监听
     'name, color': function (name, color) {
       this._refresh()
     }

@@ -5,6 +5,8 @@
 const api = require('../../utils/api')
 const appearance = require('../../utils/appearance')
 
+const REFRESH_MS = 15000
+
 Page({
   data: {
     elderlyMode: false,
@@ -13,13 +15,39 @@ Page({
     bus: null,
     stops: [],
     progress: 0,
-    loading: true
+    loading: true,
+    loadError: ''
   },
 
   async onLoad(options) {
     appearance.apply(this)
     this.setData({ busId: options.id })
     await this.loadDetail()
+  },
+
+  onShow() {
+    this.startTimer()
+  },
+
+  onHide() {
+    this.stopTimer()
+  },
+
+  onUnload() {
+    this.stopTimer()
+  },
+
+  /** 每 15s 静默刷新，保持车辆状态接近实时 */
+  startTimer() {
+    this.stopTimer()
+    this._timer = setInterval(() => this.loadDetail(), REFRESH_MS)
+  },
+
+  stopTimer() {
+    if (this._timer) {
+      clearInterval(this._timer)
+      this._timer = null
+    }
   },
 
   async loadDetail() {
@@ -37,7 +65,7 @@ Page({
         }
       }
       if (!found) {
-        this.setData({ loading: false, bus: null, stops: [] })
+        this.setData({ loading: false, bus: null, stops: [], loadError: 'notfound' })
         return
       }
       const progress = found.progress || 0
@@ -45,10 +73,11 @@ Page({
         bus: found,
         stops: this.buildStops(points, progress),
         progress,
-        loading: false
+        loading: false,
+        loadError: ''
       })
     } catch (e) {
-      this.setData({ loading: false, bus: null })
+      this.setData({ loading: false, bus: null, loadError: 'network' })
     }
   },
 

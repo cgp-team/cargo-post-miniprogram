@@ -1,7 +1,7 @@
 /* 收货地址管理页 */
 .page-address {
   min-height: 100vh;
-  background: #F5F7F5;
+  background: var(--color-paper);
   padding-bottom: 40rpx;
 }
 
@@ -39,8 +39,8 @@
 }
 .addr-default {
   font-size: 20rpx;
-  color: var(--color-primary, #2E7D32);
-  border: 2rpx solid var(--color-primary, #2E7D32);
+  color: var(--color-primary);
+  border: 2rpx solid var(--color-primary);
   border-radius: 8rpx;
   padding: 2rpx 12rpx;
 }
@@ -65,26 +65,11 @@
   color: #C0392B;
 }
 
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 120rpx 0;
-}
-.empty-emoji {
-  font-size: 80rpx;
-  margin-bottom: 20rpx;
-}
-.empty-text {
-  font-size: 28rpx;
-  color: #999;
-}
-
 .add-btn {
   margin: 10rpx 24rpx;
   padding: 26rpx;
   text-align: center;
-  background: var(--color-primary, #2E7D32);
+  background: var(--color-primary);
   color: #fff;
   font-size: 30rpx;
   border-radius: 999rpx;
@@ -139,14 +124,10 @@
 }
 .primary-btn {
   margin-top: 32rpx;
-  background: var(--color-primary, #2E7D32);
+  background: var(--color-primary);
   color: #fff;
   font-size: 30rpx;
   border-radius: 999rpx;
-}
-
-.safe-area-bottom {
-  height: calc(env(safe-area-inset-bottom) + 20rpx);
 }
 
 /* 老年人模式 */

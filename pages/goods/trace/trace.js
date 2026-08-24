@@ -18,6 +18,7 @@ Page({
     mapScale: 12,
     markers: [],
     polyline: [],
+    trackPoints: [], // 站点 + 轨迹 + 当前位置，用于地图 include-points 自适应视口
     // 站点时间轴
     stops: [],
     lastReportText: ''
@@ -25,6 +26,11 @@ Page({
 
   onLoad(options) {
     appearance.apply(this)
+    if (!options.id) {
+      wx.showToast({ title: '缺少订单编号', icon: 'none' })
+      setTimeout(() => wx.navigateBack(), 1200)
+      return
+    }
     this.setData({ orderId: options.id })
     this.loadTrace()
   },
@@ -41,6 +47,7 @@ Page({
   },
 
   renderTrace(trace) {
+    const primary = (appearance.THEMES[this.data.themeColor] || appearance.THEMES.green).primary
     const points = trace.points || []
     const track = trace.track || []
     const markers = []
@@ -52,7 +59,7 @@ Page({
         latitude: p.latitude,
         width: 24,
         height: 24,
-        label: { content: String(p.sequenceNo || i + 1), color: '#fff', bgColor: '#2E7D32', borderRadius: 12, padding: 2, fontSize: 11 },
+        label: { content: String(p.sequenceNo || i + 1), color: '#fff', bgColor: primary, borderRadius: 12, padding: 2, fontSize: 11 },
         callout: { content: p.stationName, display: 'ALWAYS', borderRadius: 6, padding: 4, fontSize: 11 }
       })
     })
@@ -80,7 +87,7 @@ Page({
     if (track.length >= 2) {
       polyline.push({
         points: track.map((t) => ({ longitude: t.longitude, latitude: t.latitude })),
-        color: '#2E7D32',
+        color: primary,
         width: 5,
         arrowLine: true
       })
@@ -90,11 +97,18 @@ Page({
       || (track.length && { lng: track[track.length - 1].longitude, lat: track[track.length - 1].latitude })
       || (points.length && { lng: points[0].longitude, lat: points[0].latitude })
       || this.data.mapCenter
+    // include-points：站点 + 轨迹 + 当前位置，让视口自适应包含全部点
+    const trackPoints = points.map((p) => ({ longitude: p.longitude, latitude: p.latitude }))
+      .concat(track.map((t) => ({ longitude: t.longitude, latitude: t.latitude })))
+    if (trace.currentLongitude && trace.currentLatitude) {
+      trackPoints.push({ longitude: trace.currentLongitude, latitude: trace.currentLatitude })
+    }
     this.setData({
       trace,
       markers,
       polyline,
       mapCenter: center,
+      trackPoints,
       stops: points.map((p) => ({ sequenceNo: p.sequenceNo, stationName: p.stationName, plannedMinutes: p.plannedMinutes || 0 })),
       lastReportText: this.formatTime(trace.lastReportTime),
       loading: false
@@ -109,9 +123,5 @@ Page({
       return `${d.getMonth() + 1}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`
     }
     return String(t).replace('T', ' ').substring(5, 16)
-  },
-
-  onPullDownRefresh() {
-    this.loadTrace().finally(() => wx.stopPullDownRefresh())
   }
 })

@@ -4,8 +4,10 @@
  */
 const api = require('../../utils/api')
 const appearance = require('../../utils/appearance')
+const auth = require('../../utils/auth')
 const feedback = require('../../utils/feedback')
 const qrcodeRender = require('../../utils/qrcode-render')
+const util = require('../../utils/util')
 
 Page({
   data: {
@@ -33,6 +35,7 @@ Page({
   },
 
   async onLoad() {
+    if (!auth.requireLogin()) return
     appearance.apply(this)
     this.loadStations()
   },
@@ -159,6 +162,10 @@ Page({
       wx.showToast({ title: '请输入收货电话', icon: 'none' })
       return
     }
+    if (!util.validatePhone(receiverMobile.trim())) {
+      wx.showToast({ title: '请输入正确的收货电话', icon: 'none' })
+      return
+    }
     this.submitting = true
     wx.showLoading({ title: '提交中…', mask: true })
     try {
@@ -197,7 +204,10 @@ Page({
 
   /** 复制订单号 */
   copyOrderNo() {
-    wx.setClipboardData({ data: this.data.orderNo })
+    wx.setClipboardData({
+      data: this.data.orderNo,
+      success: () => wx.showToast({ title: '已复制', icon: 'success' })
+    })
   },
 
   noop() {},

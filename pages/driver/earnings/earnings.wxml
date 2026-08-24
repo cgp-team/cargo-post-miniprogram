@@ -29,7 +29,7 @@
       </view>
       <view class="overview-divider"></view>
       <view class="overview-item">
-        <text class="ov-num blue">{{pendingCount}}</text>
+        <text class="ov-num gold">{{pendingCount}}</text>
         <text class="ov-label">待装车</text>
       </view>
     </view>
@@ -58,6 +58,10 @@
         <text class="record-amount">¥{{item.amount}}</text>
       </view>
     </view>
+
+    <!-- 加载态 / 空态 -->
+    <view class="loading-state" wx:if="{{loading}}">加载中…</view>
+    <view class="loading-state" wx:elif="{{loaded && !records.length}}">暂无收益记录</view>
   </view>
 
   <!-- 底部TabBar -->

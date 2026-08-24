@@ -1,4 +1,4 @@
-/* 司机端自定义TabBar —— 站牌车票风（暗色保留，激活图标深站牌绿块） */
+/* 司机端自定义TabBar —— 站牌车票风（暗色保留，激活图标主题主色块） */
 .driver-tab-bar {
   position: fixed;
   bottom: 0;
@@ -23,7 +23,7 @@
 }
 
 .tab-item.active {
-  color: #6FBF7A;
+  color: var(--color-accent);
 }
 
 .tab-icon {
@@ -37,9 +37,9 @@
   transition: all 0.3s;
 }
 
-/* 激活：图标变深站牌绿块白字 */
+/* 激活：图标变主题主色块白字 */
 .tab-item.active .tab-icon {
-  background: #1C4B2E;
+  background: var(--color-primary);
   border-radius: 22rpx;
   padding: 8rpx 26rpx;
   box-sizing: content-box;
@@ -53,7 +53,7 @@
 
 .tab-item.active .tab-label {
   font-weight: 700;
-  color: #8FE09A;
+  color: var(--color-accent);
 }
 
 /* 按压反馈 */

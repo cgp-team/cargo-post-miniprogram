@@ -39,12 +39,11 @@
     <view wx:if="{{!hasMore}}" class="order-nomore">没有更多了</view>
   </view>
 
+  <!-- 加载态 -->
+  <view class="loading-state" wx:if="{{loading && !list.length}}">加载中…</view>
+
   <!-- 空状态 -->
-  <view wx:if="{{!list.length && !loading}}" class="order-empty">
-    <icon class="empty-icon" name="box" size="120" color="#C9C2B0" />
-    <text class="empty-text">还没有订单</text>
-    <view class="empty-btn" bindtap="goHome">去逛逛</view>
-  </view>
+  <empty-state wx:if="{{!list.length && !loading}}" icon="box" text="还没有订单" btnText="去逛逛" bind:tapbtn="goHome" />
 
   <view class="safe-area-bottom"></view>
 </view>

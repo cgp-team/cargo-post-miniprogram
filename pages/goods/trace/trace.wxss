@@ -1,7 +1,7 @@
 /* 商品溯源页 */
 .page-trace {
   min-height: 100vh;
-  background: #F5F7F5;
+  background: var(--color-paper);
   padding-bottom: 40rpx;
 }
 
@@ -88,7 +88,7 @@
   width: 16rpx;
   height: 16rpx;
   border-radius: 50%;
-  background: var(--color-primary, #2E7D32);
+  background: var(--color-primary);
   margin-right: 20rpx;
   flex-shrink: 0;
 }
@@ -100,30 +100,6 @@
 .stop-min {
   font-size: 24rpx;
   color: #999;
-}
-
-.empty-page {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 160rpx 0;
-}
-.empty-emoji {
-  font-size: 90rpx;
-  margin-bottom: 24rpx;
-}
-.empty-text {
-  font-size: 30rpx;
-  color: #666;
-  margin-bottom: 12rpx;
-}
-.empty-sub {
-  font-size: 26rpx;
-  color: #999;
-}
-
-.safe-area-bottom {
-  height: calc(env(safe-area-inset-bottom) + 20rpx);
 }
 
 /* 老年人模式 */

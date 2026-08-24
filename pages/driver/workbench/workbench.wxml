@@ -70,33 +70,6 @@
       </view>
     </view>
 
-    <!-- 超大滑块 -->
-    <view class="slider-section">
-      <view class="slider-ticks">
-        <text class="tick">0</text>
-        <text class="tick">30%</text>
-        <text class="tick">50%</text>
-        <text class="tick">100%</text>
-      </view>
-      <slider
-        class="cargo-slider"
-        min="0"
-        max="100"
-        value="{{cargoCapacity}}"
-        activeColor="#4CAF50"
-        backgroundColor="#333333"
-        block-size="40"
-        block-color="#ffffff"
-        bindchange="onCapacityChange"
-        show-value="{{false}}"
-      />
-      <view class="slider-buttons">
-        <view class="quick-btn" bindtap="onCapacityChange" data-value="30" hover-class="hover">30%</view>
-        <view class="quick-btn" bindtap="onCapacityChange" data-value="50" hover-class="hover">50%</view>
-        <view class="quick-btn" bindtap="onCapacityChange" data-value="100" hover-class="hover">满仓</view>
-      </view>
-    </view>
-
     <!-- 发车按钮 -->
     <button class="start-btn" bindtap="startDrive" hover-class="hover">
       <text class="start-icon">🚌</text>
@@ -110,8 +83,8 @@
     <view class="map-area">
       <map
         class="nav-map"
-        latitude="30.32"
-        longitude="108.21"
+        latitude="{{mapLatitude}}"
+        longitude="{{mapLongitude}}"
         markers="{{markers}}"
         polyline="{{polyline}}"
         show-location="{{true}}"
@@ -134,12 +107,6 @@
             ⚠️ 有 {{pendingPickups.length}} 件货物待装车
           </text>
         </view>
-      </view>
-
-      <!-- 语音播报条 -->
-      <view class="voice-bar" wx:if="{{voiceText}}">
-        <text class="voice-icon">🔊</text>
-        <text class="voice-content">{{voiceText}}</text>
       </view>
     </view>
 

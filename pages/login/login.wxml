@@ -53,7 +53,7 @@
           </button>
         </view>
       </view>
-      <view class="sms-tip">测试环境固定验证码：9999</view>
+      <view class="sms-tip" wx:if="{{showSmsTip}}">测试环境固定验证码：9999</view>
     </block>
 
     <!-- 密码模式 -->
@@ -76,7 +76,7 @@
     <!-- 登录按钮 -->
     <button
       class="btn-primary login-btn"
-      bindtap="{{loginMode === 'sms' ? 'handleSmsLogin' : 'handlePasswordLogin'}}" hover-class="hover"
+      bindtap="handleLogin" hover-class="hover"
       loading="{{loading}}"
     >
       {{loginMode === 'sms' ? '验证码登录' : '密码登录'}}
@@ -92,10 +92,10 @@
       <text class="wechat-emoji">💬</text>
       <text>微信一键登录</text>
     </button>
+  </view>
 
-    <!-- 注册提示 -->
-    <view class="register-link" bindtap="goToRegister" hover-class="hover">
-      <text class="text-gray">首次使用？短信登录即自动注册</text>
-    </view>
+  <!-- 大字模式入口 -->
+  <view class="elderly-entry" bindtap="toggleElderly" hover-class="hover">
+    <text>大字模式：{{elderlyMode ? '已开启' : '已关闭'}}</text>
   </view>
 </view>

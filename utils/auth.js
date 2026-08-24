@@ -27,6 +27,13 @@ function requireLogin(options = {}) {
     confirmText: '去登录',
     success: (res) => {
       if (res.confirm) {
+        // 记录来源页，登录成功后跳回（tab 页需用 switchTab，故记下 isTab）
+        const pages = getCurrentPages()
+        const current = pages[pages.length - 1]
+        if (current && current.route && current.route !== 'pages/login/login') {
+          const isTab = ['pages/index/index', 'pages/goods/goods', 'pages/parcel/parcel', 'pages/mine/mine'].indexOf(current.route) >= 0
+          wx.setStorageSync('loginRedirect', { url: '/' + current.route, isTab })
+        }
         wx.reLaunch({ url: '/pages/login/login' })
       }
     }

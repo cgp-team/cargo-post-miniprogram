@@ -80,9 +80,6 @@
     </view>
   </view>
   </block>
-  <view wx:else class="empty-page">
-    <icon name="bus" size="96" color="#C9C2B0" />
-    <text class="empty-text">{{hasError ? '加载失败' : '暂无公交线路数据'}}</text>
-    <view wx:if="{{hasError}}" class="retry-btn" bindtap="loadLines" hover-class="hover">点击重试</view>
-  </view>
+  <view wx:elif="{{loading}}" class="loading-state">加载中…</view>
+  <empty-state wx:else icon="bus" text="{{hasError ? '加载失败' : '暂无公交线路数据'}}" btnText="{{hasError ? '点击重试' : ''}}" bind:tapbtn="loadLines" />
 </view>

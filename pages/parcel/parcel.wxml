@@ -111,10 +111,10 @@
       </view>
     </view>
 
-    <view class="empty-state" wx:if="{{!sendList.length && !loading}}">
-      <view class="empty-icon"><icon name="box" size="96" color="#8A8778" /></view>
-      <text class="empty-text">还没有寄货记录</text>
-    </view>
+    <view class="loading-state" wx:if="{{loading && sendList.length}}">加载中…</view>
+    <view class="loading-state" wx:elif="{{!hasMore && sendList.length}}">没有更多了</view>
+
+    <empty-state wx:if="{{!sendList.length && !loading}}" icon="box" text="还没有寄货记录" />
   </view>
 
   <!-- Tab1: 单号查询结果 -->
@@ -174,14 +174,8 @@
       </view>
     </view>
 
-    <view wx:elif="{{noResult}}" class="empty-state">
-      <view class="empty-icon"><icon name="search" size="96" color="#8A8778" /></view>
-      <text class="empty-text">未查询到该单号，请确认后重试</text>
-    </view>
-    <view wx:else class="empty-state">
-      <view class="empty-icon"><icon name="search" size="96" color="#8A8778" /></view>
-      <text class="empty-text">输入上方的运单号，查询物流进度</text>
-    </view>
+    <empty-state wx:elif="{{noResult}}" icon="search" text="未查询到该单号，请确认后重试" />
+    <empty-state wx:else icon="search" text="输入上方的运单号，查询物流进度" />
   </view>
 
   <!-- 底部安全区 -->
