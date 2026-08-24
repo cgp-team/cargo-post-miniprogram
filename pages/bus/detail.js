@@ -73,6 +73,8 @@ Page({
         bus: found,
         stops: this.buildStops(points, progress),
         progress,
+        // 是否有可靠车辆位置（无位置不显示假的实时信息）
+        locationAvailable: !!(found.latitude != null && found.longitude != null),
         loading: false,
         loadError: ''
       })

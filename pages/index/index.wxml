@@ -16,6 +16,13 @@
         <icon wx:else name="user" size="40" color="#FFFFFF" />
       </view>
     </view>
+    <!-- 定位状态提示（权限拒绝/不可用；不影响其他功能） -->
+    <view wx:if="{{locationDenied}}" class="loc-hint" bindtap="goToLocationSetting" hover-class="hover">
+      <text class="loc-hint-text">开启定位后，可查看附近公交 ›</text>
+    </view>
+    <view wx:elif="{{locationUnavailable}}" class="loc-hint">
+      <text class="loc-hint-text">定位不可用</text>
+    </view>
     <!-- 天气胶囊：一行浓缩，点击展开完整预报卡 -->
     <view wx:if="{{weather.temp != null}}" class="weather-pill" bindtap="toggleWeather" hover-class="hover">
       <icon name="sun" size="30" color="#FFFFFF" />
@@ -103,32 +110,51 @@
     </view>
   </view>
 
-  <!-- 公交实时到站 -->
+  <!-- 公交实时到站（真实附近公交；空/错误/加载有明确状态，不显示 Demo） -->
   <view class="section">
     <view class="section-header">
       <view class="section-title-wrap">
         <icon name="bus" size="32" color="{{iconDeep}}" />
-        <text class="section-title">附近公交 · 实时到站</text>
+        <text class="section-title">附近公交</text>
       </view>
       <text class="section-more" bindtap="goToBusTracking" hover-class="hover">更多 ›</text>
     </view>
 
-    <view class="bus-list">
+    <view wx:if="{{nearbyBusLocatedText || nearbyBusUpdatedText}}" class="bus-meta">
+      <text wx:if="{{nearbyBusLocatedText}}" class="bus-meta-text">{{nearbyBusLocatedText}}</text>
+      <text wx:if="{{nearbyBusUpdatedText}}" class="bus-meta-text">{{nearbyBusUpdatedText}}</text>
+    </view>
+
+    <!-- 加载中 -->
+    <view wx:if="{{nearbyBusStatus === 'loading'}}" class="bus-empty">
+      <text class="bus-empty-text">正在加载附近公交…</text>
+    </view>
+
+    <!-- 空数据 -->
+    <view wx:elif="{{nearbyBusStatus === 'empty'}}" class="bus-empty">
+      <text class="bus-empty-text">附近暂无实时公交</text>
+    </view>
+
+    <!-- 接口失败 -->
+    <view wx:elif="{{nearbyBusStatus === 'error'}}" class="bus-empty">
+      <text class="bus-empty-text">实时公交暂时不可用</text>
+      <view class="bus-retry" bindtap="loadNearbyBusData" hover-class="hover">重新加载</view>
+    </view>
+
+    <!-- 有数据 -->
+    <view wx:elif="{{nearbyBuses.length}}" class="bus-list">
       <view
         class="bus-card ticket-card"
         wx:for="{{nearbyBuses}}"
-        wx:key="id"
+        wx:key="busId"
         bindtap="goToBusDetail" hover-class="hover"
-        data-id="{{item.id}}"
-        data-demo="{{item.isDemo}}"
+        data-id="{{item.busId}}"
       >
         <view class="ticket-card__main">
-          <view class="ticket-card__serial">山乡巴士 · 城乡班线</view>
+          <view class="ticket-card__serial">{{item.routeName}} · {{item.shiftCode}}</view>
           <view class="bus-header">
-            <text class="bus-number">{{item.routeNumber}}</text>
-            <text class="bus-status {{item.status === 'running' ? 'running' : ''}}">
-              {{item.status === 'running' ? '行驶中' : '已到站'}}
-            </text>
+            <text class="bus-number">{{item.routeName}}</text>
+            <text class="bus-status {{item.statusClass}}">{{item.statusText}}</text>
           </view>
           <view class="bus-route">
             <icon name="pin" size="24" color="#8A8778" />
@@ -137,18 +163,18 @@
           <!-- 山路线：本站到下站之间的路 -->
           <view class="road-line"></view>
           <view class="bus-info">
-            <text class="bus-next">下一站：{{item.nextStation}}</text>
+            <text class="bus-next">下一站：{{item.nextStationText}}</text>
+            <text wx:if="{{item.distanceKm != null}}" class="bus-dist">距 {{item.distanceKm}} km</text>
+          </view>
+          <view class="bus-tags">
+            <text class="bus-tag {{item.sourceDot ? 'tag-live' : ''}}">{{item.sourceText}}</text>
+            <text wx:if="{{item.routeProvider}}" class="bus-tag">{{item.routeProvider}}</text>
+            <text wx:if="{{item.shiftCode}}" class="bus-tag">班次 {{item.shiftCode}}</text>
           </view>
         </view>
         <view class="ticket-card__stub">
-          <block wx:if="{{item.arriveTime > 0}}">
-            <text class="ticket-card__stub-value">{{item.arriveTime}}</text>
-            <text class="ticket-card__stub-label">分钟到站</text>
-          </block>
-          <block wx:else>
-            <text class="ticket-card__stub-value">已到</text>
-            <text class="ticket-card__stub-label">本站</text>
-          </block>
+          <text class="ticket-card__stub-value {{item.etaMinutes != null ? 'stub-eta' : ''}}" style="white-space:normal;">{{item.etaText}}</text>
+          <text class="ticket-card__stub-label">到站</text>
         </view>
       </view>
     </view>

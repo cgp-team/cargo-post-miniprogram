@@ -11,8 +11,11 @@
         <text class="tag" wx:if="{{bus.speedKmh}}">{{bus.speedKmh}} km/h</text>
       </view>
       <view class="head-meta">
-        <text>下一站：{{bus.nextStation || '—'}}</text>
-        <text wx:if="{{bus.status === 1}}">约{{bus.etaMinutes}}分钟后到站</text>
+        <block wx:if="{{locationAvailable}}">
+          <text>下一站：{{bus.nextStation || '—'}}</text>
+          <text>等待实时位置</text>
+        </block>
+        <text wx:else>暂时无法获取车辆实时位置</text>
       </view>
     </view>
 
@@ -24,7 +27,7 @@
       </view>
       <view class="progress-label">
         <text>已完成 {{progress}}%</text>
-        <text wx:if="{{bus.status === 1}}">剩余约{{bus.etaMinutes}}分钟</text>
+        <text wx:if="{{bus.status === 1}}">等待实时位置</text>
       </view>
     </view>
 
