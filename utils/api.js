@@ -297,6 +297,11 @@ function getRealtimeBusLines() {
   return request('/app-api/transport/bus/lines')
 }
 
+/** 附近实时公交（按用户坐标 Haversine 过滤 radius 内站点/车辆；无坐标时传 district 区域 fallback） */
+function getNearbyRealtimeBuses(latitude, longitude, radius, district) {
+  return request('/app-api/transport/bus/nearby', 'GET', { latitude, longitude, radius, district })
+}
+
 // ==================== 取件核销 + 文件上传 ====================
 
 /** 取件核销：邮快件收件人取件，司机确认（校验取件码） */
@@ -382,6 +387,7 @@ module.exports = {
   reportDriverLocation,
   getRealtimeBuses,
   getRealtimeBusLines,
+  getNearbyRealtimeBuses,
   driverPickupVerify,
   uploadFile
 }

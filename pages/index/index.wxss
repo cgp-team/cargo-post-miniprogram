@@ -88,6 +88,22 @@
   letter-spacing: 1rpx;
 }
 
+/* 定位状态提示（权限拒绝/不可用；适配深绿站牌背景，点击可"去设置"） */
+.loc-hint {
+  display: inline-flex;
+  align-items: center;
+  margin-top: 8rpx;
+  padding: 6rpx 18rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1rpx solid rgba(255, 255, 255, 0.4);
+}
+.loc-hint-text {
+  font-size: 22rpx;
+  color: #ffffff;
+  letter-spacing: 1rpx;
+}
+
 .user-avatar {
   position: relative;
   z-index: 1;
@@ -477,6 +493,64 @@
   color: var(--color-text-secondary);
 }
 
+/* 公交元信息（位置/更新时间） */
+.bus-meta {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 4rpx 4rpx 14rpx;
+}
+.bus-meta-text {
+  font-size: 22rpx;
+  color: var(--color-text-tertiary);
+}
+
+/* 公交空态 / 错误态 */
+.bus-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18rpx;
+  padding: 60rpx 0 40rpx;
+}
+.bus-empty-text {
+  font-size: 26rpx;
+  color: var(--color-text-tertiary);
+}
+.bus-retry {
+  padding: 12rpx 40rpx;
+  border: 2rpx solid var(--color-primary);
+  color: var(--color-primary);
+  border-radius: 999rpx;
+  font-size: 26rpx;
+}
+
+/* 公交标签（数据来源/班次） */
+.bus-tags {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-top: 12rpx;
+}
+.bus-tag {
+  font-size: 20rpx;
+  color: var(--color-text-secondary);
+  background: var(--color-primary-light);
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+}
+.bus-tag.tag-live {
+  color: #ffffff;
+  background: var(--color-primary);
+}
+.bus-dist {
+  color: var(--color-text-secondary);
+  font-size: 22rpx;
+}
+.ticket-card__stub-value.stub-eta {
+  font-size: 30rpx;
+}
+
 /* 推荐产品 */
 .product-scroll {
   white-space: nowrap;
@@ -555,6 +629,14 @@
 
 /* ============ 老年人模式：首页字体放大 ============ */
 .elderly-mode .village-name { font-size: 38rpx; }
+.elderly-mode .loc-hint { padding: 10rpx 22rpx; }
+.elderly-mode .loc-hint-text { font-size: 28rpx; }
+.elderly-mode .bus-meta-text { font-size: 26rpx; }
+.elderly-mode .bus-empty-text { font-size: 30rpx; }
+.elderly-mode .bus-retry { font-size: 30rpx; padding: 16rpx 48rpx; }
+.elderly-mode .bus-tag { font-size: 24rpx; }
+.elderly-mode .bus-next { font-size: 28rpx; }
+.elderly-mode .bus-dist { font-size: 26rpx; }
 .elderly-mode .search-input { font-size: 32rpx; }
 .elderly-mode .weather-pill-text { font-size: 30rpx; }
 .elderly-mode .weather-pill-more { font-size: 26rpx; }

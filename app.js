@@ -5,6 +5,8 @@ App({
 
   globalData: {
     currentVillage: '云山村',
+    // 统一用户定位（LocationService 结果，含真实经纬度；currentVillage 只是展示文本）
+    userLocation: null,
     elderlyMode: wx.getStorageSync('elderlyMode') || false,
     themeColor: wx.getStorageSync('themeColor') || 'green'
   }
