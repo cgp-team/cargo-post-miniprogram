@@ -153,6 +153,48 @@ async function main() {
     console.log('✓ 13 定位失败旧缓存兜底 → stale-cache')
   }
 
+  // 14: DEMO 青山镇 → source=demo + 坐标正确（用仓库已有站点坐标）
+  {
+    reset()
+    location.setDemoLocation('青山镇')
+    const loc = await location.getCurrentLocation()
+    assert.strictEqual(loc.source, 'demo')
+    assert.strictEqual(loc.latitude, 30.6234)   // ST004 青山镇站
+    assert.strictEqual(loc.longitude, 104.2345)
+    assert.strictEqual(loc.level, 'PRECISE')
+    assert.strictEqual(loc.district, '青山镇')
+    location.clearDemoLocation()
+    console.log('✓ 14 DEMO 青山镇 → source=demo + 坐标正确')
+  }
+
+  // 15: DEMO → 真实（clearDemoLocation 后回到微信 GPS）
+  {
+    reset()
+    location.setDemoLocation('青山镇')
+    await location.getCurrentLocation() // demo
+    location.clearDemoLocation()
+    const loc = await location.getCurrentLocation() // 微信真实
+    assert.strictEqual(loc.source, 'wechat')
+    assert.strictEqual(loc.latitude, 30.5723) // mock 真实坐标
+    assert.strictEqual(loc.longitude, 104.0657)
+    console.log('✓ 15 DEMO→真实 → source=wechat')
+  }
+
+  // 16: setDemoLocation 不存在 → null；DEMO 并发去重（同一实例）
+  {
+    reset()
+    assert.strictEqual(location.setDemoLocation('不存在的村'), null)
+    location.setDemoLocation('县城客运中心')
+    const p1 = location.getCurrentLocation()
+    const p2 = location.getCurrentLocation()
+    const [a, b] = await Promise.all([p1, p2])
+    assert.strictEqual(a.source, 'demo')
+    assert.strictEqual(a.latitude, 30.5723) // 县城客运中心 ST001
+    assert.strictEqual(a, b) // 同一 demo 实例，无并发
+    location.clearDemoLocation()
+    console.log('✓ 16 演示名不存在返回 null；DEMO 并发去重')
+  }
+
   console.log('\n全部通过 ✅')
 }
 
