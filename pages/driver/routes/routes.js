@@ -43,7 +43,7 @@ Page({
           status: statusKey,
           statusText: s.statusName || (s.status === 1 ? '进行中' : s.status === 2 ? '已完成' : '待发车'),
           stops: names,
-          currentStop: statusKey === 'running' ? this.currentStopIndex(s, names.length, s.stops || []) : 0
+          currentStop: statusKey === 'running' ? this.currentStopIndex(s, names.length, s.stops || []) : -1
         }
       })
       this.setData({ todayRoutes, loaded: true })

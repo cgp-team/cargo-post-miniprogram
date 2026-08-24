@@ -48,7 +48,7 @@ Page({
         goods: r.goodsName || '寄货',
         weight: r.weightKg ? r.weightKg + 'kg' : '',
         amount: r.totalAmount || '0',
-        time: this.formatTime(r.createTime),
+        time: formatBackendTime(r.createTime),
         status: r.statusName || ''
       }))
       this.setData({
@@ -66,9 +66,5 @@ Page({
     } finally {
       this.setData({ loading: false })
     }
-  },
-
-  formatTime(t) {
-    return formatBackendTime(t)
   }
 })

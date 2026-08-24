@@ -55,9 +55,6 @@ Page({
     cargoCapacity: 0,        // 空余仓位百分比
     cargoUsed: 0,            // 已用仓位百分比
 
-    // 语音播报
-    voiceText: '',
-
     // 到站任务（真实货运订单）
     pendingPickups: [],
 
@@ -72,6 +69,10 @@ Page({
     markers: [],
     polyline: [],
 
+    // 地图中心（兜底坐标，onLoad 时用司机实时定位覆盖）
+    mapLatitude: 30.32,
+    mapLongitude: 108.21,
+
     loaded: false
   },
 
@@ -79,13 +80,25 @@ Page({
     const sysInfo = wx.getWindowInfo()
     this.setData({ headerSafeStyle: 'height: ' + (sysInfo.statusBarHeight || 20) + 'px;' })
     appearance.apply(this)
+    this.initMapCenter()
     this.loadAll()
+  },
+
+  /** 地图中心跟随司机当前位置，定位失败保留兜底坐标 */
+  initMapCenter() {
+    wx.getLocation({
+      type: 'gcj02',
+      success: (res) => {
+        this.setData({ mapLatitude: res.latitude, mapLongitude: res.longitude })
+      },
+      fail: () => {} // 权限被拒或定位失败时使用兜底坐标
+    })
   },
 
   onShow() {
     appearance.apply(this)
-    // 从其他页返回时若在途，确保上报定时器在跑
-    if (this.data.status === 'driving' && !this.locationTimer) {
+    // 从其他页返回时若在途（行驶中或到站停靠），确保上报定时器在跑
+    if ((this.data.status === 'driving' || this.data.status === 'stopped') && !this.locationTimer) {
       this.startLocationReport()
     }
   },
@@ -143,7 +156,7 @@ Page({
     }))
     const polyline = [{
       points: stops.map((s) => ({ latitude: s.latitude, longitude: s.longitude })),
-      color: '#6FBF7A',
+      color: (appearance.THEMES[this.data.themeColor] || appearance.THEMES.green).accent,
       width: 6,
       arrowLine: true
     }]
@@ -331,27 +344,6 @@ Page({
   },
 
   /**
-   * 运力滑块变化（slider组件）
-   */
-  onCapacityChange(e) {
-    const value = e.detail.value || e.currentTarget.dataset.value
-    if (value !== undefined) {
-      this.setData({ cargoCapacity: value })
-    }
-  },
-
-  /**
-   * 确认发布运力
-   */
-  publishCapacity() {
-    const cap = this.data.cargoCapacity
-    wx.showToast({
-      title: `已发布 ${cap}% 仓位`,
-      icon: 'success'
-    })
-  },
-
-  /**
    * 扫码装车：匹配待装订单并调后端确认（货运散件强制司机收件拍照，快递总站核对凭证）
    */
   scanToLoad() {
@@ -488,16 +480,6 @@ Page({
     this.setData({ status: 'driving' })
     wx.showToast({
       title: '继续行驶',
-      icon: 'none'
-    })
-  },
-
-  /**
-   * 语音播报开关
-   */
-  toggleVoice() {
-    wx.showToast({
-      title: '语音播报已开启',
       icon: 'none'
     })
   },

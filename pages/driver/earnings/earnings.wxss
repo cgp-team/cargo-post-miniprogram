@@ -20,7 +20,7 @@
 /* 收益总览 */
 .overview-card {
   margin: 24rpx;
-  background: linear-gradient(135deg, #2E5A2E, #5AAE66);
+  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
   border-radius: 24rpx;
   padding: 36rpx 32rpx 28rpx;
 }
@@ -153,10 +153,10 @@
 .record-amount {
   font-size: 34rpx;
   font-weight: 800;
-  color: #6FBF7A;
+  color: var(--color-accent);
 }
 
-.ov-num.blue {
+.ov-num.gold {
   color: var(--color-gold);
 }
 
