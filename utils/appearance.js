@@ -17,11 +17,17 @@
 
 const DEFAULT_THEME = 'green'
 
+/* 导航栏换色去重：wx.setNavigationBarColor 只作用于当前页面，
+ * 主题或页面任一变化时才重新设置，避免同页 onShow 重复调用 */
+let _lastNavTheme = null
+let _lastNavPage = null
+
 /**
  * 各主题色板（key 与设置页存储保持一致：green/orange/blue）。
  * 设计语言：山乡巴士 · 站牌与车票——
  *   primary 站牌绿（大面积主角，非点缀）、dark 深站牌绿、accent 新芽绿、
- *   clay 陶土橙（司机/行动）、gold 稻谷金（农产品/公告）、paper 米纸底、ink 墨字。
+ *   clay 陶土橙（司机/行动）、gold 稻谷金（农产品/公告）、paper 米纸底、ink 墨字、
+ *   shadow 主色 20% 透明光晕（box-shadow 描边/辉光）。
  */
 const THEMES = {
   green: {
@@ -30,6 +36,7 @@ const THEMES = {
     dark: '#1C4B2E',       // 深站牌绿（头部/标题）
     accent: '#4CAF50',     // 新芽绿（强调）
     light: '#EAF3EA',      // 浅绿（浅色背景）
+    shadow: 'rgba(46,125,50,0.2)', // 主色 20% 透明光晕
     clay: '#C75B2A',       // 陶土橙（司机/行动暖色）
     gold: '#D9A441',       // 稻谷金（农产品价格/公告）
     paper: '#F6F2E9',      // 米纸底（页面底色）
@@ -41,6 +48,7 @@ const THEMES = {
     dark: '#9E4A1F',
     accent: '#E07A3F',
     light: '#F8ECE3',
+    shadow: 'rgba(199,91,42,0.2)',
     clay: '#C75B2A',
     gold: '#D9A441',
     paper: '#F6F2E9',
@@ -52,6 +60,7 @@ const THEMES = {
     dark: '#123F6E',
     accent: '#2E7BBF',
     light: '#E6EFF5',
+    shadow: 'rgba(31,94,158,0.2)',
     clay: '#C75B2A',
     gold: '#D9A441',
     paper: '#F6F2E9',
@@ -63,6 +72,7 @@ const THEMES = {
     dark: '#7A1821',       // 深红（头部/标题）
     accent: '#C24A3D',     // 亮红（强调）
     light: '#F7E6E4',      // 浅红（浅色背景）
+    shadow: 'rgba(166,36,47,0.2)', // 主色 20% 透明光晕
     clay: '#C75B2A',       // 陶土橙（司机/行动暖色）
     gold: '#D9A441',       // 稻谷金（农产品价格/公告）
     paper: '#F6F2E9',      // 米纸底（页面底色）
@@ -104,6 +114,7 @@ function themeStyle(color) {
     `--color-primary-dark:${t.dark};`,
     `--color-accent:${t.accent};`,
     `--color-primary-light:${t.light};`,
+    `--color-primary-shadow:${t.shadow};`,
     `--color-on-primary:#ffffff;`,
     `--color-clay:${t.clay};`,
     `--color-gold:${t.gold};`,
@@ -140,6 +151,12 @@ function apply(page) {
   }
   const changed = Object.keys(patch).some((k) => page.data[k] !== patch[k])
   if (changed) page.setData(patch)
+  // 导航栏跟随主题深色（login 页已删除 json 覆盖，同样走这里）
+  if (_lastNavTheme !== s.themeColor || _lastNavPage !== page) {
+    _lastNavTheme = s.themeColor
+    _lastNavPage = page
+    wx.setNavigationBarColor({ frontColor: '#ffffff', backgroundColor: t.dark })
+  }
   return s
 }
 

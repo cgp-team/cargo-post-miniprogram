@@ -12,9 +12,12 @@
  * 所以放在 utils/ 下、与 api.js 同目录用 require('./config') 引用。
  */
 const BASE_URLS = {
-  develop: 'http://1.15.29.107/api', // 开发服务器
-  trial: 'http://1.15.29.107/api',   // 暂无独立体验环境，先指开发服务器
-  release: 'http://1.15.29.107/api'  // 暂无正式服务器，先指开发服务器
+  develop: 'http://1.15.29.107/api', // 开发服务器（仅开发版可用 HTTP，需在工具中关闭域名校验）
+  // TODO(发布前必改)：体验版/正式版必须使用已备案的 HTTPS 域名，
+  // 并在小程序后台「开发管理-服务器域名」中配置 request 合法域名。
+  // 未替换占位符前，体验版/正式版无法发起任何请求。
+  trial: 'https://YOUR_DOMAIN/api',
+  release: 'https://YOUR_DOMAIN/api'
 }
 
 function getBaseUrl() {

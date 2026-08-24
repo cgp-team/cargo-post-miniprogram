@@ -14,6 +14,8 @@ let last401At = 0
 function handle401() {
   wx.removeStorageSync('token')
   wx.removeStorageSync('userInfo')
+  wx.removeStorageSync('refreshToken')
+  wx.removeStorageSync('userId')
   const now = Date.now()
   if (now - last401At < 2000) return
   last401At = now
@@ -40,6 +42,11 @@ function request(url, method = 'GET', data = {}) {
       success(res) {
         // yudao 统一格式 {code: 0, msg: "", data: ...}
         const body = res.data
+        if (!body || typeof body !== 'object') {
+          wx.showToast({ title: '请求失败', icon: 'none', duration: 2500 })
+          reject(new Error('empty response'))
+          return
+        }
         if (res.statusCode === 200 && body.code === 0) {
           resolve(body.data)
         } else if (res.statusCode === 401 || body.code === 401) {
@@ -289,14 +296,24 @@ function driverPickupVerify(driverId, orderId, pickupCode) {
 
 /** 上传文件（照片），返回文件 URL（infra app 文件上传，免登录） */
 function uploadFile(filePath) {
+  const token = wx.getStorageSync('token')
   return new Promise((resolve, reject) => {
     wx.uploadFile({
       url: `${BASE_URL}/app-api/infra/file/upload`,
       filePath,
       name: 'file',
+      // 与 request() 鉴权方式一致，无 token 时不带该头
+      header: token ? { 'Authorization': `Bearer ${token}` } : {},
       success(res) {
         let body
-        try { body = JSON.parse(res.data) } catch (e) { reject({ msg: '上传响应异常' }); return }
+        try { body = JSON.parse(res.data) } catch (e) { body = null }
+        // 与 request() 行为对齐：401 统一清理登录态并跳转登录页
+        if (res.statusCode === 401 || (body && body.code === 401)) {
+          handle401()
+          reject(body || { msg: '登录已失效，请重新登录' })
+          return
+        }
+        if (!body) { reject({ msg: '上传响应异常' }); return }
         if (body.code === 0) resolve(body.data)
         else reject(body)
       },
