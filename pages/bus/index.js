@@ -20,7 +20,8 @@ Page({
     markers: [],
     polyline: [],
     buses: [],
-    hasError: false
+    hasError: false,
+    loading: true
   },
 
   onLoad() {
@@ -72,6 +73,8 @@ Page({
       this.setData({ hasError: true })
     } finally {
       this._loading = false
+      // 首次加载完成后关闭首帧加载态（后续 15s 静默刷新不再触发）
+      if (this.data.loading) this.setData({ loading: false })
     }
   },
 

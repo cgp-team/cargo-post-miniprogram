@@ -71,7 +71,7 @@ Page({
     this.setData({ loading: true })
     try {
       const res = await api.pageMyFeedback({ pageNo: this.data.pageNo, pageSize: this.data.pageSize })
-      const list = (res.list || []).map((f) => ({ ...f, createTimeText: this.formatTime(f.createTime) }))
+      const list = (res.list || []).map((f) => ({ ...f, createTimeText: formatBackendTime(f.createTime) }))
       const merged = this.data.pageNo === 1 ? list : this.data.list.concat(list)
       this.setData({ list: merged, total: res.total || 0, hasMore: merged.length < (res.total || 0) })
     } catch (e) { /* api 已 toast */ } finally {
@@ -83,9 +83,5 @@ Page({
     if (this.data.loading || !this.data.hasMore) return
     this.setData({ pageNo: this.data.pageNo + 1 })
     this.loadList()
-  },
-
-  formatTime(t) {
-    return formatBackendTime(t)
   }
 })

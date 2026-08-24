@@ -24,17 +24,6 @@
     </view>
   </view>
 
-  <!-- 搜索栏 -->
-  <view class="search-bar card" bindtap="goToSearch" hover-class="hover">
-    <icon name="search" size="32" color="#8A8778" />
-    <input
-      class="search-input"
-      type="text"
-      placeholder="搜索公交线路、农产品、快递单号..."
-      disabled
-    />
-  </view>
-
   <!-- 天气详情卡（默认收起，点胶囊展开；主题色系） -->
   <view wx:if="{{weatherExpanded && weather.temp != null}}" class="weather-card">
     <view class="weather-main">
@@ -131,6 +120,7 @@
         wx:key="id"
         bindtap="goToBusDetail" hover-class="hover"
         data-id="{{item.id}}"
+        data-demo="{{item.isDemo}}"
       >
         <view class="ticket-card__main">
           <view class="ticket-card__serial">山乡巴士 · 城乡班线</view>
@@ -181,6 +171,7 @@
         wx:key="id"
         bindtap="goToProductDetail" hover-class="hover"
         data-id="{{item.id}}"
+        data-demo="{{item.isDemo}}"
       >
         <view class="product-img">
           <image wx:if="{{item.imageUrl}}" class="product-img-real" src="{{item.imageUrl}}" mode="aspectFill" lazy-load />

@@ -33,6 +33,7 @@
         scale="{{mapScale}}"
         markers="{{markers}}"
         polyline="{{polyline}}"
+        include-points="{{trackPoints}}"
         show-location
       ></map>
       <view class="map-legend">
@@ -52,12 +53,11 @@
     </view>
   </block>
 
+  <!-- 加载态 -->
+  <view wx:elif="{{loading}}" class="loading-state">加载中…</view>
+
   <!-- 空态：未发货或无轨迹 -->
-  <view wx:elif="{{!loading}}" class="empty-page">
-    <text class="empty-emoji">🗺️</text>
-    <text class="empty-text">商品还未发车，暂无运输轨迹</text>
-    <text class="empty-sub">发货后这里会展示大巴的实时轨迹</text>
-  </view>
+  <empty-state wx:elif="{{!loading}}" emoji="🗺️" text="商品还未发车，暂无运输轨迹" subText="发货后这里会展示大巴的实时轨迹" />
 
   <view class="safe-area-bottom"></view>
 </view>

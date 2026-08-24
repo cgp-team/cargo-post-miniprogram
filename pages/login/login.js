@@ -16,6 +16,8 @@ Page({
     smsCountdown: 0,
     loginMode: 'sms', // 'sms' | 'password'
     loading: false,
+    // 测试验证码提示仅非正式版可见
+    showSmsTip: wx.getAccountInfoSync().miniProgram.envVersion !== 'release',
     elderlyMode: false,
     themeColor: 'green',
     themeStyle: ''
@@ -23,6 +25,13 @@ Page({
 
   onLoad() {
     appearance.apply(this)
+  },
+
+  onUnload() {
+    if (this._smsTimer) {
+      clearInterval(this._smsTimer)
+      this._smsTimer = null
+    }
   },
 
   /** 切换登录方式 */
@@ -56,9 +65,12 @@ Page({
       wx.showToast({ title: '验证码已发送', icon: 'success' })
       // 60秒倒计时
       this.setData({ smsCountdown: 60 })
-      const timer = setInterval(() => {
+      this._smsTimer = setInterval(() => {
         const count = this.data.smsCountdown - 1
-        if (count <= 0) clearInterval(timer)
+        if (count <= 0) {
+          clearInterval(this._smsTimer)
+          this._smsTimer = null
+        }
         this.setData({ smsCountdown: count })
       }, 1000)
     } catch (err) {
@@ -66,6 +78,12 @@ Page({
     } finally {
       this.setData({ smsCodeSending: false })
     }
+  },
+
+  /** 登录按钮统一入口：按当前登录模式分发 */
+  handleLogin() {
+    if (this.data.loginMode === 'sms') this.handleSmsLogin()
+    else this.handlePasswordLogin()
   },
 
   /** 短信验证码登录 */
@@ -164,12 +182,31 @@ Page({
 
     wx.showToast({ title: '登录成功', icon: 'success', duration: 1500 })
     setTimeout(() => {
-      wx.reLaunch({ url: '/pages/index/index' })
+      this._redirectAfterLogin()
     }, 1500)
   },
 
-  /** 跳转注册（引导到登录页短信注册） */
-  goToRegister() {
-    wx.showToast({ title: '新用户首次短信登录即自动注册', icon: 'none', duration: 2000 })
+  /** 登录成功后跳回来源页（requireLogin 记录的 loginRedirect）；无来源则回首页 */
+  _redirectAfterLogin() {
+    const redirect = wx.getStorageSync('loginRedirect')
+    if (redirect && redirect.url) {
+      wx.removeStorageSync('loginRedirect')
+      if (redirect.isTab) {
+        wx.switchTab({ url: redirect.url })
+      } else {
+        wx.redirectTo({ url: redirect.url })
+      }
+      return
+    }
+    wx.reLaunch({ url: '/pages/index/index' })
+  },
+
+  /** 大字模式（老年模式）开关 */
+  toggleElderly() {
+    const next = !this.data.elderlyMode
+    feedback.tap()
+    wx.setStorageSync('elderlyMode', next)
+    getApp().globalData.elderlyMode = next
+    appearance.apply(this)
   }
 })

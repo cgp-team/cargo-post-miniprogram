@@ -17,7 +17,7 @@
   right: -80rpx;
   width: 360rpx;
   height: 360rpx;
-  background: radial-gradient(circle, rgba(76,175,80,0.12) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--color-primary-shadow) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -29,7 +29,7 @@
   left: -100rpx;
   width: 280rpx;
   height: 280rpx;
-  background: radial-gradient(circle, rgba(129,199,132,0.10) 0%, transparent 70%);
+  background: radial-gradient(circle, var(--color-primary-shadow) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
 }
@@ -59,7 +59,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 12rpx 32rpx rgba(46,125,50,0.25);
+  box-shadow: 0 12rpx 32rpx var(--color-primary-shadow);
   position: relative;
   z-index: 1;
 }
@@ -71,7 +71,7 @@
   width: 166rpx;
   height: 166rpx;
   border-radius: 36rpx;
-  border: 3rpx dashed rgba(76,175,80,0.25);
+  border: 3rpx dashed var(--color-primary-shadow);
   animation: ringRotate 20s linear infinite;
 }
 
@@ -90,52 +90,8 @@
 
 .logo-desc {
   font-size: 26rpx;
-  color: #4E7A56;
+  color: var(--color-primary);
   letter-spacing: 1rpx;
-}
-
-/* 角色切换 */
-.role-switch {
-  display: flex;
-  background: #ffffff;
-  border-radius: 20rpx;
-  padding: 8rpx;
-  margin-bottom: 36rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.06);
-  position: relative;
-  z-index: 1;
-}
-
-.role-tab {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 28rpx 0;
-  border-radius: 14rpx;
-  font-size: 28rpx;
-  color: #999;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-}
-
-.role-tab.active {
-  background: linear-gradient(135deg, var(--color-primary), #388E3C, #43A047);
-  color: #ffffff;
-  font-weight: 600;
-  box-shadow: 0 8rpx 24rpx rgba(46,125,50,0.3);
-  transform: scale(1.02);
-}
-
-.role-icon {
-  width: 56rpx;
-  height: 56rpx;
-  margin-bottom: 10rpx;
-  transition: all 0.15s ease;
-}
-
-.role-tab.active .role-icon {
-  filter: brightness(0) invert(1);
 }
 
 /* 表单卡片 */
@@ -175,7 +131,7 @@
 .login-page .input-field:focus {
   border-color: var(--color-accent);
   background-color: #fff;
-  box-shadow: 0 0 0 6rpx rgba(76, 175, 80, 0.08);
+  box-shadow: 0 0 0 6rpx var(--color-primary-shadow);
 }
 
 .login-page .input-field::placeholder {
@@ -230,12 +186,6 @@
   border-color: var(--color-accent);
 }
 
-.wechat-icon {
-  width: 44rpx;
-  height: 44rpx;
-  margin-right: 14rpx;
-}
-
 /* 图标行 */
 .input-label-row {
   display: flex;
@@ -246,27 +196,6 @@
 
 .input-icon {
   font-size: 30rpx;
-}
-
-.role-icon-wrap {
-  width: 64rpx;
-  height: 64rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 8rpx;
-  border-radius: 50%;
-  background: rgba(0,0,0,0.04);
-  transition: all 0.15s ease;
-}
-
-.role-tab.active .role-icon-wrap {
-  background: rgba(255,255,255,0.2);
-}
-
-.role-emoji {
-  font-size: 36rpx;
-  line-height: 1;
 }
 
 .wechat-emoji {
@@ -358,3 +287,12 @@
 .elderly-mode .sms-btn { font-size: 30rpx; width: 220rpx; }
 .elderly-mode .switch-mode { font-size: 32rpx; }
 .elderly-mode .register-link { font-size: 32rpx; }
+
+/* 大字模式入口 */
+.elderly-entry {
+  text-align: center;
+  font-size: 28rpx;
+  color: var(--color-text-secondary);
+  padding: 32rpx 0;
+}
+.elderly-mode .elderly-entry { font-size: 32rpx; }

@@ -7,7 +7,7 @@
 
 /* 顶部栏 —— 站牌式：深绿实板 + 落款横档 + 线路号 chip */
 .top-bar {
-  background: linear-gradient(160deg, var(--color-primary-dark) 0%, var(--color-primary) 60%, #2E5A2E 100%);
+  background: linear-gradient(160deg, var(--color-primary-dark) 0%, var(--color-primary) 60%, var(--color-primary-dark) 100%);
   padding: 20rpx 30rpx 48rpx;
   position: relative;
   overflow: hidden;
@@ -357,9 +357,9 @@
 }
 
 /* 四宫格配色全部取自主题板：站牌绿 / 稻谷金 / 深站牌绿 / 陶土橙 */
-.green-bg { background: linear-gradient(135deg, var(--color-primary), var(--color-accent)); box-shadow: 0 6rpx 18rpx rgba(46,125,50,0.22); }
+.green-bg { background: linear-gradient(135deg, var(--color-primary), var(--color-accent)); box-shadow: 0 6rpx 18rpx var(--color-primary-shadow); }
 .gold-bg { background: linear-gradient(135deg, var(--color-gold), #B98A2E); box-shadow: 0 6rpx 18rpx rgba(217,164,65,0.24); }
-.deep-bg { background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary)); box-shadow: 0 6rpx 18rpx rgba(28,75,46,0.24); }
+.deep-bg { background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary)); box-shadow: 0 6rpx 18rpx var(--color-primary-shadow); }
 .clay-bg { background: linear-gradient(135deg, var(--color-clay), #A64A1F); box-shadow: 0 6rpx 18rpx rgba(199,91,42,0.24); }
 
 .feature-name {
@@ -553,11 +553,6 @@
   color: var(--color-text-tertiary);
 }
 
-/* 底部安全区 */
-.safe-area-bottom {
-  height: calc(40rpx + env(safe-area-inset-bottom));
-}
-
 /* ============ 老年人模式：首页字体放大 ============ */
 .elderly-mode .village-name { font-size: 38rpx; }
 .elderly-mode .search-input { font-size: 32rpx; }
@@ -583,3 +578,6 @@
 .elderly-mode .product-from { font-size: 26rpx; }
 .elderly-mode .product-price { font-size: 40rpx; }
 .elderly-mode .product-unit { font-size: 26rpx; }
+.elderly-mode .top-badge { font-size: 24rpx; }
+.elderly-mode .top-sub { font-size: 26rpx; }
+.elderly-mode .notice-tag { font-size: 26rpx; }

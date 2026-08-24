@@ -3,12 +3,15 @@
  */
 const api = require('../../utils/api')
 const weatherApi = require('../../utils/weather')
-const appearance = require('../../utils/appearance')
 const productImg = require('../../utils/product-img')
 const auth = require('../../utils/auth')
 const { VILLAGES } = require('../../utils/util')
 
+/** 天气缓存有效期：10 分钟内直接复用缓存渲染，跳过定位与网络请求 */
+const WEATHER_CACHE_TTL = 10 * 60 * 1000
+
 Page({
+  behaviors: [require('../../behaviors/page-base')],
   data: {
     userInfo: {},
     currentVillage: '云山村',
@@ -32,7 +35,8 @@ Page({
         endStation: '云山村',
         nextStation: '青山镇路口',
         status: 'running',
-        arriveTime: 8
+        arriveTime: 8,
+        isDemo: true
       },
       {
         id: 2,
@@ -41,7 +45,8 @@ Page({
         endStation: '大湾村',
         nextStation: '双河桥头',
         status: 'running',
-        arriveTime: 15
+        arriveTime: 15,
+        isDemo: true
       },
       {
         id: 3,
@@ -50,7 +55,8 @@ Page({
         endStation: '溪口村',
         nextStation: '县城客运站',
         status: 'arrived',
-        arriveTime: 0
+        arriveTime: 0,
+        isDemo: true
       }
     ],
     recommendProducts: [
@@ -60,7 +66,8 @@ Page({
         fromVillage: '云山村',
         price: '68.00',
         unit: '斤',
-        imageUrl: '/images/product-tea.png'
+        imageUrl: '/images/product-tea.png',
+        isDemo: true
       },
       {
         id: 2,
@@ -68,7 +75,8 @@ Page({
         fromVillage: '大湾村',
         price: '45.00',
         unit: '箱',
-        imageUrl: '/images/product-egg.png'
+        imageUrl: '/images/product-egg.png',
+        isDemo: true
       },
       {
         id: 3,
@@ -76,7 +84,8 @@ Page({
         fromVillage: '竹林乡',
         price: '28.00',
         unit: '袋',
-        imageUrl: '/images/product-noodle.png'
+        imageUrl: '/images/product-noodle.png',
+        isDemo: true
       },
       {
         id: 4,
@@ -84,28 +93,23 @@ Page({
         fromVillage: '青山镇',
         price: '55.00',
         unit: '斤',
-        imageUrl: '/images/product-nut.png'
+        imageUrl: '/images/product-nut.png',
+        isDemo: true
       }
     ]
   },
 
   onLoad() {
-    // 获取状态栏高度，适配刘海屏
-    const sys = wx.getWindowInfo()
-    this.setData({ statusBarHeight: sys.statusBarHeight || 20 })
+    // 状态栏高度（适配刘海屏）+ 同步老年模式 / 主题色
+    this._initPageBase()
 
-    // 同步老年模式 / 主题色
-    appearance.apply(this)
+    // 登录统一拦截：未登录弹窗引导跳登录页（token 判据）
+    if (!auth.requireLogin()) return
 
     // 获取用户信息
     const userInfo = wx.getStorageSync('userInfo')
     if (userInfo) {
       this.setData({ userInfo })
-    } else {
-      // 未登录，跳转登录页
-      wx.reLaunch({
-        url: '/pages/login/login'
-      })
     }
 
     // 加载数据
@@ -115,8 +119,8 @@ Page({
 
   onShow() {
     // 每次显示时刷新外观设置（设置页改动后回来立即生效）
-    appearance.apply(this)
-    // 刷新天气和公交（loadWeather 内部有防重复，不会并发双发）
+    this._applyAppearance()
+    // 刷新天气和公交（loadWeather 内部有防重复与缓存 TTL，不会并发双发）
     this.loadWeather()
     this.loadBusData()
   },
@@ -124,7 +128,16 @@ Page({
   /**
    * 获取天气 — 缓存/本地兜底秒开，后台刷新真实数据
    */
-  loadWeather() {
+  loadWeather(options) {
+    // 缓存 TTL：10 分钟内直接复用缓存渲染，跳过定位与网络请求（下拉刷新传 force 绕过）
+    if (!(options && options.force)) {
+      const cache = wx.getStorageSync('weatherCache')
+      if (cache && cache.data && cache.ts && Date.now() - cache.ts < WEATHER_CACHE_TTL) {
+        this._renderWeatherFallback()
+        return
+      }
+    }
+
     // 防重复：onLoad 与 onShow 都会触发，避免同一时刻发两次请求
     if (this._weatherLoading) return
     this._weatherLoading = true
@@ -316,13 +329,6 @@ Page({
   },
 
   /**
-   * 跳转搜索
-   */
-  goToSearch() {
-    wx.showToast({ title: '搜索功能开发中', icon: 'none' })
-  },
-
-  /**
    * 跳转实时公交（车来了式地图+列表）
    */
   goToBusTracking() {
@@ -333,6 +339,10 @@ Page({
    * 跳转公交详情
    */
   goToBusDetail(e) {
+    if (e.currentTarget.dataset.demo) {
+      wx.showToast({ title: '示例数据，暂未开通', icon: 'none' })
+      return
+    }
     const busId = e.currentTarget.dataset.id
     wx.navigateTo({ url: `/pages/bus/detail?id=${busId}` })
   },
@@ -348,6 +358,10 @@ Page({
    * 跳转产品详情
    */
   goToProductDetail(e) {
+    if (e.currentTarget.dataset.demo) {
+      wx.showToast({ title: '示例数据，暂未开通', icon: 'none' })
+      return
+    }
     const productId = e.currentTarget.dataset.id
     wx.navigateTo({ url: `/pages/goods/detail/detail?id=${productId}` })
   },
@@ -371,13 +385,15 @@ Page({
    * 跳转个人中心
    */
   goToProfile() {
-    wx.showToast({ title: '个人中心开发中', icon: 'none' })
+    wx.switchTab({ url: '/pages/mine/mine' })
   },
 
   /**
    * 下拉刷新：等数据回来后再收起动画，与 goods/orders 行为一致
    */
   onPullDownRefresh() {
+    // 下拉刷新：强制更新天气（绕过缓存 TTL），首页/公交数据回来后再收起动画
+    this.loadWeather({ force: true })
     Promise.all([this.loadHomeData(), this.loadBusData()])
       .finally(() => wx.stopPullDownRefresh())
   }

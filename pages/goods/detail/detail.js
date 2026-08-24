@@ -2,12 +2,13 @@
  * 商品详情页 - 从后端获取真实商品数据 + 弹窗下单
  */
 const api = require('../../../utils/api')
-const appearance = require('../../../utils/appearance')
 const productImg = require('../../../utils/product-img')
 const feedback = require('../../../utils/feedback')
 const auth = require('../../../utils/auth')
+const util = require('../../../utils/util')
 
 Page({
+  behaviors: [require('../../../behaviors/page-base')],
   data: {
     product: null,
     statusBarHeight: 20,
@@ -25,9 +26,7 @@ Page({
   },
 
   onLoad(options) {
-    const win = wx.getWindowInfo()
-    this.setData({ statusBarHeight: win.statusBarHeight || 20 })
-    appearance.apply(this)
+    this._initPageBase()
 
     const id = options.id
     if (id) {
@@ -40,7 +39,7 @@ Page({
 
   onShow() {
     // 同步老年模式 / 主题色
-    appearance.apply(this)
+    this._applyAppearance()
   },
 
   /** 加载商品详情 */
@@ -63,14 +62,11 @@ Page({
     wx.navigateBack()
   },
 
-  /** 加入购物车（占位） */
-  addCart() {
-    wx.showToast({ title: '购物车功能开发中', icon: 'none' })
-  },
-
   /** 立即购买 → 弹窗下单 */
   buyNow() {
     if (!this.data.product) return
+    // 已售罄不响应
+    if (this.data.product.stock === 0) return
     // 未登录拦截（统一入口）
     if (!auth.requireLogin({ content: '登录后才能下单购买' })) return
     // 初始化弹窗（收货电话预填登录手机号）
@@ -100,7 +96,9 @@ Page({
   },
 
   quantityPlus() {
-    const max = this.data.product.stock || 99
+    const stock = this.data.product.stock
+    const max = typeof stock === 'number' ? stock : 99
+    if (max <= 0) return
     const q = Math.min(max, this.data.quantity + 1)
     this.setData({ quantity: q, totalAmount: this.calcAmount(q) })
   },
@@ -123,7 +121,7 @@ Page({
       wx.showToast({ title: '请输入收货人姓名', icon: 'none' })
       return
     }
-    if (!/^[\d-]{5,20}$/.test(receiverMobile.trim())) {
+    if (!util.validatePhone(receiverMobile.trim())) {
       wx.showToast({ title: '请输入正确的联系电话', icon: 'none' })
       return
     }

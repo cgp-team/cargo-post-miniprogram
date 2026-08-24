@@ -151,42 +151,8 @@
 
 .menu-emoji { flex-shrink: 0; }
 .menu-text { flex: 1; font-size: 30rpx; color: #333; font-weight: 500; }
-.menu-sub { font-size: 22rpx; color: #757575; display: block; }
-.menu-item-body { flex: 1; display: flex; flex-direction: column; gap: 4rpx; }
 .menu-arrow { font-size: 36rpx; color: var(--color-text-tertiary); }
 .menu-item.logout .menu-text { color: var(--color-danger); }
-
-/* 自定义滑动开关 */
-.toggle-switch {
-  width: 96rpx; height: 52rpx; border-radius: 26rpx;
-  transition: background 0.25s; position: relative; flex-shrink: 0;
-}
-.toggle-switch.off { background: #DDD; }
-.toggle-switch.on { background: var(--color-accent); }
-.toggle-knob {
-  width: 44rpx; height: 44rpx; border-radius: 50%; background: #fff;
-  position: absolute; top: 4rpx; left: 4rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.15); transition: left 0.25s;
-}
-.toggle-switch.on .toggle-knob { left: 48rpx; }
-
-/* 主题颜色标签 */
-.menu-label { font-size: 24rpx; color: #757575; padding: 20rpx 28rpx 12rpx; }
-.menu-divider { height: 1rpx; background: var(--color-paper); margin: 0 28rpx; }
-
-.theme-row {
-  display: flex; gap: 16rpx; padding: 8rpx 28rpx 24rpx;
-}
-
-.theme-chip {
-  flex: 1; text-align: center; padding: 18rpx 0;
-  border-radius: 14rpx; font-size: 26rpx; font-weight: 600;
-  transition: all 0.15s ease;
-}
-
-.safe-area-bottom {
-  height: calc(40rpx + env(safe-area-inset-bottom));
-}
 
 /* ============ 老年人模式：我的页字体放大 ============ */
 .elderly-mode .login-text { font-size: 36rpx; }
@@ -197,7 +163,4 @@
 .elderly-mode .farmer-btn-text { font-size: 42rpx; }
 .elderly-mode .farmer-btn-desc { font-size: 26rpx; }
 .elderly-mode .menu-text { font-size: 34rpx; }
-.elderly-mode .menu-sub { font-size: 26rpx; }
-.elderly-mode .menu-label { font-size: 28rpx; }
-.elderly-mode .theme-chip { font-size: 30rpx; padding: 22rpx 0; }
 .elderly-mode .farmer-btn { padding: 44rpx 24rpx; }

@@ -40,11 +40,18 @@
       <text class="desc-text">{{product.description}}</text>
     </view>
   </block>
+  <!-- 加载态：product 未返回时展示（加载失败会 navigateBack，无误导） -->
+  <block wx:elif="{{!product}}">
+    <view class="loading-state">加载中…</view>
+  </block>
 
   <!-- 底部操作栏 -->
   <view class="detail-footer">
-    <view class="footer-btn cart-btn" bindtap="addCart" hover-class="hover">加入购物车</view>
-    <view class="footer-btn buy-btn" bindtap="buyNow" hover-class="hover">立即购买</view>
+    <view
+      class="footer-btn buy-btn"
+      style="{{product && product.stock === 0 ? 'background: #C9C2B0;' : ''}}"
+      bindtap="buyNow" hover-class="hover"
+    >{{product && product.stock === 0 ? '已售罄' : '立即购买'}}</view>
   </view>
   <view class="safe-area-bottom"></view>
 

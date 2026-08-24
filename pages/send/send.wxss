@@ -314,3 +314,9 @@
 .elderly-mode .match-title { font-size: 44rpx; }
 .elderly-mode .bus-detail { font-size: 30rpx; }
 .elderly-mode .reminder-text { font-size: 28rpx; }
+.elderly-mode .station-text { font-size: 34rpx; }
+.elderly-mode .weight-unit { font-size: 36rpx; }
+.elderly-mode .info-label { font-size: 32rpx; }
+.elderly-mode .info-value { font-size: 32rpx; }
+.elderly-mode .receiver-addr-book { font-size: 30rpx; }
+.elderly-mode .order-no-display { font-size: 36rpx; }

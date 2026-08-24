@@ -21,10 +21,7 @@
       </view>
     </view>
 
-    <view class="empty-state" wx:if="{{!list.length && !loading}}">
-      <text class="empty-emoji">📍</text>
-      <text class="empty-text">还没有收货地址，点击下方新增</text>
-    </view>
+    <empty-state wx:if="{{!list.length && !loading}}" emoji="📍" text="还没有收货地址，点击下方新增" />
   </view>
 
   <!-- 新增按钮 -->

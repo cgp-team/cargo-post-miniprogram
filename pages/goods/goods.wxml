@@ -14,12 +14,6 @@
         <icon wx:else name="user" size="40" color="#FFFFFF" />
       </view>
     </view>
-
-    <!-- 搜索栏 -->
-    <view class="search-bar card" bindtap="goToSearch" hover-class="hover">
-      <icon name="search" size="32" color="#8A8778" />
-      <input class="search-input" type="text" placeholder="搜索农产品…" disabled />
-    </view>
   </view>
 
   <!-- 分类标签 -->
@@ -42,10 +36,7 @@
   </view>
 
   <!-- 空列表 -->
-  <view wx:elif="{{!products.length}}" class="goods-state">
-    <icon class="state-icon" name="box" size="96" color="#C9C2B0" />
-    <text class="state-text">暂无上架商品</text>
-  </view>
+  <empty-state wx:elif="{{!products.length}}" icon="box" text="暂无上架商品" />
 
   <!-- 商品网格 -->
   <view wx:else class="product-grid">

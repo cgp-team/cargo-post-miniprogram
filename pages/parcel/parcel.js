@@ -3,7 +3,6 @@
  * tab0 我的寄货（pageMySendOrders），tab1 单号查询（trackParcel）
  */
 const api = require('../../utils/api')
-const appearance = require('../../utils/appearance')
 const qrcodeRender = require('../../utils/qrcode-render')
 const { formatBackendTime, VILLAGES } = require('../../utils/util')
 
@@ -18,6 +17,7 @@ const STATUS_FLOW = [
 ]
 
 Page({
+  behaviors: [require('../../behaviors/page-base')],
   data: {
     userInfo: {},
     currentVillage: '云山村',
@@ -42,28 +42,26 @@ Page({
   },
 
   onLoad(options) {
-    const sys = wx.getWindowInfo()
-    this.setData({ statusBarHeight: sys.statusBarHeight || 20 })
+    this._initPageBase()
     const userInfo = wx.getStorageSync('userInfo')
     const app = getApp()
     this.setData({
       userInfo: userInfo || {},
       currentVillage: app.globalData.currentVillage || '云山村'
     })
-    appearance.apply(this)
     // 「我的」→「我的寄货」默认进寄货列表（switchTab 通过 globalData 传意图）
     if ((options && options.tab === 'my') || app.globalData.parcelIntent === 'my') {
       app.globalData.parcelIntent = ''
       this.setData({ activeTab: 0 })
     }
-    this.reloadSendList()
+    // 首屏列表由 onShow 统一加载，避免 onLoad/onShow 双请求
   },
 
   onShow() {
     const app = getApp()
     this.setData({ currentVillage: app.globalData.currentVillage || '云山村' })
     // 同步老年模式 / 主题色
-    appearance.apply(this)
+    this._applyAppearance()
     // 从「我的寄货」切过来时进入寄货列表 tab
     if (app.globalData.parcelIntent === 'my') {
       app.globalData.parcelIntent = ''
@@ -136,7 +134,7 @@ Page({
       res.timeline = this.buildTimeline(res.status)
       // WXML 不支持调用 Page 方法，进度/时间/颜色在此预计算后绑定
       res.progress = this.trackProgress(res.status)
-      res.createTimeText = this.formatTime(res.createTime)
+      res.createTimeText = formatBackendTime(res.createTime)
       res.statusClass = this.statusClass(res.status)
       res.etaText = this.buildEtaText(res)
       this.setData({ trackResult: res, noResult: false }, () => this.drawParcelQr())
@@ -162,13 +160,21 @@ Page({
   /** 复制单号 */
   copyTrackNo() {
     if (!this.data.trackResult) return
-    wx.setClipboardData({ data: this.data.trackResult.orderNo })
+    wx.setClipboardData({
+      data: this.data.trackResult.orderNo,
+      success: () => wx.showToast({ title: '已复制', icon: 'success' })
+    })
   },
 
   /** 列表项取件码：点击明文复制（司机核销凭码） */
   copyPickupCode(e) {
     const code = e.currentTarget.dataset.code
-    if (code) wx.setClipboardData({ data: String(code) })
+    if (code) {
+      wx.setClipboardData({
+        data: String(code),
+        success: () => wx.showToast({ title: '已复制', icon: 'success' })
+      })
+    }
   },
 
   /** 列表项取件码明文显隐切换（默认打码降层级） */
@@ -193,7 +199,7 @@ Page({
         statusName: o.statusName || this.statusText(o.status),
         statusClass: this.statusClass(o.status),
         showCode: false,
-        createTimeText: this.formatTime(o.createTime),
+        createTimeText: formatBackendTime(o.createTime),
         carrierText: this.buildCarrierText(o)
       }))
       const merged = this.data.pageNo === 1 ? list : this.data.sendList.concat(list)
@@ -264,10 +270,6 @@ Page({
       // 已取消：仅展示前两个节点；否则当前状态及之前均为完成
       done: status === 5 ? step.status <= 1 : step.status <= (status == null ? -1 : status)
     }))
-  },
-
-  formatTime(t) {
-    return formatBackendTime(t)
   },
 
   /** 切换村庄 */

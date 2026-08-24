@@ -181,10 +181,6 @@
   color: var(--color-text-tertiary);
 }
 
-.safe-area-bottom {
-  height: calc(40rpx + env(safe-area-inset-bottom));
-}
-
 /* ============ 老年人模式：商城页字体放大 ============ */
 .elderly-mode .village-name { font-size: 38rpx; }
 .elderly-mode .header-title { font-size: 40rpx; }
@@ -216,10 +212,6 @@
 
 @keyframes spin {
   to { transform: rotate(360deg); }
-}
-
-.state-icon {
-  margin-bottom: 16rpx;
 }
 
 .state-text {
