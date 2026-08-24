@@ -1,0 +1,9 @@
+<view class="es">
+  <text wx:if="{{emoji}}" class="es-emoji">{{emoji}}</text>
+  <view wx:elif="{{icon}}" class="es-icon">
+    <icon name="{{icon}}" size="96" color="#C9C2B0" />
+  </view>
+  <text class="es-text">{{text}}</text>
+  <text wx:if="{{subText}}" class="es-sub">{{subText}}</text>
+  <view wx:if="{{btnText}}" class="es-btn" hover-class="es-btn-hover" bindtap="onBtnTap">{{btnText}}</view>
+</view>
