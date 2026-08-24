@@ -517,6 +517,19 @@
   font-size: 26rpx;
   color: var(--color-text-tertiary);
 }
+.bus-empty-title {
+  font-size: 28rpx;
+  color: var(--color-ink);
+  font-weight: 600;
+}
+.bus-line-chip {
+  font-size: 22rpx;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  padding: 6rpx 18rpx;
+  border-radius: 999rpx;
+  text-align: center;
+}
 .bus-retry {
   padding: 12rpx 40rpx;
   border: 2rpx solid var(--color-primary);
@@ -633,6 +646,8 @@
 .elderly-mode .loc-hint-text { font-size: 28rpx; }
 .elderly-mode .bus-meta-text { font-size: 26rpx; }
 .elderly-mode .bus-empty-text { font-size: 30rpx; }
+.elderly-mode .bus-empty-title { font-size: 32rpx; }
+.elderly-mode .bus-line-chip { font-size: 26rpx; padding: 10rpx 24rpx; }
 .elderly-mode .bus-retry { font-size: 30rpx; padding: 16rpx 48rpx; }
 .elderly-mode .bus-tag { font-size: 24rpx; }
 .elderly-mode .bus-next { font-size: 28rpx; }

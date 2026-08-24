@@ -34,10 +34,12 @@ Page({
       { id: 3, title: '系统升级通知：物流轨迹查询功能已全面优化' }
     ],
     nearbyBuses: [],            // 附近实时公交（真实接口数据，不再硬编码 Demo）
+    nearbyStations: [],         // 附近站点（用于空态区分：有站点但无车 = 非运营时间）
+    nearbyLines: [],            // 附近站点关联线路（无运营车辆也展示：该区域有哪些线路/不在运营）
     nearbyBusStatus: 'loading', // loading | ok | empty | error
     nearbyBusUpdatedAt: 0,      // 最近成功更新时间戳（相对文案用）
     nearbyBusUpdatedText: '',   // "已更新：刚刚" / "更新于 12 秒前"
-    nearbyBusLocatedText: '',   // "根据当前位置展示" / "根据当前区域展示"
+    nearbyBusLocatedText: '',   // "根据当前位置展示" / "根据青山镇展示"
     recommendProducts: [
       {
         id: 1,
@@ -323,14 +325,19 @@ Page({
         district || undefined
       )
       const buses = this._formatBuses((data && data.buses) || [])
+      const stations = (data && data.nearbyStations) || []
+      const lines = (data && data.lines) || []
       this.setData({
         nearbyBuses: buses,
+        nearbyStations: stations,
+        nearbyLines: lines,
         nearbyBusStatus: buses.length ? 'ok' : 'empty',
         nearbyBusUpdatedAt: Date.now(),
         nearbyBusUpdatedText: '已更新：刚刚',
         nearbyBusLocatedText: hasCoords
           ? '根据当前位置展示'
-          : (data && data.locationLevel === 'DISTRICT' ? '根据当前区域展示' : '')
+          : (this.data.villageManual ? `根据${this.data.currentVillage}展示`
+              : (data && data.locationLevel === 'DISTRICT' ? '根据当前区域展示' : ''))
       })
     } catch (err) {
       console.error('加载附近公交失败', err)

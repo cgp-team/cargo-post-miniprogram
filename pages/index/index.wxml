@@ -130,9 +130,14 @@
       <text class="bus-empty-text">正在加载附近公交…</text>
     </view>
 
-    <!-- 空数据 -->
+    <!-- 空数据：有附近站点/线路但无运营车辆 = 不在运营时间，仍展示站点与线路说明 -->
     <view wx:elif="{{nearbyBusStatus === 'empty'}}" class="bus-empty">
-      <text class="bus-empty-text">附近暂无实时公交</text>
+      <block wx:if="{{nearbyStations.length}}">
+        <text class="bus-empty-title">{{currentVillage}}暂无运营公交</text>
+        <view class="bus-line-chip" wx:for="{{nearbyLines}}" wx:key="routeName">{{item.routeName}}（{{item.startStation}} → {{item.endStation}}）</view>
+        <text class="bus-empty-text">当前不在运营时间，请关注后续班次</text>
+      </block>
+      <text wx:else class="bus-empty-text">附近暂无实时公交</text>
     </view>
 
     <!-- 接口失败 -->
