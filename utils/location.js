@@ -24,6 +24,7 @@
  *   - 区域/定位失败/权限拒绝均不阻塞调用方，返回明确状态由页面决定 UI。
  */
 const weatherApi = require('./weather')
+const demoLocationUtil = require('./demo-location')
 
 // ==================== 常量（阈值统一在此，不要在页面重复写死） ====================
 
@@ -132,11 +133,39 @@ function reverseToDistrict(lat, lon) {
 // ==================== 统一入口 ====================
 
 let pending = null // 并发去重：同一时刻只发一次定位（onLoad + onShow 不会双发）
+let demoLocation = null // DEMO 演示定位（设置了则覆盖真实定位，source=demo）
+
+/**
+ * 设置演示定位（DEMO 模式）：用预设站点坐标替代真实 GPS，供开发/测试验证"附近公交"。
+ * @param {string} name 演示名（青山镇/县城客运中心/龙泉镇）
+ * @returns {object|null} demo userLocation（含 source=demo），名称不存在返回 null
+ */
+function setDemoLocation(name) {
+  const demo = demoLocationUtil.findDemo(name)
+  if (!demo) return null
+  demoLocation = {
+    success: true,
+    latitude: demo.latitude,
+    longitude: demo.longitude,
+    accuracy: 50, // 演示位置视为精确（<=100 → PRECISE）
+    district: demo.district,
+    timestamp: Date.now(),
+    source: 'demo',
+    level: LEVEL_PRECISE
+  }
+  return demoLocation
+}
+
+/** 清除演示定位：回到真实定位（微信 GPS） */
+function clearDemoLocation() {
+  demoLocation = null
+}
 
 /**
  * 获取当前用户定位（统一入口）。
  *
  * 策略：
+ *   0. DEMO 演示定位已设置 → 直接返回（source=demo），不调微信/缓存；
  *   1. 较新缓存（TTL 内）→ 直接返回（source=cache），并后台异步刷新；
  *   2. 否则微信高精度定位 → 成功则逆地理补区域、写缓存返回（source=wechat）；
  *   3. 定位失败 → 旧缓存兜底（source=stale-cache, stale=true）；无缓存 → UNKNOWN；
@@ -145,6 +174,7 @@ let pending = null // 并发去重：同一时刻只发一次定位（onLoad + o
  * @returns {Promise<object>} userLocation（含 level）
  */
 function getCurrentLocation() {
+  if (demoLocation) return Promise.resolve(demoLocation)
   if (pending) return pending // 并发去重
   pending = doGetLocation().finally(() => {
     pending = null
@@ -241,5 +271,7 @@ module.exports = {
   LEVEL_UNKNOWN,
   classifyLevel,
   getCurrentLocation,
+  setDemoLocation,
+  clearDemoLocation,
   openLocationSetting
 }

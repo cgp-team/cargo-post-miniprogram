@@ -6,7 +6,7 @@ const weatherApi = require('../../utils/weather')
 const productImg = require('../../utils/product-img')
 const auth = require('../../utils/auth')
 const location = require('../../utils/location')
-const { VILLAGES } = require('../../utils/util')
+const demoLocation = require('../../utils/demo-location')
 
 /** 天气缓存有效期：10 分钟内直接复用缓存渲染，跳过定位与网络请求 */
 const WEATHER_CACHE_TTL = 10 * 60 * 1000
@@ -334,10 +334,12 @@ Page({
         nearbyBusStatus: buses.length ? 'ok' : 'empty',
         nearbyBusUpdatedAt: Date.now(),
         nearbyBusUpdatedText: '已更新：刚刚',
-        nearbyBusLocatedText: hasCoords
-          ? '根据当前位置展示'
-          : (this.data.villageManual ? `根据${this.data.currentVillage}展示`
-              : (data && data.locationLevel === 'DISTRICT' ? '根据当前区域展示' : ''))
+        nearbyBusLocatedText: loc && loc.source === 'demo'
+          ? `根据${this.data.currentVillage}展示`
+          : (hasCoords
+              ? '根据当前位置展示'
+              : (this.data.villageManual ? `根据${this.data.currentVillage}展示`
+                  : (data && data.locationLevel === 'DISTRICT' ? '根据当前区域展示' : '')))
       })
     } catch (err) {
       console.error('加载附近公交失败', err)
@@ -420,17 +422,41 @@ Page({
    * 切换村庄
    */
   switchVillage() {
+    // 生产（release）隐藏演示入口：普通用户不能改变真实位置；开发/测试可用 DEMO 站点坐标
+    const demoAllowed = demoLocation.isDemoAllowed()
+    const itemList = ['使用真实位置']
+    if (demoAllowed) {
+      demoLocation.DEMO_LOCATIONS.forEach((d) => itemList.push(d.name))
+    }
     wx.showActionSheet({
-      itemList: VILLAGES,
+      itemList,
       success: (res) => {
-        const name = VILLAGES[res.tapIndex]
-        this.setData({ currentVillage: name, villageManual: true })
-        getApp().globalData.currentVillage = name
-        this.loadHomeData()
-        // 手动切换村庄后按新村庄重新查询附近公交（无精确定位时用村庄名做区域 fallback）
-        this.loadNearbyBusData()
+        if (res.tapIndex === 0) {
+          this._useRealLocation()
+          return
+        }
+        const demo = demoLocation.DEMO_LOCATIONS[res.tapIndex - 1]
+        if (demo) this._useDemoLocation(demo)
       }
     })
+  },
+
+  /** 使用真实位置：清除演示定位 → 重新微信定位 → 刷新附近公交 */
+  async _useRealLocation() {
+    location.clearDemoLocation()
+    this.setData({ villageManual: false })
+    await this.loadUserLocation()
+    this.loadNearbyBusData()
+  },
+
+  /** 使用演示定位（开发/测试）：设置预设站点坐标 → 同步 userLocation/currentVillage → 立即刷新附近公交 */
+  async _useDemoLocation(demo) {
+    const loc = location.setDemoLocation(demo.name)
+    if (!loc) return
+    this.setData({ currentVillage: demo.name, villageManual: true })
+    getApp().globalData.currentVillage = demo.name
+    this._applyUserLocation(loc) // 同步 userLocation(lat/lon/source=demo) + currentVillage
+    this.loadNearbyBusData() // 立即按 DEMO 坐标刷新附近公交
   },
 
   /**
