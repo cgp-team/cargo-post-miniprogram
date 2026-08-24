@@ -203,31 +203,59 @@
 
 .step-actions .btn-primary { flex: none; width: 100%; }
 
-/* 站点选择 */
-.station-picker {
+/* 路线预估（点击"下一步"后展示：loading / 成功 / 失败重试） */
+.route-preview {
+  margin-top: -6rpx;
+  margin-bottom: 26rpx;
+  background: var(--color-primary-light);
+  border-radius: 16rpx;
+  padding: 24rpx;
+}
+.route-preview-error {
+  background: #FFF8E1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14rpx;
+}
+.rp-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  height: 88rpx;
-  border: 2rpx solid #E8ECEE;
-  border-radius: 14rpx;
-  padding: 0 24rpx;
-  background: #F8FAF8;
+  padding: 10rpx 0;
 }
-
-.station-text {
+.rp-label {
+  font-size: 28rpx;
+  color: var(--color-text-secondary);
+}
+.rp-value {
   font-size: 30rpx;
-  color: #333;
+  color: var(--color-ink);
+  font-weight: 700;
 }
-
-.station-text.placeholder {
-  color: #bbb;
-}
-
-.station-arrow {
+.rp-text {
   font-size: 26rpx;
   color: var(--color-text-tertiary);
 }
+.rp-warn {
+  font-size: 22rpx;
+  color: var(--color-status-warn);
+  display: block;
+  margin-top: 8rpx;
+}
+.rp-retry {
+  padding: 14rpx 44rpx;
+  border: 2rpx solid var(--color-primary);
+  color: var(--color-primary);
+  border-radius: 999rpx;
+  font-size: 26rpx;
+}
+
+/* 适老：路线预估 */
+.elderly-mode .rp-label { font-size: 32rpx; }
+.elderly-mode .rp-value { font-size: 34rpx; }
+.elderly-mode .rp-text { font-size: 30rpx; }
+.elderly-mode .rp-retry { font-size: 30rpx; padding: 18rpx 52rpx; }
 
 /* 收货信息 */
 .receiver-section {
@@ -314,7 +342,6 @@
 .elderly-mode .match-title { font-size: 44rpx; }
 .elderly-mode .bus-detail { font-size: 30rpx; }
 .elderly-mode .reminder-text { font-size: 28rpx; }
-.elderly-mode .station-text { font-size: 34rpx; }
 .elderly-mode .weight-unit { font-size: 36rpx; }
 .elderly-mode .info-label { font-size: 32rpx; }
 .elderly-mode .info-value { font-size: 32rpx; }

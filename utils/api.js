@@ -223,6 +223,11 @@ function listSendStations() {
   return request('/app-api/transport/send/stations')
 }
 
+/** 路线预览：取货/送达站点路网距离 + 预计时间（POST，后端校验站点有效性） */
+function previewSendRoute(pickupStationId, deliveryStationId) {
+  return request('/app-api/transport/send/route-preview', 'POST', { pickupStationId, deliveryStationId })
+}
+
 /** 我的乘车安排（客运订单已分配/在途/完成，含承运车辆，供村民到站通知） */
 function getMyArrangements() {
   return request('/app-api/transport/send/arrangements')
@@ -363,6 +368,7 @@ module.exports = {
   pageMySendOrders,
   trackParcel,
   listSendStations,
+  previewSendRoute,
   getMyArrangements,
   getDriverProfile,
   getDriverShifts,

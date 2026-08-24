@@ -3,6 +3,7 @@
   "navigationBarTextStyle": "white",
   "backgroundColor": "#F6F2E9",
   "usingComponents": {
-    "icon": "/components/icon/index"
+    "icon": "/components/icon/index",
+    "station-picker": "/components/station-picker/index"
   }
 }
