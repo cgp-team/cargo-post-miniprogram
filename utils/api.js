@@ -174,6 +174,11 @@ function listProducts() {
   return request('/app-api/transport/product/list')
 }
 
+/** 上架商品分页 { pageNo, pageSize } */
+function listProductsPage(params) {
+  return request('/app-api/transport/product/page', 'GET', params)
+}
+
 /** 获取商品详情 */
 function getProduct(id) {
   return request('/app-api/transport/product/get', 'GET', { id })
@@ -349,6 +354,7 @@ module.exports = {
   pageMyFeedback,
   getProductOrderTrace,
   listProducts,
+  listProductsPage,
   getProduct,
   createProductOrder,
   pageMyProductOrders,

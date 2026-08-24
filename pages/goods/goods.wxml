@@ -29,14 +29,14 @@
     </view>
   </scroll-view>
 
-  <!-- 加载中 -->
-  <view wx:if="{{loading}}" class="goods-state">
+  <!-- 加载中（首次加载） -->
+  <view wx:if="{{loading && !allProducts.length}}" class="goods-state">
     <view class="loading-spinner"></view>
     <text class="state-text">商品加载中…</text>
   </view>
 
   <!-- 空列表 -->
-  <empty-state wx:elif="{{!products.length}}" icon="box" text="暂无上架商品" />
+  <empty-state wx:elif="{{!loading && !products.length}}" icon="box" text="暂无上架商品" />
 
   <!-- 商品网格 -->
   <view wx:else class="product-grid">
@@ -66,6 +66,10 @@
       </view>
     </view>
   </view>
+
+  <!-- 分页加载状态 -->
+  <view class="loading-state" wx:if="{{loading && allProducts.length}}">加载中…</view>
+  <view class="loading-state" wx:elif="{{!hasMore && allProducts.length}}">没有更多了</view>
 
   <!-- 底部安全区 -->
   <view class="safe-area-bottom"></view>

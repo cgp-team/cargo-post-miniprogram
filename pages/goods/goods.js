@@ -43,6 +43,10 @@ Page({
     ],
     allProducts: [],
     products: [],
+    pageNo: 1,
+    pageSize: 10,
+    total: 0,
+    hasMore: true,
     loading: true
   },
 
@@ -64,24 +68,43 @@ Page({
     this._applyAppearance()
   },
 
-  /** 加载上架商品（后端真实数据） */
+  /** 加载上架商品（分页，追加到 allProducts） */
   async loadProducts() {
     this.setData({ loading: true })
     try {
-      const list = (await api.listProducts()) || []
-      const allProducts = list.map((p) => ({
+      const res = await api.listProductsPage({ pageNo: this.data.pageNo, pageSize: this.data.pageSize })
+      const list = (res.list || []).map((p) => ({
         ...p,
         categoryId: matchCategory(p),
         price: Number(p.price).toFixed(2),
         imageUrl: productImg.resolve(p)
       }))
-      this.setData({ allProducts })
+      const allProducts = this.data.pageNo === 1 ? list : this.data.allProducts.concat(list)
+      const total = res.total || 0
+      this.setData({
+        allProducts,
+        total,
+        hasMore: list.length >= this.data.pageSize && allProducts.length < total
+      })
       this.applyCategory()
     } catch (e) {
       // 错误提示已由 api.js 统一处理
     } finally {
       this.setData({ loading: false })
     }
+  },
+
+  /** 重置分页并重新加载 */
+  reloadProducts() {
+    this.setData({ pageNo: 1, allProducts: [], total: 0, hasMore: true })
+    return this.loadProducts()
+  },
+
+  /** 触底加载下一页 */
+  onReachBottom() {
+    if (this.data.loading || !this.data.hasMore) return
+    this.setData({ pageNo: this.data.pageNo + 1 })
+    this.loadProducts()
   },
 
   /** 按当前分类过滤展示列表 */
@@ -125,7 +148,7 @@ Page({
 
   /** 下拉刷新 */
   onPullDownRefresh() {
-    this.loadProducts().then(() => {
+    this.reloadProducts().then(() => {
       wx.stopPullDownRefresh()
       wx.showToast({ title: '已刷新', icon: 'success', duration: 1000 })
     })
