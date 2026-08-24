@@ -1,6 +1,10 @@
 /**
  * 寄货页 - 农户一键寄货
- * 步骤：填写信息 + 选站点 → 拍照 + 收货信息 → 真实提交创建货运订单
+ * 步骤：填写信息 + 选站点（StationPicker）→ 路线预览 → 拍照 + 收货信息 → 真实提交创建货运订单
+ *
+ * 路线预览：选好取货/送达站点后不立即请求；点"下一步：拍照确认"时校验并调
+ * previewSendRoute（后端校验站点有效 + 高德路网距离/时间），成功才进入 Step 2。
+ * 相同站点组合缓存复用；修改任一站点立即清空旧预估。
  */
 const api = require('../../utils/api')
 const appearance = require('../../utils/appearance')
@@ -19,10 +23,16 @@ Page({
     photoUrl: '', // 拍照后上传到服务器拿到的真实 URL
     // 站点（从后端拉取）
     stations: [],
+    stationsLoading: false,
+    stationsError: false,
     pickupStationId: null,
     pickupStationName: '',
     deliveryStationId: null,
     deliveryStationName: '',
+    // 路线预估（点击"下一步"时查询；routeStatus: idle|loading|success|error）
+    routePreview: null,
+    routeStatus: 'idle',
+    routePreviewKey: '', // 缓存 key：`${pickupStationId}:${deliveryStationId}`
     // 收货信息
     receiverName: '',
     receiverMobile: '',
@@ -58,12 +68,16 @@ Page({
     wx.navigateTo({ url: '/pages/mine/address/address?from=send' })
   },
 
-  /** 加载寄货站点列表 */
+  /** 加载寄货站点列表（供 StationPicker） */
   async loadStations() {
+    this.setData({ stationsLoading: true, stationsError: false })
     try {
       const stations = await api.listSendStations()
-      this.setData({ stations: stations || [] })
-    } catch (e) { /* api 已 toast */ }
+      this.setData({ stations: stations || [], stationsLoading: false })
+    } catch (e) {
+      // api 已 toast；进入错误态，StationPicker 内可点击重试
+      this.setData({ stations: [], stationsLoading: false, stationsError: true })
+    }
   },
 
   onNameInput(e) { this.setData({ goodsName: e.detail.value }) },
@@ -73,35 +87,41 @@ Page({
   onReceiverMobileInput(e) { this.setData({ receiverMobile: e.detail.value }) },
   onReceiverAddressInput(e) { this.setData({ receiverAddress: e.detail.value }) },
 
-  /** 选择取货站点 */
-  choosePickupStation() {
-    this.chooseStation((s) => {
-      this.setData({ pickupStationId: s.id, pickupStationName: s.stationName })
-    })
-  },
-
-  /** 选择送达站点 */
-  chooseDeliveryStation() {
-    this.chooseStation((s) => {
-      this.setData({ deliveryStationId: s.id, deliveryStationName: s.stationName })
-    })
-  },
-
-  chooseStation(cb) {
-    const names = this.data.stations.map((s) => s.stationName)
-    if (!names.length) {
-      wx.showToast({ title: '站点加载中，请稍后', icon: 'none' })
-      this.loadStations()
+  /** 取货站点变更：同步 ID/名称；与送达相同则拦截；清空旧路线预估 */
+  onPickupStationChange(e) {
+    const s = e.detail
+    if (s.id === this.data.deliveryStationId) {
+      wx.showToast({ title: '取货站点和送达站点不能相同', icon: 'none' })
       return
     }
-    wx.showActionSheet({
-      itemList: names,
-      success: (res) => cb(this.data.stations[res.tapIndex])
+    this.setData({
+      pickupStationId: s.id,
+      pickupStationName: s.stationName,
+      routePreview: null,
+      routeStatus: 'idle',
+      routePreviewKey: ''
     })
   },
 
-  /** 下一步：拍照 */
-  goToPhoto() {
+  /** 送达站点变更：同步 ID/名称；与取货相同则拦截；清空旧路线预估 */
+  onDeliveryStationChange(e) {
+    const s = e.detail
+    if (s.id === this.data.pickupStationId) {
+      wx.showToast({ title: '取货站点和送达站点不能相同', icon: 'none' })
+      return
+    }
+    this.setData({
+      deliveryStationId: s.id,
+      deliveryStationName: s.stationName,
+      routePreview: null,
+      routeStatus: 'idle',
+      routePreviewKey: ''
+    })
+  },
+
+  /** 下一步：基础校验 → 路线预览（缓存命中直接复用）→ 成功才进入拍照页 */
+  async goToPhoto() {
+    if (this.data.routeStatus === 'loading') return // 防重复点击（路线计算中）
     const { goodsName, goodsWeight, pickupStationId, deliveryStationId } = this.data
     if (!goodsName.trim()) {
       wx.showToast({ title: '请输入货物名称', icon: 'none' })
@@ -119,7 +139,35 @@ Page({
       wx.showToast({ title: '请选择送达站点', icon: 'none' })
       return
     }
-    this.setData({ step: 2 })
+    if (pickupStationId === deliveryStationId) {
+      wx.showToast({ title: '取货站点和送达站点不能相同', icon: 'none' })
+      return
+    }
+    // 相同组合已成功查询过 → 直接复用，不再请求（避免重复打高德）
+    const key = `${pickupStationId}:${deliveryStationId}`
+    if (this.data.routePreviewKey === key && this.data.routePreview) {
+      this.setData({ step: 2 })
+      return
+    }
+    this.setData({ routeStatus: 'loading', routePreview: null })
+    try {
+      const preview = await api.previewSendRoute(pickupStationId, deliveryStationId)
+      if (preview && preview.available !== false) {
+        this.setData({ routePreview: preview, routeStatus: 'success', routePreviewKey: key, step: 2 })
+      } else {
+        // 路线不可达
+        this.setData({ routePreview: preview || null, routeStatus: 'error' })
+        wx.showToast({ title: '暂时无法获取路线', icon: 'none' })
+      }
+    } catch (e) {
+      // api 已 toast；失败不进入下一步
+      this.setData({ routePreview: null, routeStatus: 'error' })
+    }
+  },
+
+  /** 路线失败 → 重新查询 */
+  retryRoutePreview() {
+    this.goToPhoto()
   },
 
   /** 拍照（wx.chooseMedia）并上传到服务器拿真实 URL（快递总站核对凭证） */
@@ -146,7 +194,7 @@ Page({
     })
   },
 
-  /** 确认发布 → 真实创建货运订单 */
+  /** 确认发布 → 真实创建货运订单（只提交站点/货物/收货信息，不提交前端距离结果） */
   async confirmSend() {
     const { photoPath, photoUrl, receiverMobile } = this.data
     if (this.submitting) return
@@ -233,6 +281,13 @@ Page({
       goodsNote: '',
       photoPath: '',
       photoUrl: '',
+      pickupStationId: null,
+      pickupStationName: '',
+      deliveryStationId: null,
+      deliveryStationName: '',
+      routePreview: null,
+      routeStatus: 'idle',
+      routePreviewKey: '',
       receiverName: '',
       receiverMobile: '',
       receiverAddress: '',

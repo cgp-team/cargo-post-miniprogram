@@ -45,18 +45,50 @@
 
     <view class="form-group">
       <text class="form-label">取货站点 *</text>
-      <view class="station-picker" bindtap="choosePickupStation" hover-class="hover">
-        <text class="station-text {{pickupStationName ? '' : 'placeholder'}}">{{pickupStationName || '请选择取货站点'}}</text>
-        <text class="station-arrow">▾</text>
-      </view>
+      <station-picker
+        title="选择取货站点"
+        placeholder="请选择取货站点"
+        stations="{{stations}}"
+        value="{{pickupStationId}}"
+        loading="{{stationsLoading}}"
+        error="{{stationsError}}"
+        bindchange="onPickupStationChange"
+        bindretry="loadStations"
+      />
     </view>
 
     <view class="form-group">
       <text class="form-label">送达站点 *</text>
-      <view class="station-picker" bindtap="chooseDeliveryStation" hover-class="hover">
-        <text class="station-text {{deliveryStationName ? '' : 'placeholder'}}">{{deliveryStationName || '请选择送达站点'}}</text>
-        <text class="station-arrow">▾</text>
+      <station-picker
+        title="选择送达站点"
+        placeholder="请选择送达站点"
+        stations="{{stations}}"
+        value="{{deliveryStationId}}"
+        loading="{{stationsLoading}}"
+        error="{{stationsError}}"
+        bindchange="onDeliveryStationChange"
+        bindretry="loadStations"
+      />
+    </view>
+
+    <!-- 路线预估：点击"下一步"后展示（loading / 成功 / 失败重试） -->
+    <view wx:if="{{routeStatus === 'loading'}}" class="route-preview">
+      <text class="rp-text">正在计算路线…</text>
+    </view>
+    <view wx:elif="{{routeStatus === 'success' && routePreview}}" class="route-preview">
+      <view class="rp-row">
+        <text class="rp-label">真实道路距离</text>
+        <text class="rp-value">{{routePreview.distanceKm}} km</text>
       </view>
+      <view class="rp-row">
+        <text class="rp-label">预计行驶时间</text>
+        <text class="rp-value">{{routePreview.durationMinutes}} 分钟</text>
+      </view>
+      <text wx:if="{{routePreview.provider && routePreview.provider !== 'amap'}}" class="rp-warn">路网暂不可用，当前为直线估算</text>
+    </view>
+    <view wx:elif="{{routeStatus === 'error'}}" class="route-preview route-preview-error">
+      <text class="rp-text">暂时无法获取路线</text>
+      <view class="rp-retry" bindtap="retryRoutePreview" hover-class="hover">重新查询</view>
     </view>
 
     <button class="btn-primary send-btn" bindtap="goToPhoto">下一步：拍照确认</button>
