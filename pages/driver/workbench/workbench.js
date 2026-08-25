@@ -10,8 +10,8 @@ const feedback = require('../../../utils/feedback')
 
 /** 位置上报间隔（毫秒） */
 const LOCATION_REPORT_INTERVAL = 10000
-/** 到站判定半径（米）：进入该范围提示到站 */
-const ARRIVE_RADIUS_METERS = 300
+/** 到站判定半径（米）：进入该范围提示到站（任务书默认 50m） */
+const ARRIVE_RADIUS_METERS = 50
 
 /** 两点间球面距离（米） */
 function distanceMeters(lat1, lng1, lat2, lng2) {
@@ -114,23 +114,71 @@ Page({
         return
       }
       this.driverId = profile.driverId
-      const [shifts, pickups, tasks] = await Promise.all([
+      const [shifts, pickups, tasks, route] = await Promise.all([
         api.getDriverShifts().catch(() => []),
         api.getDriverPickups().catch(() => []),
-        api.getDriverTasks(profile.driverId).catch(() => [])
+        api.getDriverTasks(profile.driverId).catch(() => []),
+        api.getDriverRoute(profile.driverId).catch(() => null)
       ])
       this.setData({
         driverName: profile.name || '',
         plateNo: profile.plateNo || '',
         cargoLimit: profile.cargoCapacity || 0,
         pendingPickups: pickups || [],
-        tasks: tasks || []
+        tasks: tasks || [],
+        // Phase 8：完整任务段（按方案分组、站点聚合动作）——司机看到整个运营任务而非"下一站"
+        taskSegment: this.buildTaskSegment(tasks || []),
+        // Phase 9：司机路线真实道路 polyline + 偏航判定（只报警不自动改方案）
+        deviated: !!(route && route.deviated),
+        deviationMeters: route && route.deviationMeters != null ? route.deviationMeters : 0
       })
+      this.driverRoutePolyline = route && route.polyline && route.polyline.length >= 2
+        ? route.polyline.map((p) => ({ longitude: p.longitude, latitude: p.latitude }))
+        : null
       this.initFromShifts(shifts || [])
       this.setData({ loaded: true })
     } catch (e) {
       this.setData({ loaded: true })
     }
+  },
+
+  /**
+   * 完整任务段：按 planId 分组、按 visitSequence 排序，同站聚合动作（乘客/货运同站执行）。
+   * 来源 = 后端 /driver/tasks（后端为任务状态的最终来源，前端仅展示）。
+   */
+  buildTaskSegment(tasks) {
+    if (!tasks || !tasks.length) return []
+    const byPlan = {}
+    tasks.forEach((t) => {
+      const key = String(t.planId)
+      if (!byPlan[key]) {
+        byPlan[key] = { planId: t.planId, taskWindowStart: t.taskWindowStart, taskWindowEnd: t.taskWindowEnd, stops: [] }
+      }
+      byPlan[key].stops.push(t)
+    })
+    return Object.values(byPlan).map((seg) => {
+      seg.stops.sort((a, b) => (a.visitSequence || 0) - (b.visitSequence || 0))
+      const stationMap = {}
+      seg.stops.forEach((s) => {
+        const sk = String(s.stationId || '')
+        if (!stationMap[sk]) {
+          stationMap[sk] = {
+            stationName: s.stationName || '',
+            status: s.status,
+            statusName: s.statusName || '待执行',
+            actions: []
+          }
+        }
+        stationMap[sk].actions.push({
+          actionName: s.actionName || '',
+          orderNo: s.orderNo || '',
+          quantity: s.quantity,
+          statusName: s.statusName || ''
+        })
+      })
+      seg.stops = Object.values(stationMap)
+      return seg
+    })
   },
 
   /** 从真实班次初始化当前班次、站点、地图、运力；在途班次恢复行驶状态 */
@@ -154,8 +202,12 @@ Page({
       height: 20,
       callout: { content: s.stationName, fontSize: 12, padding: 4, display: 'ALWAYS' }
     }))
+    // Phase 9：地图轨迹优先用后端返回的真实道路 polyline（RoadSegments），否则退化为站点连线（兜底）
+    const routePoints = this.driverRoutePolyline && this.driverRoutePolyline.length >= 2
+      ? this.driverRoutePolyline
+      : stops.map((s) => ({ latitude: s.latitude, longitude: s.longitude }))
     const polyline = [{
-      points: stops.map((s) => ({ latitude: s.latitude, longitude: s.longitude })),
+      points: routePoints,
       color: (appearance.THEMES[this.data.themeColor] || appearance.THEMES.green).accent,
       width: 6,
       arrowLine: true

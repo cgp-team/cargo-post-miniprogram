@@ -33,6 +33,30 @@
     </view>
   </view>
 
+  <!-- 偏航告警（Phase 9：>100m 只报警，不自动改方案） -->
+  <view class="deviation-banner" wx:if="{{deviated}}">
+    <text>⚠️ 偏航提醒：距规划路线约 {{deviationMeters}} 米，请回到计划道路</text>
+  </view>
+
+  <!-- ========== 完整任务段（Phase 8）：司机看到整个运营任务，非"下一站" ========== -->
+  <view class="task-segment-panel" wx:if="{{taskSegment && taskSegment.length}}">
+    <view class="task-segment-title">📋 今日运营任务</view>
+    <view class="task-segment" wx:for="{{taskSegment}}" wx:key="planId" wx:for-item="seg">
+      <view class="task-window">{{seg.taskWindowStart || ''}} ~ {{seg.taskWindowEnd || ''}}</view>
+      <view class="task-stop" wx:for="{{seg.stops}}" wx:key="index" wx:for-item="stop">
+        <view class="task-stop-head">
+          <text class="task-stop-name">🛑 {{stop.stationName}}</text>
+          <text class="task-stop-status">{{stop.statusName}}</text>
+        </view>
+        <view class="task-action" wx:for="{{stop.actions}}" wx:key="index" wx:for-item="act">
+          <text class="task-action-name">{{act.actionName}}</text>
+          <text wx:if="{{act.orderNo}}" class="task-action-order">{{act.orderNo}}</text>
+          <text wx:if="{{act.quantity}}" class="task-action-qty">×{{act.quantity}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
   <!-- ========== 状态一：待发车 - 行李舱可视化 ========== -->
   <view class="idle-panel" wx:if="{{status === 'idle'}}">
     <!-- 大巴车行李舱图形 -->

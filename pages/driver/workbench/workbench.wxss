@@ -752,3 +752,60 @@
 .elderly-mode .start-text { font-size: 52rpx; }
 .elderly-mode .speed-num { font-size: 68rpx; }
 .elderly-mode .speed-unit { font-size: 28rpx; }
+
+/* ============ 完整任务段（Phase 8） ============ */
+.task-segment-panel {
+  margin: 16rpx 24rpx;
+  padding: 24rpx;
+  border-radius: 20rpx;
+  background: rgba(20, 34, 26, 0.92);
+  border: 2rpx solid rgba(255, 255, 255, 0.08);
+}
+.task-segment-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: #EAF3EA;
+  margin-bottom: 12rpx;
+}
+.task-window {
+  font-size: 22rpx;
+  color: #9AA89E;
+  margin-bottom: 12rpx;
+}
+.task-stop {
+  padding: 16rpx 0;
+  border-bottom: 1rpx solid rgba(255, 255, 255, 0.06);
+}
+.task-stop:last-child { border-bottom: none; }
+.task-stop-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.task-stop-name { font-size: 28rpx; font-weight: 600; color: #F6F2E9; }
+.task-stop-status { font-size: 22rpx; color: #D9A441; }
+.task-action {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  color: #CBE3CB;
+}
+.task-action-name { color: #A8D5A8; }
+.task-action-order { color: #9AA89E; }
+.task-action-qty { color: #D9A441; }
+.elderly-mode .task-segment-title { font-size: 34rpx; }
+.elderly-mode .task-stop-name { font-size: 32rpx; }
+.elderly-mode .task-action { font-size: 28rpx; }
+
+/* ============ 偏航告警（Phase 9） ============ */
+.deviation-banner {
+  margin: 16rpx 24rpx;
+  padding: 16rpx 24rpx;
+  border-radius: 16rpx;
+  background: rgba(192, 57, 43, 0.2);
+  border: 2rpx solid rgba(192, 57, 43, 0.6);
+  font-size: 26rpx;
+  color: #F5C6BE;
+}
