@@ -233,6 +233,11 @@ function getMyArrangements() {
   return request('/app-api/transport/send/arrangements')
 }
 
+/** 客户确认已按替代交接送到指定站点（待客户操作 → 待入池） */
+function confirmStationAction(orderId) {
+  return request(`/app-api/transport/send/confirm-station-action?orderId=${orderId}`, 'POST')
+}
+
 // ==================== 司机端 ====================
 
 /** 司机档案（登录会员识别身份） */
@@ -258,6 +263,11 @@ function getDriverEarnings() {
 /** 调度任务（算法派单结果，预留） */
 function getDriverTasks(driverId) {
   return request('/app-api/transport/driver/tasks', 'GET', { driverId })
+}
+
+/** 司机路线（完整任务段有序经停 + 真实道路 polyline + 偏航判定，Phase 9 地图数据） */
+function getDriverRoute(driverId) {
+  return request('/app-api/transport/driver/route', 'GET', { driverId })
 }
 
 /** 发车：创建当天班次执行记录，订单推进已发车 */
@@ -381,11 +391,13 @@ module.exports = {
   listSendStations,
   previewSendRoute,
   getMyArrangements,
+  confirmStationAction,
   getDriverProfile,
   getDriverShifts,
   getDriverPickups,
   getDriverEarnings,
   getDriverTasks,
+  getDriverRoute,
   driverDepart,
   driverArrive,
   driverPickupConfirm,

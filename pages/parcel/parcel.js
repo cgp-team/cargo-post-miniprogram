@@ -4,11 +4,15 @@
  */
 const api = require('../../utils/api')
 const qrcodeRender = require('../../utils/qrcode-render')
+const reviewUtils = require('../../utils/review')
 const { formatBackendTime, VILLAGES } = require('../../utils/util')
 
-/** 运输订单状态流（对应 TransportOrderStatusEnum） */
+/** 运输订单状态流（对应 TransportOrderStatusEnum，含 Phase 2 承运审核前置状态） */
 const STATUS_FLOW = [
-  { status: 0, label: '待调度', desc: '寄货已提交，等待调度归集' },
+  { status: 0, label: '已创建', desc: '寄货已提交，承运审核中' },
+  { status: 6, label: '待审核', desc: '承运审核进行中，请留意通知' },
+  { status: 7, label: '待客户操作', desc: '请到指定站点完成交接后入池' },
+  { status: 8, label: '待入池', desc: '承运审核通过，等待调度归集' },
   { status: 1, label: '已入池', desc: '订单已进入调度订单池' },
   { status: 2, label: '已分配', desc: '已分配班次车辆' },
   { status: 3, label: '已发车', desc: '车辆已发车，运输中' },
@@ -137,6 +141,8 @@ Page({
       res.createTimeText = formatBackendTime(res.createTime)
       res.statusClass = this.statusClass(res.status)
       res.etaText = this.buildEtaText(res)
+      // 承运审核拒运提示（reviewStatus=4 审核不通过 + 原因）
+      res.reviewNotice = this.buildReviewNotice(res)
       this.setData({ trackResult: res, noResult: false }, () => this.drawParcelQr())
     } catch (e) {
       wx.hideLoading()
@@ -190,6 +196,26 @@ Page({
     return this.loadSendList()
   },
 
+  /** 客户确认已按替代交接送到指定站点（待客户操作 status=7 → 待入池） */
+  async confirmStationAction(e) {
+    const orderId = e.currentTarget.dataset.id
+    if (!orderId || this._confirming) return
+    this._confirming = true
+    try {
+      await api.confirmStationAction(orderId)
+      wx.showToast({ title: '已确认，等待归集', icon: 'success' })
+      if (this.data.activeTab === 0) {
+        this.reloadSendList()
+      } else {
+        this.searchParcel()
+      }
+    } catch (err) {
+      // 错误已由 api.js 统一 toast
+    } finally {
+      this._confirming = false
+    }
+  },
+
   async loadSendList() {
     this.setData({ loading: true })
     try {
@@ -230,14 +256,22 @@ Page({
   /** 运输状态 → 语义 class（chip 配色在 wxss，不再内联色值） */
   statusClass(s) {
     return {
-      0: 'status-pending', 1: 'status-pending',
+      0: 'status-pending', 6: 'status-pending', 7: 'status-pending', 8: 'status-pending',
+      1: 'status-pending',
       2: 'status-shipping', 3: 'status-shipping',
       4: 'status-done', 5: 'status-done'
     }[s] || 'status-done'
   },
 
   trackProgress(s) {
-    return { 0: 15, 1: 30, 2: 45, 3: 70, 4: 100, 5: 15 }[s] || 10
+    return { 0: 15, 6: 20, 7: 25, 8: 30, 1: 35, 2: 45, 3: 70, 4: 100, 5: 15 }[s] || 10
+  },
+
+  /** 承运审核拒运提示：reviewStatus=4（审核不通过）时展示原因（reasonCode 统一映射文案） */
+  buildReviewNotice(res) {
+    if (!res || res.reviewStatus !== 4) return ''
+    const reason = reviewUtils.reasonText(res.reviewReasonCodes)
+    return reason ? `审核不通过：${reason}` : '审核不通过，该货物暂不支持承运'
   },
 
   /** 到达预估文案：优先「预计 HH:mm 到达 X站」，否则「约 N 分钟后到达 X站」 */
@@ -262,13 +296,16 @@ Page({
     return ''
   },
 
-  /** 按状态生成时间轴 */
+  /** 按状态生成时间轴（按 STATUS_FLOW 顺序判定完成节点，而非数值比较，兼容审核前置状态 6/7/8） */
   buildTimeline(status) {
-    return STATUS_FLOW.map((step) => ({
+    const currentIndex = STATUS_FLOW.findIndex((s) => s.status === status)
+    // 已取消/拒运：展示到「已入池」节点为止（取消多发生在审核环节）
+    const cancelCutoff = STATUS_FLOW.findIndex((s) => s.status === 1)
+    const cutoff = status === 5 ? cancelCutoff : (currentIndex < 0 ? -1 : currentIndex)
+    return STATUS_FLOW.map((step, i) => ({
       label: step.label,
       desc: step.desc,
-      // 已取消：仅展示前两个节点；否则当前状态及之前均为完成
-      done: status === 5 ? step.status <= 1 : step.status <= (status == null ? -1 : status)
+      done: i <= cutoff
     }))
   },
 

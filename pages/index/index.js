@@ -367,8 +367,10 @@ Page({
         nextStation: b.nextStation,
         nextStationText: b.nextStation || '—',
         sourceText: b.locationSource === 'REAL_FRESH' ? '实时'
-          : (b.locationSource === 'SIMULATED' ? '模拟位置' : '位置暂不可用'),
+          : (b.locationSource === 'REAL_STALE' ? '位置可能过期'
+              : (b.locationSource === 'SIMULATED' ? '模拟位置' : '位置暂不可用')),
         sourceDot: b.locationSource === 'REAL_FRESH', // 🟢 实时
+        sourceStale: b.locationSource === 'REAL_STALE', // 🟠 位置可能过期（司机中断上报）
         etaText: hasEta ? b.etaMinutes + ' 分钟到站' : '等待实时位置',
         etaMinutes: hasEta ? b.etaMinutes : null,
         distanceKm: typeof b.distanceToNextStationKm === 'number' ? b.distanceToNextStationKm : null,

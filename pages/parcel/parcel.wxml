@@ -109,6 +109,8 @@
         <text wx:else class="parcel-code-value masked">＊＊＊＊</text>
         <text class="parcel-code-toggle" data-index="{{index}}" bindtap="toggleCode" hover-class="hover">{{item.showCode ? '收起' : '查看'}}</text>
       </view>
+      <!-- 待客户操作：确认已送站 → 待入池 -->
+      <button wx:if="{{item.status === 7}}" class="btn-station-confirm" data-id="{{item.id}}" bindtap="confirmStationAction" hover-class="hover">我已送到指定站点，确认入池</button>
     </view>
 
     <view class="loading-state" wx:if="{{loading && sendList.length}}">加载中…</view>
@@ -135,9 +137,14 @@
         <text class="parcel-eta">{{trackResult.createTimeText}}</text>
       </view>
 
-      <!-- 货运审核状态 -->
-      <view wx:if="{{trackResult.auditStatus === 0}}" class="parcel-audit warn"><icon name="clock" size="28" color="#B27A12" /><text>审核中：货物正在等待平台审核</text></view>
+      <!-- 货运审核状态（Phase 2 承运审核，按 reviewStatus 展示；reasonCode 文案由 reviewNotice 统一映射） -->
+      <view wx:if="{{trackResult.reviewNotice}}" class="parcel-audit fail"><icon name="info" size="28" color="#C0392B" /><text>{{trackResult.reviewNotice}}</text></view>
+      <view wx:elif="{{trackResult.reviewStatus === 2}}" class="parcel-audit warn"><icon name="notice" size="28" color="#C75B2A" /><text>需您到指定站点交接后即可进入运输流程</text></view>
+      <view wx:elif="{{trackResult.reviewStatus === 3 || trackResult.auditStatus === 0}}" class="parcel-audit warn"><icon name="clock" size="28" color="#B27A12" /><text>审核中：货物正在等待平台审核</text></view>
       <view wx:elif="{{trackResult.auditStatus === 2}}" class="parcel-audit fail"><icon name="info" size="28" color="#C0392B" /><text>审核未通过：{{trackResult.rejectReason || '货物不符合运输要求'}}</text></view>
+
+      <!-- 待客户操作：确认已送站 → 待入池 -->
+      <button wx:if="{{trackResult.status === 7}}" class="btn-station-confirm" data-id="{{trackResult.id}}" bindtap="confirmStationAction" hover-class="hover">我已送到指定站点，确认入池</button>
 
       <!-- 承运班次与到达预估（已分配/已发车时由后端返回） -->
       <view wx:if="{{trackResult.vehiclePlate || trackResult.etaText}}" class="parcel-carrier">

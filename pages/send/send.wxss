@@ -347,3 +347,23 @@
 .elderly-mode .info-value { font-size: 32rpx; }
 .elderly-mode .receiver-addr-book { font-size: 30rpx; }
 .elderly-mode .order-no-display { font-size: 36rpx; }
+
+/* ============ 承运审核结果卡片 ============ */
+.review-card {
+  width: 100%;
+  border-radius: 24rpx;
+  padding: 24rpx 28rpx;
+  margin-bottom: 24rpx;
+  box-sizing: border-box;
+}
+.review-passed { background: #EAF3EA; border: 2rpx solid #CBE3CB; }
+.review-conditional, .review-manual, .review-pending { background: #FDF3E7; border: 2rpx solid #F0D9B8; }
+.review-rejected { background: #FBEDEA; border: 2rpx solid #F0C4BA; }
+.review-title-row { display: flex; align-items: center; gap: 12rpx; }
+.review-title { font-size: 30rpx; font-weight: 600; color: #1C4B2E; }
+.review-rejected .review-title { color: #C0392B; }
+.review-conditional .review-title, .review-manual .review-title, .review-pending .review-title { color: #C75B2A; }
+.review-reason { display: block; margin-top: 12rpx; font-size: 26rpx; color: #C0392B; }
+.review-hint { display: block; margin-top: 8rpx; font-size: 26rpx; color: #6B5A4A; }
+.elderly-mode .review-title { font-size: 34rpx; }
+.elderly-mode .review-reason, .elderly-mode .review-hint { font-size: 30rpx; }

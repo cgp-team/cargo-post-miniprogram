@@ -10,6 +10,7 @@ const api = require('../../utils/api')
 const appearance = require('../../utils/appearance')
 const auth = require('../../utils/auth')
 const feedback = require('../../utils/feedback')
+const reviewUtils = require('../../utils/review')
 const qrcodeRender = require('../../utils/qrcode-render')
 const util = require('../../utils/util')
 
@@ -231,11 +232,30 @@ Page({
       this.submitting = false
       wx.hideLoading()
       feedback.tap()
-      this.setData({ orderNo: res.orderNo, step: 3 }, () => this.drawQr())
+      // 承运审核结果：客户实时知道可运/不可运/为什么/需什么操作（reasonCode 前端统一映射文案）
+      const review = this.resolveReview(res)
+      this.setData({ orderNo: res.orderNo, step: 3, ...review }, () => this.drawQr())
     } catch (e) {
       this.submitting = false
       wx.hideLoading()
       // 错误提示已由 api.js 统一处理，保留当前页面现场
+    }
+  },
+
+  /** 审核结果 → 前端展示态（mode 驱动样式，hint 为操作指引；reasonCode 文案走 utils/review 统一映射） */
+  resolveReview(res) {
+    const reasonText = reviewUtils.reasonText(res.reviewReasonCodes)
+    switch (res.reviewStatus) {
+      case 1:
+        return { reviewMode: 'passed', reviewTitle: '审核通过', reviewHint: '订单可进入待入池，调度员将尽快为您安排班次', reviewReasonText: '' }
+      case 2:
+        return { reviewMode: 'conditional', reviewTitle: '需您操作', reviewHint: '请将货物送到指定站点交接后即可入池', reviewReasonText: reasonText }
+      case 3:
+        return { reviewMode: 'manual', reviewTitle: '待人工审核', reviewHint: '工作人员将尽快确认承运条件，请留意通知', reviewReasonText: reasonText }
+      case 4:
+        return { reviewMode: 'rejected', reviewTitle: '审核不通过', reviewHint: '该货物暂不支持承运，无法进入运输流程', reviewReasonText: reasonText }
+      default:
+        return { reviewMode: 'pending', reviewTitle: '审核中', reviewHint: '正在为您确认承运条件', reviewReasonText: reasonText }
     }
   },
 

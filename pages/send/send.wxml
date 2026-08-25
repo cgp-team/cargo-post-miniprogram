@@ -174,6 +174,16 @@
     <icon class="match-emoji" name="send" size="100" color="{{iconColor}}" />
     <text class="match-title">寄货已提交！</text>
 
+    <!-- 承运审核结果：可运/不可运/需操作 实时反馈 -->
+    <view wx:if="{{reviewMode}}" class="review-card review-{{reviewMode}}">
+      <view class="review-title-row">
+        <icon name="notice" size="28" color="{{reviewMode === 'passed' ? '#2E7D32' : (reviewMode === 'rejected' ? '#C0392B' : '#C75B2A')}}" />
+        <text class="review-title">{{reviewTitle}}</text>
+      </view>
+      <text wx:if="{{reviewReasonText}}" class="review-reason">原因：{{reviewReasonText}}</text>
+      <text class="review-hint">{{reviewHint}}</text>
+    </view>
+
     <view class="match-bus-card">
       <canvas type="2d" id="qrCanvas" class="qr-canvas"></canvas>
       <text class="order-no-display">{{orderNo}}</text>
