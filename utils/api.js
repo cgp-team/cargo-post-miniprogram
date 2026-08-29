@@ -295,6 +295,16 @@ function reportDriverLocation(data) {
   return request('/app-api/transport/driver/location', 'POST', data)
 }
 
+/** 司机车辆当前位置（真实上报 REAL + 模拟引擎 SIMULATED） */
+function getDriverPosition(driverId) {
+  return request('/app-api/transport/driver/position', 'GET', { driverId })
+}
+
+/** 微信订阅消息模板列表（@PermitAll，返回含 id=模板ID/title/type） */
+function getSubscribeTemplateList() {
+  return request('/app-api/member/social-user/get-subscribe-template-list')
+}
+
 // ==================== 实时公交 ====================
 
 /** 实时公交列表（复用监控车辆位置，含线路起终点/下一站/ETA/位置，免登录） */
@@ -398,6 +408,8 @@ module.exports = {
   getDriverEarnings,
   getDriverTasks,
   getDriverRoute,
+  getDriverPosition,
+  getSubscribeTemplateList,
   driverDepart,
   driverArrive,
   driverPickupConfirm,

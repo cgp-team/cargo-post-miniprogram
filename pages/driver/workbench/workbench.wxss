@@ -1,17 +1,16 @@
-/* 司机工作台 - 暗黑主题 */
+/* 司机工作台 - 对齐用户端「山乡巴士·站牌与车票」米纸暖色主题 */
 .workbench {
   min-height: 100vh;
-  background: #1A1A1A;
-  color: #ffffff;
+  background: var(--color-paper, #F6F2E9);
+  color: var(--color-ink, #2B2B28);
   padding-bottom: 140rpx;
   font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
-/* ========== 顶部进度条 ========== */
+/* ========== 顶部进度条（深站牌绿头部，与用户端导航一致） ========== */
 .progress-header {
-  background: linear-gradient(180deg, #0D0D0D 0%, #1A1A1A 100%);
+  background: linear-gradient(180deg, var(--color-primary-dark, #1C4B2E) 0%, var(--color-primary, #2E7D32) 100%);
   padding: 0 32rpx 28rpx;
-  border-bottom: 1rpx solid #2A2A2A;
 }
 
 .header-safe {
@@ -37,21 +36,19 @@
   padding: 8rpx 20rpx;
   border-radius: 20rpx;
   font-weight: 600;
+  color: #ffffff;
 }
 
 .status-tag.idle {
-  background: rgba(255,152,0,0.2);
-  color: #E8925B;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .status-tag.driving {
-  background: var(--color-primary-shadow);
-  color: var(--color-accent);
+  background: rgba(255, 255, 255, 0.22);
 }
 
 .status-tag.stopped {
-  background: rgba(255,82,82,0.2);
-  color: #EF5350;
+  background: rgba(199, 91, 42, 0.85);
 }
 
 /* 进度条 */
@@ -67,23 +64,23 @@
 
 .stop-label {
   font-size: 22rpx;
-  color: #888;
+  color: rgba(255, 255, 255, 0.75);
 }
 
-.stop-label.start { color: var(--color-accent); }
-.stop-label.end { color: #E8925B; }
+.stop-label.start { color: #ffffff; }
+.stop-label.end { color: #FFE0B2; }
 
 .progress-track {
   position: relative;
   height: 10rpx;
-  background: #333;
+  background: rgba(255, 255, 255, 0.25);
   border-radius: 5rpx;
   overflow: visible;
 }
 
 .progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-accent));
+  background: #ffffff;
   border-radius: 5rpx;
   transition: width 0.5s ease;
 }
@@ -94,10 +91,10 @@
   width: 28rpx;
   height: 28rpx;
   background: #ffffff;
-  border: 4rpx solid var(--color-accent);
+  border: 4rpx solid var(--color-clay, #C75B2A);
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  box-shadow: 0 0 16rpx var(--color-primary-shadow);
+  box-shadow: 0 0 16rpx rgba(255, 255, 255, 0.5);
   transition: left 0.5s ease;
 }
 
@@ -109,12 +106,12 @@
 
 .next-stop-name {
   font-size: 28rpx;
-  color: #ccc;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .next-stop-dist {
   font-size: 28rpx;
-  color: var(--color-accent);
+  color: #ffffff;
   font-weight: 600;
 }
 
@@ -144,13 +141,14 @@
 
 .bus-body {
   width: 240rpx;
-  background: #2A2A2A;
+  background: #ffffff;
   border-radius: 24rpx;
   padding: 20rpx 16rpx;
   display: flex;
   flex-direction: column;
   gap: 16rpx;
-  border: 2rpx solid #3A3A3A;
+  border: 2rpx solid rgba(43, 43, 40, 0.1);
+  box-shadow: 0 8rpx 24rpx rgba(43, 43, 40, 0.06);
 }
 
 .bus-windows {
@@ -162,19 +160,19 @@
 .window {
   width: 40rpx;
   height: 28rpx;
-  background: #1A1A1A;
+  background: var(--color-primary-light, #EAF3EA);
   border-radius: 6rpx;
-  border: 1rpx solid #444;
+  border: 1rpx solid rgba(43, 43, 40, 0.08);
 }
 
 /* 行李舱填充区 */
 .bus-cargo-area {
   flex: 1;
-  background: #1A1A1A;
+  background: var(--color-paper, #F6F2E9);
   border-radius: 14rpx;
   position: relative;
   overflow: hidden;
-  border: 2rpx dashed #444;
+  border: 2rpx dashed rgba(43, 43, 40, 0.18);
   min-height: 200rpx;
 }
 
@@ -183,7 +181,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(180deg, var(--color-accent), var(--color-primary));
+  background: linear-gradient(180deg, var(--color-accent, #4CAF50), var(--color-primary, #2E7D32));
   transition: height 0.3s ease;
   border-radius: 0 0 12rpx 12rpx;
 }
@@ -194,7 +192,7 @@
   left: 25%;
   right: 25%;
   height: 4rpx;
-  background: rgba(255,255,255,0.3);
+  background: rgba(255, 255, 255, 0.35);
   border-radius: 2rpx;
 }
 
@@ -203,7 +201,7 @@
   left: 0;
   right: 0;
   height: 3rpx;
-  background: #E07A3F;
+  background: var(--color-clay, #C75B2A);
   z-index: 2;
 }
 
@@ -216,9 +214,9 @@
 .wheel {
   width: 32rpx;
   height: 32rpx;
-  background: #555;
+  background: var(--color-ink, #2B2B28);
   border-radius: 50%;
-  border: 3rpx solid #777;
+  border: 3rpx solid rgba(43, 43, 40, 0.3);
 }
 
 /* 仓位标签 */
@@ -228,12 +226,14 @@
   justify-content: space-between;
   padding: 0 0;
   font-size: 20rpx;
-  color: #666;
+  color: var(--color-text-tertiary, #8A8778);
 }
 
-.cargo-label-max { color: #888; }
-.cargo-label-half { color: #888; }
-.cargo-label-empty { color: #888; }
+.cargo-label-max,
+.cargo-label-half,
+.cargo-label-empty {
+  color: var(--color-text-tertiary, #8A8778);
+}
 
 /* 仓位数据 */
 .cargo-stats {
@@ -245,13 +245,13 @@
 .cargo-percent {
   font-size: 100rpx;
   font-weight: 900;
-  color: var(--color-accent);
+  color: var(--color-primary, #2E7D32);
   line-height: 1;
 }
 
 .cargo-title {
   font-size: 28rpx;
-  color: #999;
+  color: var(--color-text-secondary, #6B675C);
   margin-top: 8rpx;
 }
 
@@ -267,7 +267,7 @@
   padding: 0 8rpx;
   margin-bottom: 12rpx;
   font-size: 22rpx;
-  color: #666;
+  color: var(--color-text-tertiary, #8A8778);
 }
 
 .cargo-slider {
@@ -285,38 +285,38 @@
   flex: 1;
   text-align: center;
   padding: 20rpx 0;
-  background: #2A2A2A;
+  background: #ffffff;
   border-radius: 16rpx;
   font-size: 30rpx;
   font-weight: 700;
-  color: #ccc;
-  border: 2rpx solid #3A3A3A;
+  color: var(--color-ink, #2B2B28);
+  border: 2rpx solid rgba(43, 43, 40, 0.1);
   transition: all 0.2s;
 }
 
 .quick-btn:active {
-  background: var(--color-accent);
+  background: var(--color-primary, #2E7D32);
   color: #fff;
-  border-color: var(--color-accent);
+  border-color: var(--color-primary, #2E7D32);
 }
 
 /* 发车按钮 */
 .start-btn {
   width: 320rpx;
   height: 120rpx;
-  background: linear-gradient(135deg, var(--color-accent), var(--color-primary));
+  background: linear-gradient(135deg, var(--color-clay, #C75B2A), var(--color-primary, #2E7D32));
   border-radius: 60rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 16rpx;
   border: none;
-  box-shadow: 0 12rpx 40rpx var(--color-primary-shadow);
+  box-shadow: 0 12rpx 40rpx var(--color-primary-shadow, rgba(46, 125, 50, 0.2));
 }
 
 .start-btn:active {
   transform: scale(0.95);
-  box-shadow: 0 6rpx 20rpx var(--color-primary-shadow);
+  box-shadow: 0 6rpx 20rpx var(--color-primary-shadow, rgba(46, 125, 50, 0.2));
 }
 
 .start-icon {
@@ -340,7 +340,7 @@
 .map-area {
   height: 600rpx;
   position: relative;
-  background: #222;
+  background: var(--color-primary-light, #EAF3EA);
 }
 
 .nav-map {
@@ -353,42 +353,41 @@
   position: absolute;
   top: 24rpx;
   right: 24rpx;
-  background: rgba(0,0,0,0.75);
+  background: rgba(28, 75, 46, 0.85);
   border-radius: 20rpx;
   padding: 16rpx 24rpx;
   display: flex;
   align-items: baseline;
   gap: 4rpx;
   backdrop-filter: blur(10rpx);
-  border: 1rpx solid rgba(255,255,255,0.1);
 }
 
 .speed-num {
   font-size: 56rpx;
   font-weight: 900;
-  color: var(--color-accent);
+  color: #ffffff;
   line-height: 1;
 }
 
 .speed-unit {
   font-size: 24rpx;
-  color: #999;
+  color: rgba(255, 255, 255, 0.7);
 }
 
-/* 前方到站卡片 */
+/* 前方到站卡片（站牌式） */
 .next-stop-card {
   position: absolute;
   bottom: 120rpx;
   left: 24rpx;
   right: 24rpx;
-  background: rgba(20,20,20,0.92);
+  background: #ffffff;
   border-radius: 20rpx;
   padding: 24rpx;
   display: flex;
   align-items: center;
   gap: 20rpx;
-  border: 2rpx solid #E8925B;
-  backdrop-filter: blur(10rpx);
+  border: 2rpx solid var(--color-clay, #C75B2A);
+  box-shadow: 0 8rpx 24rpx rgba(43, 43, 40, 0.12);
 }
 
 .stop-alert-icon {
@@ -402,20 +401,20 @@
 .stop-alert-name {
   font-size: 38rpx;
   font-weight: 800;
-  color: #fff;
+  color: var(--color-ink, #2B2B28);
   display: block;
 }
 
 .stop-alert-dist {
   font-size: 28rpx;
-  color: #E8925B;
+  color: var(--color-clay, #C75B2A);
   display: block;
   margin-top: 4rpx;
 }
 
 .stop-alert-task {
   font-size: 26rpx;
-  color: #EF5350;
+  color: var(--color-danger, #C0392B);
   display: block;
   margin-top: 6rpx;
 }
@@ -426,13 +425,12 @@
   bottom: 24rpx;
   left: 24rpx;
   right: 24rpx;
-  background: var(--color-primary-shadow);
+  background: var(--color-primary-dark, #1C4B2E);
   border-radius: 14rpx;
   padding: 16rpx 24rpx;
   display: flex;
   align-items: center;
   gap: 12rpx;
-  border: 1rpx solid var(--color-primary-shadow);
 }
 
 .voice-icon {
@@ -441,17 +439,17 @@
 
 .voice-content {
   font-size: 26rpx;
-  color: var(--color-accent);
+  color: #ffffff;
   flex: 1;
 }
 
 /* ETA信息栏 */
 .eta-bar {
   display: flex;
-  background: #222;
+  background: #ffffff;
   padding: 28rpx 32rpx;
   gap: 0;
-  border-bottom: 1rpx solid #2A2A2A;
+  border-bottom: 1rpx solid rgba(43, 43, 40, 0.08);
 }
 
 .eta-item {
@@ -461,7 +459,7 @@
 
 .eta-label {
   font-size: 22rpx;
-  color: #888;
+  color: var(--color-text-tertiary, #8A8778);
   display: block;
   margin-bottom: 8rpx;
 }
@@ -469,12 +467,12 @@
 .eta-value {
   font-size: 40rpx;
   font-weight: 800;
-  color: #fff;
+  color: var(--color-ink, #2B2B28);
   display: block;
 }
 
 .eta-value.orange {
-  color: #E8925B;
+  color: var(--color-clay, #C75B2A);
 }
 
 /* ========== 停靠面板 ========== */
@@ -500,13 +498,13 @@
 .stop-title {
   font-size: 44rpx;
   font-weight: 800;
-  color: #fff;
+  color: var(--color-ink, #2B2B28);
   display: block;
 }
 
 .stop-subtitle {
   font-size: 28rpx;
-  color: #999;
+  color: var(--color-text-secondary, #6B675C);
   display: block;
   margin-top: 8rpx;
 }
@@ -515,9 +513,10 @@
 .pickup-list {
   width: 100%;
   margin-bottom: 40rpx;
-  background: #222;
+  background: #ffffff;
   border-radius: 20rpx;
   padding: 8rpx 0;
+  box-shadow: 0 8rpx 24rpx rgba(43, 43, 40, 0.06);
 }
 
 .pickup-item {
@@ -525,7 +524,7 @@
   align-items: center;
   padding: 24rpx 28rpx;
   gap: 20rpx;
-  border-bottom: 1rpx solid #2A2A2A;
+  border-bottom: 1rpx solid rgba(43, 43, 40, 0.08);
 }
 
 .pickup-item:last-child {
@@ -543,13 +542,13 @@
 .pickup-name {
   font-size: 32rpx;
   font-weight: 700;
-  color: #fff;
+  color: var(--color-ink, #2B2B28);
   display: block;
 }
 
 .pickup-detail {
   font-size: 24rpx;
-  color: #999;
+  color: var(--color-text-secondary, #6B675C);
   display: block;
   margin-top: 4rpx;
 }
@@ -558,7 +557,7 @@
   width: 40rpx;
   height: 40rpx;
   border-radius: 8rpx;
-  border: 2rpx solid rgba(255,255,255,0.4);
+  border: 2rpx solid rgba(43, 43, 40, 0.25);
   background: transparent;
   box-sizing: border-box;
   display: flex;
@@ -568,15 +567,15 @@
 }
 
 .pickup-check.checked {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
+  background: var(--color-primary, #2E7D32);
+  border-color: var(--color-primary, #2E7D32);
 }
 
 /* 巨大扫码按钮 */
 .scan-btn {
   width: 100%;
   height: 280rpx;
-  background: linear-gradient(180deg, var(--color-accent), var(--color-primary));
+  background: linear-gradient(180deg, var(--color-primary, #2E7D32), var(--color-primary-dark, #1C4B2E));
   border-radius: 32rpx;
   display: flex;
   flex-direction: column;
@@ -584,13 +583,13 @@
   justify-content: center;
   gap: 12rpx;
   border: none;
-  box-shadow: 0 16rpx 48rpx var(--color-primary-shadow);
+  box-shadow: 0 16rpx 48rpx var(--color-primary-shadow, rgba(46, 125, 50, 0.2));
   margin-bottom: 32rpx;
 }
 
 .scan-btn:active {
   transform: scale(0.96);
-  box-shadow: 0 8rpx 24rpx var(--color-primary-shadow);
+  box-shadow: 0 8rpx 24rpx var(--color-primary-shadow, rgba(46, 125, 50, 0.2));
 }
 
 .scan-icon {
@@ -606,12 +605,12 @@
 
 .scan-hint {
   font-size: 24rpx;
-  color: rgba(255,255,255,0.7);
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .skip-btn {
   font-size: 32rpx;
-  color: #9AA39B;
+  color: var(--color-text-secondary, #6B675C);
   padding: 24rpx 40rpx;
 }
 
@@ -621,7 +620,7 @@
   align-items: center;
   gap: 12rpx;
   padding: 12rpx 30rpx 0;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .driver-emoji {
@@ -635,7 +634,7 @@
 
 .driver-plate {
   font-size: 24rpx;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.25);
   border-radius: 8rpx;
   padding: 4rpx 14rpx;
 }
@@ -648,15 +647,16 @@
 /* 调度任务区 */
 .task-list {
   margin: 20rpx 28rpx;
-  background: #1E1E1E;
+  background: #ffffff;
   border-radius: 20rpx;
   padding: 24rpx;
+  box-shadow: 0 8rpx 24rpx rgba(43, 43, 40, 0.06);
 }
 
 .task-title {
   font-size: 26rpx;
   font-weight: 600;
-  color: var(--color-accent);
+  color: var(--color-primary, #2E7D32);
   display: block;
   margin-bottom: 16rpx;
 }
@@ -666,26 +666,26 @@
   align-items: center;
   gap: 16rpx;
   padding: 12rpx 0;
-  border-top: 1rpx solid rgba(255, 255, 255, 0.06);
+  border-top: 1rpx solid rgba(43, 43, 40, 0.08);
 }
 
 .task-station {
   font-size: 28rpx;
-  color: #fff;
+  color: var(--color-ink, #2B2B28);
   font-weight: 600;
 }
 
 .task-action {
   font-size: 24rpx;
-  color: #E8925B;
-  background: rgba(255, 183, 77, 0.12);
+  color: var(--color-clay, #C75B2A);
+  background: rgba(199, 91, 42, 0.1);
   border-radius: 8rpx;
   padding: 4rpx 14rpx;
 }
 
 .task-order {
   font-size: 22rpx;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--color-text-tertiary, #8A8778);
   margin-left: auto;
 }
 
@@ -694,7 +694,7 @@
   width: calc(100% - 64rpx);
   margin: 32rpx;
   height: 120rpx;
-  background: linear-gradient(180deg, var(--color-accent), var(--color-primary));
+  background: linear-gradient(180deg, var(--color-clay, #C75B2A), var(--color-primary, #2E7D32));
   border-radius: 24rpx;
   display: flex;
   flex-direction: row;
@@ -702,12 +702,12 @@
   justify-content: center;
   gap: 16rpx;
   border: none;
-  box-shadow: 0 12rpx 36rpx var(--color-primary-shadow);
+  box-shadow: 0 12rpx 36rpx var(--color-primary-shadow, rgba(46, 125, 50, 0.2));
 }
 
 .arrive-btn:active {
   transform: scale(0.97);
-  box-shadow: 0 6rpx 18rpx var(--color-primary-shadow);
+  box-shadow: 0 6rpx 18rpx var(--color-primary-shadow, rgba(46, 125, 50, 0.2));
 }
 
 .arrive-icon {
@@ -723,23 +723,23 @@
 /* 妥投扫码按钮（停靠中，次按钮） */
 .deliver-btn {
   height: 200rpx;
-  background: var(--color-gold);
-  box-shadow: 0 16rpx 48rpx rgba(217,164,65,0.35);
+  background: var(--color-gold, #D9A441);
+  box-shadow: 0 16rpx 48rpx rgba(217, 164, 65, 0.35);
 }
 
 .deliver-btn:active {
-  box-shadow: 0 8rpx 24rpx rgba(217,164,65,0.3);
+  box-shadow: 0 8rpx 24rpx rgba(217, 164, 65, 0.3);
 }
 
 /* 取件核销按钮（邮快件，次按钮） */
 .verify-btn {
   height: 200rpx;
-  background: linear-gradient(180deg, var(--color-primary), var(--color-primary-dark));
-  box-shadow: 0 16rpx 48rpx var(--color-primary-shadow);
+  background: linear-gradient(180deg, var(--color-primary, #2E7D32), var(--color-primary-dark, #1C4B2E));
+  box-shadow: 0 16rpx 48rpx var(--color-primary-shadow, rgba(46, 125, 50, 0.2));
 }
 
 .verify-btn:active {
-  box-shadow: 0 8rpx 24rpx var(--color-primary-shadow);
+  box-shadow: 0 8rpx 24rpx var(--color-primary-shadow, rgba(46, 125, 50, 0.2));
 }
 
 /* ============ 老年人模式：司机端工作台字号放大 ============ */
@@ -753,28 +753,34 @@
 .elderly-mode .speed-num { font-size: 68rpx; }
 .elderly-mode .speed-unit { font-size: 28rpx; }
 
-/* ============ 完整任务段（Phase 8） ============ */
+/* ============ 运营路单（signature：司机视角的任务段清单） ============ */
 .task-segment-panel {
   margin: 16rpx 24rpx;
-  padding: 24rpx;
-  border-radius: 20rpx;
-  background: rgba(20, 34, 26, 0.92);
-  border: 2rpx solid rgba(255, 255, 255, 0.08);
+  padding: 24rpx 24rpx 16rpx;
+  border-radius: 12rpx;
+  background: #ffffff;
+  border: 1rpx solid rgba(43, 43, 40, 0.08);
+  box-shadow: 0 8rpx 24rpx rgba(43, 43, 40, 0.08);
+  /* 左侧打孔：路单装订孔 */
+  background-image: radial-gradient(circle, var(--color-paper, #F6F2E9) 0 6rpx, transparent 6rpx);
+  background-size: 32rpx 32rpx;
+  background-position: -8rpx 12rpx;
 }
 .task-segment-title {
   font-size: 30rpx;
   font-weight: 700;
-  color: #EAF3EA;
+  color: var(--color-primary-dark, #1C4B2E);
   margin-bottom: 12rpx;
+  letter-spacing: 2rpx;
 }
 .task-window {
   font-size: 22rpx;
-  color: #9AA89E;
+  color: var(--color-text-tertiary, #8A8778);
   margin-bottom: 12rpx;
 }
 .task-stop {
   padding: 16rpx 0;
-  border-bottom: 1rpx solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1rpx dashed rgba(43, 43, 40, 0.12);
 }
 .task-stop:last-child { border-bottom: none; }
 .task-stop-head {
@@ -782,19 +788,19 @@
   justify-content: space-between;
   align-items: center;
 }
-.task-stop-name { font-size: 28rpx; font-weight: 600; color: #F6F2E9; }
-.task-stop-status { font-size: 22rpx; color: #D9A441; }
+.task-stop-name { font-size: 28rpx; font-weight: 600; color: var(--color-ink, #2B2B28); }
+.task-stop-status { font-size: 22rpx; color: var(--color-gold, #D9A441); }
 .task-action {
   display: flex;
   align-items: center;
   gap: 12rpx;
   margin-top: 6rpx;
   font-size: 24rpx;
-  color: #CBE3CB;
+  color: var(--color-text-secondary, #6B675C);
 }
-.task-action-name { color: #A8D5A8; }
-.task-action-order { color: #9AA89E; }
-.task-action-qty { color: #D9A441; }
+.task-action-name { color: var(--color-primary, #2E7D32); }
+.task-action-order { color: var(--color-text-tertiary, #8A8778); }
+.task-action-qty { color: var(--color-clay, #C75B2A); }
 .elderly-mode .task-segment-title { font-size: 34rpx; }
 .elderly-mode .task-stop-name { font-size: 32rpx; }
 .elderly-mode .task-action { font-size: 28rpx; }
@@ -804,8 +810,93 @@
   margin: 16rpx 24rpx;
   padding: 16rpx 24rpx;
   border-radius: 16rpx;
-  background: rgba(192, 57, 43, 0.2);
-  border: 2rpx solid rgba(192, 57, 43, 0.6);
+  background: rgba(192, 57, 43, 0.1);
+  border: 2rpx solid rgba(192, 57, 43, 0.4);
   font-size: 26rpx;
-  color: #F5C6BE;
+  color: #C0392B;
+}
+
+/* ============ 连续任务导航（导航横幅 + 取/派 chip） ============ */
+.nav-banner {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  margin: 16rpx 24rpx 0;
+  padding: 24rpx;
+  border-radius: 20rpx;
+  background: linear-gradient(135deg, var(--color-primary-dark, #1C4B2E), var(--color-primary, #2E7D32));
+  box-shadow: 0 8rpx 24rpx var(--color-primary-shadow, rgba(46, 125, 50, 0.2));
+}
+.nav-seq {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.75);
+}
+.nav-station-name {
+  font-size: 44rpx;
+  font-weight: 800;
+  color: #fff;
+}
+.nav-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 4rpx;
+}
+.nav-chip {
+  font-size: 24rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 999rpx;
+  color: #fff;
+}
+.nav-chip.pickup { background: rgba(255, 255, 255, 0.22); }
+.nav-chip.deliver { background: var(--color-clay, #C75B2A); }
+.nav-chip.board, .nav-chip.alight { background: rgba(255, 255, 255, 0.18); }
+.nav-chip.none { background: rgba(255, 255, 255, 0.14); }
+.nav-amap {
+  align-self: flex-end;
+  margin-top: 8rpx;
+  font-size: 26rpx;
+  padding: 10rpx 24rpx;
+  border-radius: 999rpx;
+  color: #fff;
+  background: var(--color-clay, #C75B2A);
+}
+.stop-alert-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-top: 6rpx;
+}
+.stop-alert-actions .nav-chip.pickup { background: rgba(46, 125, 50, 0.12); color: var(--color-primary, #2E7D32); }
+.stop-alert-actions .nav-chip.deliver { background: rgba(199, 91, 42, 0.12); color: var(--color-clay, #C75B2A); }
+.stop-alert-actions .nav-chip.board, .stop-alert-actions .nav-chip.alight { background: rgba(31, 94, 158, 0.1); color: #1F5E9E; }
+.arrive-btn.ready {
+  box-shadow: 0 0 0 6rpx var(--color-gold, #D9A441), 0 12rpx 36rpx var(--color-primary-shadow, rgba(46, 125, 50, 0.2));
+}
+
+/* ============ 模拟模式开关 ============ */
+.sim-toggle {
+  margin-left: auto;
+  font-size: 22rpx;
+  padding: 6rpx 18rpx;
+  border-radius: 999rpx;
+  color: rgba(255, 255, 255, 0.8);
+  border: 2rpx solid rgba(255, 255, 255, 0.3);
+}
+.sim-toggle.on {
+  color: var(--color-gold, #D9A441);
+  border-color: var(--color-gold, #D9A441);
+  background: rgba(217, 164, 65, 0.18);
+}
+
+/* ============ 订阅派单通知入口 ============ */
+.subscribe-entry {
+  margin: 16rpx 24rpx 0;
+  padding: 20rpx;
+  text-align: center;
+  border-radius: 16rpx;
+  font-size: 26rpx;
+  color: var(--color-gold, #D9A441);
+  border: 2rpx dashed rgba(217, 164, 65, 0.5);
+  background: rgba(217, 164, 65, 0.08);
 }
