@@ -8,6 +8,7 @@
       <text class="driver-text">{{driverName}}</text>
       <text class="driver-plate">{{plateNo}}</text>
       <text class="driver-capacity">货仓 {{cargoLimit}} 件</text>
+      <text class="sim-toggle {{simMode ? 'on' : ''}}" bindtap="toggleSimMode">{{simMode ? '🧪 模拟中' : '模拟模式'}}</text>
     </view>
     <view class="route-label">
       <text class="route-badge">{{routeName || '今日班次'}}</text>
@@ -94,6 +95,11 @@
       </view>
     </view>
 
+    <!-- 订阅派单通知 -->
+    <view class="subscribe-entry" bindtap="subscribeDispatch">
+      <text>🔔 订阅派单通知</text>
+    </view>
+
     <!-- 发车按钮 -->
     <button class="start-btn" bindtap="startDrive" hover-class="hover">
       <text class="start-icon">🚌</text>
@@ -103,6 +109,20 @@
 
   <!-- ========== 状态二：行驶中 - 导航模式 ========== -->
   <view class="driving-panel" wx:if="{{status === 'driving'}}">
+    <!-- 连续任务导航横幅（第 N/总站 · 站名 · 取/派） -->
+    <view class="nav-banner" wx:if="{{navTotalStops > 0}}">
+      <view class="nav-seq">第 {{navStopIndex}}/{{navTotalStops}} 站</view>
+      <view class="nav-station-name">{{navStationName}}</view>
+      <view class="nav-actions">
+        <text class="nav-chip pickup" wx:if="{{navPickupCount > 0}}">📥 取货×{{navPickupCount}}</text>
+        <text class="nav-chip deliver" wx:if="{{navDeliverCount > 0}}">📤 派货×{{navDeliverCount}}</text>
+        <text class="nav-chip board" wx:if="{{navBoardCount > 0}}">🚌 接客×{{navBoardCount}}</text>
+        <text class="nav-chip alight" wx:if="{{navAlightCount > 0}}">🚏 送客×{{navAlightCount}}</text>
+        <text class="nav-chip none" wx:if="{{navActionTotal === 0}}">经停通过</text>
+      </view>
+      <view class="nav-amap" wx:if="{{nextStationDistance > 0}}" bindtap="openAmapNav">🚗 导航</view>
+    </view>
+
     <!-- 地图区域（简化版，实际接入腾讯/高德地图组件） -->
     <view class="map-area">
       <map
@@ -127,6 +147,12 @@
         <view class="stop-alert-info">
           <text class="stop-alert-name">{{nextStation}}</text>
           <text class="stop-alert-dist">前方 {{nextStationDistance}}m</text>
+          <view class="stop-alert-actions">
+            <text class="nav-chip pickup" wx:if="{{navPickupCount > 0}}">📥 取货×{{navPickupCount}}</text>
+            <text class="nav-chip deliver" wx:if="{{navDeliverCount > 0}}">📤 派货×{{navDeliverCount}}</text>
+            <text class="nav-chip board" wx:if="{{navBoardCount > 0}}">🚌 接客×{{navBoardCount}}</text>
+            <text class="nav-chip alight" wx:if="{{navAlightCount > 0}}">🚏 送客×{{navAlightCount}}</text>
+          </view>
           <text class="stop-alert-task" wx:if="{{pendingPickups.length > 0}}">
             ⚠️ 有 {{pendingPickups.length}} 件货物待装车
           </text>
@@ -151,9 +177,9 @@
     </view>
 
     <!-- 到站确认按钮 -->
-    <button class="arrive-btn" bindtap="arriveAtStation" hover-class="hover">
+    <button class="arrive-btn {{canArrive ? 'ready' : ''}}" bindtap="arriveAtStation" hover-class="hover">
       <text class="arrive-icon">🚏</text>
-      <text class="arrive-text">到达 {{nextStation || '下一站'}}</text>
+      <text class="arrive-text">{{canArrive ? '确认到达 ' + (navStationName || nextStation) : '到达 ' + (navStationName || nextStation || '下一站')}}</text>
     </button>
   </view>
 

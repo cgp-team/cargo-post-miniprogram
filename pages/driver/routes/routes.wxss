@@ -1,27 +1,27 @@
-/* 路线页 - 暗黑主题 */
+/* 路线页 - 对齐用户端「山乡巴士·站牌与车票」米纸暖色主题 */
 .routes-page {
   min-height: 100vh;
-  background: #1A1A1A;
-  color: #fff;
+  background: var(--color-paper, #F6F2E9);
+  color: var(--color-ink, #2B2B28);
   padding-bottom: 140rpx;
 }
 
-/* 头部 */
+/* 头部（深站牌绿，与用户端导航一致） */
 .page-header {
-  background: linear-gradient(180deg, #0D0D0D, #1A1A1A);
+  background: linear-gradient(180deg, var(--color-primary-dark, #1C4B2E), var(--color-primary, #2E7D32));
   padding: 0 32rpx 32rpx;
-  border-bottom: 1rpx solid #2A2A2A;
 }
 
 .page-title {
   font-size: 44rpx;
   font-weight: 800;
+  color: #ffffff;
   display: block;
 }
 
 .page-date {
   font-size: 26rpx;
-  color: #888;
+  color: rgba(255, 255, 255, 0.75);
   display: block;
   margin-top: 8rpx;
 }
@@ -29,14 +29,15 @@
 /* 路线卡片 */
 .route-card {
   margin: 24rpx;
-  background: #222;
+  background: #ffffff;
   border-radius: 24rpx;
   padding: 32rpx;
-  border: 1rpx solid #2A2A2A;
+  border: 1rpx solid rgba(43, 43, 40, 0.08);
+  box-shadow: 0 8rpx 24rpx rgba(43, 43, 40, 0.06);
 }
 
 .route-card.running {
-  border-color: var(--color-primary-shadow);
+  border-color: var(--color-primary, #2E7D32);
 }
 
 .route-card-header {
@@ -49,13 +50,13 @@
 .route-card-number {
   font-size: 42rpx;
   font-weight: 800;
-  color: var(--color-accent);
+  color: var(--color-primary, #2E7D32);
   display: block;
 }
 
 .route-card-direction {
   font-size: 26rpx;
-  color: #999;
+  color: var(--color-text-secondary, #6B675C);
   display: block;
   margin-top: 4rpx;
 }
@@ -68,32 +69,32 @@
 }
 
 .route-card-status.running {
-  background: var(--color-primary-shadow);
-  color: var(--color-accent);
+  background: rgba(46, 125, 50, 0.12);
+  color: var(--color-primary, #2E7D32);
 }
 
 .route-card-status.pending {
-  background: rgba(224,122,63,0.18);
-  color: #E8925B;
+  background: rgba(199, 91, 42, 0.12);
+  color: var(--color-clay, #C75B2A);
 }
 
 .route-card-status.done {
-  background: #F2F0EA;
-  color: #8A8778;
+  background: rgba(43, 43, 40, 0.06);
+  color: var(--color-text-tertiary, #8A8778);
 }
 
 .route-time {
   font-size: 28rpx;
-  color: #ccc;
+  color: var(--color-text-secondary, #6B675C);
   display: flex;
   align-items: center;
   gap: 10rpx;
   margin-bottom: 30rpx;
   padding-bottom: 24rpx;
-  border-bottom: 1rpx solid #2A2A2A;
+  border-bottom: 1rpx solid rgba(43, 43, 40, 0.08);
 }
 
-/* 时间线 —— 山路线：虚线山路 + 站点圆点（路过=强调色，当前=陶土橙脉冲） */
+/* 时间线 —— 山路线：虚线山路 + 站点圆点（路过=站牌绿，当前=陶土橙脉冲） */
 .timeline {
   display: flex;
   flex-direction: column;
@@ -108,7 +109,7 @@
   gap: 20rpx;
 }
 
-/* 站点间虚线山路（未路过=暗灰虚线，路过=主题强调色虚线） */
+/* 站点间虚线山路（未路过=浅灰虚线，路过=主题强调色虚线） */
 .timeline-item::before {
   content: '';
   position: absolute;
@@ -116,7 +117,7 @@
   top: 48rpx;
   bottom: -18rpx;
   width: 3rpx;
-  background: repeating-linear-gradient(180deg, #444 0, #444 8rpx, transparent 8rpx, transparent 14rpx);
+  background: repeating-linear-gradient(180deg, rgba(43, 43, 40, 0.18) 0, rgba(43, 43, 40, 0.18) 8rpx, transparent 8rpx, transparent 14rpx);
 }
 
 .timeline-item:last-child::before {
@@ -124,16 +125,16 @@
 }
 
 .timeline-item.done::before {
-  background: repeating-linear-gradient(180deg, var(--color-accent) 0, var(--color-accent) 8rpx, transparent 8rpx, transparent 14rpx);
+  background: repeating-linear-gradient(180deg, var(--color-primary, #2E7D32) 0, var(--color-primary, #2E7D32) 8rpx, transparent 8rpx, transparent 14rpx);
 }
 
-/* 站点圆点：路过=实心绿，未到=空心暗，当前=陶土橙带脉冲 */
+/* 站点圆点：路过=实心绿，未到=空心浅灰，当前=陶土橙带脉冲 */
 .timeline-dot {
   width: 26rpx;
   height: 26rpx;
   border-radius: 50%;
-  background: #222;
-  border: 3rpx solid #555;
+  background: #ffffff;
+  border: 3rpx solid rgba(43, 43, 40, 0.25);
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -143,41 +144,41 @@
 }
 
 .timeline-item.done .timeline-dot {
-  background: var(--color-accent);
-  border-color: var(--color-accent);
+  background: var(--color-primary, #2E7D32);
+  border-color: var(--color-primary, #2E7D32);
 }
 
 .timeline-item.current .timeline-dot {
-  background: #E07A3F;
-  border-color: #E07A3F;
-  box-shadow: 0 0 0 8rpx rgba(224, 122, 63, 0.18);
+  background: var(--color-clay, #C75B2A);
+  border-color: var(--color-clay, #C75B2A);
+  box-shadow: 0 0 0 8rpx rgba(199, 91, 42, 0.16);
   animation: station-pulse 1.8s ease-in-out infinite;
 }
 
 @keyframes station-pulse {
-  0%, 100% { box-shadow: 0 0 0 6rpx rgba(224, 122, 63, 0.16); }
-  50% { box-shadow: 0 0 0 12rpx rgba(224, 122, 63, 0.05); }
+  0%, 100% { box-shadow: 0 0 0 6rpx rgba(199, 91, 42, 0.14); }
+  50% { box-shadow: 0 0 0 12rpx rgba(199, 91, 42, 0.04); }
 }
 
 .dot-inner {
   width: 10rpx;
   height: 10rpx;
   border-radius: 50%;
-  background: #1A1A1A;
+  background: #ffffff;
 }
 
 .timeline-name {
   font-size: 28rpx;
-  color: #999;
+  color: var(--color-text-tertiary, #8A8778);
   flex: 1;
 }
 
 .timeline-item.done .timeline-name {
-  color: #ccc;
+  color: var(--color-text-secondary, #6B675C);
 }
 
 .timeline-item.current .timeline-name {
-  color: #fff;
+  color: var(--color-ink, #2B2B28);
   font-weight: 700;
   font-size: 32rpx;
 }
@@ -186,18 +187,18 @@
   font-size: 20rpx;
   padding: 4rpx 12rpx;
   border-radius: 8rpx;
-  background: rgba(224,122,63,0.2);
-  color: #E8925B;
+  background: rgba(199, 91, 42, 0.12);
+  color: var(--color-clay, #C75B2A);
 }
 
 .timeline-tag.end {
-  background: rgba(255,82,82,0.2);
-  color: #EF5350;
+  background: rgba(192, 57, 43, 0.1);
+  color: #C0392B;
 }
 
 .timeline-tag.current-tag {
-  background: rgba(224,122,63,0.28);
-  color: #F0A06C;
+  background: rgba(199, 91, 42, 0.2);
+  color: var(--color-clay, #C75B2A);
   font-weight: 700;
 }
 

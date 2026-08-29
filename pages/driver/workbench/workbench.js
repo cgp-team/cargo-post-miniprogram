@@ -7,9 +7,12 @@
 const api = require('../../../utils/api')
 const appearance = require('../../../utils/appearance')
 const feedback = require('../../../utils/feedback')
+const nav = require('../../../utils/nav')
 
 /** 位置上报间隔（毫秒） */
 const LOCATION_REPORT_INTERVAL = 10000
+/** 模拟位置轮询间隔（毫秒）：模拟模式下读后端引擎位置 */
+const SIM_POLL_INTERVAL = 3000
 /** 到站判定半径（米）：进入该范围提示到站（任务书默认 50m） */
 const ARRIVE_RADIUS_METERS = 50
 
@@ -50,6 +53,21 @@ Page({
     totalStops: 0,
     currentStopIndex: 0,
     progressPercent: 0,
+
+    // 连续任务导航（任务段途经点）
+    navTotalStops: 0,
+    navStopIndex: 0,
+    navStationName: '',
+    navPickupCount: 0,
+    navDeliverCount: 0,
+    navBoardCount: 0,
+    navAlightCount: 0,
+    navActionTotal: 0,
+    targetIndex: 0,
+    canArrive: false,
+
+    // 模拟模式：消费后端模拟运营引擎位置（管理端启动模拟后司机端演示用）
+    simMode: false,
 
     // 行李舱运力
     cargoCapacity: 0,        // 空余仓位百分比
@@ -135,7 +153,14 @@ Page({
       this.driverRoutePolyline = route && route.polyline && route.polyline.length >= 2
         ? route.polyline.map((p) => ({ longitude: p.longitude, latitude: p.latitude }))
         : null
-      this.initFromShifts(shifts || [])
+      // 连续任务导航：合并 route(坐标/顺序/真实道路) + tasks(取/派明细) 得 navPoints
+      const navPoints = nav.buildNavPoints(route || null, tasks || [])
+      this.navPoints = navPoints
+      if (navPoints.length >= 2) {
+        this.initFromNav(navPoints, shifts || [])
+      } else {
+        this.initFromShifts(shifts || [])
+      }
       this.setData({ loaded: true })
     } catch (e) {
       this.setData({ loaded: true })
@@ -179,6 +204,116 @@ Page({
       seg.stops = Object.values(stationMap)
       return seg
     })
+  },
+
+  /**
+   * 连续任务导航初始化：以算法任务段经停点（navPoints）为导航数据源。
+   * 班次信息仍用于发车/到站（shiftId）+ 运力展示，但地图/下一站/进度走任务段。
+   */
+  initFromNav(navPoints, shifts) {
+    let current = null
+    if (shifts && shifts.length) {
+      current = shifts.find((s) => s.status === 1) || shifts[0]
+    }
+    if (current) {
+      this.shiftId = current.shiftId
+      const cap = this.data.cargoLimit
+      const used = (current.loadedCount != null ? current.loadedCount : this.data.pendingPickups.length) || 0
+      const pct = cap > 0 ? Math.max(0, Math.round((cap - used) / cap * 100)) : 100
+      const usedPct = cap > 0 ? Math.min(100, Math.round(used / cap * 100)) : 0
+      this.setData({
+        routeName: current.routeName || current.shiftCode,
+        cargoCapacity: pct,
+        cargoUsed: usedPct,
+        eta: this.calcEta(current)
+      })
+    }
+
+    // 恢复进度：优先后端任务状态（第一个 PENDING 站），回退班次 currentStationId
+    const pendIdx = navPoints.findIndex((p) => (p.status == null ? 0 : p.status) === 0)
+    const lastDone = navPoints.length > 0 && navPoints[navPoints.length - 1].status === 7
+    let resumeIdx = pendIdx >= 0 ? pendIdx : (lastDone ? navPoints.length : 0)
+    if (resumeIdx === 0 && current && current.currentStationId != null) {
+      const matched = navPoints.findIndex((p) => p.stationId === current.currentStationId)
+      if (matched > 0) resumeIdx = matched
+    }
+    resumeIdx = Math.min(resumeIdx, navPoints.length - 1)
+
+    this.applyNavView(resumeIdx)
+
+    if (current && current.status === 1 && resumeIdx < navPoints.length) {
+      this.setData({ status: 'driving' })
+      this.startLocationReport()
+    }
+  },
+
+  /** 统一渲染导航视图（下一站/进度/markers/polyline），targetIndex 是唯一事实来源 */
+  applyNavView(targetIndex) {
+    const points = this.navPoints || []
+    const total = points.length
+    const idx = Math.min(targetIndex, total - 1)
+    const t = points[idx] || {}
+    this.setData({
+      targetIndex: idx,
+      currentStopIndex: idx,
+      totalStops: total,
+      navTotalStops: total,
+      navStopIndex: total ? idx + 1 : 0,
+      navStationName: t.stationName || '',
+      navPickupCount: t.pickupCount || 0,
+      navDeliverCount: t.deliverCount || 0,
+      navBoardCount: t.boardCount || 0,
+      navAlightCount: t.alightCount || 0,
+      navActionTotal: t.actionTotal || 0,
+      nextStation: t.stationName || '',
+      currentStation: idx > 0 ? (points[idx - 1] || {}).stationName : '',
+      progressPercent: total > 1 ? Math.round(idx / (total - 1) * 100) : 0,
+      markers: this.buildNavMarkers(idx),
+      polyline: this.buildNavPolyline(),
+      canArrive: false
+    })
+  },
+
+  /** 任务段途经点 markers：目标高亮 / 已过灰 / 未到正常；动作用 callout 文字+背景色区分 */
+  buildNavMarkers(targetIndex) {
+    const theme = appearance.THEMES[this.data.themeColor] || appearance.THEMES.green
+    return (this.navPoints || []).map((p, i) => {
+      const isTarget = i === targetIndex
+      const passed = i < targetIndex
+      const hasCargo = p.pickupCount > 0 || p.deliverCount > 0
+      let content = p.stationName || ''
+      if (p.pickupCount) content += ' 📥' + p.pickupCount
+      if (p.deliverCount) content += ' 📤' + p.deliverCount
+      if (p.boardCount) content += ' 🚌' + p.boardCount
+      if (p.alightCount) content += ' 🚏' + p.alightCount
+      return {
+        id: i,
+        latitude: p.latitude,
+        longitude: p.longitude,
+        iconPath: passed ? '/images/marker-end.png'
+          : isTarget ? '/images/marker-start.png' : '/images/marker-stop.png',
+        width: isTarget ? 32 : 26,
+        height: isTarget ? 32 : 26,
+        callout: {
+          content,
+          color: '#fff',
+          fontSize: isTarget ? 14 : 11,
+          bgColor: passed ? '#666' : isTarget ? (theme.primary || '#2E7D32') : hasCargo ? (theme.clay || '#C75B2A') : '#444',
+          padding: 6,
+          borderRadius: 8,
+          display: isTarget ? 'ALWAYS' : 'BYCLICK'
+        }
+      }
+    })
+  },
+
+  /** 导航 polyline：真实道路优先，兜底站连线 */
+  buildNavPolyline() {
+    const points = (this.driverRoutePolyline && this.driverRoutePolyline.length >= 2)
+      ? this.driverRoutePolyline
+      : (this.navPoints || []).map((p) => ({ latitude: p.latitude, longitude: p.longitude }))
+    const accent = (appearance.THEMES[this.data.themeColor] || appearance.THEMES.green).accent
+    return [{ points, color: accent, width: 6, arrowLine: true }]
   },
 
   /** 从真实班次初始化当前班次、站点、地图、运力；在途班次恢复行驶状态 */
@@ -275,19 +410,21 @@ Page({
     }
     this.submitting = false
     feedback.tap()
-    this.setData({
-      status: 'driving',
-      currentStopIndex: 0,
-      progressPercent: 0
-    })
+    // 连续任务导航：发车后从首个有效站开始；首站为纯经停时跳到下一有效站
+    if (this.navPoints && this.navPoints.length >= 2) {
+      const startIdx = (this.navPoints[0] && !(this.navPoints[0].actionTotal > 0) && this.navPoints.length > 1) ? 1 : 0
+      this.applyNavView(startIdx)
+    }
+    this.setData({ status: 'driving', progressPercent: 0 })
     wx.showToast({ title: '车辆已出发', icon: 'success', duration: 1500 })
     this.startLocationReport()
   },
 
-  /** 启动位置上报定时器：真实 GPS 位置驱动进度与监控中心 */
+  /** 启动位置上报定时器：真实 GPS 或模拟引擎位置驱动进度（模拟模式不调真实 GPS，避免 REAL 顶掉模拟） */
   startLocationReport() {
     if (this.locationTimer) clearInterval(this.locationTimer)
-    const tick = () => {
+    const simMode = this.data.simMode
+    const tick = simMode ? () => this.pollSimPosition() : () => {
       wx.getLocation({
         type: 'gcj02',
         success: (res) => this.onLocation(res),
@@ -295,7 +432,55 @@ Page({
       })
     }
     tick()
-    this.locationTimer = setInterval(tick, LOCATION_REPORT_INTERVAL)
+    this.locationTimer = setInterval(tick, simMode ? SIM_POLL_INTERVAL : LOCATION_REPORT_INTERVAL)
+  },
+
+  /** 模拟模式：轮询后端模拟引擎位置，驱动连续导航（不上报真实 GPS） */
+  async pollSimPosition() {
+    try {
+      const pos = await api.getDriverPosition(this.driverId)
+      if (!pos || !pos.simRunning || pos.simLatitude == null || pos.simLongitude == null) {
+        return // 模拟未运行或无位置
+      }
+      this.updateNavByCoord(pos.simLatitude, pos.simLongitude, 0)
+    } catch (e) {
+      // 静默，等待下一轮
+    }
+  },
+
+  /** 切换模拟模式：切换后重启位置轮询 */
+  toggleSimMode() {
+    const next = !this.data.simMode
+    this.setData({ simMode: next })
+    if (this.data.status === 'driving' || this.data.status === 'stopped') {
+      this.startLocationReport()
+    }
+    wx.showToast({ title: next ? '已开启模拟模式' : '已关闭模拟模式', icon: 'none' })
+  },
+
+  /** 订阅派单通知：拉模板列表 → wx.requestSubscribeMessage 授权（一次性模板，派单前需再次订阅） */
+  async subscribeDispatch() {
+    try {
+      const templates = await api.getSubscribeTemplateList()
+      if (!templates || !templates.length) {
+        wx.showToast({ title: '暂无可用订阅模板', icon: 'none' })
+        return
+      }
+      const tpl = templates.find((t) => t.title === '派单通知') || templates[0]
+      wx.requestSubscribeMessage({
+        tmplIds: [tpl.id],
+        success: (res) => {
+          if (res[tpl.id] === 'accept') {
+            wx.showToast({ title: '订阅成功', icon: 'success' })
+          } else {
+            wx.showToast({ title: '未订阅', icon: 'none' })
+          }
+        },
+        fail: () => wx.showToast({ title: '订阅失败', icon: 'none' })
+      })
+    } catch (e) {
+      wx.showToast({ title: '订阅失败', icon: 'none' })
+    }
   },
 
   /** 定位失败：权限被拒时提示并停止上报，其余静默等待下个周期 */
@@ -317,9 +502,8 @@ Page({
     }
   },
 
-  /** 收到一次真实定位：上报后端 + 更新速度/下一站距离/进度 */
+  /** 收到一次真实定位：上报后端 + 驱动导航（任务段导航优先，班次兜底） */
   onLocation(res) {
-    const stops = this.shiftStops || []
     const speedKmh = Math.round((res.speed || 0) * 3.6)
     api.reportDriverLocation({
       driverId: this.driverId,
@@ -328,71 +512,159 @@ Page({
       latitude: res.latitude,
       speedKmh
     }).catch(() => {})
+    this.updateNavByCoord(res.latitude, res.longitude, speedKmh)
+  },
 
-    if (this.data.status !== 'driving' || stops.length < 2) {
+  /** 纯导航推进：给定坐标更新地图中心/下一站距离/进度/到站（模拟模式与真实 GPS 共用） */
+  updateNavByCoord(latitude, longitude, speedKmh) {
+    // 地图跟随当前位置
+    this.setData({ mapLatitude: longitude, mapLongitude: latitude })
+
+    if (this.data.status !== 'driving') {
       this.setData({ speed: speedKmh })
       return
     }
 
-    // 下一站 = 当前序号的下一站；距离足够近时提示可确认到站
-    const nextIdx = Math.min(this.data.currentStopIndex + 1, stops.length - 1)
-    const next = stops[nextIdx]
-    const dist = Math.round(distanceMeters(res.latitude, res.longitude, next.latitude, next.longitude))
+    const points = this.navPoints || []
+    // 无任务段导航时回退旧班次站点逻辑
+    if (points.length < 2) {
+      const stops = this.shiftStops || []
+      if (stops.length < 2) { this.setData({ speed: speedKmh }); return }
+      const nextIdx = Math.min(this.data.currentStopIndex + 1, stops.length - 1)
+      const next = stops[nextIdx]
+      const dist = Math.round(distanceMeters(latitude, longitude, next.latitude, next.longitude))
+      const prev = stops[nextIdx - 1]
+      const segLen = distanceMeters(prev.latitude, prev.longitude, next.latitude, next.longitude)
+      const ratio = segLen > 0 ? Math.max(0, Math.min(1, 1 - dist / segLen)) : 0
+      const percent = Math.round(((nextIdx - 1 + ratio) / (stops.length - 1)) * 100)
+      this.setData({
+        speed: speedKmh,
+        currentStation: prev.stationName,
+        nextStation: next.stationName,
+        nextStationDistance: dist,
+        progressPercent: percent
+      })
+      return
+    }
+
+    // 任务段导航
+    const ti = Math.min(this.data.targetIndex, points.length - 1)
+    const target = points[ti]
+    const dist = Math.round(distanceMeters(latitude, longitude, target.latitude, target.longitude))
+
+    // 纯经停站（无任何取/派/上下客动作）：进半径自动跳过，保证连续行驶
+    if (dist <= ARRIVE_RADIUS_METERS && !(target.actionTotal > 0)) {
+      const next = ti + 1
+      if (next < points.length) {
+        this.applyNavView(next)
+        this.setData({ speed: speedKmh, nextStationDistance: 0 })
+      } else {
+        this.setData({ speed: speedKmh })
+      }
+      return
+    }
+
+    // 距目标 ≤50m → 点亮「到达」按钮
+    if (dist <= ARRIVE_RADIUS_METERS) this.setData({ canArrive: true })
+    else if (this.data.canArrive) this.setData({ canArrive: false })
 
     // 进度：站间按距离线性插值
-    const prev = stops[nextIdx - 1]
-    const segLen = distanceMeters(prev.latitude, prev.longitude, next.latitude, next.longitude)
+    const prev = points[ti - 1] || target
+    const segLen = distanceMeters(prev.latitude, prev.longitude, target.latitude, target.longitude)
     const ratio = segLen > 0 ? Math.max(0, Math.min(1, 1 - dist / segLen)) : 0
-    const percent = Math.round(((nextIdx - 1 + ratio) / (stops.length - 1)) * 100)
+    const percent = Math.round(((ti - 1 + ratio) / (points.length - 1)) * 100)
 
     this.setData({
       speed: speedKmh,
-      currentStation: prev.stationName,
-      nextStation: next.stationName,
+      nextStation: target.stationName,
       nextStationDistance: dist,
       progressPercent: percent
     })
   },
 
   /**
-   * 确认到站 - 调后端记录；终点站自动完成班次
+   * 确认到站 - 调后端记录；终点站自动完成任务段
    */
   async arriveAtStation() {
-    const stops = this.shiftStops || []
-    if (!this.driverId || !this.shiftId || !stops.length || this.submitting) return
-    const nextIdx = Math.min(this.data.currentStopIndex + 1, stops.length - 1)
-    const station = stops[nextIdx]
+    const points = this.navPoints || []
+    const useNav = points.length >= 2
+    if (!this.driverId || !this.shiftId || this.submitting) return
+
+    let stationId
+    let ti
+    if (useNav) {
+      ti = Math.min(this.data.targetIndex, points.length - 1)
+      stationId = points[ti].stationId
+    } else {
+      const stops = this.shiftStops || []
+      if (!stops.length) return
+      ti = Math.min(this.data.currentStopIndex + 1, stops.length - 1)
+      stationId = stops[ti].stationId
+    }
+
     this.submitting = true
     try {
-      await api.driverArrive(this.driverId, this.shiftId, station.stationId)
+      await api.driverArrive(this.driverId, this.shiftId, stationId)
     } catch (e) {
       this.submitting = false
       return
     }
     this.submitting = false
     feedback.tap()
-    const isTerminal = nextIdx === stops.length - 1
+
+    if (useNav && points[ti]) points[ti].reached = true
+
+    const totalLen = useNav ? points.length : (this.shiftStops || []).length
+    const isTerminal = ti === totalLen - 1
     if (isTerminal) {
-      // 班次完成
+      // 任务段/班次完成
       if (this.locationTimer) {
         clearInterval(this.locationTimer)
         this.locationTimer = null
       }
-      this.setData({
-        status: 'idle',
-        currentStopIndex: nextIdx,
-        progressPercent: 100,
-        speed: 0
-      })
-      wx.showToast({ title: '班次已完成', icon: 'success', duration: 2000 })
-      this.loadAll() // 刷新班次与任务
+      this.setData({ status: 'idle', currentStopIndex: ti, progressPercent: 100, speed: 0, canArrive: false })
+      wx.showToast({ title: '本次任务完成', icon: 'success', duration: 2000 })
+      this.loadAll()
       return
     }
     this.setData({
       status: 'stopped',
-      currentStopIndex: nextIdx,
-      currentStation: station.stationName
+      currentStopIndex: ti,
+      currentStation: useNav ? points[ti].stationName : (this.shiftStops || [])[ti].stationName,
+      canArrive: false,
+      markers: useNav ? this.buildNavMarkers(ti) : this.data.markers
     })
+  },
+
+  /** 站内作业完成后推进到下一站（幂等：仅 stopped 态执行，防扫码连点重复推进） */
+  continueToNextStation() {
+    if (this.data.status !== 'stopped') return
+    const points = this.navPoints || []
+    if (points.length >= 2) {
+      const next = this.data.targetIndex + 1
+      if (next >= points.length) {
+        this.setData({ status: 'idle', progressPercent: 100 })
+        wx.showToast({ title: '本次任务完成', icon: 'success', duration: 2000 })
+        this.loadAll()
+        return
+      }
+      this.applyNavView(next)
+      this.setData({ status: 'driving', nextStationDistance: 0 })
+    } else {
+      this.setData({ status: 'driving' })
+    }
+    this.startLocationReport()
+  },
+
+  /** 单段跳转系统地图（可选高德 App 车道级导航）：跳当前目标站 */
+  openAmapNav() {
+    const points = this.navPoints || []
+    const t = points.length >= 2 ? points[Math.min(this.data.targetIndex, points.length - 1)] : null
+    if (!t || t.latitude == null || t.longitude == null) {
+      wx.showToast({ title: '暂无导航目标', icon: 'none' })
+      return
+    }
+    wx.openLocation({ latitude: t.latitude, longitude: t.longitude, name: t.stationName || '任务点', scale: 16 })
   },
 
   /**
@@ -499,11 +771,9 @@ Page({
         wx.showToast({ title: successText, icon: 'success' })
         const pickups = this.data.pendingPickups.filter((p) => p.orderId !== order.orderId)
         this.refreshCargo(pickups)
-        // 装车完成继续行驶
+        // 装车完成继续行驶（连续任务导航：推进到下一站）
         setTimeout(() => {
-          if (this.data.status === 'stopped') {
-            this.setData({ status: 'driving' })
-          }
+          this.continueToNextStation()
         }, 1500)
       },
       fail: () => {
@@ -529,7 +799,7 @@ Page({
    * 跳过装车，继续行驶
    */
   skipLoading() {
-    this.setData({ status: 'driving' })
+    this.continueToNextStation()
     wx.showToast({
       title: '继续行驶',
       icon: 'none'
