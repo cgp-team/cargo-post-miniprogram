@@ -8,7 +8,7 @@
       <text class="driver-text">{{driverName}}</text>
       <text class="driver-plate">{{plateNo}}</text>
       <text class="driver-capacity">货仓 {{cargoLimit}} 件</text>
-      <text class="sim-toggle {{simMode ? 'on' : ''}}" bindtap="toggleSimMode">{{simMode ? '🧪 模拟中' : '模拟模式'}}</text>
+      <text class="location-source {{locationSource === 'SIMULATED' ? 'sim' : ''}}" wx:if="{{locationSource === 'SIMULATED'}}">🧪 模拟运行</text>
     </view>
     <view class="route-label">
       <text class="route-badge">{{routeName || '今日班次'}}</text>

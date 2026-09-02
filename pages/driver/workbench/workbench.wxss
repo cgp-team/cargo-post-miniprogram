@@ -874,18 +874,14 @@
   box-shadow: 0 0 0 6rpx var(--color-gold, #D9A441), 0 12rpx 36rpx var(--color-primary-shadow, rgba(46, 125, 50, 0.2));
 }
 
-/* ============ 模拟模式开关 ============ */
-.sim-toggle {
+/* ============ 位置来源状态标签（只读展示，非控制开关） ============ */
+.location-source {
   margin-left: auto;
   font-size: 22rpx;
   padding: 6rpx 18rpx;
   border-radius: 999rpx;
-  color: rgba(255, 255, 255, 0.8);
-  border: 2rpx solid rgba(255, 255, 255, 0.3);
-}
-.sim-toggle.on {
   color: var(--color-gold, #D9A441);
-  border-color: var(--color-gold, #D9A441);
+  border: 2rpx solid var(--color-gold, #D9A441);
   background: rgba(217, 164, 65, 0.18);
 }
 

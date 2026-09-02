@@ -11,8 +11,8 @@ const nav = require('../../../utils/nav')
 
 /** 位置上报间隔（毫秒） */
 const LOCATION_REPORT_INTERVAL = 10000
-/** 模拟位置轮询间隔（毫秒）：模拟模式下读后端引擎位置 */
-const SIM_POLL_INTERVAL = 3000
+/** 位置监控间隔（毫秒）：统一查询后端 position，自动判断 REAL/SIMULATED */
+const POSITION_MONITOR_INTERVAL = 3000
 /** 到站判定半径（米）：进入该范围提示到站（任务书默认 50m） */
 const ARRIVE_RADIUS_METERS = 50
 
@@ -66,8 +66,8 @@ Page({
     targetIndex: 0,
     canArrive: false,
 
-    // 模拟模式：消费后端模拟运营引擎位置（管理端启动模拟后司机端演示用）
-    simMode: false,
+    // 位置来源：由后端 Driver Position API 自动决定（REAL / SIMULATED / NONE）
+    locationSource: 'NONE',
 
     // 行李舱运力
     cargoCapacity: 0,        // 空余仓位百分比
@@ -420,42 +420,61 @@ Page({
     this.startLocationReport()
   },
 
-  /** 启动位置上报定时器：真实 GPS 或模拟引擎位置驱动进度（模拟模式不调真实 GPS，避免 REAL 顶掉模拟） */
+  /**
+   * 统一位置监控：查询后端 Driver Position API，自动判断位置来源。
+   * - SIMULATED：使用后端模拟引擎坐标，不上报真实 GPS（避免 REAL 顶掉模拟）
+   * - REAL：使用 wx.getLocation 真实 GPS 并上报
+   * - NONE：等待下次轮询
+   */
   startLocationReport() {
     if (this.locationTimer) clearInterval(this.locationTimer)
-    const simMode = this.data.simMode
-    const tick = simMode ? () => this.pollSimPosition() : () => {
-      wx.getLocation({
-        type: 'gcj02',
-        success: (res) => this.onLocation(res),
-        fail: (err) => this.onLocationFail(err)
-      })
-    }
-    tick()
-    this.locationTimer = setInterval(tick, simMode ? SIM_POLL_INTERVAL : LOCATION_REPORT_INTERVAL)
+    this.monitorTick()
+    this.locationTimer = setInterval(() => this.monitorTick(), POSITION_MONITOR_INTERVAL)
   },
 
-  /** 模拟模式：轮询后端模拟引擎位置，驱动连续导航（不上报真实 GPS） */
-  async pollSimPosition() {
+  /** 单次位置监控：查询后端 → 判断来源 → 更新导航 */
+  async monitorTick() {
+    if (!this.driverId) return
     try {
       const pos = await api.getDriverPosition(this.driverId)
-      if (!pos || !pos.simRunning || pos.simLatitude == null || pos.simLongitude == null) {
-        return // 模拟未运行或无位置
+      if (!pos) return
+
+      const source = pos.dataSource || 'NONE'
+      this.setData({ locationSource: source })
+
+      if (source === 'SIMULATED' && pos.simRunning && pos.simLatitude != null && pos.simLongitude != null) {
+        // SIMULATED：使用模拟引擎坐标，不上报真实 GPS
+        this.updateNavByCoord(pos.simLatitude, pos.simLongitude, 0)
+      } else if (source === 'REAL' && pos.latitude != null && pos.longitude != null) {
+        // REAL：使用后端已上报的真实坐标更新导航
+        this.updateNavByCoord(pos.latitude, pos.longitude, 0)
+        // 同时继续上报最新 GPS（保持上报链路活跃）
+        this.reportRealLocation()
+      } else {
+        // NONE 或无有效坐标：尝试用真实 GPS
+        this.reportRealLocation()
       }
-      this.updateNavByCoord(pos.simLatitude, pos.simLongitude, 0)
     } catch (e) {
       // 静默，等待下一轮
     }
   },
 
-  /** 切换模拟模式：切换后重启位置轮询 */
-  toggleSimMode() {
-    const next = !this.data.simMode
-    this.setData({ simMode: next })
-    if (this.data.status === 'driving' || this.data.status === 'stopped') {
-      this.startLocationReport()
-    }
-    wx.showToast({ title: next ? '已开启模拟模式' : '已关闭模拟模式', icon: 'none' })
+  /** 上报真实 GPS（仅 REAL 状态调用） */
+  reportRealLocation() {
+    wx.getLocation({
+      type: 'gcj02',
+      success: (res) => {
+        const speedKmh = Math.round((res.speed || 0) * 3.6)
+        api.reportDriverLocation({
+          driverId: this.driverId,
+          shiftId: this.shiftId,
+          longitude: res.longitude,
+          latitude: res.latitude,
+          speedKmh
+        }).catch(() => {})
+      },
+      fail: () => {} // 权限问题由 onLocationFail 处理
+    })
   },
 
   /** 订阅派单通知：拉模板列表 → wx.requestSubscribeMessage 授权（一次性模板，派单前需再次订阅） */
@@ -502,7 +521,7 @@ Page({
     }
   },
 
-  /** 收到一次真实定位：上报后端 + 驱动导航（任务段导航优先，班次兜底） */
+  /** 收到一次真实定位：上报后端 + 驱动导航（由 monitorTick 中 REAL 分支调用） */
   onLocation(res) {
     const speedKmh = Math.round((res.speed || 0) * 3.6)
     api.reportDriverLocation({
