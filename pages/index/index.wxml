@@ -24,7 +24,7 @@
       <text class="loc-hint-text">定位不可用</text>
     </view>
     <!-- 定位精度较低（accuracy > 100m）：引导用户重新定位，避免"附近公交"按偏差几百米的坐标查询 -->
-    <view wx:else-if="{{locationPoorAccuracy}}" class="loc-hint loc-hint-warn">
+    <view wx:elif="{{locationPoorAccuracy}}" class="loc-hint loc-hint-warn">
       <text class="loc-hint-text" bindtap="relocate" hover-class="hover">
         定位精度较低{{locationAccuracyText ? '（约 ' + locationAccuracyText + '）' : ''}}{{locationVeryPoorAccuracy ? '，区域名可能不准' : ''}}，点此重新定位
       </text>
