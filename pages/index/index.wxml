@@ -24,8 +24,15 @@
       <text class="loc-hint-text">定位不可用</text>
     </view>
     <!-- 定位精度较低（accuracy > 100m）：引导用户重新定位，避免"附近公交"按偏差几百米的坐标查询 -->
-    <view wx:else-if="{{locationPoorAccuracy}}" class="loc-hint" bindtap="relocate" hover-class="hover">
-      <text class="loc-hint-text">定位精度较低{{locationAccuracyText ? '（约 ' + locationAccuracyText + ' 米）' : ''}}，点此重新定位 ›</text>
+    <view wx:else-if="{{locationPoorAccuracy}}" class="loc-hint loc-hint-warn">
+      <text class="loc-hint-text" bindtap="relocate" hover-class="hover">
+        定位精度较低{{locationAccuracyText ? '（约 ' + locationAccuracyText + '）' : ''}}{{locationVeryPoorAccuracy ? '，区域名可能不准' : ''}}，点此重新定位
+      </text>
+      <!-- 手动选点：手机未开"精确位置"/室内/WiFi 定位时误差可达公里级，点一次即可纠正 -->
+      <text class="loc-hint-action" bindtap="manualPickLocation" hover-class="hover">手动选择位置 ›</text>
+    </view>
+    <view wx:elif="{{locationManual}}" class="loc-hint">
+      <text class="loc-hint-text" bindtap="manualPickLocation" hover-class="hover">已手动选择位置，点此可修改 ›</text>
     </view>
     <!-- 天气胶囊：一行浓缩，点击展开完整预报卡 -->
     <view wx:if="{{weather.temp != null}}" class="weather-pill" bindtap="toggleWeather" hover-class="hover">

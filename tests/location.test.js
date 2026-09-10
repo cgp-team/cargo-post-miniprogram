@@ -267,7 +267,72 @@ async function main() {
       []
     )
     assert.ok(['AMAP', 'CACHE', 'DEMO', 'UNKNOWN'].includes(loc.source))
-    console.log('✓ 20 半径自适应 + 统一输出字段（source/level/accuracy/timestamp/district）')
+  console.log('✓ 20 半径自适应 + 统一输出字段（source/level/accuracy/timestamp/district）')
+  }
+
+  // 21: 精度分级/文案（粗定位 >500m、极差 >1000m）
+  {
+    reset()
+    assert.strictEqual(location.isCoarseAccuracy({ accuracy: 300 }), false)
+    assert.strictEqual(location.isCoarseAccuracy({ accuracy: 800 }), true)
+    assert.strictEqual(location.isVeryCoarseAccuracy({ accuracy: 800 }), false)
+    assert.strictEqual(location.isVeryCoarseAccuracy({ accuracy: 3200 }), true)
+    assert.strictEqual(location.accuracyText({ accuracy: 35 }), '35m')
+    assert.strictEqual(location.accuracyText({ accuracy: 3200 }), '3.2km')
+    assert.strictEqual(location.accuracyText({}), '')
+    console.log('✓ 21 粗定位阈值/精度文案')
+  }
+
+  // 22: 粗定位（公里级误差）时沿用最近一次高精度结果，避免"人在南岸区显示渝中区"
+  {
+    reset()
+    global.wx.getLocation = (o) => { o.success && o.success({ latitude: 29.5325, longitude: 106.5765, accuracy: 30 }) }
+    const precise = await location.getCurrentLocation({ force: true })
+    assert.strictEqual(precise.level, 'PRECISE')
+    // 紧接着系统只给出公里级粗定位（未开精确位置/室内/WiFi 定位，坐标偏到渝中区）
+    global.wx.getLocation = (o) => { o.success && o.success({ latitude: 29.5555, longitude: 106.5500, accuracy: 3200 }) }
+    const reused = await location.getCurrentLocation({ force: true })
+    assert.strictEqual(reused.latitude, 29.5325, '应沿用上一次高精度纬度')
+    assert.strictEqual(reused.longitude, 106.5765, '应沿用上一次高精度经度')
+    assert.strictEqual(reused.stale, true)
+    assert.ok(/耐用上一次高精度|沿用上一次高精度/.test(reused.note || ''), '应标注沿用说明')
+    console.log('✓ 22 极差精度沿用上一次高精度定位')
+  }
+
+  // 23: 手动选点（wx.chooseLocation）优先于自动定位，且在有效期内不被覆盖
+  {
+    reset()
+    global.wx.chooseLocation = (o) => {
+      o.success && o.success({ latitude: 29.5325, longitude: 106.5765, name: '重庆邮电大学', address: '南岸区崇文路' })
+    }
+    const picked = await location.chooseLocation()
+    assert.strictEqual(picked.success, true)
+    assert.strictEqual(picked.source, 'MANUAL')
+    assert.strictEqual(picked.manual, true)
+    assert.strictEqual(picked.name, '重庆邮电大学')
+    assert.strictEqual(picked.accuracy, 20)
+    assert.strictEqual(picked.level, 'PRECISE')
+    // 自动定位此时不应覆盖手动结果（也不再调 wx.getLocation）
+    getLocationCalls = 0
+    const auto = await location.getCurrentLocation()
+    assert.strictEqual(auto.source, 'MANUAL')
+    assert.strictEqual(auto.latitude, 29.5325)
+    assert.strictEqual(getLocationCalls, 0, '手动选点有效期内不应再自动定位')
+    // 用户主动"重新定位" → 放弃手动选点，回到真实定位
+    const refreshed = await location.refreshLocation()
+    assert.strictEqual(refreshed.source, 'AMAP')
+    assert.strictEqual(getLocationCalls > 0, true)
+    console.log('✓ 23 手动选点优先 + 强制刷新回到真实定位')
+  }
+
+  // 24: 高德 addressComponent 空数组字段归一（[] 是 truthy，直接 || 会得到空数组）
+  {
+    reset()
+    assert.strictEqual(location.pickText([]), '')
+    assert.strictEqual(location.pickText(['南岸区']), '南岸区')
+    assert.strictEqual(location.pickText('南岸区'), '南岸区')
+    assert.strictEqual(location.pickText(undefined), '')
+    console.log('✓ 24 高德空数组字段归一为字符串')
   }
 
   console.log('\n全部通过 ✅')

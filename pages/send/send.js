@@ -49,6 +49,9 @@ Page({
     // 取货服务方式（后端 ServiceModeEnum.code）：可达性评估结果，随订单一起落库，
     // 后台订单管理/审核页据此显示"最近站点交接 / 上门交接"
     pickupServiceMode: '',
+    // 定位精度提示（粗定位 >500m 时提示手动选点）
+    locCoarse: false,
+    locAccuracyText: '',
     photoPath: '',
     photoUrl: '', // 拍照后上传到服务器拿到的真实 URL
     // 站点（从后端拉取）
@@ -167,17 +170,13 @@ Page({
         originalLatitude: loc.latitude,
         originalLongitude: loc.longitude
       })
-      const res = await api.getReachability(loc.latitude, loc.longitude)
+      // 定位精度提示：粗定位（>500m）时提醒用户手动选点，避免"附近没有站点/距离很远"的错觉
       this.setData({
-        reachability: res || null,
-        // 车辆进不去（校园/步行区）→ NEAREST_STATION 最近站点交接；可直达 → DOOR_PICKUP 上门
-        pickupServiceMode: (res && res.serviceMode) || '',
-        reachLoading: false
+        locCoarse: location.isCoarseAccuracy(loc),
+        locAccuracyText: location.accuracyText(loc)
       })
-      // 可达：直接把最近站点作为取货站；不可达：等用户点「使用推荐站点」确认
-      if (res && res.reachable && res.recommendedStation) {
-        this.applyPickupStation(res.recommendedStation)
-      }
+      // 可达性评估（可达 → 直接就近取货；不可达 → 等用户点「使用推荐站点」确认）
+      await this._evaluateReachability(loc.latitude, loc.longitude)
     } catch (e) {
       this.setData({ reachLoading: false, pickupMode: 'station' })
       wx.showToast({ title: '可达性判断失败，请改用自选站点', icon: 'none' })
@@ -190,6 +189,48 @@ Page({
     if (!res || !res.recommendedStation) return
     this.applyPickupStation(res.recommendedStation)
     wx.showToast({ title: '已使用推荐站点', icon: 'success' })
+  },
+
+  /**
+   * 手动选择位置（定位不准时的纠正）：微信地图选点 → 用选中坐标重新做可达性评估。
+   * 粗定位会让"推荐站点/距离/步行分钟"全部失真，演示前若发现定位偏了，点这里纠正一次即可。
+   */
+  async manualPickLocation() {
+    try {
+      const picked = await location.chooseLocation()
+      if (!picked || !picked.success) return // 用户取消
+      const address = picked.name || picked.address || [picked.city, picked.district].filter(Boolean).join('') || '所选位置'
+      this.setData({
+        pickupMode: 'location',
+        originalAddress: address,
+        originalLatitude: picked.latitude,
+        originalLongitude: picked.longitude,
+        locCoarse: false,
+        locAccuracyText: ''
+      })
+      await this._evaluateReachability(picked.latitude, picked.longitude)
+    } catch (e) {
+      wx.showToast({ title: '选择位置失败，请重试', icon: 'none' })
+    }
+  },
+
+  /** 可达性评估（与 useCurrentLocation 共用） */
+  async _evaluateReachability(latitude, longitude) {
+    this.setData({ reachLoading: true })
+    try {
+      const res = await api.getReachability(latitude, longitude)
+      this.setData({
+        reachability: res || null,
+        pickupServiceMode: (res && res.serviceMode) || '',
+        reachLoading: false
+      })
+      if (res && res.reachable && res.recommendedStation) {
+        this.applyPickupStation(res.recommendedStation)
+      }
+    } catch (e) {
+      this.setData({ reachLoading: false })
+      wx.showToast({ title: '可达性判断失败，请改用自选站点', icon: 'none' })
+    }
   },
 
   /** 切回自选取货站点 */

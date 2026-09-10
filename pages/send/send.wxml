@@ -116,9 +116,18 @@
         <view class="mode-btn {{pickupMode === 'location' ? 'active' : ''}}" bindtap="useCurrentLocation" hover-class="hover">
           <text>使用当前位置</text>
         </view>
+        <!-- 手动选点：手机未开"精确位置"/室内/WiFi 定位时误差可达公里级（显示到隔壁区），点地图纠正 -->
+        <view class="mode-btn" bindtap="manualPickLocation" hover-class="hover">
+          <text>手动选位置</text>
+        </view>
         <view class="mode-btn {{pickupMode === 'station' ? 'active' : ''}}" bindtap="switchToStationMode" hover-class="hover">
           <text>自选取货站点</text>
         </view>
+      </view>
+
+      <view wx:if="{{locCoarse}}" class="reach-card warn">
+        <text class="reach-title">当前定位精度较低（约 {{locAccuracyText}}）</text>
+        <text class="reach-line">位置可能偏差几百米到几公里，建议点「手动选位置」在地图上点准，或开启手机「精确位置」</text>
       </view>
 
       <view wx:if="{{reachLoading}}" class="reach-card">正在判断当前位置能否安排取货…</view>

@@ -61,6 +61,17 @@ const SOURCE_AMAP = 'AMAP'
 const SOURCE_CACHE = 'CACHE'
 const SOURCE_DEMO = 'DEMO'
 const SOURCE_UNKNOWN = 'UNKNOWN'
+/** 手动选点（地图上点选，用户确认过的位置）：定位不准时的纠正手段 */
+const SOURCE_MANUAL = 'MANUAL'
+
+/** 精度差阈值（米）：超过视为"粗略定位"（常见于手机未开精确位置/室内/WiFi 定位），页面要给纠错入口 */
+const COARSE_ACCURACY = 500
+/** 精度极差阈值（米）：误差可能到公里级，若近期有高精度结果则优先沿用 */
+const VERY_COARSE_ACCURACY = 1000
+/** 高精度结果可复用时长（毫秒）：粗定位时沿用该时间窗内的精确结果 */
+const PRECISE_REUSE_TTL = 2 * 60 * 1000
+/** 手动选点有效期（毫秒）：用户手动点选的位置优先于自动定位（2 小时后自动失效） */
+const MANUAL_TTL = 2 * 60 * 60 * 1000
 
 /** 定位精度级别 */
 const LEVEL_PRECISE = 'PRECISE'        // 有经纬度，精度 <= 100m
@@ -72,6 +83,34 @@ const LEVEL_UNKNOWN = 'UNKNOWN'        // 完全没有
 const CACHE_KEY = 'userLocation'
 
 // ==================== 精度分级 ====================
+
+/**
+ * 高德 addressComponent 字段可能是数组（缺字段时为 `[]`），统一取字符串。
+ * 例：`{"city":[],"province":"重庆市","district":"南岸区"}` → city 取 province。
+ */
+function pickText(value) {
+  if (Array.isArray(value)) {
+    const first = value.find((v) => typeof v === 'string' && v)
+    return first || ''
+  }
+  return typeof value === 'string' ? value : ''
+}
+
+/** 精度是否"粗略"（>500m）：页面据此提示"定位精度较低"并给出手动选点入口 */
+function isCoarseAccuracy(loc) {
+  return !!(loc && typeof loc.accuracy === 'number' && loc.accuracy > COARSE_ACCURACY)
+}
+
+/** 精度是否"极差"（>1000m）：可能差到公里级，错误区域名就出现在这里 */
+function isVeryCoarseAccuracy(loc) {
+  return !!(loc && typeof loc.accuracy === 'number' && loc.accuracy > VERY_COARSE_ACCURACY)
+}
+
+/** 精度文案：0.9km / 3.2km，供页面与日志统一展示 */
+function accuracyText(loc) {
+  if (!loc || typeof loc.accuracy !== 'number' || loc.accuracy <= 0) return ''
+  return loc.accuracy >= 1000 ? `${(loc.accuracy / 1000).toFixed(1)}km` : `${Math.round(loc.accuracy)}m`
+}
 
 /** 精度分级：阈值统一在此，页面/组件不要各自写死 */
 function classifyLevel(loc) {
@@ -227,8 +266,10 @@ function amapReverse(latitude, longitude) {
             return
           }
           finish({
-            district: comp.district || comp.township || '',
-            city: comp.city || comp.province || '',
+            // 注意：高德 addressComponent 缺字段时返回的是空数组 []（如 "city":[]），
+            // JS 里 [] 是 truthy，直接 `comp.city || comp.province` 会得到空数组 → 页面显示空白。
+            district: pickText(comp.district) || pickText(comp.township) || '',
+            city: pickText(comp.city) || pickText(comp.province) || '',
             // 高德逆地理返回的完整地址（如「重庆邮电大学」）→ 作为用户原始寄货地址留痕
             address: first.name || ''
           })
@@ -261,6 +302,7 @@ async function locateOnce() {
       loc = second
     }
   }
+  loc = applyPreciseReuse(loc)
   const amap = await amapReverse(loc.latitude, loc.longitude)
   if (amap) {
     return { ...loc, district: amap.district || loc.district, city: amap.city, address: amap.address || '' }
@@ -268,6 +310,42 @@ async function locateOnce() {
   // 高德不可用时退回免费逆地理（只补 district）
   const region = await reverseToDistrict(loc.latitude, loc.longitude)
   return { ...loc, ...(region || {}) }
+}
+
+/** 最近一次高精度定位（内存态）：粗定位时用于沿用，避免"明明前 1 分钟还是准的"被粗定位覆盖 */
+let lastPreciseFix = null
+
+/** 判定是否值得沿用上一次高精度结果：本次极差、上一次精确且足够新 */
+function shouldReusePreciseFix(loc, now) {
+  if (!lastPreciseFix || !isVeryCoarseAccuracy(loc)) return false
+  if (!(typeof lastPreciseFix.accuracy === 'number' && lastPreciseFix.accuracy <= PRECISE_ACCURACY)) return false
+  return now - lastPreciseFix.timestamp <= PRECISE_REUSE_TTL
+}
+
+/**
+ * 粗定位纠正：手机/系统给的是"粗略位置"（未开精确位置、室内、WiFi 定位）时误差可达公里级，
+ * 会出现"人在南岸区、显示渝中区"。此时若最近 2 分钟内有高精度结果，直接沿用（标记 stale + note），
+ * 否则保留本次结果并标记 coarse，由页面提示用户手动选点纠正。
+ */
+function applyPreciseReuse(loc) {
+  const now = Date.now()
+  if (shouldReusePreciseFix(loc, now)) {
+    return {
+      success: true,
+      latitude: lastPreciseFix.latitude,
+      longitude: lastPreciseFix.longitude,
+      accuracy: lastPreciseFix.accuracy,
+      coordType: 'GCJ02',
+      timestamp: now,
+      stale: true,
+      note: '当前定位精度较低，已沿用上一次高精度定位'
+    }
+  }
+  if (loc.success && typeof loc.accuracy === 'number' && loc.accuracy > 0
+      && loc.accuracy <= PRECISE_ACCURACY) {
+    lastPreciseFix = { latitude: loc.latitude, longitude: loc.longitude, accuracy: loc.accuracy, timestamp: now }
+  }
+  return loc
 }
 
 /**
@@ -303,6 +381,12 @@ function movedEnough(prev, next) {
 function logLocation(loc) {
   if (!loc) return
   console.log(`[AMAP_LOCATION] source=${loc.source} latitude=${loc.latitude} longitude=${loc.longitude} accuracy=${loc.accuracy} district=${loc.district || ''} city=${loc.city || ''} level=${loc.level}`)
+  // 精度告警：误差几百米~公里级时，区域名可能落到隔壁区（"人在南岸区显示渝中区"就是这种）
+  if (isCoarseAccuracy(loc)) {
+    console.warn(`[AMAP_LOCATION] 定位精度较低（约 ${accuracyText(loc)}），区域名可能不准确；`
+      + '请在手机「设置→隐私→定位服务→微信」开启"精确位置"，或点"手动选择位置"纠正')
+  }
+  if (loc.note) console.warn(`[AMAP_LOCATION] ${loc.note}`)
 }
 
 /** 通知订阅者：定位发生（实质性）变化 → 页面据此重新查询附近公交 */
@@ -351,6 +435,52 @@ function clearDemoLocation() {
 }
 
 /**
+ * 手动选择位置（定位不准时的纠正手段）：调微信地图选点，返回统一结构（source=MANUAL）。
+ *
+ * 为什么需要：设备/系统给的是"粗略位置"时（未开精确位置、室内、WiFi 定位），误差可达公里级，
+ * 会出现"人在重庆邮电大学、却定位到渝中区"。用户在地图上点一次即可拿到准确 GCJ-02 坐标，
+ * 该位置在 {@link MANUAL_TTL} 内优先于自动定位，之后自动失效；点"重新定位"也会放弃它。
+ *
+ * @returns {Promise<object>} 统一 userLocation；用户取消返回 { success:false, cancelled:true }
+ */
+async function chooseLocation() {
+  const picked = await new Promise((resolve) => {
+    wx.chooseLocation({
+      success: (res) => resolve(res),
+      fail: () => resolve(null)
+    })
+  })
+  if (!picked || typeof picked.latitude !== 'number' || typeof picked.longitude !== 'number') {
+    return { success: false, cancelled: true, source: SOURCE_MANUAL, level: LEVEL_UNKNOWN, timestamp: Date.now() }
+  }
+  // 选点坐标即 GCJ-02（微信地图组件），补一次逆地理拿区县名（失败不影响坐标可用）
+  const amap = await amapReverse(picked.latitude, picked.longitude).catch(() => null)
+  const now = Date.now()
+  const loc = {
+    success: true,
+    latitude: picked.latitude,
+    longitude: picked.longitude,
+    accuracy: 20, // 用户在地图上点选的位置按"精确"处理
+    coordType: 'GCJ02',
+    timestamp: now,
+    source: SOURCE_MANUAL,
+    manual: true,
+    manualUntil: now + MANUAL_TTL,
+    level: LEVEL_PRECISE,
+    // 展示优先用用户点的地点名（如「重庆邮电大学」），其次区县
+    name: picked.name || '',
+    address: picked.address || picked.name || '',
+    district: (amap && amap.district) || '',
+    city: (amap && amap.city) || ''
+  }
+  writeCache(loc)
+  notified = null // 手动选点视为位置变化，强制通知订阅者重新查询
+  notifyListeners(loc)
+  logLocation(loc)
+  return loc
+}
+
+/**
  * 获取当前用户定位（统一入口）。
  *
  * 策略：
@@ -379,6 +509,12 @@ function getCurrentLocation(options) {
 async function doGetLocation(force) {
   const now = Date.now()
   const cache = readCache()
+
+  // -1) 用户手动选点（地图上点选确认）：在有效期内优先于自动定位
+  //     （定位不准时用户手动纠正过，就不该被下一次自动粗定位覆盖）
+  if (!force && cache && cache.manual && cache.manualUntil && now < cache.manualUntil) {
+    return normalize(cache, { source: SOURCE_MANUAL, manual: true })
+  }
 
   // 0) 强制刷新：跳过缓存（用户手动"重新定位"/下拉刷新）
   if (force) {
@@ -489,14 +625,25 @@ module.exports = {
   SOURCE_CACHE,
   SOURCE_DEMO,
   SOURCE_UNKNOWN,
+  SOURCE_MANUAL,
   LEVEL_PRECISE,
   LEVEL_APPROXIMATE,
   LEVEL_DISTRICT,
   LEVEL_UNKNOWN,
+  // 精度阈值与文案（页面统一用它，不要各自写死）
+  COARSE_ACCURACY,
+  VERY_COARSE_ACCURACY,
+  isCoarseAccuracy,
+  isVeryCoarseAccuracy,
+  accuracyText,
+  /** 内部工具（导出以便单测）：高德 addressComponent 数组字段 → 字符串 */
+  pickText,
   classifyLevel,
   nearbyRadius,
   getDeviceLocationGcj02,
   getCurrentLocation,
+  /** 手动选择位置（定位不准时的纠正手段，地图点选） */
+  chooseLocation,
   /** 强制重新定位（跳过缓存），供"定位不准·重新定位"/下拉刷新使用 */
   refreshLocation: () => getCurrentLocation({ force: true }),
   setDemoLocation,
