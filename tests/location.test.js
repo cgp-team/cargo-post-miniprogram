@@ -195,6 +195,49 @@ async function main() {
     console.log('✓ 16 演示名不存在返回 null；DEMO 并发去重')
   }
 
+  // 17: 精度不足（800m）→ 自动补测一次并取更准的结果（定位不准的核心修复）
+  {
+    reset()
+    let call = 0
+    global.wx.getLocation = (o) => {
+      call++
+      o.success && o.success(call === 1
+        ? { latitude: 30.5723, longitude: 104.0657, accuracy: 800 } // 首次：基站粗定位
+        : { latitude: 30.5999, longitude: 104.1001, accuracy: 35 }) // 补测：高精度
+    }
+    const loc = await location.getCurrentLocation()
+    assert.strictEqual(call, 2, '精度不足应补测一次')
+    assert.strictEqual(loc.accuracy, 35, '应取更准的那次定位')
+    assert.strictEqual(loc.latitude, 30.5999)
+    assert.strictEqual(loc.level, 'PRECISE')
+    console.log('✓ 17 精度不足 → 补测一次并取更准结果')
+  }
+
+  // 18: 缓存超过"秒出"阈值（90s）→ 同步重新定位，不用旧坐标查公交
+  {
+    reset()
+    storage.userLocation = {
+      latitude: 1, longitude: 2, accuracy: 30, district: '旧区域',
+      timestamp: Date.now() - 200 * 1000, level: 'PRECISE', source: 'wechat'
+    }
+    const loc = await location.getCurrentLocation()
+    assert.strictEqual(getLocationCalls, 1, '缓存超过 90s 应重新定位')
+    assert.strictEqual(loc.source, 'wechat')
+    assert.strictEqual(loc.latitude, 30.5723)
+    console.log('✓ 18 缓存超过 90s → 同步重新定位（不再用旧坐标）')
+  }
+
+  // 19: refreshLocation（force）跳过缓存，即使缓存很新
+  {
+    reset()
+    await location.getCurrentLocation() // 先写入新缓存
+    assert.strictEqual(getLocationCalls, 1)
+    const loc = await location.refreshLocation()
+    assert.strictEqual(getLocationCalls, 2, '强制刷新应跳过缓存再定位一次')
+    assert.strictEqual(loc.source, 'wechat')
+    console.log('✓ 19 refreshLocation 强制跳过缓存')
+  }
+
   console.log('\n全部通过 ✅')
 }
 

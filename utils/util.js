@@ -10,6 +10,32 @@ function validatePhone(phone) {
 }
 
 /**
+ * 长×宽×高（厘米）→ 体积（立方米），保留 4 位小数（与后端 decimal(12,4) 对齐）。
+ * 任一维非正数/非法 → 返回 0（不猜体积）。
+ */
+function cmSizeToM3(length, width, height) {
+  const l = Number(length)
+  const w = Number(width)
+  const h = Number(height)
+  if (!(l > 0 && w > 0 && h > 0)) return 0
+  return Math.round((l / 100) * (w / 100) * (h / 100) * 10000) / 10000
+}
+
+/**
+ * Haversine 大圆距离（公里）：经纬度均为度，坐标系必须一致（项目统一 GCJ-02）。
+ * 与后端 GeoDistanceUtil.haversineKm 同口径，保证前后端距离一致。
+ */
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const toRad = (d) => (d * Math.PI) / 180
+  const R = 6371.0
+  const dLat = toRad(lat2 - lat1)
+  const dLon = toRad(lon2 - lon1)
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+    + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2)
+  return 2 * R * Math.asin(Math.min(1, Math.sqrt(a)))
+}
+
+/**
  * 格式化时间
  */
 function formatTime(date) {
@@ -49,6 +75,8 @@ function formatBackendTime(t) {
 
 module.exports = {
   validatePhone,
+  cmSizeToM3,
+  haversineKm,
   formatTime,
   formatBackendTime,
   VILLAGES

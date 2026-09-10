@@ -33,6 +33,9 @@
 .tag.status.running {
   background: var(--color-gold);
 }
+.tag.demo {
+  background: var(--color-clay);
+}
 .head-meta {
   display: flex;
   justify-content: space-between;

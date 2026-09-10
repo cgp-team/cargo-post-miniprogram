@@ -30,6 +30,16 @@ const demoLocationUtil = require('./demo-location')
 
 /** 定位缓存有效期：5 分钟（用户位置比天气更需要新鲜；方案建议 5~10 分钟取 5） */
 const LOCATION_CACHE_TTL = 5 * 60 * 1000
+/**
+ * "秒出"缓存新鲜阈值：90 秒。
+ * 超过该时长不再直接用缓存坐标去查附近公交（否则会拿几分钟前的位置算距离，表现为"定位不准"），
+ * 改为同步取一次新定位；定位失败才退回旧缓存（标记 stale）。
+ */
+const CACHE_FRESH_TTL = 90 * 1000
+/** 高精度定位超时（毫秒）：给系统更多时间拿好精度（越大越准，但等待越久） */
+const HIGH_ACCURACY_EXPIRE_MS = 10000
+/** 可接受精度（米）：优于该值视为"够准"，不再补测 */
+const ACCEPTABLE_ACCURACY = 200
 /** 逆地理区域缓存有效期：30 分钟（行政区变化慢，可复用） */
 const DISTRICT_CACHE_TTL = 30 * 60 * 1000
 /** PRECISE 精度阈值（米）：accuracy <= 100m 视为精确 */
@@ -95,15 +105,18 @@ function wechatGetLocation() {
           return
         }
         wx.getLocation({
-          type: 'wgs84',
+          // GCJ-02：与项目站点表（transport_station）、高德、司机端上报同一坐标系，
+          // 用 wgs84 会让"附近距离"整体偏移百米级（见 docs/optimization/realtime-bus.md）
+          type: 'gcj02',
           isHighAccuracy: true,          // 高精度定位
-          highAccuracyExpireTime: 6000,  // 6 秒内未拿到高精度自动回退普通定位
+          highAccuracyExpireTime: HIGH_ACCURACY_EXPIRE_MS, // 10 秒内尽量拿高精度，超时自动回退
           success: (loc) => {
             resolve({
               success: true,
               latitude: loc.latitude,
               longitude: loc.longitude,
               accuracy: typeof loc.accuracy === 'number' ? loc.accuracy : null,
+              coordType: 'GCJ02',
               timestamp: Date.now()
             })
           },
@@ -134,6 +147,66 @@ function reverseToDistrict(lat, lon) {
 
 let pending = null // 并发去重：同一时刻只发一次定位（onLoad + onShow 不会双发）
 let demoLocation = null // DEMO 演示定位（设置了则覆盖真实定位，source=demo）
+/** 定位变化订阅者（首页用它触发"位置变了→重新查附近公交"） */
+const listeners = []
+
+/** 订阅定位变化，返回取消订阅函数 */
+function onLocationChange(handler) {
+  if (typeof handler !== 'function') return () => {}
+  listeners.push(handler)
+  return () => {
+    const idx = listeners.indexOf(handler)
+    if (idx >= 0) listeners.splice(idx, 1)
+  }
+}
+
+/**
+ * 取一次"尽可能准"的定位：
+ * 1. 先按高精度取一次；
+ * 2. 精度不够（无 accuracy 或 > {@link ACCEPTABLE_ACCURACY}）时再取一次，取两次里更准的那次。
+ * 目的：微信首次定位常返回几百米误差（基站/WiFi 定位），补测一次通常能显著收敛。
+ */
+async function locateOnce() {
+  const first = await wechatGetLocation()
+  if (!first.success) return first
+  if (typeof first.accuracy === 'number' && first.accuracy > 0 && first.accuracy <= ACCEPTABLE_ACCURACY) {
+    return first
+  }
+  const second = await wechatGetLocation()
+  if (second.success && typeof second.accuracy === 'number'
+      && (typeof first.accuracy !== 'number' || second.accuracy < first.accuracy)) {
+    return second
+  }
+  return first
+}
+
+/** 坐标是否发生实质变化（>100m，约 0.001 度），避免 GPS 抖动触发重复请求 */
+function movedEnough(prev, next) {
+  if (!prev || typeof prev.latitude !== 'number' || typeof prev.longitude !== 'number') return true
+  return Math.abs(prev.latitude - next.latitude) > 0.001 || Math.abs(prev.longitude - next.longitude) > 0.001
+}
+
+/** 定位日志（排障用；只打坐标/精度/来源/区域，不含用户身份信息） */
+function logLocation(loc) {
+  if (!loc) return
+  console.log(`[Location] latitude=${loc.latitude} longitude=${loc.longitude} accuracy=${loc.accuracy} source=${loc.source} district=${loc.district || ''} level=${loc.level}`)
+}
+
+/** 通知订阅者：定位发生（实质性）变化 → 页面据此重新查询附近公交 */
+function notifyListeners(loc) {
+  if (!movedEnough(notified, loc)) return
+  notified = loc
+  listeners.forEach((handler) => {
+    try {
+      handler(loc)
+    } catch (e) {
+      console.warn('[Location] 定位变化回调失败', e)
+    }
+  })
+}
+
+/** 最近一次已通知的定位（防抖） */
+let notified = null
 
 /**
  * 设置演示定位（DEMO 模式）：用预设站点坐标替代真实 GPS，供开发/测试验证"附近公交"。
@@ -151,8 +224,10 @@ function setDemoLocation(name) {
     district: demo.district,
     timestamp: Date.now(),
     source: 'demo',
+    coordType: 'GCJ02',
     level: LEVEL_PRECISE
   }
+  notified = demoLocation
   return demoLocation
 }
 
@@ -173,27 +248,47 @@ function clearDemoLocation() {
  *
  * @returns {Promise<object>} userLocation（含 level）
  */
-function getCurrentLocation() {
+function getCurrentLocation(options) {
+  const force = !!(options && options.force)
   if (demoLocation) return Promise.resolve(demoLocation)
   if (pending) return pending // 并发去重
-  pending = doGetLocation().finally(() => {
+  pending = doGetLocation(force).then((loc) => {
+    logLocation(loc)
+    notifyListeners(loc)
+    return loc
+  }).finally(() => {
     pending = null
   })
   return pending
 }
 
-async function doGetLocation() {
+async function doGetLocation(force) {
   const now = Date.now()
   const cache = readCache()
 
-  // 1) 较新缓存：直接返回（秒出），后台异步刷新（失败保留旧缓存）
-  if (cache && cache.timestamp && now - cache.timestamp < LOCATION_CACHE_TTL) {
+  // 0) 强制刷新：跳过缓存（用户手动"重新定位"/下拉刷新）
+  if (force) {
+    const forced = await locateOnce()
+    if (forced.denied) return withDenied(cache, now)
+    if (forced.success) {
+      const region = await reverseToDistrict(forced.latitude, forced.longitude)
+      const result = { ...forced, source: 'wechat', ...(region || {}), level: classifyLevel(forced) }
+      writeCache(result)
+      return result
+    }
+    // 强制刷新失败：旧缓存兜底
+    if (cache) return normalize(cache, { source: 'stale-cache', stale: true })
+    return { success: false, level: LEVEL_UNKNOWN, source: 'unknown', timestamp: now }
+  }
+
+  // 1) 90 秒内缓存：直接返回（秒出），后台异步刷新（刷新到更准位置时会通知页面重查公交）
+  if (cache && cache.timestamp && now - cache.timestamp < CACHE_FRESH_TTL) {
     refreshInBackground()
     return normalize(cache, { source: 'cache' })
   }
 
-  // 2) 微信原生定位
-  const loc = await wechatGetLocation()
+  // 2) 缓存过期/不存在：同步取新定位（不再拿几分钟前的坐标查附近公交）
+  const loc = await locateOnce()
   if (loc.denied) {
     return withDenied(cache, now)
   }
@@ -217,13 +312,15 @@ async function doGetLocation() {
   return { success: false, level: LEVEL_UNKNOWN, source: 'unknown', timestamp: now }
 }
 
-/** 后台异步刷新：命中缓存后补发一次真实定位，成功才覆盖缓存（失败/拒绝保留旧缓存） */
+/** 后台异步刷新：命中缓存后补发一次真实定位（择优），成功才覆盖缓存（失败/拒绝保留旧缓存） */
 function refreshInBackground() {
-  wechatGetLocation().then((loc) => {
+  locateOnce().then((loc) => {
     if (!loc.success) return
     return reverseToDistrict(loc.latitude, loc.longitude).then((region) => {
       const fresh = { ...loc, source: 'wechat', ...(region || {}), level: classifyLevel(loc) }
       writeCache(fresh)
+      logLocation(fresh)
+      notifyListeners(fresh)
     })
   }).catch(() => {})
 }
@@ -263,6 +360,9 @@ function openLocationSetting() {
 
 module.exports = {
   LOCATION_CACHE_TTL,
+  CACHE_FRESH_TTL,
+  HIGH_ACCURACY_EXPIRE_MS,
+  ACCEPTABLE_ACCURACY,
   DISTRICT_CACHE_TTL,
   PRECISE_ACCURACY,
   LEVEL_PRECISE,
@@ -271,7 +371,10 @@ module.exports = {
   LEVEL_UNKNOWN,
   classifyLevel,
   getCurrentLocation,
+  /** 强制重新定位（跳过缓存），供"定位不准·重新定位"/下拉刷新使用 */
+  refreshLocation: () => getCurrentLocation({ force: true }),
   setDemoLocation,
   clearDemoLocation,
+  onLocationChange,
   openLocationSetting
 }

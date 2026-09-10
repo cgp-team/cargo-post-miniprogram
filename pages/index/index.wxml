@@ -4,8 +4,8 @@
   <view class="top-bar" style="padding-top: {{statusBarHeight + 16}}px">
     <view class="top-row">
       <view class="top-left">
-        <view class="location-info" bindtap="switchVillage" hover-class="hover">
-          <text class="village-name">{{currentVillage}}</text>
+      <view class="location-info" bindtap="switchVillage" hover-class="hover">
+        <text class="village-name">{{currentVillage || (locationUnavailable ? '定位不可用' : '当前位置')}}</text>
           <text class="arrow-down">▾</text>
           <text class="top-badge">县城⇄乡村</text>
         </view>
@@ -22,6 +22,10 @@
     </view>
     <view wx:elif="{{locationUnavailable}}" class="loc-hint">
       <text class="loc-hint-text">定位不可用</text>
+    </view>
+    <!-- 定位精度较低（accuracy > 100m）：引导用户重新定位，避免"附近公交"按偏差几百米的坐标查询 -->
+    <view wx:else-if="{{locationPoorAccuracy}}" class="loc-hint" bindtap="relocate" hover-class="hover">
+      <text class="loc-hint-text">定位精度较低{{locationAccuracyText ? '（约 ' + locationAccuracyText + ' 米）' : ''}}，点此重新定位 ›</text>
     </view>
     <!-- 天气胶囊：一行浓缩，点击展开完整预报卡 -->
     <view wx:if="{{weather.temp != null}}" class="weather-pill" bindtap="toggleWeather" hover-class="hover">
@@ -132,12 +136,22 @@
 
     <!-- 空数据：有附近站点/线路但无运营车辆 = 不在运营时间，仍展示站点与线路说明 -->
     <view wx:elif="{{nearbyBusStatus === 'empty'}}" class="bus-empty">
-      <block wx:if="{{nearbyStations.length}}">
-        <text class="bus-empty-title">{{currentVillage}}暂无运营公交</text>
-        <view class="bus-line-chip" wx:for="{{nearbyLines}}" wx:key="routeName">{{item.routeName}}（{{item.startStation}} → {{item.endStation}}）</view>
-        <text class="bus-empty-text">当前不在运营时间，请关注后续班次</text>
+      <!-- 附近有线路（现实公交或项目自建）但暂无实时车辆：不能说"附近没有公交" -->
+      <block wx:if="{{nearbyLineCount}}">
+        <text class="bus-empty-title">附近有 {{nearbyLineCount}} 条公交线路</text>
+        <view class="bus-line-chip" wx:for="{{nearbyLines}}" wx:key="routeName">
+          {{item.routeName}}<text wx:if="{{item.dataSource === 'REAL_TRANSIT'}}"> · 现实公交</text><text wx:elif="{{item.dataSource === 'PROJECT_TRANSIT'}}"> · 项目线路</text>
+        </view>
+        <text class="bus-empty-text">当前暂无实时车辆数据</text>
       </block>
-      <text wx:else class="bus-empty-text">附近暂无实时公交</text>
+      <block wx:elif="{{nearbyStations.length}}">
+        <text class="bus-empty-title">附近有 {{nearbyStations.length}} 个公交站点</text>
+        <view class="bus-line-chip" wx:for="{{nearbyStations}}" wx:key="name">
+          {{item.name}}<text wx:if="{{item.distanceKm != null}}"> · {{item.distanceKm}}km</text><text wx:if="{{item.dataSource === 'REAL_TRANSIT'}}"> · 现实公交</text>
+        </view>
+        <text class="bus-empty-text">当前暂无实时车辆数据</text>
+      </block>
+      <text wx:else class="bus-empty-text">附近暂无公交线路</text>
     </view>
 
     <!-- 接口失败 -->
@@ -179,7 +193,7 @@
         </view>
         <view class="ticket-card__stub">
           <text class="ticket-card__stub-value {{item.etaMinutes != null ? 'stub-eta' : ''}}" style="white-space:normal;">{{item.etaText}}</text>
-          <text class="ticket-card__stub-label">到站</text>
+          <text class="ticket-card__stub-label">{{item.etaLabel || '到站'}}</text>
         </view>
       </view>
     </view>
