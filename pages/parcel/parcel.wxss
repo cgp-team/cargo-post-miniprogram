@@ -172,6 +172,27 @@
   font-weight: 600;
 }
 
+/* 物体信息标签（类型/件数/体积/生鲜），寄货页填写后在此回显 */
+.parcel-cargo-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-bottom: 14rpx;
+}
+
+.cargo-chip {
+  padding: 6rpx 16rpx;
+  border-radius: 999rpx;
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  font-size: 22rpx;
+}
+
+.cargo-chip-fresh {
+  background: #F8ECE3;
+  color: var(--color-clay);
+}
+
 /* 列表项取件码：默认打码降层级，点「查看」展开明文 */
 .parcel-code-row {
   display: flex;
@@ -363,6 +384,53 @@
   gap: 8rpx;
   color: var(--color-primary);
   font-size: 26rpx;
+}
+
+/* 车快到了：高亮提醒条（≤10 分钟），演示时一眼可见 */
+.parcel-service-point {
+  margin-top: 12rpx;
+  padding: 14rpx 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  border-radius: 14rpx;
+  background: #F8ECE3;
+}
+
+.service-point-text {
+  flex: 1;
+  font-size: 25rpx;
+  color: var(--color-clay);
+  font-weight: 600;
+}
+
+.service-point-nav {
+  padding: 8rpx 20rpx;
+  border-radius: 999rpx;
+  background: var(--color-clay);
+  color: #fff;
+  font-size: 23rpx;
+  font-weight: 600;
+}
+
+.parcel-approach {
+  margin-top: 12rpx;
+  padding: 16rpx 20rpx;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  border-radius: 14rpx;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 26rpx;
+  font-weight: 600;
+  box-shadow: 0 4rpx 12rpx var(--color-primary-shadow);
+}
+
+.parcel-approach-text {
+  color: #fff;
+  flex: 1;
 }
 .carrier-link {
   color: var(--color-primary);

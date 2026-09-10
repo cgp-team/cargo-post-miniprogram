@@ -92,12 +92,48 @@ Page({
     wx.navigateTo({ url: '/pages/bus/index' })
   },
 
-  /** 车来取货/送货提醒文案：承运车辆实时位置 → 距目标站点分钟（无实时位置返回空） */
+  /** 车来取货/送货提醒文案：承运车辆位置（真实上报或模拟演示）→ 距目标站点分钟（无位置返回空） */
   buildCarrierText(o) {
     if (!o || o.carrierEtaMinutes == null || o.carrierEtaMinutes <= 0) return ''
     const station = o.targetStation || '站点'
     const dist = o.carrierDistanceKm != null ? `（约 ${o.carrierDistanceKm} km）` : ''
-    return `${o.vehiclePlate || '班车'} 距${station}约 ${o.carrierEtaMinutes} 分钟${dist}`
+    const source = o.carrierLocationSource === 'SIMULATED' ? ' · 模拟演示' : ''
+    return `${o.vehiclePlate || '班车'} 距${station}约 ${o.carrierEtaMinutes} 分钟${dist}${source}`
+  },
+
+  /** 车辆接近提醒：批量检查"车快到了"的订单，首次进入阈值时弹一次 toast（不重复打扰） */
+  notifyApproaching(list) {
+    const shown = this._approachingShown || (this._approachingShown = {})
+    const arriving = (list || []).filter((o) => o && o.carrierApproaching)
+    if (!arriving.length) return
+    const fresh = arriving.filter((o) => !shown[o.orderNo])
+    if (!fresh.length) return
+    fresh.forEach((o) => { shown[o.orderNo] = true })
+    const first = fresh[0]
+    const more = fresh.length > 1 ? `（另有 ${fresh.length - 1} 单）` : ''
+    const simulated = first.carrierLocationSource === 'SIMULATED' ? '（模拟演示）' : ''
+    wx.showToast({
+      title: `${first.vehiclePlate || '班车'} 快到了：距${first.targetStation || '站点'}约 ${first.carrierEtaMinutes} 分钟${simulated}${more}`,
+      icon: 'none',
+      duration: 3500
+    })
+  },
+
+  /** 需客户送站（status=7 待客户操作）：显示后端匹配的"就近交接站点 + 距取货点公里数" */
+  buildServicePointText(o) {
+    if (!o || o.status !== 7 || !o.servicePointStationName) return ''
+    const km = o.servicePointDistanceKm
+    return `请送往就近站点：${o.servicePointStationName}${km != null ? `（距取货点约 ${km} km）` : ''}`
+  },
+
+  /** 导航到就近交接站点（用后端返回的站点坐标调 wx.openLocation） */
+  openServicePoint(e) {
+    const { lat, lng, name } = e.currentTarget.dataset
+    if (typeof lat !== 'number' || typeof lng !== 'number') {
+      wx.showToast({ title: '站点暂无坐标', icon: 'none' })
+      return
+    }
+    wx.openLocation({ latitude: lat, longitude: lng, name: name || '交接站点', scale: 16 })
   },
 
   onPullDownRefresh() {
@@ -143,7 +179,14 @@ Page({
       res.etaText = this.buildEtaText(res)
       // 承运审核拒运提示（reviewStatus=4 审核不通过 + 原因）
       res.reviewNotice = this.buildReviewNotice(res)
-      this.setData({ trackResult: res, noResult: false }, () => this.drawParcelQr())
+      // 车来取货/送货提醒（单号查询同样生效，演示时可直接查单看到倒计时）
+      res.carrierText = this.buildCarrierText(res)
+      res.approaching = !!res.carrierApproaching
+      res.servicePointText = this.buildServicePointText(res)
+      this.setData({ trackResult: res, noResult: false }, () => {
+        this.notifyApproaching([res])
+        this.drawParcelQr()
+      })
     } catch (e) {
       wx.hideLoading()
       this.setData({ trackResult: null, noResult: true })
@@ -226,10 +269,14 @@ Page({
         statusClass: this.statusClass(o.status),
         showCode: false,
         createTimeText: formatBackendTime(o.createTime),
-        carrierText: this.buildCarrierText(o)
+        carrierText: this.buildCarrierText(o),
+        approaching: !!o.carrierApproaching,
+        servicePointText: this.buildServicePointText(o)
       }))
       const merged = this.data.pageNo === 1 ? list : this.data.sendList.concat(list)
       const total = res.total || 0
+      // 车快到了：首次进入阈值弹一次提醒（演示时最直观；重复刷新不打扰）
+      this.notifyApproaching(list)
       this.setData({
         sendList: merged,
         total,

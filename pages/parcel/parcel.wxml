@@ -92,8 +92,19 @@
         <view class="route-weight"><icon name="bus" size="26" color="#6B675C" /><text>重量 {{item.goodsWeight}}kg</text></view>
         <text class="parcel-eta">{{item.createTimeText}}</text>
       </view>
+      <!-- 物体信息（寄货页填写）：类型 / 件数 / 体积 / 生鲜 -->
+      <view wx:if="{{item.cargoCategory || item.itemCount}}" class="parcel-cargo-row">
+        <text class="cargo-chip">{{item.cargoCategory || '农产品'}}</text>
+        <text class="cargo-chip">{{item.itemCount || 1}} 件</text>
+        <text wx:if="{{item.volumeM3}}" class="cargo-chip">{{item.volumeM3}} m³</text>
+        <text wx:if="{{item.freshFlag}}" class="cargo-chip cargo-chip-fresh">生鲜冷链</text>
+      </view>
       <!-- 车来取货/送货提醒：承运车辆实时位置 → 距目标站点分钟 -->
-      <view wx:if="{{item.carrierText}}" class="parcel-carrier-list" bindtap="goToBusTracking" hover-class="hover">
+      <view wx:if="{{item.approaching}}" class="parcel-approach" bindtap="goToBusTracking" hover-class="hover">
+        <icon name="bus" size="30" color="#FFFFFF" />
+        <text class="parcel-approach-text">车快到了 {{item.carrierEtaMinutes}} 分钟 · {{item.vehiclePlate || '班车'}} 距{{item.targetStation || '站点'}}{{item.carrierLocationSource === 'SIMULATED' ? '（模拟演示）' : ''}}</text>
+      </view>
+      <view wx:elif="{{item.carrierText}}" class="parcel-carrier-list" bindtap="goToBusTracking" hover-class="hover">
         <icon name="bus" size="26" color="{{iconColor}}" />
         <text>{{item.carrierText}}</text>
       </view>
@@ -110,6 +121,15 @@
         <text class="parcel-code-toggle" data-index="{{index}}" bindtap="toggleCode" hover-class="hover">{{item.showCode ? '收起' : '查看'}}</text>
       </view>
       <!-- 待客户操作：确认已送站 → 待入池 -->
+      <view wx:if="{{item.status === 7 && item.servicePointText}}" class="parcel-service-point">
+        <text class="service-point-text">{{item.servicePointText}}</text>
+        <text
+          wx:if="{{item.servicePointLatitude && item.servicePointLongitude}}"
+          class="service-point-nav"
+          data-lat="{{item.servicePointLatitude}}" data-lng="{{item.servicePointLongitude}}" data-name="{{item.servicePointStationName}}"
+          bindtap="openServicePoint" hover-class="hover"
+        >导航前往</text>
+      </view>
       <button wx:if="{{item.status === 7}}" class="btn-station-confirm" data-id="{{item.id}}" bindtap="confirmStationAction" hover-class="hover">我已送到指定站点，确认入池</button>
     </view>
 
@@ -144,6 +164,15 @@
       <view wx:elif="{{trackResult.auditStatus === 2}}" class="parcel-audit fail"><icon name="info" size="28" color="#C0392B" /><text>审核未通过：{{trackResult.rejectReason || '货物不符合运输要求'}}</text></view>
 
       <!-- 待客户操作：确认已送站 → 待入池 -->
+      <view wx:if="{{trackResult.status === 7 && trackResult.servicePointText}}" class="parcel-service-point">
+        <text class="service-point-text">{{trackResult.servicePointText}}</text>
+        <text
+          wx:if="{{trackResult.servicePointLatitude && trackResult.servicePointLongitude}}"
+          class="service-point-nav"
+          data-lat="{{trackResult.servicePointLatitude}}" data-lng="{{trackResult.servicePointLongitude}}" data-name="{{trackResult.servicePointStationName}}"
+          bindtap="openServicePoint" hover-class="hover"
+        >导航前往</text>
+      </view>
       <button wx:if="{{trackResult.status === 7}}" class="btn-station-confirm" data-id="{{trackResult.id}}" bindtap="confirmStationAction" hover-class="hover">我已送到指定站点，确认入池</button>
 
       <!-- 承运班次与到达预估（已分配/已发车时由后端返回） -->

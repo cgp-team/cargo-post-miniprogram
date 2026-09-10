@@ -33,6 +33,73 @@
     </view>
 
     <view class="form-group">
+      <text class="form-label">货物类型 *</text>
+      <picker mode="selector" range="{{categoryOptions}}" value="{{categoryIndex}}" bindchange="onCategoryChange">
+        <view class="picker-value">
+          <text>{{cargoCategory}}</text>
+          <text class="picker-arrow">▾</text>
+        </view>
+      </picker>
+    </view>
+
+    <view class="form-group">
+      <text class="form-label">货物件数 *</text>
+      <view class="weight-row">
+        <input
+          class="form-input flex-1"
+          type="number"
+          placeholder="如：2"
+          value="{{itemCount}}"
+          bindinput="onItemCountInput"
+        />
+        <text class="weight-unit">件</text>
+      </view>
+    </view>
+
+    <view class="form-group">
+      <text class="form-label">货物体积 *</text>
+      <view class="size-row">
+        <input
+          class="form-input size-input"
+          type="digit"
+          placeholder="长cm"
+          value="{{sizeLength}}"
+          data-field="sizeLength"
+          bindinput="onSizeInput"
+        />
+        <text class="size-x">×</text>
+        <input
+          class="form-input size-input"
+          type="digit"
+          placeholder="宽cm"
+          value="{{sizeWidth}}"
+          data-field="sizeWidth"
+          bindinput="onSizeInput"
+        />
+        <text class="size-x">×</text>
+        <input
+          class="form-input size-input"
+          type="digit"
+          placeholder="高cm"
+          value="{{sizeHeight}}"
+          data-field="sizeHeight"
+          bindinput="onSizeInput"
+        />
+      </view>
+      <text class="form-hint">体积约 {{volumeText}} m³（按长×宽×高，单位厘米换算）</text>
+    </view>
+
+    <view class="form-group">
+      <view class="switch-row">
+        <view class="switch-text">
+          <text class="form-label">生鲜 / 需冷链</text>
+          <text class="form-hint">勾选后承运方需人工确认运输条件</text>
+        </view>
+        <switch checked="{{freshFlag}}" color="{{iconColor}}" bindchange="onFreshChange" />
+      </view>
+    </view>
+
+    <view class="form-group">
       <text class="form-label">备注（选填）</text>
       <textarea
         class="form-textarea"
@@ -119,6 +186,22 @@
         <text class="info-label">重量</text>
         <text class="info-value">{{goodsWeight}} 斤</text>
       </view>
+      <view class="info-row">
+        <text class="info-label">类型</text>
+        <text class="info-value">{{cargoCategory}}</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">件数</text>
+        <text class="info-value">{{itemCount}} 件</text>
+      </view>
+      <view class="info-row">
+        <text class="info-label">体积</text>
+        <text class="info-value">{{sizeLength}}×{{sizeWidth}}×{{sizeHeight}} cm（{{volumeText}} m³）</text>
+      </view>
+      <view wx:if="{{freshFlag}}" class="info-row">
+        <text class="info-label">生鲜</text>
+        <text class="info-value">需冷链，承运方确认</text>
+      </view>
       <view wx:if="{{goodsNote}}" class="info-row">
         <text class="info-label">备注</text>
         <text class="info-value">{{goodsNote}}</text>
@@ -182,6 +265,11 @@
       </view>
       <text wx:if="{{reviewReasonText}}" class="review-reason">原因：{{reviewReasonText}}</text>
       <text class="review-hint">{{reviewHint}}</text>
+      <!-- 需客户送站：显示就近交接站点 + 导航（后端按取货站点最近的可用站点匹配） -->
+      <view wx:if="{{reviewMode === 'conditional' && servicePointStationName}}" class="review-station">
+        <text class="review-station-name">交接站点：{{servicePointStationName}}<text wx:if="{{servicePointDistanceKm != null}}">（距取货点约 {{servicePointDistanceKm}} km）</text></text>
+        <view class="review-station-btn" bindtap="openServicePoint" hover-class="hover">导航前往</view>
+      </view>
     </view>
 
     <view class="match-bus-card">
