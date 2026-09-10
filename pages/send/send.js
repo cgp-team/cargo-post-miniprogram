@@ -46,6 +46,9 @@ Page({
     originalAddress: '',
     originalLatitude: null,
     originalLongitude: null,
+    // 取货服务方式（后端 ServiceModeEnum.code）：可达性评估结果，随订单一起落库，
+    // 后台订单管理/审核页据此显示"最近站点交接 / 上门交接"
+    pickupServiceMode: '',
     photoPath: '',
     photoUrl: '', // 拍照后上传到服务器拿到的真实 URL
     // 站点（从后端拉取）
@@ -165,7 +168,12 @@ Page({
         originalLongitude: loc.longitude
       })
       const res = await api.getReachability(loc.latitude, loc.longitude)
-      this.setData({ reachability: res || null, reachLoading: false })
+      this.setData({
+        reachability: res || null,
+        // 车辆进不去（校园/步行区）→ NEAREST_STATION 最近站点交接；可直达 → DOOR_PICKUP 上门
+        pickupServiceMode: (res && res.serviceMode) || '',
+        reachLoading: false
+      })
       // 可达：直接把最近站点作为取货站；不可达：等用户点「使用推荐站点」确认
       if (res && res.reachable && res.recommendedStation) {
         this.applyPickupStation(res.recommendedStation)
@@ -186,7 +194,7 @@ Page({
 
   /** 切回自选取货站点 */
   switchToStationMode() {
-    this.setData({ pickupMode: 'station', reachability: null })
+    this.setData({ pickupMode: 'station', reachability: null, pickupServiceMode: '' })
   },
 
   /** 把推荐站点写入取货站点（与手动选择共用同一字段，提交口径一致） */
@@ -363,6 +371,8 @@ Page({
         originalAddress: this.data.originalAddress || '',
         originalLatitude: this.data.originalLatitude,
         originalLongitude: this.data.originalLongitude,
+        // 取货方式随单落库，后台可核对"用户在校内 → 最近站点交接"
+        pickupServiceMode: this.data.pickupServiceMode || '',
         goodsNote: this.data.goodsNote.trim(),
         photoUrl,
         receiverName: this.data.receiverName.trim(),
@@ -482,6 +492,7 @@ Page({
       originalAddress: '',
       originalLatitude: null,
       originalLongitude: null,
+      pickupServiceMode: '',
       photoPath: '',
       photoUrl: '',
       pickupStationId: null,

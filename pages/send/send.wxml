@@ -326,7 +326,7 @@
     <view wx:if="{{pickupMode === 'location' || originalAddress}}" class="pickup-summary">
       <view class="info-row">
         <text class="info-label">取货方式</text>
-        <text class="info-value">{{pickupMode === 'location' ? '就近站点交接' : '自选取货站点'}}</text>
+        <text class="info-value">{{pickupServiceMode === 'DOOR_PICKUP' ? '车辆上门交接' : (pickupMode === 'location' ? '就近站点交接' : '自选取货站点')}}</text>
       </view>
       <view wx:if="{{pickupStationName}}" class="info-row">
         <text class="info-label">取货站点</text>
