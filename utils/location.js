@@ -228,7 +228,9 @@ function amapReverse(latitude, longitude) {
           }
           finish({
             district: comp.district || comp.township || '',
-            city: comp.city || comp.province || ''
+            city: comp.city || comp.province || '',
+            // 高德逆地理返回的完整地址（如「重庆邮电大学」）→ 作为用户原始寄货地址留痕
+            address: first.name || ''
           })
         },
         fail: () => {
@@ -261,7 +263,7 @@ async function locateOnce() {
   }
   const amap = await amapReverse(loc.latitude, loc.longitude)
   if (amap) {
-    return { ...loc, district: amap.district || loc.district, city: amap.city }
+    return { ...loc, district: amap.district || loc.district, city: amap.city, address: amap.address || '' }
   }
   // 高德不可用时退回免费逆地理（只补 district）
   const region = await reverseToDistrict(loc.latitude, loc.longitude)

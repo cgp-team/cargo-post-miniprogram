@@ -111,6 +111,28 @@
     </view>
 
     <view class="form-group">
+      <text class="form-label">取货方式 *</text>
+      <view class="pickup-mode-row">
+        <view class="mode-btn {{pickupMode === 'location' ? 'active' : ''}}" bindtap="useCurrentLocation" hover-class="hover">
+          <text>使用当前位置</text>
+        </view>
+        <view class="mode-btn {{pickupMode === 'station' ? 'active' : ''}}" bindtap="switchToStationMode" hover-class="hover">
+          <text>自选取货站点</text>
+        </view>
+      </view>
+
+      <view wx:if="{{reachLoading}}" class="reach-card">正在判断当前位置能否安排取货…</view>
+      <view wx:elif="{{reachability}}" class="reach-card {{reachability.reachable ? 'ok' : 'warn'}}">
+        <text class="reach-title">{{reachability.reachable ? '当前位置可由车辆就近服务' : '当前位置车辆无法直接进入'}}</text>
+        <text wx:if="{{reachability.recommendedStation}}" class="reach-line">推荐服务站点：{{reachability.recommendedStation.name}}</text>
+        <text wx:if="{{reachability.distanceKm != null}}" class="reach-line">距离约 {{reachability.distanceKm}} km · 步行约 {{reachability.walkMinutes}} 分钟{{reachability.distanceProvider === 'HAVERSINE' ? '（路线估算）' : ''}}</text>
+        <text class="reach-line reach-reason">{{reachability.message}}</text>
+        <view wx:if="{{!reachability.reachable && reachability.recommendedStation}}" class="reach-btn" bindtap="useRecommendedStation" hover-class="hover">使用推荐站点</view>
+      </view>
+      <text wx:if="{{originalAddress}}" class="form-hint">原始地址：{{originalAddress}}</text>
+    </view>
+
+    <view class="form-group">
       <text class="form-label">取货站点 *</text>
       <station-picker
         title="选择取货站点"
@@ -202,6 +224,14 @@
         <text class="info-label">生鲜</text>
         <text class="info-value">需冷链，承运方确认</text>
       </view>
+      <view wx:if="{{pickupMode === 'location'}}" class="info-row">
+        <text class="info-label">取货方式</text>
+        <text class="info-value">就近站点{{reachability && !reachability.reachable ? '（送站交接）' : ''}}</text>
+      </view>
+      <view wx:if="{{pickupMode === 'location' && reachability && reachability.distanceKm != null}}" class="info-row">
+        <text class="info-label">距离/步行</text>
+        <text class="info-value">{{reachability.distanceKm}} km · 约 {{reachability.walkMinutes}} 分钟</text>
+      </view>
       <view wx:if="{{goodsNote}}" class="info-row">
         <text class="info-label">备注</text>
         <text class="info-value">{{goodsNote}}</text>
@@ -290,6 +320,27 @@
 
     <view class="step-actions">
       <button class="btn-primary" bindtap="goHome">我知道了，返回首页</button>
+    </view>
+
+    <!-- 取货方式与原始地址（答辩演示重点：位置 ≠ 车辆能到的地方） -->
+    <view wx:if="{{pickupMode === 'location' || originalAddress}}" class="pickup-summary">
+      <view class="info-row">
+        <text class="info-label">取货方式</text>
+        <text class="info-value">{{pickupMode === 'location' ? '就近站点交接' : '自选取货站点'}}</text>
+      </view>
+      <view wx:if="{{pickupStationName}}" class="info-row">
+        <text class="info-label">取货站点</text>
+        <text class="info-value">{{pickupStationName}}</text>
+      </view>
+      <view wx:if="{{reachability && reachability.distanceKm != null}}" class="info-row">
+        <text class="info-label">距离/步行</text>
+        <text class="info-value">{{reachability.distanceKm}} km · 约 {{reachability.walkMinutes}} 分钟</text>
+      </view>
+      <view wx:if="{{originalAddress}}" class="info-row">
+        <text class="info-label">原始地址</text>
+        <text class="info-value">{{originalAddress}}</text>
+      </view>
+      <text class="pickup-summary-tip">订单已进入调度系统，调度员将安排最近班次</text>
     </view>
   </view>
 

@@ -259,6 +259,14 @@ function listSendStations() {
   return request('/app-api/transport/send/stations')
 }
 
+/**
+ * 当前位置可达性评估：车辆能否直接到达用户位置；
+ * 不可达时返回最近可服务站点 + 距离 + 步行时间（服务端按道路距离优先、直线兜底）。
+ */
+function getReachability(latitude, longitude) {
+  return request('/app-api/transport/send/reachability', 'POST', { latitude, longitude })
+}
+
 /** 路线预览：取货/送达站点路网距离 + 预计时间（POST，后端校验站点有效性） */
 function previewSendRoute(pickupStationId, deliveryStationId) {
   return request('/app-api/transport/send/route-preview', 'POST', { pickupStationId, deliveryStationId })
@@ -433,6 +441,7 @@ module.exports = {
   trackParcel,
   listSendStations,
   previewSendRoute,
+  getReachability,
   getMyArrangements,
   confirmStationAction,
   getDriverProfile,

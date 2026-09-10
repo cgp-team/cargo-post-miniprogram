@@ -139,6 +139,93 @@
 .switch-text .form-label { margin-bottom: 6rpx; }
 
 /* 需客户送站：就近交接站点 + 导航按钮 */
+.pickup-mode-row {
+  display: flex;
+  gap: 16rpx;
+}
+
+.mode-btn {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  border-radius: 14rpx;
+  border: 2rpx solid #E8ECEE;
+  background: #F8FAF8;
+  font-size: 27rpx;
+  color: #555;
+}
+
+.mode-btn.active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  font-weight: 600;
+}
+
+/* 可达性评估卡片：warn=车辆无法直接进入（推荐送站） */
+.reach-card {
+  margin-top: 14rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 14rpx;
+  background: #F8FAF8;
+  font-size: 25rpx;
+  color: #555;
+}
+
+.reach-card.ok {
+  background: var(--color-primary-light);
+}
+
+.reach-card.warn {
+  background: #F8ECE3;
+}
+
+.reach-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--color-ink);
+  margin-bottom: 8rpx;
+}
+
+.reach-line {
+  display: block;
+  margin-top: 4rpx;
+  font-size: 25rpx;
+  color: #555;
+}
+
+.reach-reason {
+  color: #8A8778;
+}
+
+.reach-btn {
+  margin-top: 14rpx;
+  height: 72rpx;
+  line-height: 72rpx;
+  text-align: center;
+  border-radius: 999rpx;
+  background: var(--color-clay);
+  color: #fff;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.pickup-summary {
+  margin-top: 20rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 14rpx;
+  background: #F8FAF8;
+}
+
+.pickup-summary-tip {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 23rpx;
+  color: var(--color-text-tertiary);
+}
+
 .review-station {
   display: flex;
   align-items: center;
