@@ -1,142 +1,113 @@
-﻿<!-- 实时公交 - 车来了式 -->
+<!-- 实时公交 · 农村客货邮版"车来了"：定位 → 地图（第一视觉）→ 附近线路 → 正在运行 -->
 <view class="bus-page {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
-  <!-- 附近公交（与首页同一 /bus/nearby 接口）：现实公交 + 项目线路 + 模拟车辆，按来源分层，不互相伪装 -->
-  <view class="nearby-section">
-    <view class="section-header">
-      <view class="section-title-wrap">
-        <icon name="pin" size="30" color="{{iconDeep}}" />
-        <text class="section-title">附近公交</text>
-      </view>
-      <text class="section-sub">{{nearbyLocatedText}}</text>
-    </view>
 
-    <view wx:if="{{nearbyBusStatus === 'loading'}}" class="empty">正在加载附近公交…</view>
-    <view wx:elif="{{nearbyBusStatus === 'error'}}" class="empty" bindtap="loadNearby" hover-class="hover">加载失败，点击重试</view>
-    <block wx:elif="{{nearbyBuses.length}}">
-      <view
-        class="bus-card ticket-card"
-        wx:for="{{nearbyBuses}}"
-        wx:key="busId"
-        bindtap="goToBusDetail"
-        data-bus="{{item.busId}}"
-        hover-class="hover"
-      >
-        <view class="ticket-card__main">
-          <view class="ticket-card__serial">{{item.routeName || '线路未知'}} · {{item.shiftCode || '班次待定'}}</view>
-          <view class="bus-row-top">
-            <text class="bus-plate">{{item.plateNo}}</text>
-            <text wx:if="{{item.simulated}}" class="bus-demo-tag">模拟演示</text>
-            <text wx:elif="{{item.isReal}}" class="bus-live-tag">实时</text>
-            <text class="bus-status {{item.status === 'RUNNING' ? 'running' : ''}}">{{item.statusText}}</text>
-          </view>
-          <view class="bus-next">下一站：{{item.nextStation || '—'}}</view>
-        </view>
-        <view class="ticket-card__stub">
-          <text class="ticket-card__stub-value">{{item.etaText}}</text>
-          <text class="ticket-card__stub-label">{{item.simulated ? '演示' : '到站'}}</text>
-        </view>
-      </view>
-    </block>
-    <!-- 附近有线路但暂无实时车辆：不能说"附近没有公交" -->
-    <block wx:elif="{{nearbyLineCount}}">
-      <text class="empty">附近有 {{nearbyLineCount}} 条公交线路</text>
-      <view class="line-chip" wx:for="{{nearbyLines}}" wx:key="routeName">
-        {{item.routeName}}<text wx:if="{{item.dataSource === 'REAL_TRANSIT'}}"> · 现实公交</text><text wx:elif="{{item.dataSource === 'PROJECT_TRANSIT'}}"> · 项目线路</text>
-      </view>
-      <text class="empty">当前暂无实时车辆数据</text>
-    </block>
-    <block wx:elif="{{nearbyStations.length}}">
-      <text class="empty">附近有 {{nearbyStations.length}} 个公交站点</text>
-      <view class="line-chip" wx:for="{{nearbyStations}}" wx:key="name">
-        {{item.name}}<text wx:if="{{item.distanceKm != null}}"> · {{item.distanceKm}}km</text><text wx:if="{{item.dataSource === 'REAL_TRANSIT'}}"> · 现实公交</text>
-      </view>
-      <text class="empty">当前暂无实时车辆数据</text>
-    </block>
-    <view wx:else class="empty">附近暂无公交线路</view>
-    <text wx:if="{{!nearbyRealTransitAvailable && nearbyBusStatus === 'empty'}}" class="nearby-note">未配置现实公交数据源（高德 key），当前展示项目客货邮线路与演示车辆</text>
+  <!-- 定位状态条：已定位 · 精度 XXm / 定位精度较低 · 已扩大搜索范围 / 无法获取当前位置 -->
+  <view class="loc-bar {{radiusExpanded ? 'warn' : ''}} {{locationLevel === 'UNKNOWN' ? 'fail' : ''}}" bindtap="locateMe" hover-class="hover">
+    <icon name="pin" size="26" color="#FFFFFF" />
+    <text class="loc-text">{{locationText}}</text>
+    <text class="loc-action">{{locationLevel === 'UNKNOWN' ? '重新定位' : '定位'}} ↻</text>
   </view>
 
-  <block wx:if="{{lines.length}}">
-  <!-- 线路选择 -->
-  <scroll-view class="line-tabs" scroll-x enable-flex>
-    <view
-      class="line-tab {{activeLineIndex === index ? 'active' : ''}}"
-      wx:for="{{lines}}"
-      wx:key="routeId"
-      bindtap="selectLine"
-      data-index="{{index}}"
-    >
-      <text class="line-name">{{item.routeName}}</text>
-      <text class="line-sub">{{item.startStation}} ⇄ {{item.endStation}}</text>
-    </view>
-  </scroll-view>
+  <!-- 概览：根据当前位置 · 附近 N 个公交站 · M 条线路 -->
+  <view class="summary">
+    <text class="summary-main">{{nearbyLocatedText || '正在获取当前位置…'}}</text>
+    <text class="summary-sub">附近 {{nearbyStationCount}} 个公交站 · {{nearbyLineCount}} 条线路</text>
+  </view>
 
-  <!-- 地图 -->
+  <!-- 地图：第一视觉焦点（约 45% 屏高），含我的位置 / 公交站 / 运行车辆 / 线路 -->
   <view class="map-wrap">
     <map
       id="busMap"
       class="bus-map"
-      longitude="{{mapCenter.lng}}"
-      latitude="{{mapCenter.lat}}"
+      longitude="{{mapCenter.longitude}}"
+      latitude="{{mapCenter.latitude}}"
       scale="{{mapScale}}"
       markers="{{markers}}"
       polyline="{{polyline}}"
-      bindmarkertap="goToBusDetail"
+      show-location
+      bindmarkertap="onMarkerTap"
+      bindregionchange="onRegionChange"
     ></map>
     <view class="map-legend">
-      <text class="legend-dot"></text>
-      <text>在线车辆</text>
+      <text class="legend-item"><text class="dot dot-me"></text>我的位置</text>
+      <text class="legend-item"><text class="dot dot-stop"></text>公交站</text>
+      <text class="legend-item"><text class="dot dot-real"></text>实时车</text>
+      <text class="legend-item"><text class="dot dot-sim"></text>模拟车</text>
+    </view>
+    <view class="map-btn" bindtap="locateMe" hover-class="hover">
+      <icon name="pin" size="26" color="{{iconDeep}}" />
+      <text>回到我的位置</text>
     </view>
   </view>
 
-  <!-- 车辆列表 -->
-  <view class="bus-list">
+  <!-- 附近线路（默认最多 6 条，可展开全部） -->
+  <view class="section">
     <view class="section-header">
       <view class="section-title-wrap">
         <icon name="bus" size="30" color="{{iconDeep}}" />
-        <text class="section-title">{{currentLineName}}</text>
+        <text class="section-title">附近线路</text>
       </view>
-      <text class="section-sub" bindtap="loadLines">刷新 ↻</text>
+      <text class="section-more" bindtap="toggleAllLines" hover-class="hover">{{showAllLines ? '收起' : '全部线路'}} ›</text>
     </view>
-    <view wx:if="{{hasError}}" class="empty" bindtap="loadLines" hover-class="hover">加载失败，点击重试</view>
-    <view wx:elif="{{!buses.length}}" class="empty">该线路当前暂无车辆在线</view>
-    <view
-      class="bus-card ticket-card"
-      wx:for="{{buses}}"
-      wx:key="busId"
-      bindtap="goToBusDetail"
-      data-bus="{{item.busId}}"
-    >
-      <view class="ticket-card__main">
-        <view class="ticket-card__serial">山乡巴士 · {{item.shiftCode}}</view>
-        <view class="bus-row-top">
-          <text class="bus-plate">{{item.plateNo}}</text>
-          <text wx:if="{{item.dataSource === 'SIMULATED'}}" class="bus-demo-tag">模拟演示</text>
-          <text class="bus-status {{item.status === 1 ? 'running' : ''}}">{{item.status === 1 ? '行驶中' : '待发车'}}</text>
-        </view>
-        <view class="bus-route">
-          <text>{{item.startStation}}</text>
-          <text class="arrow">→</text>
-          <text>{{item.endStation}}</text>
-        </view>
-        <view class="bus-next">下一站：{{item.nextStation || '—'}}</view>
-        <view class="bus-progress-bar">
-          <view class="bus-progress-fill" style="width: {{item.progress || 0}}%"></view>
-        </view>
+    <scroll-view class="line-scroll" scroll-x enable-flex wx:if="{{visibleLines.length}}">
+      <view
+        class="line-chip {{activeLineKey === item.key ? 'active' : ''}}"
+        wx:for="{{visibleLines}}"
+        wx:key="key"
+        data-key="{{item.key}}"
+        data-name="{{item.name}}"
+        data-source="{{item.dataSource}}"
+        bindtap="selectNearbyLine"
+        hover-class="hover"
+      >
+        <text class="line-name">{{item.name}}</text>
+        <text class="line-tag {{item.dataSource === 'REAL_TRANSIT' ? 'tag-real' : 'tag-project'}}">{{item.dataSource === 'REAL_TRANSIT' ? '现实公交' : '客货邮'}}</text>
       </view>
-      <view class="ticket-card__stub">
-        <block wx:if="{{item.status === 1}}">
-          <text class="ticket-card__stub-value">{{item.etaMinutes}}</text>
-          <text class="ticket-card__stub-label">分钟到站</text>
-        </block>
-        <block wx:else>
-          <text class="ticket-card__stub-value">待发</text>
-          <text class="ticket-card__stub-label">待发车</text>
-        </block>
+    </scroll-view>
+    <view wx:elif="{{loading}}" class="empty">正在加载附近线路…</view>
+    <view wx:elif="{{hasError}}" class="empty" bindtap="loadNearby" hover-class="hover">加载失败，点击重试</view>
+    <view wx:else class="empty">附近暂无公交线路</view>
+  </view>
+
+  <!-- 正在运行车辆 -->
+  <view class="section">
+    <view class="section-header">
+      <view class="section-title-wrap">
+        <icon name="bus" size="30" color="{{iconDeep}}" />
+        <text class="section-title">正在运行</text>
+      </view>
+      <text class="section-sub">{{vehicles.length}} 辆</text>
+    </view>
+
+    <view wx:if="{{!vehicles.length && !loading}}" class="empty">
+      <text wx:if="{{nearbyLineCount}}">附近有 {{nearbyLineCount}} 条线路，当前暂无实时车辆数据</text>
+      <text wx:else>附近暂无公交车</text>
+    </view>
+
+    <view
+      class="vehicle-card"
+      wx:for="{{vehicles}}"
+      wx:key="busId"
+      data-bus="{{item.busId}}"
+      bindtap="goToBusDetail"
+      hover-class="hover"
+    >
+      <view class="vehicle-main">
+        <view class="vehicle-row">
+          <image class="vehicle-icon" src="{{item.simulated ? '/images/marker-bus-sim.png' : '/images/marker-bus-real.png'}}" mode="aspectFit" />
+          <text class="vehicle-plate">{{item.plateNo}}</text>
+          <text class="vehicle-status {{item.statusText === '行驶中' ? 'running' : ''}}">{{item.statusText}}</text>
+          <text class="vehicle-source {{item.simulated ? 'src-sim' : 'src-real'}}">{{item.sourceText}}</text>
+        </view>
+        <view class="vehicle-route">{{item.routeName}}{{item.shiftCode ? ' · ' + item.shiftCode : ''}}</view>
+        <view class="vehicle-next">下一站：{{item.nextStation}}</view>
+      </view>
+      <view class="vehicle-stub">
+        <text class="stub-eta">{{item.etaText}}</text>
+        <text class="stub-dist" wx:if="{{item.distanceKm != null}}">{{item.distanceKm}} km</text>
       </view>
     </view>
   </view>
-  </block>
-  <view wx:elif="{{loading}}" class="loading-state">加载中…</view>
-  <empty-state wx:else icon="bus" text="{{hasError ? '加载失败' : '暂无公交线路数据'}}" btnText="{{hasError ? '点击重试' : ''}}" bind:tapbtn="loadLines" />
+
+  <view class="safe-area-bottom"></view>
 </view>

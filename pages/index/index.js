@@ -218,10 +218,8 @@ Page({
    */
   _nearbyRadius(loc, hasCoords) {
     if (!hasCoords) return null
-    const accuracy = loc && typeof loc.accuracy === 'number' ? loc.accuracy : null
-    if (accuracy && accuracy > 500) return 15000
-    if (loc && loc.level === 'APPROXIMATE') return 10000
-    return 5000
+    // 半径口径统一在 LocationService（5000 / 8000 / 15000），页面不再各自写死
+    return location.nearbyRadius(loc && loc.accuracy, loc && loc.level)
   },
 
   /** 定位不准 → 强制重新定位（跳过缓存）并重查附近公交 */
@@ -394,7 +392,7 @@ Page({
         nearbyBusStatus: buses.length ? 'ok' : 'empty',
         nearbyBusUpdatedAt: Date.now(),
         nearbyBusUpdatedText: '已更新：刚刚',
-        nearbyBusLocatedText: loc && loc.source === 'demo'
+        nearbyBusLocatedText: loc && loc.source === location.SOURCE_DEMO
           ? `根据${this.data.currentVillage}展示`
           : (hasCoords
               ? '根据当前位置展示'

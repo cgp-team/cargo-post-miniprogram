@@ -52,10 +52,10 @@ async function main() {
     assert.strictEqual(first.latitude, 30.5723)
     assert.strictEqual(first.longitude, 104.0657)
     assert.strictEqual(first.level, 'PRECISE')       // accuracy 30 <= 100
-    assert.strictEqual(first.source, 'wechat')
+    assert.strictEqual(first.source, 'AMAP')
     assert.strictEqual(first.district, '大足区')
     const second = await location.getCurrentLocation()
-    assert.strictEqual(second.source, 'cache')        // TTL 内命中缓存
+    assert.strictEqual(second.source, 'CACHE')        // TTL 内命中缓存
     console.log('✓ 1/5/7/8 定位成功+PRECISE+逆地理区域+缓存命中')
   }
 
@@ -101,10 +101,10 @@ async function main() {
   // 9: 缓存过期（> 5min）→ 重新定位
   {
     reset()
-    storage['userLocation'] = { success: true, latitude: 30.0, longitude: 104.0, accuracy: 30, district: '旧区', timestamp: Date.now() - 6 * 60 * 1000, source: 'wechat' }
+    storage['userLocation'] = { success: true, latitude: 30.0, longitude: 104.0, accuracy: 30, district: '旧区', timestamp: Date.now() - 6 * 60 * 1000, source: 'AMAP' }
     const loc = await location.getCurrentLocation()
     assert.strictEqual(loc.latitude, 30.5723) // 重新定位的新值
-    assert.strictEqual(loc.source, 'wechat')
+    assert.strictEqual(loc.source, 'AMAP')
     console.log('✓ 9 缓存过期 → 重新定位')
   }
 
@@ -136,21 +136,33 @@ async function main() {
     reset()
     await location.getCurrentLocation()            // 首次定位写缓存
     const loc = await location.getCurrentLocation() // 命中缓存立即返回
-    assert.strictEqual(loc.source, 'cache')
+    assert.strictEqual(loc.source, 'CACHE')
     console.log('✓ 12 缓存命中秒出（source=cache）')
   }
 
-  // 13: 定位失败但有旧缓存 → stale-cache 兜底
+  // 13: 定位失败但有"仍在 5 分钟有效期内"的缓存 → CACHE + stale 兜底（超过 5 分钟的缓存不再使用，见 13b）
   {
     reset()
-    storage['userLocation'] = { success: true, latitude: 30.0, longitude: 104.0, accuracy: 30, district: '旧区', timestamp: Date.now() - 6 * 60 * 1000, source: 'wechat' }
+    storage['userLocation'] = { success: true, latitude: 30.0, longitude: 104.0, accuracy: 30, district: '旧区', timestamp: Date.now() - 3 * 60 * 1000, source: 'AMAP' }
     getLocationMode = 'fail-other'
     const loc = await location.getCurrentLocation()
     assert.strictEqual(loc.success, true)
     assert.strictEqual(loc.stale, true)
-    assert.strictEqual(loc.source, 'stale-cache')
+    assert.strictEqual(loc.source, 'CACHE')
     assert.strictEqual(loc.latitude, 30.0)
-    console.log('✓ 13 定位失败旧缓存兜底 → stale-cache')
+    console.log('✓ 13 定位失败（5 分钟内缓存）→ CACHE + stale 兜底')
+  }
+
+  // 13b: 缓存已超过 5 分钟有效期且定位失败 → 不伪造位置，返回 UNKNOWN
+  {
+    reset()
+    storage['userLocation'] = { success: true, latitude: 30.0, longitude: 104.0, accuracy: 30, district: '旧区', timestamp: Date.now() - 6 * 60 * 1000, source: 'AMAP' }
+    getLocationMode = 'fail-other'
+    const loc = await location.getCurrentLocation()
+    assert.strictEqual(loc.success, false)
+    assert.strictEqual(loc.source, 'UNKNOWN')
+    assert.strictEqual(loc.level, 'UNKNOWN')
+    console.log('✓ 13b 超过 5 分钟的缓存不再兜底 → UNKNOWN（不伪造位置）')
   }
 
   // 14: DEMO 青山镇 → source=demo + 坐标正确（用仓库已有站点坐标）
@@ -158,7 +170,7 @@ async function main() {
     reset()
     location.setDemoLocation('青山镇')
     const loc = await location.getCurrentLocation()
-    assert.strictEqual(loc.source, 'demo')
+    assert.strictEqual(loc.source, 'DEMO')
     assert.strictEqual(loc.latitude, 30.6234)   // ST004 青山镇站
     assert.strictEqual(loc.longitude, 104.2345)
     assert.strictEqual(loc.level, 'PRECISE')
@@ -174,7 +186,7 @@ async function main() {
     await location.getCurrentLocation() // demo
     location.clearDemoLocation()
     const loc = await location.getCurrentLocation() // 微信真实
-    assert.strictEqual(loc.source, 'wechat')
+    assert.strictEqual(loc.source, 'AMAP')
     assert.strictEqual(loc.latitude, 30.5723) // mock 真实坐标
     assert.strictEqual(loc.longitude, 104.0657)
     console.log('✓ 15 DEMO→真实 → source=wechat')
@@ -188,7 +200,7 @@ async function main() {
     const p1 = location.getCurrentLocation()
     const p2 = location.getCurrentLocation()
     const [a, b] = await Promise.all([p1, p2])
-    assert.strictEqual(a.source, 'demo')
+    assert.strictEqual(a.source, 'DEMO')
     assert.strictEqual(a.latitude, 30.5723) // 县城客运中心 ST001
     assert.strictEqual(a, b) // 同一 demo 实例，无并发
     location.clearDemoLocation()
@@ -218,11 +230,11 @@ async function main() {
     reset()
     storage.userLocation = {
       latitude: 1, longitude: 2, accuracy: 30, district: '旧区域',
-      timestamp: Date.now() - 200 * 1000, level: 'PRECISE', source: 'wechat'
+      timestamp: Date.now() - 200 * 1000, level: 'PRECISE', source: 'AMAP'
     }
     const loc = await location.getCurrentLocation()
     assert.strictEqual(getLocationCalls, 1, '缓存超过 90s 应重新定位')
-    assert.strictEqual(loc.source, 'wechat')
+    assert.strictEqual(loc.source, 'AMAP')
     assert.strictEqual(loc.latitude, 30.5723)
     console.log('✓ 18 缓存超过 90s → 同步重新定位（不再用旧坐标）')
   }
@@ -234,8 +246,28 @@ async function main() {
     assert.strictEqual(getLocationCalls, 1)
     const loc = await location.refreshLocation()
     assert.strictEqual(getLocationCalls, 2, '强制刷新应跳过缓存再定位一次')
-    assert.strictEqual(loc.source, 'wechat')
+    assert.strictEqual(loc.source, 'AMAP')
     console.log('✓ 19 refreshLocation 强制跳过缓存')
+  }
+
+  // 20: 附近公交半径按精度自适应（5000 / 8000 / 15000）+ 来源/城市字段
+  {
+    reset()
+    assert.strictEqual(location.nearbyRadius(35), 5000)   // <=100m
+    assert.strictEqual(location.nearbyRadius(100), 5000)
+    assert.strictEqual(location.nearbyRadius(300), 8000)  // 100~500m
+    assert.strictEqual(location.nearbyRadius(500), 8000)
+    assert.strictEqual(location.nearbyRadius(900), 15000) // >500m
+    assert.strictEqual(location.nearbyRadius(null, 'PRECISE'), 5000)
+    assert.strictEqual(location.nearbyRadius(null, 'APPROXIMATE'), 15000)
+    const loc = await location.getCurrentLocation()
+    // 统一输出契约：source ∈ AMAP|CACHE|DEMO|UNKNOWN，并带 city/district/accuracy/timestamp/level
+    assert.deepStrictEqual(
+      ['success', 'latitude', 'longitude', 'accuracy', 'timestamp', 'source', 'level', 'district'].filter((k) => !(k in loc)),
+      []
+    )
+    assert.ok(['AMAP', 'CACHE', 'DEMO', 'UNKNOWN'].includes(loc.source))
+    console.log('✓ 20 半径自适应 + 统一输出字段（source/level/accuracy/timestamp/district）')
   }
 
   console.log('\n全部通过 ✅')

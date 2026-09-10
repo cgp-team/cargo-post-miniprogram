@@ -8,6 +8,7 @@ const api = require('../../../utils/api')
 const appearance = require('../../../utils/appearance')
 const feedback = require('../../../utils/feedback')
 const nav = require('../../../utils/nav')
+const location = require('../../../utils/location')
 
 /** 位置上报间隔（毫秒） */
 const LOCATION_REPORT_INTERVAL = 10000
@@ -103,14 +104,16 @@ Page({
   },
 
   /** 地图中心跟随司机当前位置，定位失败保留兜底坐标 */
-  initMapCenter() {
-    wx.getLocation({
-      type: 'gcj02',
-      success: (res) => {
-        this.setData({ mapLatitude: res.latitude, mapLongitude: res.longitude })
-      },
-      fail: () => {} // 权限被拒或定位失败时使用兜底坐标
-    })
+  async initMapCenter() {
+    // 统一走 LocationService 的设备定位（GCJ-02），页面不再直接调 wx.getLocation
+    try {
+      const loc = await location.getDeviceLocationGcj02()
+      if (loc && loc.success) {
+        this.setData({ mapLatitude: loc.latitude, mapLongitude: loc.longitude })
+      }
+    } catch (e) {
+      // 权限被拒或定位失败时使用兜底坐标
+    }
   },
 
   onShow() {
@@ -460,21 +463,21 @@ Page({
   },
 
   /** 上报真实 GPS（仅 REAL 状态调用） */
-  reportRealLocation() {
-    wx.getLocation({
-      type: 'gcj02',
-      success: (res) => {
-        const speedKmh = Math.round((res.speed || 0) * 3.6)
-        api.reportDriverLocation({
-          driverId: this.driverId,
-          shiftId: this.shiftId,
-          longitude: res.longitude,
-          latitude: res.latitude,
-          speedKmh
-        }).catch(() => {})
-      },
-      fail: () => {} // 权限问题由 onLocationFail 处理
-    })
+  async reportRealLocation() {
+    // 统一走 LocationService（GCJ-02，与站点表/高德/地图一致），避免页面各自调 wx.getLocation
+    try {
+      const loc = await location.getDeviceLocationGcj02()
+      if (!loc || !loc.success) return // 权限问题由 onLocationFail 处理
+      api.reportDriverLocation({
+        driverId: this.driverId,
+        shiftId: this.shiftId,
+        longitude: loc.longitude,
+        latitude: loc.latitude,
+        speedKmh: 0 // LocationService 不返回速度；车辆速度由后端按里程/时长估算
+      }).catch(() => {})
+    } catch (e) {
+      // 静默，等待下一轮
+    }
   },
 
   /** 订阅派单通知：拉模板列表 → wx.requestSubscribeMessage 授权（一次性模板，派单前需再次订阅） */

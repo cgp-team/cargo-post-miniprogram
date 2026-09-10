@@ -74,6 +74,25 @@ const oriGetKey = config.getAmapMiniKey
   assert.strictEqual(stations[0].name, '人民公园站')
   assert.strictEqual(stations[0].latitude, 30.605)
 
+  // 3b. 同名同坐标站点去重：线路取并集、只保留一张卡片（线上曾出现「曾家岩(公交站)」重复两条）
+  const deduped = transit.dedupeStations([
+    { name: '曾家岩(公交站)', latitude: 30.605, longitude: 104.105, distanceKm: 0.08, dataSource: 'REAL_TRANSIT', lines: ['125路'] },
+    { name: '曾家岩', latitude: 30.605, longitude: 104.105, distanceKm: 0.08, dataSource: 'REAL_TRANSIT', lines: ['184路'] },
+    { name: '人民支路(公交站)', latitude: 30.61, longitude: 104.11, distanceKm: 0.24, dataSource: 'REAL_TRANSIT', lines: ['125路'] }
+  ])
+  assert.strictEqual(deduped.length, 2, '同名同坐标必须合并为一条')
+  const zeng = deduped.find((s) => s.name.indexOf('曾家岩') >= 0)
+  assert.strictEqual(zeng.name, '曾家岩', '名称取更简洁的（去掉 (公交站)）')
+  assert.deepStrictEqual(zeng.lines.sort(), ['125路', '184路'], '线路必须并集，不能丢')
+  assert.strictEqual(transit.normalizeStationName('曾家岩(公交站)'), '曾家岩')
+  assert.strictEqual(transit.normalizeStationName('人民支路站'), '人民支路')
+  // 坐标相差较大（>1e-5 度）的不合并
+  const far = transit.dedupeStations([
+    { name: '同名站', latitude: 30.6, longitude: 104.1, lines: [] },
+    { name: '同名站', latitude: 30.62, longitude: 104.12, lines: [] }
+  ])
+  assert.strictEqual(far.length, 2)
+
   // 4. enrichNearby：与后端结果合并，标注来源并更新分层计数
   const merged = await transit.enrichNearby(
     { nearbyStations: [{ name: '项目站', distanceKm: 0.5, dataSource: 'PROJECT_TRANSIT' }], realTransitAvailable: false },
