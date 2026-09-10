@@ -432,6 +432,15 @@
   color: #fff;
   flex: 1;
 }
+/* 司机已到达：醒目的到达提醒（红色，区别于"车快到了"的绿色） */
+.parcel-approach.parcel-arrived {
+  background: #C0392B;
+  box-shadow: 0 4rpx 12rpx rgba(192, 57, 43, 0.28);
+}
+.parcel-carrier-arrived {
+  color: #C0392B;
+  font-weight: 600;
+}
 .carrier-link {
   color: var(--color-primary);
   font-weight: 600;

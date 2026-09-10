@@ -210,14 +210,35 @@ Page({
   },
 
   /**
+   * 选班次：与本次派单任务段（navPoints）站点重合度最高者优先；
+   * 同分时在途(1)优先、其次未发车(0)，最后按原顺序。无班次返回 null。
+   * 目的：司机在重庆邮电大学片区执行任务时，发车/表头都用同片区的班次，不串到别的线路。
+   */
+  pickShiftForNav(navPoints, shifts) {
+    const list = shifts || []
+    if (!list.length) return null
+    const targetIds = (navPoints || []).map((p) => String(p.stationId)).filter(Boolean)
+    if (!targetIds.length) return list.find((s) => s.status === 1) || list[0]
+    let best = null
+    list.forEach((s) => {
+      const stopIds = ((s && s.stops) || []).map((x) => String(x.stationId))
+      const overlap = stopIds.filter((id) => targetIds.indexOf(id) >= 0).length
+      const score = overlap * 10 + (s.status === 1 ? 2 : s.status === 0 ? 1 : 0)
+      if (!best || score > best.score) best = { shift: s, score, overlap }
+    })
+    // 完全无重合（例如派单站点不在任何班次线路上）→ 回退原逻辑，保证仍能出方案
+    if (!best || best.overlap === 0) return list.find((s) => s.status === 1) || list[0]
+    return best.shift
+  },
+
+  /**
    * 连续任务导航初始化：以算法任务段经停点（navPoints）为导航数据源。
    * 班次信息仍用于发车/到站（shiftId）+ 运力展示，但地图/下一站/进度走任务段。
    */
   initFromNav(navPoints, shifts) {
-    let current = null
-    if (shifts && shifts.length) {
-      current = shifts.find((s) => s.status === 1) || shifts[0]
-    }
+    // 班次选择：优先"经停站与本次派单任务段重合度最高"的班次（片区一致），
+    // 否则退化为在途班次/首个班次 —— 避免出现"任务在重庆邮电大学片区、发车却是成都线路"的错配
+    const current = this.pickShiftForNav(navPoints, shifts)
     if (current) {
       this.shiftId = current.shiftId
       const cap = this.data.cargoLimit
@@ -232,8 +253,11 @@ Page({
       })
     }
 
-    // 恢复进度：优先后端任务状态（第一个 PENDING 站），回退班次 currentStationId
-    const pendIdx = navPoints.findIndex((p) => (p.status == null ? 0 : p.status) === 0)
+    // 恢复进度：优先后端任务状态（第一个"有作业"且 PENDING 的站），回退班次 currentStationId。
+    // 跳过发车场站本身（只有 DEPART/RETURN、没有取派/上下客的经停）——发车后不该说"下一站=出发点"。
+    const pendingIdx = (p) => (p.status == null ? 0 : p.status) === 0
+    const firstWorkIdx = navPoints.findIndex((p) => pendingIdx(p) && (p.actionTotal || 0) > 0)
+    const pendIdx = firstWorkIdx >= 0 ? firstWorkIdx : navPoints.findIndex(pendingIdx)
     const lastDone = navPoints.length > 0 && navPoints[navPoints.length - 1].status === 7
     let resumeIdx = pendIdx >= 0 ? pendIdx : (lastDone ? navPoints.length : 0)
     if (resumeIdx === 0 && current && current.currentStationId != null) {
@@ -268,6 +292,7 @@ Page({
       navBoardCount: t.boardCount || 0,
       navAlightCount: t.alightCount || 0,
       navActionTotal: t.actionTotal || 0,
+      navReturnPoint: !!t.isReturn,
       nextStation: t.stationName || '',
       currentStation: idx > 0 ? (points[idx - 1] || {}).stationName : '',
       progressPercent: total > 1 ? Math.round(idx / (total - 1) * 100) : 0,
@@ -694,6 +719,11 @@ Page({
    */
   scanToLoad() {
     this.scanOrder(async (order) => {
+      // 商城订单：同样拍照核验，走商城订单接口（订单仍为已发货，标记"已装车/配送中"）
+      if (order.bizType === 'PRODUCT') {
+        const productPhoto = await this.takeCargoPhoto()
+        return api.driverProductLoad(this.driverId, order.orderId, productPhoto)
+      }
       let photoUrl = ''
       if (order.orderType !== 3) { // 邮快件有快递面单，不强制拍照
         photoUrl = await this.takeCargoPhoto()
@@ -706,7 +736,14 @@ Page({
    * 扫码妥投：匹配待装订单并调后端完成派送
    */
   scanToDeliver() {
-    this.scanOrder((order) => api.driverDeliver(this.driverId, order.orderId), '妥投成功')
+    this.scanOrder(async (order) => {
+      // 商城订单：妥投即交付完成（拍交付凭证 → 订单转已完成，用户端可见"已送达"）
+      if (order.bizType === 'PRODUCT') {
+        const proof = await this.takeCargoPhoto()
+        return api.driverProductDeliver(this.driverId, order.orderId, proof)
+      }
+      return api.driverDeliver(this.driverId, order.orderId)
+    }, '妥投成功')
   },
 
   /**

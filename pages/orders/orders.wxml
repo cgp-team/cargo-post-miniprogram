@@ -27,6 +27,7 @@
         </view>
         <text class="order-goods-amount">¥{{g.amount}}</text>
       </view>
+      <view wx:if="{{item.deliveryHint}}" class="order-delivery-hint">{{item.deliveryHint}}</view>
       <view class="order-foot">
         <text class="order-time">{{item.createTimeText}}</text>
         <view class="order-foot-right">

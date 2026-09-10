@@ -334,6 +334,16 @@ function driverDeliver(driverId, orderId) {
   return request('/app-api/transport/driver/deliver', 'POST', { driverId, orderId })
 }
 
+/** 商城订单装车确认（司机拍照核验凭证，订单保持已发货/配送中） */
+function driverProductLoad(driverId, orderId, driverPhotoUrl) {
+  return request('/app-api/transport/driver/product-load', 'POST', { driverId, orderId, driverPhotoUrl })
+}
+
+/** 商城订单妥投完成（司机交付凭证，订单转已完成，用户端可见） */
+function driverProductDeliver(driverId, orderId, driverPhotoUrl) {
+  return request('/app-api/transport/driver/product-deliver', 'POST', { driverId, orderId, driverPhotoUrl })
+}
+
 /** 上报车辆位置（行驶中定时调用） */
 function reportDriverLocation(data) {
   return request('/app-api/transport/driver/location', 'POST', data)
@@ -456,6 +466,8 @@ module.exports = {
   driverArrive,
   driverPickupConfirm,
   driverDeliver,
+  driverProductLoad,
+  driverProductDeliver,
   reportDriverLocation,
   getRealtimeBuses,
   getRealtimeBusLines,

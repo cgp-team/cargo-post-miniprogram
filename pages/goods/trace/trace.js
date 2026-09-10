@@ -5,6 +5,7 @@
  */
 const api = require('../../../utils/api')
 const appearance = require('../../../utils/appearance')
+const qrcodeRender = require('../../../utils/qrcode-render')
 
 Page({
   data: {
@@ -21,7 +22,12 @@ Page({
     trackPoints: [], // 站点 + 轨迹 + 当前位置，用于地图 include-points 自适应视口
     // 站点时间轴
     stops: [],
-    lastReportText: ''
+    lastReportText: '',
+    // 司机到站/交付（商城订单同样走"司机装车 → 到站 → 妥投"闭环）
+    arrivedText: '',
+    loadTimeText: '',
+    deliverTimeText: '',
+    statusText: ''
   },
 
   onLoad(options) {
@@ -111,7 +117,44 @@ Page({
       trackPoints,
       stops: points.map((p) => ({ sequenceNo: p.sequenceNo, stationName: p.stationName, plannedMinutes: p.plannedMinutes || 0 })),
       lastReportText: this.formatTime(trace.lastReportTime),
+      statusText: trace.statusName || '',
+      arrivedText: this.buildArrivedText(trace),
+      loadTimeText: this.formatTime(trace.loadTime),
+      deliverTimeText: this.formatTime(trace.deliverTime),
       loading: false
+    }, () => this.drawOrderQr())
+  },
+
+  /** 司机已到达/已交付文案：用户端"司机已到达交付点"提醒（后端 shift_execution 为源） */
+  buildArrivedText(trace) {
+    if (!trace) return ''
+    const driver = trace.driverName ? `${trace.driverName}${trace.driverMobile ? ' ' + trace.driverMobile : ''} ` : ''
+    if (trace.deliverTime) return `${driver}已送达（${this.formatTime(trace.deliverTime)}）`
+    if (trace.driverArrived) {
+      const station = trace.deliverStationName || trace.endStation || '交付站点'
+      return `${driver}已到达${station}，请前往领取`
+    }
+    if (trace.loadTime) return `${driver}已装车，正在配送（${this.formatTime(trace.loadTime)}）`
+    return ''
+  },
+
+  /** 订单二维码：司机扫码装车/妥投（内容=业务订单号，与司机端扫码匹配口径一致） */
+  drawOrderQr() {
+    const trace = this.data.trace || {}
+    if (!trace.orderNo) return
+    wx.nextTick(() => {
+      const query = wx.createSelectorQuery().in(this)
+      query
+        .select('#mallOrderQr')
+        .fields({ node: true, size: true })
+        .exec((res) => {
+          if (!res || !res[0] || !res[0].node) return
+          try {
+            qrcodeRender.draw(res[0].node, trace.orderNo, res[0].width)
+          } catch (e) {
+            // 二维码绘制失败不影响溯源主流程
+          }
+        })
     })
   },
 
@@ -123,5 +166,12 @@ Page({
       return `${d.getMonth() + 1}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`
     }
     return String(t).replace('T', ' ').substring(5, 16)
+  },
+
+  /** 预览司机核验凭证照片（装车/妥投） */
+  previewProof(e) {
+    const url = e.currentTarget.dataset.url
+    if (!url) return
+    wx.previewImage({ urls: [url], current: url })
   }
 })

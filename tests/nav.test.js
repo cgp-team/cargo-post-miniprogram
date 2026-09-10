@@ -73,10 +73,30 @@ function test_mixed_actions_same_station() {
   assert.deepStrictEqual(red.actionTypes.sort(), [1, 3, 4])
 }
 
+// 返场经停：计划首尾同站（出发/返回）去重后必须把"返场"补回队尾，
+// 否则司机端没有返场确认入口，班次执行不结束、用户端"司机已到达交付点"不触发
+function test_return_stop_appended() {
+  const depotRoute = {
+    planId: 100,
+    stops: [
+      { stationId: 1, stationName: '黄桷垭站', longitude: 106.57, latitude: 29.53, visitSequence: 1, actionName: '出发', status: 0, statusName: '待执行' },
+      { stationId: 2, stationName: '重邮站', longitude: 106.58, latitude: 29.53, visitSequence: 2, actionName: '揽收', status: 0, statusName: '待执行' },
+      { stationId: 1, stationName: '黄桷垭站', longitude: 106.57, latitude: 29.53, visitSequence: 3, actionName: '返回', status: 0, statusName: '待执行' }
+    ]
+  }
+  const pts = buildNavPoints(depotRoute, [])
+  assert.strictEqual(pts.length, 3, '出发场站去重后应把返场站补回队尾')
+  assert.deepStrictEqual(pts.map((p) => p.stationId), [1, 2, 1])
+  assert.strictEqual(pts[0].isReturn, undefined)
+  assert.strictEqual(pts[2].isReturn, true)
+  assert.strictEqual(pts[2].actionTotal, 0)
+}
+
 test_dedupe_and_order()
 test_quantity_aggregation_and_fallback()
 test_pure_pass_station()
 test_route_empty()
 test_mixed_actions_same_station()
+test_return_stop_appended()
 
 console.log('nav.test.js 全部通过')

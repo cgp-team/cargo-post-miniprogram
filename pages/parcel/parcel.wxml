@@ -100,6 +100,10 @@
         <text wx:if="{{item.freshFlag}}" class="cargo-chip cargo-chip-fresh">生鲜冷链</text>
       </view>
       <!-- 车来取货/送货提醒：承运车辆实时位置 → 距目标站点分钟 -->
+      <view wx:if="{{item.arrived}}" class="parcel-approach parcel-arrived">
+        <icon name="notice" size="30" color="#FFFFFF" />
+        <text class="parcel-approach-text">{{item.arrivedText}}</text>
+      </view>
       <view wx:if="{{item.approaching}}" class="parcel-approach" bindtap="goToBusTracking" hover-class="hover">
         <icon name="bus" size="30" color="#FFFFFF" />
         <text class="parcel-approach-text">车快到了 {{item.carrierEtaMinutes}} 分钟 · {{item.vehiclePlate || '班车'}} 距{{item.targetStation || '站点'}}{{item.carrierLocationSource === 'SIMULATED' ? '（模拟演示）' : ''}}</text>
@@ -178,6 +182,7 @@
       <!-- 承运班次与到达预估（已分配/已发车时由后端返回） -->
       <view wx:if="{{trackResult.vehiclePlate || trackResult.etaText}}" class="parcel-carrier">
         <view wx:if="{{trackResult.vehiclePlate}}" class="carrier-row"><icon name="bus" size="28" color="{{iconColor}}" /><text>{{trackResult.shiftCode || '班车'}} · {{trackResult.vehiclePlate}}</text></view>
+        <view wx:if="{{trackResult.arrived}}" class="carrier-row parcel-carrier-arrived"><icon name="notice" size="28" color="#C0392B" /><text>{{trackResult.arrivedText}}</text></view>
         <view wx:if="{{trackResult.etaText}}" class="carrier-row parcel-carrier-eta"><icon name="clock" size="28" color="{{iconColor}}" /><text>{{trackResult.etaText}}</text></view>
         <view wx:if="{{trackResult.carrierLongitude}}" class="carrier-row" bindtap="goToBusTracking" hover-class="hover"><icon name="pin" size="28" color="{{iconColor}}" /><text class="carrier-link">查看车辆实时位置 ›</text></view>
       </view>

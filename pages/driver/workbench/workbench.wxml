@@ -118,7 +118,8 @@
         <text class="nav-chip deliver" wx:if="{{navDeliverCount > 0}}">📤 派货×{{navDeliverCount}}</text>
         <text class="nav-chip board" wx:if="{{navBoardCount > 0}}">🚌 接客×{{navBoardCount}}</text>
         <text class="nav-chip alight" wx:if="{{navAlightCount > 0}}">🚏 送客×{{navAlightCount}}</text>
-        <text class="nav-chip none" wx:if="{{navActionTotal === 0}}">经停通过</text>
+        <text class="nav-chip return" wx:if="{{navActionTotal === 0 && navReturnPoint}}">🏁 返场确认</text>
+        <text class="nav-chip none" wx:elif="{{navActionTotal === 0}}">经停通过</text>
       </view>
       <view class="nav-amap" wx:if="{{nextStationDistance > 0}}" bindtap="openAmapNav">🚗 导航</view>
     </view>
@@ -195,10 +196,11 @@
     <!-- 待装货物列表（货运 + 邮快件） -->
     <view class="pickup-list" wx:if="{{pendingPickups.length > 0}}">
       <view class="pickup-item" wx:for="{{pendingPickups}}" wx:key="orderId">
-        <text class="pickup-emoji">{{item.orderType === 3 ? '📬' : '📦'}}</text>
+        <text class="pickup-emoji">{{item.bizType === 'PRODUCT' ? '🛒' : (item.orderType === 3 ? '📬' : '📦')}}</text>
         <view class="pickup-info">
-          <text class="pickup-name">{{item.orderType === 3 ? (item.mailNo || '快递') : (item.goodsName || '寄货')}}</text>
-          <text class="pickup-detail">{{item.weightKg}}kg · {{item.orderType === 3 ? ('取件码 ' + (item.pickupCode || '—')) : (item.receiverName || '待定')}}</text>
+          <text class="pickup-name">{{item.bizType === 'PRODUCT' ? (item.goodsName || '商城订单') : (item.orderType === 3 ? (item.mailNo || '快递') : (item.goodsName || '寄货'))}}</text>
+          <text wx:if="{{item.bizType === 'PRODUCT'}}" class="pickup-detail">商城订单 · 送至 {{item.receiverAddress || '自提站点'}}（{{item.receiverName || '收件人'}} {{item.receiverMobile || ''}}）</text>
+          <text wx:else class="pickup-detail">{{item.weightKg}}kg · {{item.orderType === 3 ? ('取件码 ' + (item.pickupCode || '—')) : (item.receiverName || '待定')}}</text>
           <text class="pickup-detail">{{item.orderNo}}</text>
         </view>
         <view class="pickup-check {{item.checked ? 'checked' : ''}}">
@@ -221,14 +223,14 @@
     <button class="scan-btn" bindtap="scanToLoad" hover-class="hover">
       <text class="scan-icon">📷</text>
       <text class="scan-text">扫码装车</text>
-      <text class="scan-hint">请扫描农户手机上的二维码</text>
+      <text class="scan-hint">扫寄货单/商城订单二维码，拍照核验后装车</text>
     </button>
 
     <!-- 妥投扫码 -->
     <button class="scan-btn deliver-btn" bindtap="scanToDeliver" hover-class="hover">
       <text class="scan-icon">✅</text>
       <text class="scan-text">扫码妥投</text>
-      <text class="scan-hint">送达收件人后扫码完成派送</text>
+      <text class="scan-hint">送达收件人后扫码；商城订单再拍交付凭证</text>
     </button>
 
     <!-- 取件核销（邮快件） -->

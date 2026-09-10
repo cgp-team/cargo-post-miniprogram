@@ -77,6 +77,9 @@ Page({
       const list = (res.list || []).map((o) => ({
         ...o,
         statusClass: this.statusClass(o.status),
+        // 配送提示：已发货=司机配送中（点溯源看司机/轨迹/到站提醒），已完成=已送达
+        deliveryHint: o.status === 1 ? '司机配送中 · 点「产地溯源」看司机与到站提醒'
+          : (o.status === 2 ? '已送达 · 点「产地溯源」看交付凭证' : ''),
         createTimeText: formatBackendTime(o.createTime),
         items: (o.items || []).map((g) => ({
           ...g,

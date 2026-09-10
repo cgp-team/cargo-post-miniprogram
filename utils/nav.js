@@ -89,6 +89,38 @@ function buildNavPoints(route, tasks) {
   }).sort((a, b) => (a.visitSequence || 0) - (b.visitSequence || 0))
 
   navPoints.forEach((p, i) => { p.index = i })
+
+  // ④ 返场经停补回队尾：同一站点既出现在计划首（出发）又出现在计划尾（返回）时，上面的按站点去重
+  //    会把它折叠成首站 → 司机端就没有"返场确认"入口，班次执行记录永远停在倒数第二站，
+  //    用户端"司机已到达交付点/商城订单自提点"也永远不会触发。这里把计划里 visitSequence
+  //    最大的那一站补回队尾（标记 isReturn，坐标/站名复用同站）。
+  const allStops = (route.stops || []).filter((s) => s.stationId != null)
+  if (allStops.length) {
+    const lastStop = allStops.reduce((a, b) =>
+      (b.visitSequence == null ? -1 : b.visitSequence) >= (a.visitSequence == null ? -1 : a.visitSequence) ? b : a)
+    const tail = navPoints[navPoints.length - 1]
+    if (tail && String(tail.stationId) !== String(lastStop.stationId)) {
+      navPoints.push({
+        stationId: lastStop.stationId,
+        stationName: lastStop.stationName,
+        longitude: lastStop.longitude,
+        latitude: lastStop.latitude,
+        visitSequence: lastStop.visitSequence,
+        pickupCount: 0,
+        deliverCount: 0,
+        boardCount: 0,
+        alightCount: 0,
+        actionTotal: 0,
+        orders: [],
+        actionTypes: [],
+        status: lastStop.status,
+        statusName: lastStop.statusName,
+        reached: false,
+        isReturn: true,
+        index: navPoints.length
+      })
+    }
+  }
   return navPoints
 }
 
