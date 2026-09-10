@@ -811,34 +811,54 @@ Page({
     if (this.submitting) return
     wx.scanCode({
       scanType: ['qrCode', 'barCode'],
-      success: async (res) => {
-        const no = (res.result || '').trim()
-        const order = this.data.pendingPickups.find((p) => p.orderNo === no)
-        if (!order) {
-          wx.showToast({ title: '未匹配到待办订单', icon: 'none', duration: 2000 })
+      success: (res) => this.handleScannedCode((res.result || '').trim(), action, successText),
+      // 现场扫码不可用（光线/摄像头/二维码破损）时的兜底：手动输入单号，流程不中断
+      fail: () => this.promptManualOrderNo(action, successText)
+    })
+  },
+
+  /** 手输单号兜底（wx.showModal editable，需基础库 2.17.1+） */
+  promptManualOrderNo(action, successText) {
+    wx.showModal({
+      title: '手动输入单号',
+      editable: true,
+      placeholderText: '扫码不可用时，输入订单号',
+      success: (res) => {
+        if (!res.confirm) {
+          wx.showToast({ title: '已取消', icon: 'none' })
           return
         }
-        this.submitting = true
-        try {
-          await action(order)
-        } catch (e) {
-          this.submitting = false
-          return
-        }
-        this.submitting = false
-        feedback.tap()
-        wx.showToast({ title: successText, icon: 'success' })
-        const pickups = this.data.pendingPickups.filter((p) => p.orderId !== order.orderId)
-        this.refreshCargo(pickups)
-        // 装车完成继续行驶（连续任务导航：推进到下一站）
-        setTimeout(() => {
-          this.continueToNextStation()
-        }, 1500)
-      },
-      fail: () => {
-        wx.showToast({ title: '已取消扫码', icon: 'none' })
+        const no = String(res.content || '').trim()
+        if (!no) return
+        this.handleScannedCode(no, action, successText)
       }
     })
+  },
+
+  /** 扫码/手输得到单号后统一处理：匹配待办 → 执行动作 → 刷新 → 推进下一站 */
+  async handleScannedCode(no, action, successText) {
+    if (!no) return
+    const order = this.data.pendingPickups.find((p) => p.orderNo === no)
+    if (!order) {
+      wx.showToast({ title: '未匹配到待办订单', icon: 'none', duration: 2000 })
+      return
+    }
+    this.submitting = true
+    try {
+      await action(order)
+    } catch (e) {
+      this.submitting = false
+      return
+    }
+    this.submitting = false
+    feedback.tap()
+    wx.showToast({ title: successText, icon: 'success' })
+    const pickups = this.data.pendingPickups.filter((p) => p.orderId !== order.orderId)
+    this.refreshCargo(pickups)
+    // 装车完成继续行驶（连续任务导航：推进到下一站）
+    setTimeout(() => {
+      this.continueToNextStation()
+    }, 1500)
   },
 
   /** 装车/妥投后刷新待办列表与行李舱运力 */
