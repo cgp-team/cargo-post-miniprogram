@@ -126,6 +126,76 @@
   background: var(--color-primary-light);
   font-weight: 600;
 }
+.bus-demo-tag {
+  font-size: 22rpx;
+  color: var(--color-clay);
+  padding: 4rpx 16rpx;
+  background: #F8ECE3;
+  border-radius: 20rpx;
+  margin-right: 12rpx;
+}
+.bus-live-tag {
+  font-size: 22rpx;
+  color: var(--color-primary-dark);
+  padding: 4rpx 16rpx;
+  background: var(--color-primary-light);
+  border-radius: 20rpx;
+  margin-right: 12rpx;
+  font-weight: 600;
+}
+
+/* 附近公交分层展示区（与首页同一数据源） */
+.nearby-section {
+  padding: 16rpx 24rpx 8rpx;
+}
+
+.nearby-section .section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 8rpx 0 12rpx;
+}
+
+.nearby-section .section-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.nearby-section .section-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
+.nearby-section .section-sub {
+  font-size: 22rpx;
+  color: var(--color-text-secondary);
+}
+
+.nearby-section .empty {
+  display: block;
+  padding: 16rpx 0;
+  font-size: 26rpx;
+  color: var(--color-text-secondary);
+}
+
+.nearby-section .line-chip {
+  display: inline-block;
+  margin: 0 12rpx 12rpx 0;
+  padding: 8rpx 18rpx;
+  border-radius: 999rpx;
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  font-size: 24rpx;
+}
+
+.nearby-note {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: var(--color-text-tertiary);
+}
 .bus-route {
   font-size: 26rpx;
   color: var(--color-ink);

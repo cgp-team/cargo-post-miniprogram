@@ -1,5 +1,61 @@
-<!-- 实时公交 - 车来了式 -->
+﻿<!-- 实时公交 - 车来了式 -->
 <view class="bus-page {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
+  <!-- 附近公交（与首页同一 /bus/nearby 接口）：现实公交 + 项目线路 + 模拟车辆，按来源分层，不互相伪装 -->
+  <view class="nearby-section">
+    <view class="section-header">
+      <view class="section-title-wrap">
+        <icon name="pin" size="30" color="{{iconDeep}}" />
+        <text class="section-title">附近公交</text>
+      </view>
+      <text class="section-sub">{{nearbyLocatedText}}</text>
+    </view>
+
+    <view wx:if="{{nearbyBusStatus === 'loading'}}" class="empty">正在加载附近公交…</view>
+    <view wx:elif="{{nearbyBusStatus === 'error'}}" class="empty" bindtap="loadNearby" hover-class="hover">加载失败，点击重试</view>
+    <block wx:elif="{{nearbyBuses.length}}">
+      <view
+        class="bus-card ticket-card"
+        wx:for="{{nearbyBuses}}"
+        wx:key="busId"
+        bindtap="goToBusDetail"
+        data-bus="{{item.busId}}"
+        hover-class="hover"
+      >
+        <view class="ticket-card__main">
+          <view class="ticket-card__serial">{{item.routeName || '线路未知'}} · {{item.shiftCode || '班次待定'}}</view>
+          <view class="bus-row-top">
+            <text class="bus-plate">{{item.plateNo}}</text>
+            <text wx:if="{{item.simulated}}" class="bus-demo-tag">模拟演示</text>
+            <text wx:elif="{{item.isReal}}" class="bus-live-tag">实时</text>
+            <text class="bus-status {{item.status === 'RUNNING' ? 'running' : ''}}">{{item.statusText}}</text>
+          </view>
+          <view class="bus-next">下一站：{{item.nextStation || '—'}}</view>
+        </view>
+        <view class="ticket-card__stub">
+          <text class="ticket-card__stub-value">{{item.etaText}}</text>
+          <text class="ticket-card__stub-label">{{item.simulated ? '演示' : '到站'}}</text>
+        </view>
+      </view>
+    </block>
+    <!-- 附近有线路但暂无实时车辆：不能说"附近没有公交" -->
+    <block wx:elif="{{nearbyLineCount}}">
+      <text class="empty">附近有 {{nearbyLineCount}} 条公交线路</text>
+      <view class="line-chip" wx:for="{{nearbyLines}}" wx:key="routeName">
+        {{item.routeName}}<text wx:if="{{item.dataSource === 'REAL_TRANSIT'}}"> · 现实公交</text><text wx:elif="{{item.dataSource === 'PROJECT_TRANSIT'}}"> · 项目线路</text>
+      </view>
+      <text class="empty">当前暂无实时车辆数据</text>
+    </block>
+    <block wx:elif="{{nearbyStations.length}}">
+      <text class="empty">附近有 {{nearbyStations.length}} 个公交站点</text>
+      <view class="line-chip" wx:for="{{nearbyStations}}" wx:key="name">
+        {{item.name}}<text wx:if="{{item.distanceKm != null}}"> · {{item.distanceKm}}km</text><text wx:if="{{item.dataSource === 'REAL_TRANSIT'}}"> · 现实公交</text>
+      </view>
+      <text class="empty">当前暂无实时车辆数据</text>
+    </block>
+    <view wx:else class="empty">附近暂无公交线路</view>
+    <text wx:if="{{!nearbyRealTransitAvailable && nearbyBusStatus === 'empty'}}" class="nearby-note">未配置现实公交数据源（高德 key），当前展示项目客货邮线路与演示车辆</text>
+  </view>
+
   <block wx:if="{{lines.length}}">
   <!-- 线路选择 -->
   <scroll-view class="line-tabs" scroll-x enable-flex>
@@ -55,6 +111,7 @@
         <view class="ticket-card__serial">山乡巴士 · {{item.shiftCode}}</view>
         <view class="bus-row-top">
           <text class="bus-plate">{{item.plateNo}}</text>
+          <text wx:if="{{item.dataSource === 'SIMULATED'}}" class="bus-demo-tag">模拟演示</text>
           <text class="bus-status {{item.status === 1 ? 'running' : ''}}">{{item.status === 1 ? '行驶中' : '待发车'}}</text>
         </view>
         <view class="bus-route">

@@ -141,6 +141,9 @@ Page({
         remark: remark.trim(),
         userMobile: userInfo.mobile || ''
       })
+      if (!res || !res.orderNo) {
+        throw { msg: '服务未返回订单号，请稍后重试' }
+      }
       wx.hideLoading()
       feedback.tap()
       this.setData({ showOrderPop: false })
@@ -157,7 +160,16 @@ Page({
       })
     } catch (e) {
       wx.hideLoading()
-      // 错误提示已由 api.js 统一处理
+      // 401 已由 api.js 统一提示并跳登录（登录后回到本页，收货信息保留在弹窗 data 中）
+      if (e && e.code === 401) return
+      // 其余失败给出可读原因：api.js 的 toast 只闪现一次，这里用弹窗把后端原因说清楚，避免"一串失败"
+      const reason = (e && e.msg) || (e && e.errMsg) || '网络异常或服务暂时不可用'
+      wx.showModal({
+        title: '下单失败',
+        content: `${reason}\n可稍后重试；如持续失败，请把此提示反馈给平台客服。`,
+        showCancel: false,
+        confirmText: '知道了'
+      })
     }
   }
 })

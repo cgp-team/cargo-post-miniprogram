@@ -1,9 +1,13 @@
 /**
  * 实时公交页 - 车来了式：线路选择 + 地图车辆位置 + 实时车辆列表
- * 数据源：GET /app-api/transport/bus/lines（免登录，复用监控车辆位置）
+ * 数据源：GET /app-api/transport/bus/lines（线路地图/线路车辆）+ GET /app-api/transport/bus/nearby
+ *        （附近公交分层：现实公交 REAL_TRANSIT + 项目线路 PROJECT_TRANSIT + 模拟车辆 SIMULATED）
+ * 说明：附近公交与首页共用同一 nearby 接口，避免"首页一套逻辑、公交页另一套逻辑"。
  */
 const api = require('../../utils/api')
 const appearance = require('../../utils/appearance')
+const location = require('../../utils/location')
+const transitAmap = require('../../utils/transit-amap')
 
 const REFRESH_MS = 15000
 
@@ -21,16 +25,26 @@ Page({
     polyline: [],
     buses: [],
     hasError: false,
-    loading: true
+    loading: true,
+    // 附近公交（现实公交 / 项目线路 / 模拟车辆分层，与首页同源）
+    nearbyBuses: [],
+    nearbyStations: [],
+    nearbyLines: [],
+    nearbyLineCount: 0,
+    nearbyRealTransitAvailable: false,
+    nearbyBusStatus: 'loading', // loading | ok | empty | error
+    nearbyLocatedText: ''
   },
 
   onLoad() {
     appearance.apply(this)
+    this.loadNearby()
     this.loadLines()
   },
 
   onShow() {
     appearance.apply(this)
+    this.loadNearby()
     this.loadLines()
     this.startTimer()
   },
@@ -46,7 +60,10 @@ Page({
   /** 每 15s 静默刷新，保持车辆位置接近实时 */
   startTimer() {
     this.stopTimer()
-    this._timer = setInterval(() => this.loadLines(), REFRESH_MS)
+    this._timer = setInterval(() => {
+      this.loadLines()
+      this.loadNearby()
+    }, REFRESH_MS)
   },
 
   stopTimer() {
@@ -58,6 +75,82 @@ Page({
 
   /** 拉取线路 + 车辆，重建当前线路地图数据 */
   async loadLines() {
+    if (this._linesLoading) return
+    this._linesLoading = true
+    try {
+      await this._doLoadLines()
+    } finally {
+      this._linesLoading = false
+    }
+  },
+
+  /**
+   * 附近公交（与首页同一接口 /bus/nearby）：现实公交站点/线路 + 项目自建线路 + 车辆（REAL/SIMULATED）。
+   * 分层展示、各自标注来源；"有线路但暂无实时车辆"不会被误报成"附近没有公交"。
+   */
+  async loadNearby() {
+    try {
+      const loc = await location.getCurrentLocation()
+      const hasCoords = !!(loc && loc.success
+        && typeof loc.latitude === 'number' && typeof loc.longitude === 'number')
+      const district = hasCoords ? '' : ((loc && loc.district) || '')
+      const raw = await api.getNearbyRealtimeBuses(
+        hasCoords ? loc.latitude : null,
+        hasCoords ? loc.longitude : null,
+        hasCoords ? this._nearbyRadius(loc) : null,
+        district || null
+      )
+      // 与首页同一口径：后端现实层缺失时，用高德小程序 SDK 补客户端现实站点
+      const data = await transitAmap.enrichNearby(
+        raw,
+        hasCoords ? loc.latitude : null,
+        hasCoords ? loc.longitude : null
+      )
+      const buses = (data && data.buses) || []
+      const stations = (data && data.nearbyStations) || []
+      const lines = (data && data.lines) || []
+      this.setData({
+        nearbyBuses: buses.map((b) => this._formatNearbyBus(b)),
+        nearbyStations: stations,
+        nearbyLines: lines,
+        nearbyLineCount: (data && data.lineCount) || lines.length,
+        nearbyRealTransitAvailable: !!(data && data.realTransitAvailable),
+        nearbyBusStatus: buses.length ? 'ok' : 'empty',
+        nearbyLocatedText: hasCoords
+          ? (loc.source === 'demo' ? `根据${loc.district || '演示地点'}展示` : '根据当前位置展示')
+          : (district ? `根据${district}展示` : '定位不可用')
+      })
+    } catch (e) {
+      this.setData({ nearbyBusStatus: 'error' })
+    }
+  },
+
+  /** 搜索半径按定位精度自适应（与首页口径一致，避免定位偏差导致查不到车） */
+  _nearbyRadius(loc) {
+    const accuracy = loc && typeof loc.accuracy === 'number' ? loc.accuracy : null
+    if (accuracy && accuracy > 500) return 15000
+    if (loc && loc.level === 'APPROXIMATE') return 10000
+    return 5000
+  },
+
+  /** 附近车辆卡片文案：来源（实时/模拟演示/过期）与状态，绝不把模拟位置标成实时 */
+  _formatNearbyBus(b) {
+    const hasEta = typeof b.etaMinutes === 'number' && b.etaMinutes >= 0
+    const simulated = b.locationSource === 'SIMULATED' || b.dataSource === 'SIMULATED'
+    return {
+      ...b,
+      simulated,
+      isReal: b.locationSource === 'REAL_FRESH' || b.dataSource === 'REAL',
+      statusText: b.status === 'RUNNING' ? '行驶中'
+        : (b.status === 'IDLE' ? '待发/停靠' : (b.status === 'ARRIVED' ? '已到站' : '无位置')),
+      sourceText: b.locationSource === 'REAL_FRESH' ? '实时'
+        : (b.locationSource === 'REAL_STALE' ? '位置可能过期'
+          : (simulated ? '模拟演示' : '位置暂不可用')),
+      etaText: hasEta ? b.etaMinutes + ' 分钟' : (simulated ? '演示中' : '—')
+    }
+  },
+
+  async _doLoadLines() {
     if (this._loading) return
     this._loading = true
     try {
@@ -168,6 +261,6 @@ Page({
   },
 
   onPullDownRefresh() {
-    this.loadLines().finally(() => wx.stopPullDownRefresh())
+    Promise.all([this.loadLines(), this.loadNearby()]).finally(() => wx.stopPullDownRefresh())
   }
 })

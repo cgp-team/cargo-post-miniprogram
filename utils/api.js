@@ -12,6 +12,18 @@ const BASE_URL = getBaseUrl()
 let last401At = 0
 
 function handle401() {
+  // 记录来源页并在重新登录后跳回：401 会强制 reLaunch 登录页，
+  // 不记录的话「商城下单/寄货提交」这类写到一半的操作现场会丢失（用户只能从头再来）。
+  try {
+    const pages = getCurrentPages()
+    const current = pages[pages.length - 1]
+    if (current && current.route && current.route !== 'pages/login/login') {
+      const isTab = ['pages/index/index', 'pages/goods/goods', 'pages/parcel/parcel', 'pages/mine/mine'].indexOf(current.route) >= 0
+      wx.setStorageSync('loginRedirect', { url: '/' + current.route, isTab })
+    }
+  } catch (e) {
+    // 记录失败不影响登录跳转
+  }
   wx.removeStorageSync('token')
   wx.removeStorageSync('userInfo')
   wx.removeStorageSync('refreshToken')
@@ -19,8 +31,30 @@ function handle401() {
   const now = Date.now()
   if (now - last401At < 2000) return
   last401At = now
-  wx.showToast({ title: '登录已失效，请重新登录', icon: 'none' })
+  wx.showToast({ title: '登录已失效，请重新登录', icon: 'none', duration: 2500 })
   wx.reLaunch({ url: '/pages/login/login' })
+}
+
+/**
+ * 请求参数清理：过滤 undefined / null / 空字符串。
+ *
+ * 背景：微信 wx.request 会把 undefined 序列化成字符串 "undefined"（GET 拼进 query、POST 拼进 body），
+ * 后端 Integer/Long/Double 等类型绑定会直接失败，例如订单页
+ * `status: undefined` → `For input string: "undefined"` 的线上报错。
+ *
+ * 约定：
+ * - 只清理对象自身的键（浅层），嵌套对象/数组原样保留（避免误删结构）；
+ * - 保留 0 / false / 非空字符串（0 是合法业务值，如「待发货」status=0、页码等）。
+ */
+function cleanParams(data) {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return data
+  const cleaned = {}
+  Object.keys(data).forEach((key) => {
+    const value = data[key]
+    if (value === undefined || value === null || value === '') return
+    cleaned[key] = value
+  })
+  return cleaned
 }
 
 /**
@@ -28,12 +62,14 @@ function handle401() {
  */
 function request(url, method = 'GET', data = {}) {
   const token = wx.getStorageSync('token')
+  // GET/POST 统一清理参数：空值不进 query/body，避免 "undefined" 字符串打到后端
+  const payload = cleanParams(data)
 
   return new Promise((resolve, reject) => {
     wx.request({
       url: `${BASE_URL}${url}`,
       method,
-      data,
+      data: payload,
       timeout: 10000,
       header: {
         'Content-Type': 'application/json',
@@ -318,14 +354,10 @@ function getRealtimeBusLines() {
 }
 
 /** 附近实时公交（按用户坐标 Haversine 过滤 radius 内站点/车辆；无坐标时传 district 区域 fallback）。
- *  过滤 undefined 参数：微信 wx.request 会把 undefined 序列化成字符串 "undefined"，导致后端 Double 转换 400。 */
+ *  空值参数（无定位/无区域/未指定 radius）统一由 request() 的 cleanParams 过滤，
+ *  避免 wx.request 把 undefined 序列化成字符串 "undefined" 导致后端 Double 转换 400。 */
 function getNearbyRealtimeBuses(latitude, longitude, radius, district) {
-  const params = {}
-  if (latitude != null) params.latitude = latitude
-  if (longitude != null) params.longitude = longitude
-  if (radius != null) params.radius = radius
-  if (district) params.district = district
-  return request('/app-api/transport/bus/nearby', 'GET', params)
+  return request('/app-api/transport/bus/nearby', 'GET', { latitude, longitude, radius, district })
 }
 
 // ==================== 取件核销 + 文件上传 ====================
@@ -371,6 +403,7 @@ function uploadFile(filePath) {
 
 module.exports = {
   request,
+  cleanParams,
   smsLogin,
   sendSmsCode,
   wechatMiniAppLogin,

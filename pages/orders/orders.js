@@ -47,7 +47,11 @@ Page({
 
   /** 切换状态 tab */
   switchTab(e) {
-    const key = e.currentTarget.dataset.key
+    // dataset 可能回传字符串（如 '0'），统一归一为数字或 ''（全部），
+    // 保证 status 参数始终是数字，避免后端 Integer 绑定失败
+    const raw = e.currentTarget.dataset.key
+    const num = Number(raw)
+    const key = raw === '' || raw === undefined || raw === null || isNaN(num) ? '' : num
     if (key === this.data.activeTab) return
     this.setData({ activeTab: key })
     this.reload()
@@ -62,11 +66,14 @@ Page({
     const { activeTab, pageNo, pageSize } = this.data
     this.setData({ loading: true })
     try {
-      const res = await api.pageMyProductOrders({
-        pageNo,
-        pageSize,
-        status: activeTab === '' ? undefined : activeTab
-      })
+      // 不传 status: undefined —— wx.request 会把它序列化成字符串 "undefined"，
+      // 后端 ProductOrderPageReqVO.status(Integer) 绑定失败报
+      // Failed to convert property value ... For input string: "undefined"
+      const params = { pageNo, pageSize }
+      if (activeTab !== '') {
+        params.status = activeTab
+      }
+      const res = await api.pageMyProductOrders(params)
       const list = (res.list || []).map((o) => ({
         ...o,
         statusClass: this.statusClass(o.status),

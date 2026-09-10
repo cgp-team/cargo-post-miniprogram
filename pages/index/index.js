@@ -7,6 +7,7 @@ const productImg = require('../../utils/product-img')
 const auth = require('../../utils/auth')
 const location = require('../../utils/location')
 const demoLocation = require('../../utils/demo-location')
+const transitAmap = require('../../utils/transit-amap')
 
 /** 天气缓存有效期：10 分钟内直接复用缓存渲染，跳过定位与网络请求 */
 const WEATHER_CACHE_TTL = 10 * 60 * 1000
@@ -21,6 +22,8 @@ Page({
     userLocation: null,
     locationDenied: false,      // 权限被拒绝（引导"去设置"）
     locationUnavailable: false, // 定位不可用（无坐标）
+    locationPoorAccuracy: false, // 定位精度较低（accuracy > 100m）：提示用户"重新定位"
+    locationAccuracyText: null,  // 精度米数（展示用）
     weather: {},
     weatherLoading: false,   // 真实天气请求中
     weatherUpdateTime: '',   // 更新时间提示
@@ -36,6 +39,8 @@ Page({
     nearbyBuses: [],            // 附近实时公交（真实接口数据，不再硬编码 Demo）
     nearbyStations: [],         // 附近站点（用于空态区分：有站点但无车 = 非运营时间）
     nearbyLines: [],            // 附近站点关联线路（无运营车辆也展示：该区域有哪些线路/不在运营）
+    nearbyLineCount: 0,         // 附近线路条数（现实公交 + 项目线路，空态文案用）
+    nearbyRealTransitAvailable: false, // 现实公交数据源（高德）是否可用
     nearbyBusStatus: 'loading', // loading | ok | empty | error
     nearbyBusUpdatedAt: 0,      // 最近成功更新时间戳（相对文案用）
     nearbyBusUpdatedText: '',   // "已更新：刚刚" / "更新于 12 秒前"
@@ -98,6 +103,11 @@ Page({
     this.loadNearbyBusData()
     this.loadWeather()
     this.loadHomeData()
+    // 定位变化（缓存秒出后后台刷到新位置）→ 主动刷新附近公交，避免一直用旧位置查询
+    this._offLocationChange = location.onLocationChange((loc) => {
+      this._applyUserLocation(loc)
+      this.loadNearbyBusData()
+    })
   },
 
   onHide() {
@@ -107,6 +117,10 @@ Page({
 
   onUnload() {
     this.stopNearbyTimer()
+    if (this._offLocationChange) {
+      this._offLocationChange()
+      this._offLocationChange = null
+    }
   },
 
   onShow() {
@@ -167,13 +181,15 @@ Page({
    * 统一用户定位：由 LocationService 返回，页面只负责保存 userLocation + 更新展示村庄名 + 权限引导。
    * 定位失败/拒绝不阻塞首页其他功能。
    */
-  async loadUserLocation() {
-    const loc = await location.getCurrentLocation()
+  async loadUserLocation(options) {
+    const loc = await location.getCurrentLocation(options)
     if (!loc || !loc.success) {
       this.setData({
         userLocation: null,
         locationDenied: !!(loc && loc.denied),
-        locationUnavailable: true
+        locationUnavailable: true,
+        // 定位不可用时不再假装身在"云山村"（手动切换过村庄的用户保留其选择）
+        currentVillage: this.data.villageManual ? this.data.currentVillage : ''
       })
       return
     }
@@ -186,11 +202,45 @@ Page({
       userLocation: loc,
       locationDenied: false,
       locationUnavailable: false,
-      currentVillage: loc.district || this.data.currentVillage
+      locationPoorAccuracy: !!loc && loc.level === 'APPROXIMATE',
+      locationAccuracyText: loc && typeof loc.accuracy === 'number' ? Math.round(loc.accuracy) : null,
+      // 区域名只是展示文本：定位成功但拿不到区域名时留空，由 UI 显示"定位不可用/当前位置"
+      currentVillage: loc.district || (this.data.villageManual ? this.data.currentVillage : '')
     })
     const app = getApp()
     if (loc.district) app.globalData.currentVillage = loc.district
     app.globalData.userLocation = loc
+  },
+
+  /**
+   * 附近搜索半径：按定位精度自适应，避免"定位不准（几百米误差）→ 附近公交查不到"。
+   * 无坐标时返回 null，交给后端按 district 区域 fallback。
+   */
+  _nearbyRadius(loc, hasCoords) {
+    if (!hasCoords) return null
+    const accuracy = loc && typeof loc.accuracy === 'number' ? loc.accuracy : null
+    if (accuracy && accuracy > 500) return 15000
+    if (loc && loc.level === 'APPROXIMATE') return 10000
+    return 5000
+  },
+
+  /** 定位不准 → 强制重新定位（跳过缓存）并重查附近公交 */
+  async relocate() {
+    wx.showLoading({ title: '重新定位…', mask: true })
+    try {
+      const loc = await location.refreshLocation()
+      wx.hideLoading()
+      if (loc && loc.success) {
+        this._applyUserLocation(loc)
+        this.loadNearbyBusData()
+        wx.showToast({ title: loc.level === 'PRECISE' ? '定位已更新' : '已更新（精度一般）', icon: 'none' })
+      } else {
+        wx.showToast({ title: '定位失败，请检查定位权限', icon: 'none' })
+      }
+    } catch (e) {
+      wx.hideLoading()
+      wx.showToast({ title: '定位失败，请稍后重试', icon: 'none' })
+    }
   },
 
   /** 权限被拒绝 → 引导去设置开启定位 */
@@ -318,11 +368,19 @@ Page({
       this.setData({ nearbyBusStatus: 'loading' })
     }
     try {
-      const data = await api.getNearbyRealtimeBuses(
-        hasCoords ? loc.latitude : undefined,
-        hasCoords ? loc.longitude : undefined,
-        undefined, // radius 默认后端 5000
-        district || undefined
+      const raw = await api.getNearbyRealtimeBuses(
+        // 无定位/无区域时传 null（api.js cleanParams 统一过滤），不要传 undefined：
+        // wx.request 会把 undefined 序列化成字符串 "undefined"，后端 Double 绑定直接 400
+        hasCoords ? loc.latitude : null,
+        hasCoords ? loc.longitude : null,
+        this._nearbyRadius(loc, hasCoords), // 精度差时放宽半径（定位不准也能找到车）
+        district || null
+      )
+      // 现实公交客户端层（高德小程序 SDK）：后端未配 Web 服务 key 时用小程序 key 补齐真实站点
+      const data = await transitAmap.enrichNearby(
+        raw,
+        hasCoords ? loc.latitude : null,
+        hasCoords ? loc.longitude : null
       )
       const buses = this._formatBuses((data && data.buses) || [])
       const stations = (data && data.nearbyStations) || []
@@ -331,6 +389,8 @@ Page({
         nearbyBuses: buses,
         nearbyStations: stations,
         nearbyLines: lines,
+        nearbyLineCount: (data && data.lineCount) || lines.length,
+        nearbyRealTransitAvailable: !!(data && data.realTransitAvailable),
         nearbyBusStatus: buses.length ? 'ok' : 'empty',
         nearbyBusUpdatedAt: Date.now(),
         nearbyBusUpdatedText: '已更新：刚刚',
@@ -371,7 +431,10 @@ Page({
               : (b.locationSource === 'SIMULATED' ? '模拟位置' : '位置暂不可用')),
         sourceDot: b.locationSource === 'REAL_FRESH', // 🟢 实时
         sourceStale: b.locationSource === 'REAL_STALE', // 🟠 位置可能过期（司机中断上报）
-        etaText: hasEta ? b.etaMinutes + ' 分钟到站' : '等待实时位置',
+        // 无 ETA 时按数据来源区分文案：模拟演示车辆说清"是演示"，真实车辆才提示"等待实时位置"
+        etaText: hasEta ? b.etaMinutes + ' 分钟到站'
+          : (b.locationSource === 'SIMULATED' ? '模拟演示中' : '等待实时位置'),
+        etaLabel: hasEta ? '到站' : (b.locationSource === 'SIMULATED' ? '演示' : '到站'),
         etaMinutes: hasEta ? b.etaMinutes : null,
         distanceKm: typeof b.distanceToNextStationKm === 'number' ? b.distanceToNextStationKm : null,
         routeProvider: b.routeProvider || '',
@@ -522,9 +585,9 @@ Page({
    * 下拉刷新：等数据回来后再收起动画，与 goods/orders 行为一致
    */
   onPullDownRefresh() {
-    // 下拉刷新：强制更新天气 + 立即刷新附近公交（有请求去重，不会重复并发）
+    // 下拉刷新：强制重新定位（跳过缓存）+ 强制更新天气 + 立即刷新附近公交
     this.loadWeather({ force: true })
-    Promise.all([this.loadHomeData(), this.loadNearbyBusData()])
+    Promise.all([this.loadHomeData(), this.loadUserLocation({ force: true }).then(() => this.loadNearbyBusData())])
       .finally(() => wx.stopPullDownRefresh())
   }
 })

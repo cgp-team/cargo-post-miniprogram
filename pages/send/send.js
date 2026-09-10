@@ -14,12 +14,29 @@ const reviewUtils = require('../../utils/review')
 const qrcodeRender = require('../../utils/qrcode-render')
 const util = require('../../utils/util')
 
+/** 货物类型可选值（与后端 cargoCategory 字段一致，缺省农产品） */
+const CARGO_CATEGORIES = ['农产品', '生鲜果蔬', '日用品', '文件票据', '其他']
+
+/** 单件限重（kg）：与后端承运审核规则一致，超限前端先提示，避免提交后被拒运 */
+const MAX_WEIGHT_KG = 30
+
 Page({
   data: {
     step: 1,          // 1=填写信息, 2=拍照确认, 3=提交成功
     goodsName: '',
     goodsWeight: '',
     goodsNote: '',
+    // 物体信息（类型/件数/体积/生鲜）——后端 transport_cargo_order 对应字段
+    categoryOptions: CARGO_CATEGORIES,
+    categoryIndex: 0,
+    cargoCategory: CARGO_CATEGORIES[0],
+    itemCount: '1',
+    sizeLength: '',
+    sizeWidth: '',
+    sizeHeight: '',
+    volumeM3: 0,          // 长×宽×高(cm) 折算 m³，提交用
+    volumeText: '0.0000', // 展示用（保留 4 位小数）
+    freshFlag: false,
     photoPath: '',
     photoUrl: '', // 拍照后上传到服务器拿到的真实 URL
     // 站点（从后端拉取）
@@ -38,6 +55,11 @@ Page({
     receiverName: '',
     receiverMobile: '',
     receiverAddress: '',
+    // 承运审核"需客户操作"时的就近交接站点（客户送站导航用）
+    servicePointStationName: '',
+    servicePointDistanceKm: null,
+    servicePointLatitude: null,
+    servicePointLongitude: null,
     // 提交结果
     orderNo: '',
     elderlyMode: false,
@@ -88,6 +110,37 @@ Page({
   onReceiverMobileInput(e) { this.setData({ receiverMobile: e.detail.value }) },
   onReceiverAddressInput(e) { this.setData({ receiverAddress: e.detail.value }) },
 
+  /** 货物类型选择 */
+  onCategoryChange(e) {
+    const index = Number(e.detail.value) || 0
+    this.setData({ categoryIndex: index, cargoCategory: CARGO_CATEGORIES[index] })
+  },
+
+  /** 货物件数：仅保留正整数 */
+  onItemCountInput(e) {
+    const value = String(e.detail.value || '').replace(/[^\d]/g, '')
+    this.setData({ itemCount: value })
+  },
+
+  /** 长/宽/高（cm）输入：任一变化即重算体积（m³） */
+  onSizeInput(e) {
+    const field = e.currentTarget.dataset.field
+    const value = String(e.detail.value || '').replace(/[^\d.]/g, '')
+    this.setData({ [field]: value }, () => this.recalcVolume())
+  },
+
+  /** 是否生鲜/需冷链（true → 后端转人工确认承运条件） */
+  onFreshChange(e) {
+    this.setData({ freshFlag: !!e.detail.value })
+  },
+
+  /** 长×宽×高(cm) → 体积(m³)：0.01m 换算，保留 4 位小数（与 decimal(12,4) 对齐） */
+  recalcVolume() {
+    const { sizeLength, sizeWidth, sizeHeight } = this.data
+    const volumeM3 = util.cmSizeToM3(sizeLength, sizeWidth, sizeHeight)
+    this.setData({ volumeM3, volumeText: volumeM3.toFixed(4) })
+  },
+
   /** 取货站点变更：同步 ID/名称；与送达相同则拦截；清空旧路线预估 */
   onPickupStationChange(e) {
     const s = e.detail
@@ -130,6 +183,19 @@ Page({
     }
     if (!goodsWeight.trim() || Number(goodsWeight) <= 0) {
       wx.showToast({ title: '请输入正确的货物重量', icon: 'none' })
+      return
+    }
+    // 单件限重与后端承运审核规则一致（斤 → kg），超限先提示，避免提交后被拒运
+    if (Number(goodsWeight) * 0.5 > MAX_WEIGHT_KG) {
+      wx.showToast({ title: `单件限重 ${MAX_WEIGHT_KG} 公斤（${MAX_WEIGHT_KG * 2} 斤）`, icon: 'none' })
+      return
+    }
+    if (!Number(this.data.itemCount) || Number(this.data.itemCount) < 1) {
+      wx.showToast({ title: '请输入货物件数', icon: 'none' })
+      return
+    }
+    if (!(this.data.volumeM3 > 0)) {
+      wx.showToast({ title: '请填写货物长宽高', icon: 'none' })
       return
     }
     if (!pickupStationId) {
@@ -223,6 +289,10 @@ Page({
         deliveryStationId: this.data.deliveryStationId,
         goodsName: this.data.goodsName.trim(),
         goodsWeight: Number(this.data.goodsWeight) * 0.5, // 斤 → kg
+        cargoCategory: this.data.cargoCategory,
+        itemCount: Number(this.data.itemCount),
+        volumeM3: this.data.volumeM3,
+        freshFlag: this.data.freshFlag,
         goodsNote: this.data.goodsNote.trim(),
         photoUrl,
         receiverName: this.data.receiverName.trim(),
@@ -249,7 +319,17 @@ Page({
       case 1:
         return { reviewMode: 'passed', reviewTitle: '审核通过', reviewHint: '订单可进入待入池，调度员将尽快为您安排班次', reviewReasonText: '' }
       case 2:
-        return { reviewMode: 'conditional', reviewTitle: '需您操作', reviewHint: '请将货物送到指定站点交接后即可入池', reviewReasonText: reasonText }
+        return {
+          reviewMode: 'conditional',
+          reviewTitle: '需您操作',
+          // 就近交接站点：后端已按"取货站点最近的可用站点"匹配（取货站本身是场站时就用该站）
+          reviewHint: this._servicePointHint(res),
+          reviewReasonText: reasonText,
+          servicePointStationName: res.servicePointStationName || '',
+          servicePointDistanceKm: res.servicePointDistanceKm != null ? res.servicePointDistanceKm : null,
+          servicePointLatitude: res.servicePointLatitude != null ? res.servicePointLatitude : null,
+          servicePointLongitude: res.servicePointLongitude != null ? res.servicePointLongitude : null
+        }
       case 3:
         return { reviewMode: 'manual', reviewTitle: '待人工审核', reviewHint: '工作人员将尽快确认承运条件，请留意通知', reviewReasonText: reasonText }
       case 4:
@@ -257,6 +337,24 @@ Page({
       default:
         return { reviewMode: 'pending', reviewTitle: '审核中', reviewHint: '正在为您确认承运条件', reviewReasonText: reasonText }
     }
+  },
+
+  /** 就近送站提示文案：站点名 + 距取货点公里数（缺数据时给通用文案） */
+  _servicePointHint(res) {
+    const name = res && res.servicePointStationName
+    if (!name) return '请将货物送到指定站点交接后即可入池'
+    const km = res.servicePointDistanceKm
+    return `请将货物送到就近站点「${name}」${km != null ? `（距取货点约 ${km} km）` : ''}交接后即可入池`
+  },
+
+  /** 导航到就近交接站点（wx.openLocation 需要站点坐标） */
+  openServicePoint() {
+    const { servicePointLatitude: lat, servicePointLongitude: lng, servicePointStationName: name } = this.data
+    if (typeof lat !== 'number' || typeof lng !== 'number') {
+      wx.showToast({ title: '站点暂无坐标，请在「快递」页查看站点名', icon: 'none' })
+      return
+    }
+    wx.openLocation({ latitude: lat, longitude: lng, name: name || '交接站点', scale: 16 })
   },
 
   /** 提交成功后绘制订单二维码（取件/司机扫码用） */
@@ -299,6 +397,15 @@ Page({
       goodsName: '',
       goodsWeight: '',
       goodsNote: '',
+      categoryIndex: 0,
+      cargoCategory: CARGO_CATEGORIES[0],
+      itemCount: '1',
+      sizeLength: '',
+      sizeWidth: '',
+      sizeHeight: '',
+      volumeM3: 0,
+      volumeText: '0.0000',
+      freshFlag: false,
       photoPath: '',
       photoUrl: '',
       pickupStationId: null,
@@ -311,6 +418,10 @@ Page({
       receiverName: '',
       receiverMobile: '',
       receiverAddress: '',
+      servicePointStationName: '',
+      servicePointDistanceKm: null,
+      servicePointLatitude: null,
+      servicePointLongitude: null,
       orderNo: ''
     })
   },
