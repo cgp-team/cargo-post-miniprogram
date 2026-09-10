@@ -13,6 +13,7 @@ const feedback = require('../../utils/feedback')
 const reviewUtils = require('../../utils/review')
 const qrcodeRender = require('../../utils/qrcode-render')
 const util = require('../../utils/util')
+const location = require('../../utils/location')
 
 /** 货物类型可选值（与后端 cargoCategory 字段一致，缺省农产品） */
 const CARGO_CATEGORIES = ['农产品', '生鲜果蔬', '日用品', '文件票据', '其他']
@@ -37,6 +38,17 @@ Page({
     volumeM3: 0,          // 长×宽×高(cm) 折算 m³，提交用
     volumeText: '0.0000', // 展示用（保留 4 位小数）
     freshFlag: false,
+    // 取货方式：'station' 自选取货站点 / 'location' 使用当前位置（含可达性评估与推荐站点）
+    pickupMode: 'station',
+    reachLoading: false,
+    reachability: null,
+    // 用户原始地址与坐标（位置 ≠ 车辆能到的地方：二者都保存，不互相覆盖）
+    originalAddress: '',
+    originalLatitude: null,
+    originalLongitude: null,
+    // 取货服务方式（后端 ServiceModeEnum.code）：可达性评估结果，随订单一起落库，
+    // 后台订单管理/审核页据此显示"最近站点交接 / 上门交接"
+    pickupServiceMode: '',
     photoPath: '',
     photoUrl: '', // 拍照后上传到服务器拿到的真实 URL
     // 站点（从后端拉取）
@@ -132,6 +144,68 @@ Page({
   /** 是否生鲜/需冷链（true → 后端转人工确认承运条件） */
   onFreshChange(e) {
     this.setData({ freshFlag: !!e.detail.value })
+  },
+
+  /**
+   * 使用当前位置寄货：真实定位（GCJ-02）→ 后端可达性评估 → 不可达则推荐最近可服务站点。
+   * 订单会同时保存"用户原始地址/坐标"与"实际服务站"，不把用户地址覆盖成站点名。
+   */
+  async useCurrentLocation() {
+    this.setData({ reachLoading: true, pickupMode: 'location' })
+    try {
+      const loc = await location.getCurrentLocation()
+      if (!loc || !loc.success) {
+        this.setData({ reachLoading: false, pickupMode: 'station' })
+        wx.showToast({ title: '无法获取当前位置，请改用自选站点', icon: 'none' })
+        return
+      }
+      const address = loc.address
+        || [loc.city, loc.district].filter(Boolean).join('')
+        || '当前位置'
+      this.setData({
+        originalAddress: address,
+        originalLatitude: loc.latitude,
+        originalLongitude: loc.longitude
+      })
+      const res = await api.getReachability(loc.latitude, loc.longitude)
+      this.setData({
+        reachability: res || null,
+        // 车辆进不去（校园/步行区）→ NEAREST_STATION 最近站点交接；可直达 → DOOR_PICKUP 上门
+        pickupServiceMode: (res && res.serviceMode) || '',
+        reachLoading: false
+      })
+      // 可达：直接把最近站点作为取货站；不可达：等用户点「使用推荐站点」确认
+      if (res && res.reachable && res.recommendedStation) {
+        this.applyPickupStation(res.recommendedStation)
+      }
+    } catch (e) {
+      this.setData({ reachLoading: false, pickupMode: 'station' })
+      wx.showToast({ title: '可达性判断失败，请改用自选站点', icon: 'none' })
+    }
+  },
+
+  /** 用户确认使用推荐站点（不可达场景的"送站交接"确认） */
+  useRecommendedStation() {
+    const res = this.data.reachability
+    if (!res || !res.recommendedStation) return
+    this.applyPickupStation(res.recommendedStation)
+    wx.showToast({ title: '已使用推荐站点', icon: 'success' })
+  },
+
+  /** 切回自选取货站点 */
+  switchToStationMode() {
+    this.setData({ pickupMode: 'station', reachability: null, pickupServiceMode: '' })
+  },
+
+  /** 把推荐站点写入取货站点（与手动选择共用同一字段，提交口径一致） */
+  applyPickupStation(station) {
+    this.setData({
+      pickupStationId: station.id,
+      pickupStationName: station.name,
+      routePreview: null,
+      routeStatus: 'idle',
+      routePreviewKey: ''
+    })
   },
 
   /** 长×宽×高(cm) → 体积(m³)：0.01m 换算，保留 4 位小数（与 decimal(12,4) 对齐） */
@@ -293,6 +367,12 @@ Page({
         itemCount: Number(this.data.itemCount),
         volumeM3: this.data.volumeM3,
         freshFlag: this.data.freshFlag,
+        // 用户原始位置（不可达时与推荐站点一起保存，后台可看到"用户在哪、车去哪接"）
+        originalAddress: this.data.originalAddress || '',
+        originalLatitude: this.data.originalLatitude,
+        originalLongitude: this.data.originalLongitude,
+        // 取货方式随单落库，后台可核对"用户在校内 → 最近站点交接"
+        pickupServiceMode: this.data.pickupServiceMode || '',
         goodsNote: this.data.goodsNote.trim(),
         photoUrl,
         receiverName: this.data.receiverName.trim(),
@@ -406,6 +486,13 @@ Page({
       volumeM3: 0,
       volumeText: '0.0000',
       freshFlag: false,
+      pickupMode: 'station',
+      reachLoading: false,
+      reachability: null,
+      originalAddress: '',
+      originalLatitude: null,
+      originalLongitude: null,
+      pickupServiceMode: '',
       photoPath: '',
       photoUrl: '',
       pickupStationId: null,

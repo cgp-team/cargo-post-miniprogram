@@ -101,6 +101,35 @@ Page({
     return `${o.vehiclePlate || '班车'} 距${station}约 ${o.carrierEtaMinutes} 分钟${dist}${source}`
   },
 
+  /**
+   * 司机已到达文案：站点 + 司机姓名/电话（后端按派单经停状态给出）。
+   * 已装车/已派送完成时给出对应进度文案（用户端一眼看到"到哪一步了"）。
+   */
+  buildArrivedText(o) {
+    if (!o || !o.carrierArrived) return ''
+    const station = o.carrierArrivedStation || o.targetStation || '交接站点'
+    const driver = o.driverName ? `${o.driverName}${o.driverMobile ? ' ' + o.driverMobile : ''} ` : ''
+    if (o.carrierDelivered) return `${driver}已在该站点完成派送`
+    if (o.carrierLoaded) return `${driver}已在该站点揽收装车`
+    return `${driver}已到达${station}，请前往交接`
+  },
+
+  /** 司机已到达提醒：按单去重，只弹一次（不打扰重复刷新） */
+  notifyArrived(list) {
+    const shown = this._arrivedShown || (this._arrivedShown = {})
+    const arrived = (list || []).filter((o) => o && o.carrierArrived)
+    const fresh = arrived.filter((o) => !shown[o.orderNo])
+    if (!fresh.length) return
+    fresh.forEach((o) => { shown[o.orderNo] = true })
+    const first = fresh[0]
+    const more = fresh.length > 1 ? `（另有 ${fresh.length - 1} 单）` : ''
+    wx.showToast({
+      title: `${this.buildArrivedText(first)}${more}`,
+      icon: 'none',
+      duration: 3500
+    })
+  },
+
   /** 车辆接近提醒：批量检查"车快到了"的订单，首次进入阈值时弹一次 toast（不重复打扰） */
   notifyApproaching(list) {
     const shown = this._approachingShown || (this._approachingShown = {})
@@ -182,9 +211,12 @@ Page({
       // 车来取货/送货提醒（单号查询同样生效，演示时可直接查单看到倒计时）
       res.carrierText = this.buildCarrierText(res)
       res.approaching = !!res.carrierApproaching
+      res.arrived = !!res.carrierArrived
+      res.arrivedText = this.buildArrivedText(res)
       res.servicePointText = this.buildServicePointText(res)
       this.setData({ trackResult: res, noResult: false }, () => {
         this.notifyApproaching([res])
+        this.notifyArrived([res])
         this.drawParcelQr()
       })
     } catch (e) {
@@ -271,12 +303,17 @@ Page({
         createTimeText: formatBackendTime(o.createTime),
         carrierText: this.buildCarrierText(o),
         approaching: !!o.carrierApproaching,
+        // 司机到站提醒：司机端「确认到达」后 carriedArrived=true（后端为源，含司机姓名/站点）
+        arrived: !!o.carrierArrived,
+        arrivedText: this.buildArrivedText(o),
         servicePointText: this.buildServicePointText(o)
       }))
       const merged = this.data.pageNo === 1 ? list : this.data.sendList.concat(list)
       const total = res.total || 0
       // 车快到了：首次进入阈值弹一次提醒（演示时最直观；重复刷新不打扰）
       this.notifyApproaching(list)
+      // 司机已到达：首次出现弹一次提醒（用户端"司机已到达"消息）
+      this.notifyArrived(list)
       this.setData({
         sendList: merged,
         total,

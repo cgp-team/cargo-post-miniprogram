@@ -1,6 +1,20 @@
 <!-- 实时公交车辆详情 -->
 <view class="detail-page {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
   <block wx:if="{{bus}}">
+    <!-- 顶部地图：车辆实时位置 + 线路 polyline + 我的位置 -->
+    <view class="detail-map-wrap">
+      <map
+        id="busDetailMap"
+        class="detail-map"
+        longitude="{{mapCenter.longitude}}"
+        latitude="{{mapCenter.latitude}}"
+        scale="{{mapScale}}"
+        markers="{{markers}}"
+        polyline="{{polyline}}"
+        show-location
+      ></map>
+    </view>
+
     <!-- 车辆头部 -->
     <view class="bus-head">
       <view class="head-plate">{{bus.plateNo}}</view>
@@ -9,6 +23,7 @@
         <text class="tag status {{bus.status === 1 ? 'running' : ''}}">{{bus.status === 1 ? '行驶中' : '待发车'}}</text>
         <text class="tag">{{bus.shiftCode}}</text>
         <text class="tag demo" wx:if="{{bus.dataSource === 'SIMULATED'}}">模拟演示</text>
+        <text class="tag" wx:if="{{sourceText}}">数据：{{sourceText}}</text>
         <text class="tag" wx:if="{{bus.speedKmh}}">{{bus.speedKmh}} km/h</text>
       </view>
       <view class="head-meta">

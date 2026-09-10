@@ -8,6 +8,7 @@ const api = require('../../../utils/api')
 const appearance = require('../../../utils/appearance')
 const feedback = require('../../../utils/feedback')
 const nav = require('../../../utils/nav')
+const location = require('../../../utils/location')
 
 /** 位置上报间隔（毫秒） */
 const LOCATION_REPORT_INTERVAL = 10000
@@ -103,14 +104,16 @@ Page({
   },
 
   /** 地图中心跟随司机当前位置，定位失败保留兜底坐标 */
-  initMapCenter() {
-    wx.getLocation({
-      type: 'gcj02',
-      success: (res) => {
-        this.setData({ mapLatitude: res.latitude, mapLongitude: res.longitude })
-      },
-      fail: () => {} // 权限被拒或定位失败时使用兜底坐标
-    })
+  async initMapCenter() {
+    // 统一走 LocationService 的设备定位（GCJ-02），页面不再直接调 wx.getLocation
+    try {
+      const loc = await location.getDeviceLocationGcj02()
+      if (loc && loc.success) {
+        this.setData({ mapLatitude: loc.latitude, mapLongitude: loc.longitude })
+      }
+    } catch (e) {
+      // 权限被拒或定位失败时使用兜底坐标
+    }
   },
 
   onShow() {
@@ -207,14 +210,35 @@ Page({
   },
 
   /**
+   * 选班次：与本次派单任务段（navPoints）站点重合度最高者优先；
+   * 同分时在途(1)优先、其次未发车(0)，最后按原顺序。无班次返回 null。
+   * 目的：司机在重庆邮电大学片区执行任务时，发车/表头都用同片区的班次，不串到别的线路。
+   */
+  pickShiftForNav(navPoints, shifts) {
+    const list = shifts || []
+    if (!list.length) return null
+    const targetIds = (navPoints || []).map((p) => String(p.stationId)).filter(Boolean)
+    if (!targetIds.length) return list.find((s) => s.status === 1) || list[0]
+    let best = null
+    list.forEach((s) => {
+      const stopIds = ((s && s.stops) || []).map((x) => String(x.stationId))
+      const overlap = stopIds.filter((id) => targetIds.indexOf(id) >= 0).length
+      const score = overlap * 10 + (s.status === 1 ? 2 : s.status === 0 ? 1 : 0)
+      if (!best || score > best.score) best = { shift: s, score, overlap }
+    })
+    // 完全无重合（例如派单站点不在任何班次线路上）→ 回退原逻辑，保证仍能出方案
+    if (!best || best.overlap === 0) return list.find((s) => s.status === 1) || list[0]
+    return best.shift
+  },
+
+  /**
    * 连续任务导航初始化：以算法任务段经停点（navPoints）为导航数据源。
    * 班次信息仍用于发车/到站（shiftId）+ 运力展示，但地图/下一站/进度走任务段。
    */
   initFromNav(navPoints, shifts) {
-    let current = null
-    if (shifts && shifts.length) {
-      current = shifts.find((s) => s.status === 1) || shifts[0]
-    }
+    // 班次选择：优先"经停站与本次派单任务段重合度最高"的班次（片区一致），
+    // 否则退化为在途班次/首个班次 —— 避免出现"任务在重庆邮电大学片区、发车却是成都线路"的错配
+    const current = this.pickShiftForNav(navPoints, shifts)
     if (current) {
       this.shiftId = current.shiftId
       const cap = this.data.cargoLimit
@@ -229,8 +253,11 @@ Page({
       })
     }
 
-    // 恢复进度：优先后端任务状态（第一个 PENDING 站），回退班次 currentStationId
-    const pendIdx = navPoints.findIndex((p) => (p.status == null ? 0 : p.status) === 0)
+    // 恢复进度：优先后端任务状态（第一个"有作业"且 PENDING 的站），回退班次 currentStationId。
+    // 跳过发车场站本身（只有 DEPART/RETURN、没有取派/上下客的经停）——发车后不该说"下一站=出发点"。
+    const pendingIdx = (p) => (p.status == null ? 0 : p.status) === 0
+    const firstWorkIdx = navPoints.findIndex((p) => pendingIdx(p) && (p.actionTotal || 0) > 0)
+    const pendIdx = firstWorkIdx >= 0 ? firstWorkIdx : navPoints.findIndex(pendingIdx)
     const lastDone = navPoints.length > 0 && navPoints[navPoints.length - 1].status === 7
     let resumeIdx = pendIdx >= 0 ? pendIdx : (lastDone ? navPoints.length : 0)
     if (resumeIdx === 0 && current && current.currentStationId != null) {
@@ -265,6 +292,7 @@ Page({
       navBoardCount: t.boardCount || 0,
       navAlightCount: t.alightCount || 0,
       navActionTotal: t.actionTotal || 0,
+      navReturnPoint: !!t.isReturn,
       nextStation: t.stationName || '',
       currentStation: idx > 0 ? (points[idx - 1] || {}).stationName : '',
       progressPercent: total > 1 ? Math.round(idx / (total - 1) * 100) : 0,
@@ -460,21 +488,21 @@ Page({
   },
 
   /** 上报真实 GPS（仅 REAL 状态调用） */
-  reportRealLocation() {
-    wx.getLocation({
-      type: 'gcj02',
-      success: (res) => {
-        const speedKmh = Math.round((res.speed || 0) * 3.6)
-        api.reportDriverLocation({
-          driverId: this.driverId,
-          shiftId: this.shiftId,
-          longitude: res.longitude,
-          latitude: res.latitude,
-          speedKmh
-        }).catch(() => {})
-      },
-      fail: () => {} // 权限问题由 onLocationFail 处理
-    })
+  async reportRealLocation() {
+    // 统一走 LocationService（GCJ-02，与站点表/高德/地图一致），避免页面各自调 wx.getLocation
+    try {
+      const loc = await location.getDeviceLocationGcj02()
+      if (!loc || !loc.success) return // 权限问题由 onLocationFail 处理
+      api.reportDriverLocation({
+        driverId: this.driverId,
+        shiftId: this.shiftId,
+        longitude: loc.longitude,
+        latitude: loc.latitude,
+        speedKmh: 0 // LocationService 不返回速度；车辆速度由后端按里程/时长估算
+      }).catch(() => {})
+    } catch (e) {
+      // 静默，等待下一轮
+    }
   },
 
   /** 订阅派单通知：拉模板列表 → wx.requestSubscribeMessage 授权（一次性模板，派单前需再次订阅） */
@@ -691,6 +719,11 @@ Page({
    */
   scanToLoad() {
     this.scanOrder(async (order) => {
+      // 商城订单：同样拍照核验，走商城订单接口（订单仍为已发货，标记"已装车/配送中"）
+      if (order.bizType === 'PRODUCT') {
+        const productPhoto = await this.takeCargoPhoto()
+        return api.driverProductLoad(this.driverId, order.orderId, productPhoto)
+      }
       let photoUrl = ''
       if (order.orderType !== 3) { // 邮快件有快递面单，不强制拍照
         photoUrl = await this.takeCargoPhoto()
@@ -703,7 +736,14 @@ Page({
    * 扫码妥投：匹配待装订单并调后端完成派送
    */
   scanToDeliver() {
-    this.scanOrder((order) => api.driverDeliver(this.driverId, order.orderId), '妥投成功')
+    this.scanOrder(async (order) => {
+      // 商城订单：妥投即交付完成（拍交付凭证 → 订单转已完成，用户端可见"已送达"）
+      if (order.bizType === 'PRODUCT') {
+        const proof = await this.takeCargoPhoto()
+        return api.driverProductDeliver(this.driverId, order.orderId, proof)
+      }
+      return api.driverDeliver(this.driverId, order.orderId)
+    }, '妥投成功')
   },
 
   /**
@@ -771,34 +811,54 @@ Page({
     if (this.submitting) return
     wx.scanCode({
       scanType: ['qrCode', 'barCode'],
-      success: async (res) => {
-        const no = (res.result || '').trim()
-        const order = this.data.pendingPickups.find((p) => p.orderNo === no)
-        if (!order) {
-          wx.showToast({ title: '未匹配到待办订单', icon: 'none', duration: 2000 })
+      success: (res) => this.handleScannedCode((res.result || '').trim(), action, successText),
+      // 现场扫码不可用（光线/摄像头/二维码破损）时的兜底：手动输入单号，流程不中断
+      fail: () => this.promptManualOrderNo(action, successText)
+    })
+  },
+
+  /** 手输单号兜底（wx.showModal editable，需基础库 2.17.1+） */
+  promptManualOrderNo(action, successText) {
+    wx.showModal({
+      title: '手动输入单号',
+      editable: true,
+      placeholderText: '扫码不可用时，输入订单号',
+      success: (res) => {
+        if (!res.confirm) {
+          wx.showToast({ title: '已取消', icon: 'none' })
           return
         }
-        this.submitting = true
-        try {
-          await action(order)
-        } catch (e) {
-          this.submitting = false
-          return
-        }
-        this.submitting = false
-        feedback.tap()
-        wx.showToast({ title: successText, icon: 'success' })
-        const pickups = this.data.pendingPickups.filter((p) => p.orderId !== order.orderId)
-        this.refreshCargo(pickups)
-        // 装车完成继续行驶（连续任务导航：推进到下一站）
-        setTimeout(() => {
-          this.continueToNextStation()
-        }, 1500)
-      },
-      fail: () => {
-        wx.showToast({ title: '已取消扫码', icon: 'none' })
+        const no = String(res.content || '').trim()
+        if (!no) return
+        this.handleScannedCode(no, action, successText)
       }
     })
+  },
+
+  /** 扫码/手输得到单号后统一处理：匹配待办 → 执行动作 → 刷新 → 推进下一站 */
+  async handleScannedCode(no, action, successText) {
+    if (!no) return
+    const order = this.data.pendingPickups.find((p) => p.orderNo === no)
+    if (!order) {
+      wx.showToast({ title: '未匹配到待办订单', icon: 'none', duration: 2000 })
+      return
+    }
+    this.submitting = true
+    try {
+      await action(order)
+    } catch (e) {
+      this.submitting = false
+      return
+    }
+    this.submitting = false
+    feedback.tap()
+    wx.showToast({ title: successText, icon: 'success' })
+    const pickups = this.data.pendingPickups.filter((p) => p.orderId !== order.orderId)
+    this.refreshCargo(pickups)
+    // 装车完成继续行驶（连续任务导航：推进到下一站）
+    setTimeout(() => {
+      this.continueToNextStation()
+    }, 1500)
   },
 
   /** 装车/妥投后刷新待办列表与行李舱运力 */
