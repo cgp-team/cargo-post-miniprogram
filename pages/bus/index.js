@@ -133,15 +133,16 @@ Page({
       })
       return
     }
-    const accuracy = typeof loc.accuracy === 'number' ? Math.round(loc.accuracy) : null
-    const expanded = accuracy != null && accuracy > location.PRECISE_ACCURACY
+    const accuracyText = location.accuracyText(loc)
+    const expanded = location.isCoarseAccuracy(loc)
     this.setData({
       locationText: expanded
-        ? '定位精度较低 · 已扩大搜索范围'
-        : (accuracy != null ? `已定位 · 精度 ${accuracy}m` : '已定位'),
+        ? `定位精度较低（约 ${accuracyText}）· 已扩大搜索范围`
+        : (accuracyText ? `已定位 · 精度 ${accuracyText}` : '已定位'),
       locationLevel: loc.level || '',
-      locationAccuracy: accuracy,
+      locationAccuracy: typeof loc.accuracy === 'number' ? Math.round(loc.accuracy) : null,
       radiusExpanded: expanded,
+      locationManual: !!(loc.manual),
       userLocation: loc
     })
     this._userLocation = loc
@@ -174,6 +175,23 @@ Page({
     } catch (e) {
       wx.hideLoading()
       wx.showToast({ title: '定位失败，请稍后重试', icon: 'none' })
+    }
+  },
+
+  /**
+   * 手动选择位置（定位不准时的纠正）：粗定位（未开精确位置/室内/WiFi）误差可达公里级，
+   * 会出现"人在南岸区、公交按渝中区查"的情况；地图点选后按新坐标重查附近公交。
+   */
+  async manualPickLocation() {
+    try {
+      const loc = await location.chooseLocation()
+      if (!loc || !loc.success) return // 用户取消
+      this._userPanned = false
+      this._applyLocation(loc)
+      await this.loadNearby()
+      wx.showToast({ title: `已使用：${loc.name || loc.address || '所选位置'}`.slice(0, 30), icon: 'none' })
+    } catch (e) {
+      wx.showToast({ title: '选择位置失败，请重试', icon: 'none' })
     }
   },
 

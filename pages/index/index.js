@@ -198,18 +198,42 @@ Page({
 
   /** 保存定位结果（内部保留真实经纬度；currentVillage 只是展示文本），并同步全局 */
   _applyUserLocation(loc) {
+    const coarse = location.isCoarseAccuracy(loc)
     this.setData({
       userLocation: loc,
       locationDenied: false,
       locationUnavailable: false,
-      locationPoorAccuracy: !!loc && loc.level === 'APPROXIMATE',
-      locationAccuracyText: loc && typeof loc.accuracy === 'number' ? Math.round(loc.accuracy) : null,
-      // 区域名只是展示文本：定位成功但拿不到区域名时留空，由 UI 显示"定位不可用/当前位置"
-      currentVillage: loc.district || (this.data.villageManual ? this.data.currentVillage : '')
+      // 精度差（>500m）时明确提示"可能不准"，并给"手动选择位置"入口（粗定位区域名可能落到隔壁区）
+      locationPoorAccuracy: !!loc && (loc.level === 'APPROXIMATE' || coarse),
+      locationVeryPoorAccuracy: location.isVeryCoarseAccuracy(loc),
+      locationAccuracyText: location.accuracyText(loc),
+      locationManual: !!(loc && loc.manual),
+      // 区域名只是展示文本：手动选点优先显示用户点选的地点名（如「重庆邮电大学」）
+      currentVillage: (loc && (loc.manual && loc.name ? loc.name : loc.district))
+        || (this.data.villageManual ? this.data.currentVillage : '')
     })
     const app = getApp()
-    if (loc.district) app.globalData.currentVillage = loc.district
+    if (loc.district || (loc.manual && loc.name)) {
+      app.globalData.currentVillage = loc.manual && loc.name ? loc.name : loc.district
+    }
     app.globalData.userLocation = loc
+  },
+
+  /**
+   * 手动选择位置（定位不准时的纠正手段）：微信地图选点 → 用选中的 GCJ-02 坐标重查附近公交与天气。
+   * 手机未开"精确位置"/室内/WiFi 定位时误差可达公里级（人在南岸区显示渝中区），点一次即可纠正。
+   */
+  async manualPickLocation() {
+    try {
+      const loc = await location.chooseLocation()
+      if (!loc || !loc.success) return // 用户取消
+      this._applyUserLocation(loc)
+      this._fetchWeather(loc.latitude, loc.longitude)
+      this.loadNearbyBusData()
+      wx.showToast({ title: `已使用：${loc.name || loc.address || '所选位置'}`.slice(0, 30), icon: 'none' })
+    } catch (e) {
+      wx.showToast({ title: '选择位置失败，请重试', icon: 'none' })
+    }
   },
 
   /**

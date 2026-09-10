@@ -36,6 +36,14 @@
   opacity: 0.92;
   font-size: 24rpx;
 }
+.loc-action-pick {
+  margin-left: 12rpx;
+  padding: 4rpx 16rpx;
+  border-radius: 999rpx;
+  background: rgba(255, 255, 255, 0.22);
+  font-weight: 600;
+  opacity: 1;
+}
 
 /* ---------- 概览 ---------- */
 .summary {
