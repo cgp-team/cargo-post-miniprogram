@@ -92,12 +92,12 @@ Page({
     wx.navigateTo({ url: '/pages/bus/index' })
   },
 
-  /** 车来取货/送货提醒文案：承运车辆位置（真实上报或模拟演示）→ 距目标站点分钟（无位置返回空） */
+  /** 车来取货/送货提醒文案：承运车辆位置（真实上报或按班次推算）→ 距目标站点分钟（无位置返回空） */
   buildCarrierText(o) {
     if (!o || o.carrierEtaMinutes == null || o.carrierEtaMinutes <= 0) return ''
     const station = o.targetStation || '站点'
     const dist = o.carrierDistanceKm != null ? `（约 ${o.carrierDistanceKm} km）` : ''
-    const source = o.carrierLocationSource === 'SIMULATED' ? ' · 模拟演示' : ''
+    const source = o.carrierLocationSource === 'SIMULATED' ? ' · 位置推算' : ''
     return `${o.vehiclePlate || '班车'} 距${station}约 ${o.carrierEtaMinutes} 分钟${dist}${source}`
   },
 
@@ -140,7 +140,7 @@ Page({
     fresh.forEach((o) => { shown[o.orderNo] = true })
     const first = fresh[0]
     const more = fresh.length > 1 ? `（另有 ${fresh.length - 1} 单）` : ''
-    const simulated = first.carrierLocationSource === 'SIMULATED' ? '（模拟演示）' : ''
+    const simulated = first.carrierLocationSource === 'SIMULATED' ? '（位置推算）' : ''
     wx.showToast({
       title: `${first.vehiclePlate || '班车'} 快到了：距${first.targetStation || '站点'}约 ${first.carrierEtaMinutes} 分钟${simulated}${more}`,
       icon: 'none',

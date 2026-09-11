@@ -22,17 +22,16 @@
       <view class="head-tags">
         <text class="tag status {{bus.status === 1 ? 'running' : ''}}">{{bus.status === 1 ? '行驶中' : '待发车'}}</text>
         <text class="tag">{{bus.shiftCode}}</text>
-        <text class="tag demo" wx:if="{{bus.dataSource === 'SIMULATED'}}">模拟演示</text>
+        <text class="tag" wx:if="{{bus.dataSource === 'SIMULATED'}}">位置推算</text>
         <text class="tag" wx:if="{{sourceText}}">数据：{{sourceText}}</text>
         <text class="tag" wx:if="{{bus.speedKmh}}">{{bus.speedKmh}} km/h</text>
       </view>
       <view class="head-meta">
+        <text class="head-state">{{stateText}}</text>
         <block wx:if="{{locationAvailable}}">
-          <text>下一站：{{bus.nextStation || '—'}}</text>
-          <text wx:if="{{bus.dataSource === 'SIMULATED'}}">模拟演示位置（非司机实时上报）</text>
-          <text wx:elif="{{bus.status === 1}}">等待实时位置</text>
+          <text>当前站：{{currentStationText}} · 下一站：{{nextStationText}}{{etaText ? ' · ' + etaText : ''}}</text>
+          <text wx:if="{{bus.dataSource === 'SIMULATED'}}">按班次计划推算的位置（非司机实时上报）</text>
         </block>
-        <text wx:else>暂时无法获取车辆实时位置</text>
       </view>
     </view>
 

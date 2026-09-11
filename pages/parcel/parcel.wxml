@@ -106,7 +106,7 @@
       </view>
       <view wx:if="{{item.approaching}}" class="parcel-approach" bindtap="goToBusTracking" hover-class="hover">
         <icon name="bus" size="30" color="#FFFFFF" />
-        <text class="parcel-approach-text">车快到了 {{item.carrierEtaMinutes}} 分钟 · {{item.vehiclePlate || '班车'}} 距{{item.targetStation || '站点'}}{{item.carrierLocationSource === 'SIMULATED' ? '（模拟演示）' : ''}}</text>
+        <text class="parcel-approach-text">车快到了 {{item.carrierEtaMinutes}} 分钟 · {{item.vehiclePlate || '班车'}} 距{{item.targetStation || '站点'}}{{item.carrierLocationSource === 'SIMULATED' ? '（位置推算）' : ''}}</text>
       </view>
       <view wx:elif="{{item.carrierText}}" class="parcel-carrier-list" bindtap="goToBusTracking" hover-class="hover">
         <icon name="bus" size="26" color="{{iconColor}}" />

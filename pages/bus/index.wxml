@@ -34,7 +34,7 @@
       <text class="legend-item"><text class="dot dot-me"></text>我的位置</text>
       <text class="legend-item"><text class="dot dot-stop"></text>公交站</text>
       <text class="legend-item"><text class="dot dot-real"></text>实时车</text>
-      <text class="legend-item"><text class="dot dot-sim"></text>模拟车</text>
+      <text class="legend-item"><text class="dot dot-sim"></text>推算位置</text>
     </view>
     <view class="map-btn" bindtap="locateMe" hover-class="hover">
       <icon name="pin" size="26" color="{{iconDeep}}" />
@@ -63,7 +63,7 @@
         hover-class="hover"
       >
         <text class="line-name">{{item.name}}</text>
-        <text class="line-tag {{item.dataSource === 'REAL_TRANSIT' ? 'tag-real' : 'tag-project'}}">{{item.dataSource === 'REAL_TRANSIT' ? '现实公交' : '客货邮'}}</text>
+        <text class="line-tag {{item.dataSource === 'REAL_TRANSIT' ? 'tag-real' : 'tag-project'}}">{{item.dataSource === 'REAL_TRANSIT' ? '现实公交站点' : '真实公交线路'}}</text>
       </view>
     </scroll-view>
     <view wx:elif="{{loading}}" class="empty">正在加载附近线路…</view>
@@ -82,7 +82,8 @@
     </view>
 
     <view wx:if="{{!vehicles.length && !loading}}" class="empty">
-      <text wx:if="{{nearbyLineCount}}">附近有 {{nearbyLineCount}} 条线路，当前暂无实时车辆数据</text>
+      <text wx:if="{{runningEmptyText}}">{{runningEmptyText}}</text>
+      <text wx:elif="{{nearbyLineCount}}">附近有 {{nearbyLineCount}} 条线路，当前暂无车辆经过</text>
       <text wx:else>附近暂无公交车</text>
     </view>
 
@@ -105,7 +106,7 @@
           <image class="vehicle-icon" src="{{item.simulated ? '/images/marker-bus-sim.png' : '/images/marker-bus-real.png'}}" mode="aspectFit" />
           <text class="vehicle-plate">{{item.plateNo}}</text>
         </view>
-        <view class="vehicle-next">下一站：{{item.nextStation}}</view>
+        <view class="vehicle-next">{{item.stationText}}</view>
       </view>
       <view class="vehicle-badge">
         <text class="vehicle-status {{item.statusText === '行驶中' ? 'running' : ''}}">{{item.statusText}}</text>

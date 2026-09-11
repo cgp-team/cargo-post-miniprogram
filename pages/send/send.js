@@ -384,10 +384,6 @@ Page({
       wx.showToast({ title: '请先拍照确认货物', icon: 'none' })
       return
     }
-    if (!photoUrl) {
-      wx.showToast({ title: '照片上传中或失败，请稍后重试', icon: 'none' })
-      return
-    }
     if (!receiverMobile.trim()) {
       wx.showToast({ title: '请输入收货电话', icon: 'none' })
       return
@@ -399,6 +395,24 @@ Page({
     this.submitting = true
     wx.showLoading({ title: '提交中…', mask: true })
     try {
+      // 照片上传失败/超时不再直接卡住发布：先补传一次，仍失败再让用户选择"不带照片提交"
+      // （后端 photoUrl 允许为空，不能因为一张照片把订单堵死在页面上）
+      let finalPhotoUrl = photoUrl
+      if (!finalPhotoUrl) {
+        wx.showLoading({ title: '重试上传照片…', mask: true })
+        finalPhotoUrl = await this._uploadPhoto(photoPath)
+        if (finalPhotoUrl) {
+          this.setData({ photoUrl: finalPhotoUrl })
+        } else {
+          const goOn = await this._confirmWithoutPhoto()
+          if (!goOn) {
+            this.submitting = false
+            wx.hideLoading()
+            return
+          }
+        }
+        wx.showLoading({ title: '提交中…', mask: true })
+      }
       const res = await api.createSendOrder({
         pickupStationId: this.data.pickupStationId,
         deliveryStationId: this.data.deliveryStationId,
@@ -415,22 +429,51 @@ Page({
         // 取货方式随单落库，后台可核对"用户在校内 → 最近站点交接"
         pickupServiceMode: this.data.pickupServiceMode || '',
         goodsNote: this.data.goodsNote.trim(),
-        photoUrl,
+        photoUrl: finalPhotoUrl,
         receiverName: this.data.receiverName.trim(),
         receiverMobile: receiverMobile.trim(),
         receiverAddress: this.data.receiverAddress.trim()
       })
       this.submitting = false
       wx.hideLoading()
-      feedback.tap()
-      // 承运审核结果：客户实时知道可运/不可运/为什么/需什么操作（reasonCode 前端统一映射文案）
-      const review = this.resolveReview(res)
-      this.setData({ orderNo: res.orderNo, step: 3, ...review }, () => this.drawQr())
+      // 订单已创建：先切到成功页（保证"已发布"一定可见），再补审核结果文案。
+      // 展示层异常绝不能让用户以为"没发布成功"而重复提交。
+      this.setData({ orderNo: res.orderNo, step: 3 }, () => this.drawQr())
+      try {
+        feedback.tap()
+        this.setData(this.resolveReview(res))
+      } catch (e) {
+        console.warn('[send] 审核结果展示异常（订单已创建）', e)
+      }
     } catch (e) {
       this.submitting = false
       wx.hideLoading()
       // 错误提示已由 api.js 统一处理，保留当前页面现场
     }
+  },
+
+  /** 上传照片（返回 URL；失败返回空串，绝不抛出） */
+  async _uploadPhoto(path) {
+    if (!path) return ''
+    try {
+      return (await api.uploadFile(path)) || ''
+    } catch (e) {
+      return ''
+    }
+  },
+
+  /** 照片上传失败时询问是否继续提交（后端允许无照片，避免流程被一张照片堵死） */
+  _confirmWithoutPhoto() {
+    return new Promise((resolve) => {
+      wx.showModal({
+        title: '照片未上传成功',
+        content: '网络较慢导致照片上传失败，是否不带照片提交？（受理后工作人员仍会现场核实货物）',
+        confirmText: '继续提交',
+        cancelText: '重试上传',
+        success: (res) => resolve(!!res.confirm),
+        fail: () => resolve(false)
+      })
+    })
   },
 
   /** 审核结果 → 前端展示态（mode 驱动样式，hint 为操作指引；reasonCode 文案走 utils/review 统一映射） */

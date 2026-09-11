@@ -29,6 +29,12 @@ const MARKER_ME = 1
 const MARKER_STATION_BASE = 1000
 /** 车辆 marker id 起始（2000 + busId），便于点击时反查 */
 const MARKER_BUS_BASE = 2000
+/**
+ * 地图兜底中心：重庆邮电大学（南山·南岸区）。
+ * 定位拿到真实坐标前先落在这里，避免把地图初始画到与业务无关的城市，
+ * 定位成功后 {@link _centerOnUser} 会覆盖它。
+ */
+const DEFAULT_MAP_CENTER = { latitude: 29.5325, longitude: 106.5765 }
 
 Page({
   behaviors: [require('../../behaviors/page-base')],
@@ -59,7 +65,7 @@ Page({
     // 地图
     // 初始中心用项目首个场站（县城客运中心）兜底，避免用 103/30 这类无意义默认值；
     // 真实定位/最近站点到达后会被覆盖（优先级：用户位置 → 最近站点 → 项目线路首站）
-    mapCenter: { latitude: 30.5723, longitude: 104.0657 },
+    mapCenter: DEFAULT_MAP_CENTER,
     mapScale: 14,
     markers: [],
     polyline: []
@@ -231,6 +237,11 @@ Page({
         nearbyLocatedText: hasCoords
           ? (loc.source === location.SOURCE_DEMO ? `根据${loc.district || '演示地点'}展示` : '根据当前位置展示')
           : (district ? `根据${district}展示` : '定位不可用'),
+        // 运营时段（无车时如实展示"当前不在运营时间 + 下一班几点"，不留空白）
+        inService: data && data.inService != null ? data.inService : null,
+        serviceWindowText: (data && data.serviceWindowText) || '',
+        nextDepartureText: (data && data.nextDepartureTime) || '',
+        runningEmptyText: this._runningEmptyText(data, buses),
         hasError: false,
         loading: false
       })
@@ -247,6 +258,24 @@ Page({
   },
 
   /** 附近线路：现实线路 + 项目线路分别标注来源；同名去重；按名称稳定排序 */
+  /**
+   * "正在运行"空态文案：有线路但没车时，如实说明是不是运营时间之外。
+   * 运营时段/下一班来自后端（按附近线路的启用班次推导）。
+   */
+  _runningEmptyText(data, buses) {
+    if (buses && buses.length) return ''
+    const window = (data && data.serviceWindowText) || this.data.serviceWindowText
+    const next = (data && data.nextDepartureTime) || this.data.nextDepartureText
+    const inService = data && data.inService != null ? data.inService : this.data.inService
+    if (inService === false) {
+      return `当前不在运营时间${window ? `（服务时段 ${window}）` : ''}${next ? `，下一班 ${next} 发车` : ''}`
+    }
+    if (inService === true) {
+      return '班次正在运行中，附近暂时没有车辆经过，稍后会自动刷新'
+    }
+    return '附近暂无正在运行的车辆'
+  },
+
   _buildVisibleLines(lines, stations) {
     const result = []
     const seen = {}
@@ -282,8 +311,8 @@ Page({
     })
   },
 
-  /** 点击附近线路：切到该线路（现实线路用站点连线、项目线路用真实几何） */
-  selectNearbyLine(e) {
+  /** 点击附近线路：切到该线路（项目线路按需拉取真实道路轨迹，失败回退站点连线） */
+  async selectNearbyLine(e) {
     const key = e.currentTarget.dataset.key
     const name = e.currentTarget.dataset.name
     const source = e.currentTarget.dataset.source
@@ -316,9 +345,17 @@ Page({
       this.setData({ activeLineKey: key, polyline: [] })
       return
     }
-    const pts = (line.roadPolyline && line.roadPolyline.length >= 2
-      ? line.roadPolyline
-      : (line.points || []))
+    // 真实道路轨迹：点开时按需查询（后端 5 分钟缓存，避免整页 15 条线路逐站打高德导致超时）
+    let road = line.roadPolyline
+    if ((!road || road.length < 2) && line.routeId) {
+      try {
+        const fetched = await api.getBusLinePolyline(line.routeId)
+        if (fetched && fetched.length >= 2) road = fetched
+      } catch (err) {
+        road = null
+      }
+    }
+    const pts = ((road && road.length >= 2) ? road : (line.points || []))
       .filter((p) => p && p.longitude != null && p.latitude != null)
       .map((p) => ({ latitude: p.latitude, longitude: p.longitude }))
     this.setData({
@@ -356,6 +393,16 @@ Page({
   _formatVehicle(b) {
     const hasEta = typeof b.etaMinutes === 'number' && b.etaMinutes >= 0
     const simulated = b.locationSource === 'SIMULATED' || b.dataSource === 'SIMULATED'
+    const nextStation = b.nextStation || ''
+    const currentStation = b.currentStation || ''
+    const running = b.status === 'RUNNING'
+    // 卡片主文案：永远有内容，且区分"在途"与"待发/收车"——
+    // 待发车的 etaMinutes 是"距发车分钟"，不能写成"到下一站分钟"（否则会出现"预计 464 分钟到达"）
+    const stationText = running && nextStation
+      ? `下一站：${nextStation}`
+      : (currentStation
+        ? `${running ? '当前停靠' : '待发车'}：${currentStation}`
+        : (b.endStation ? `已到终点站：${b.endStation}` : '位置待更新'))
     return {
       busId: b.busId,
       plateNo: b.plateNo || '班车',
@@ -363,13 +410,19 @@ Page({
       shiftCode: b.shiftCode || '',
       statusText: b.status === 'RUNNING' ? '行驶中'
         : (b.status === 'IDLE' ? '待发/停靠' : (b.status === 'ARRIVED' ? '已到站' : '无位置')),
-      nextStation: b.nextStation || '—',
+      nextStation: nextStation || (currentStation || b.endStation || '—'),
+      currentStation,
+      stationText,
+      running,
       distanceKm: typeof b.distanceToNextStationKm === 'number' ? b.distanceToNextStationKm : null,
-      etaText: hasEta ? `约 ${b.etaMinutes} 分钟` : (simulated ? '演示中' : '—'),
+      // 班次模拟车辆的预计到站：按班次计划时长推算，文案用"预计"而不是"演示"，
+      // 车上显示的是真实线路上的推算位置（线路/站点均来自真实公交线网）
+      etaText: !hasEta ? (simulated ? '待发车' : '—')
+        : (running ? `约 ${b.etaMinutes} 分钟` : `${b.etaMinutes} 分钟后发车`),
       simulated,
       isReal: b.locationSource === 'REAL_FRESH' || b.dataSource === 'REAL',
       sourceText: b.locationSource === 'REAL_FRESH' ? '实时'
-        : (b.locationSource === 'REAL_STALE' ? '位置可能过期' : (simulated ? '模拟演示' : '位置暂不可用')),
+        : (b.locationSource === 'REAL_STALE' ? '位置可能过期' : (simulated ? '位置推算' : '位置暂不可用')),
       longitude: b.longitude,
       latitude: b.latitude
     }
@@ -421,7 +474,20 @@ Page({
         iconPath: '/images/marker-stop.png',
         width: 22,
         height: 22,
-        zIndex: 5
+        zIndex: 5,
+        // 最近的 8 个站点带名称标签：避免"地图上站点乱标、看不出是哪个站"
+        label: i < 8 && s.name
+          ? {
+              content: s.name,
+              color: '#1F3B57',
+              fontSize: 10,
+              bgColor: '#FFFFFF',
+              borderRadius: 3,
+              padding: 2,
+              anchorX: -14,
+              anchorY: -8
+            }
+          : undefined
       })
     })
     // 车辆：动画帧优先，其次原始坐标
@@ -441,7 +507,7 @@ Page({
         height: 34,
         zIndex: 8,
         callout: {
-          content: `${b.plateNo || '班车'}${simulated ? ' · 模拟演示' : ' · 实时'}\n下一站：${b.nextStation || '—'}`,
+          content: `${b.plateNo || '班车'}${simulated ? ' · 位置推算' : ' · 实时'}\n下一站：${b.nextStation || '—'}`,
           color: '#ffffff',
           bgColor: simulated ? '#C75B2A' : '#2E7D32',
           fontSize: 11,
@@ -461,9 +527,13 @@ Page({
     return dLat * dLat + dLng * dLng
   },
 
-  /** 地图拖动/缩放：用户手动操作后不再自动抢回中心 */
+  /**
+   * 地图拖动/缩放：只有"用户手动操作"才标记为已拖动，之后不再自动抢回中心。
+   * 注意：设置 longitude/latitude 触发的程序化 regionchange 也会带 type=begin，
+   * 若按 type 判断会把首次定位当成用户拖动，导致地图永远停在兜底中心（定位看着"不准"）。
+   */
   onRegionChange(e) {
-    if (e.type === 'begin' || e.causedBy === 'drag' || e.causedBy === 'scale') {
+    if (e.causedBy === 'drag' || e.causedBy === 'scale') {
       this._userPanned = true
     }
   },

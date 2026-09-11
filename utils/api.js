@@ -371,6 +371,11 @@ function getRealtimeBusLines() {
   return request('/app-api/transport/bus/lines')
 }
 
+/** 单条线路的真实道路轨迹（点开线路时按需查询，带缓存；失败由前端回退站点直线） */
+function getBusLinePolyline(routeId) {
+  return request(`/app-api/transport/bus/line-polyline?routeId=${routeId}`)
+}
+
 /** 附近实时公交（按用户坐标 Haversine 过滤 radius 内站点/车辆；无坐标时传 district 区域 fallback）。
  *  空值参数（无定位/无区域/未指定 radius）统一由 request() 的 cleanParams 过滤，
  *  避免 wx.request 把 undefined 序列化成字符串 "undefined" 导致后端 Double 转换 400。 */
@@ -469,6 +474,8 @@ function uploadFile(filePath) {
       url: `${BASE_URL}/app-api/infra/file/upload`,
       filePath,
       name: 'file',
+      // 显式超时：默认不超时会让"上传中…"遮罩一直挂着，用户以为卡死在发布界面
+      timeout: 30000,
       // 与 request() 鉴权方式一致，无 token 时不带该头
       header: token ? { 'Authorization': `Bearer ${token}` } : {},
       success(res) {
@@ -547,6 +554,7 @@ module.exports = {
   reportDriverLocation,
   getRealtimeBuses,
   getRealtimeBusLines,
+  getBusLinePolyline,
   getNearbyRealtimeBuses,
   driverPickupVerify,
   pageMyNotifications,
