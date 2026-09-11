@@ -584,9 +584,14 @@
   margin-top: 20rpx;
   width: 100%;
   height: 76rpx;
-  line-height: 76rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16rpx;
+  box-sizing: border-box;
+  line-height: 1.2;
   border-radius: 38rpx;
-  background: #C75B2A;
+  background: #1F5E9E;
   color: #FFFFFF;
   font-size: 28rpx;
   font-weight: 600;
@@ -612,6 +617,9 @@
   font-weight: 600;
   color: #2B2B28;
   margin-bottom: 16rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .parcel-plan-reason {
@@ -620,6 +628,7 @@
   font-size: 24rpx;
   line-height: 1.5;
   color: #6B6355;
+  word-break: break-word;
 }
 
 .parcel-map-wrap {
@@ -645,16 +654,18 @@
 
 .parcel-map-current {
   padding: 10rpx 20rpx;
-  background: #FFF6E8;
-  color: #B4700F;
+  background: #E6EFF5;
+  color: #1F5E9E;
   font-size: 24rpx;
+  word-break: break-word;
 }
 
-.lg-done { color: #2E7D32; }
-.lg-doing { color: #E08A2B; }
-.lg-todo { color: #A79E8C; }
-.lg-hub { color: #C75B2A; }
-.lg-est { color: #8A8778; }
+/* 白色 + 蓝色主题：完成/当前统一蓝色系，未开始灰色，仅异常用暖色 */
+.lg-done { color: #1F5E9E; }
+.lg-doing { color: #2E7BBF; }
+.lg-todo { color: #9AA5B1; }
+.lg-hub { color: #123F6E; }
+.lg-est { color: #8A93A0; }
 
 .parcel-leg {
   display: flex;
@@ -668,7 +679,7 @@
   width: 44rpx;
   height: 44rpx;
   border-radius: 50%;
-  background: #2E7D32;
+  background: #1F5E9E;
   color: #FFFFFF;
   font-size: 26rpx;
   text-align: center;

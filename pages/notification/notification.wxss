@@ -1,5 +1,5 @@
 page {
-  background: #F6F2E9;
+  background: #F5F8FC;
 }
 
 .page {
@@ -30,13 +30,13 @@ page {
 }
 
 .tab.active {
-  background: #2E7D32;
+  background: #1F5E9E;
   color: #FFFFFF;
 }
 
 .read-all {
   font-size: 26rpx;
-  color: #2E7D32;
+  color: #1F5E9E;
 }
 
 .list {
@@ -54,7 +54,7 @@ page {
 }
 
 .card.unread {
-  border-left: 8rpx solid #2E7D32;
+  border-left: 8rpx solid #2E7BBF;
 }
 
 .card-hover {
@@ -71,6 +71,13 @@ page {
   font-size: 32rpx;
   font-weight: 600;
   color: #2B2B2B;
+  /* 长标题不换行溢出：单行省略，避免文字跑到卡片外 */
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 12rpx;
 }
 
 .dot {
@@ -86,6 +93,7 @@ page {
   font-size: 28rpx;
   color: #6B6355;
   line-height: 1.5;
+  word-break: break-word;
 }
 
 .card-bottom {
@@ -97,15 +105,20 @@ page {
 
 .tag {
   font-size: 22rpx;
-  color: #2E7D32;
-  background: #E7F2E8;
+  color: #1F5E9E;
+  background: #E6EFF5;
   border-radius: 8rpx;
   padding: 4rpx 14rpx;
+  white-space: nowrap;
+  max-width: 60%;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .time {
   font-size: 24rpx;
   color: #A79E8C;
+  white-space: nowrap;
 }
 
 .more {
