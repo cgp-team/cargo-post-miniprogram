@@ -96,8 +96,9 @@
       hover-class="hover"
     >
       <view class="vehicle-eta-area">
-        <text class="vehicle-eta-num">{{item.etaMinutes || '—'}}</text>
-        <text class="vehicle-eta-unit">分钟</text>
+        <text class="vehicle-eta-num">{{item.etaNumber}}</text>
+        <text class="vehicle-eta-unit">{{item.etaUnit}}</text>
+        <text class="vehicle-wait" wx:if="{{item.waitMinutes}}">{{item.waitMinutes}} 分钟后发车</text>
         <text class="vehicle-dist" wx:if="{{item.distanceKm != null}}">{{item.distanceKm}}km</text>
       </view>
       <view class="vehicle-info">

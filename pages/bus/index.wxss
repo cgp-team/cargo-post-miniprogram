@@ -246,6 +246,14 @@
   margin-top: 4rpx;
 }
 
+/* 待发车：等待时长用中小号字，不与"到下一站分钟"混淆 */
+.vehicle-wait {
+  font-size: 20rpx;
+  color: var(--color-text-secondary);
+  display: block;
+  margin-top: 4rpx;
+}
+
 .vehicle-dist {
   font-size: 22rpx;
   color: var(--color-text-tertiary);

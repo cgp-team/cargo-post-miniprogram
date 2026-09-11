@@ -367,8 +367,9 @@ function getRealtimeBuses() {
 }
 
 /** 实时公交线路（含经停点与该线在线车辆，车来了式地图+列表，免登录） */
-function getRealtimeBusLines() {
-  return request('/app-api/transport/bus/lines')
+/** 实时公交线路（传坐标时只取附近线路：主城全量线网几百条，全量下发会超时） */
+function getRealtimeBusLines(latitude, longitude, radius) {
+  return request('/app-api/transport/bus/lines', 'GET', { latitude, longitude, radius })
 }
 
 /** 单条线路的真实道路轨迹（点开线路时按需查询，带缓存；失败由前端回退站点直线） */

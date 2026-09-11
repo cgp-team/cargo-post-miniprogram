@@ -153,6 +153,15 @@
         bindchange="onPickupStationChange"
         bindretry="loadStations"
       />
+      <!-- 该站点车辆进不去时：提示并就就近更换（不可达场景的首要操作） -->
+      <view wx:if="{{stationSuggestion}}" class="station-suggest">
+        <text class="station-suggest-text">
+          {{stationSuggestion.message}}{{stationSuggestion.distanceKm ? '（距所选站点约 ' + stationSuggestion.distanceKm + ' km）' : ''}}
+        </text>
+        <view class="station-suggest-btn" bindtap="applyStationSuggestion" hover-class="hover">
+          改用「{{stationSuggestion.name}}」
+        </view>
+      </view>
     </view>
 
     <view class="form-group">
