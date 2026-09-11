@@ -34,7 +34,7 @@
       <text class="legend-item"><text class="dot dot-me"></text>我的位置</text>
       <text class="legend-item"><text class="dot dot-stop"></text>公交站</text>
       <text class="legend-item"><text class="dot dot-real"></text>实时车</text>
-      <text class="legend-item"><text class="dot dot-sim"></text>模拟车</text>
+      <text class="legend-item"><text class="dot dot-sim"></text>推算位置</text>
     </view>
     <view class="map-btn" bindtap="locateMe" hover-class="hover">
       <icon name="pin" size="26" color="{{iconDeep}}" />

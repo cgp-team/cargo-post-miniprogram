@@ -7,6 +7,8 @@ const appearance = require('../../utils/appearance')
 const location = require('../../utils/location')
 
 const REFRESH_MS = 15000
+/** 地图兜底中心：重庆邮电大学（南山·南岸区），定位/车辆位置到达后覆盖 */
+const DEFAULT_MAP_CENTER = { latitude: 29.5325, longitude: 106.5765 }
 
 Page({
   data: {
@@ -19,7 +21,7 @@ Page({
     loading: true,
     loadError: '',
     // 地图：车辆实时位置 + 线路 polyline + 我的位置
-    mapCenter: { latitude: 30.5723, longitude: 104.0657 },
+    mapCenter: DEFAULT_MAP_CENTER,
     mapScale: 14,
     markers: [],
     polyline: [],
@@ -68,6 +70,7 @@ Page({
         if (bus) {
           found = bus
           points = line.points || []
+          this._line = line
           break
         }
       }
@@ -85,6 +88,18 @@ Page({
         me = null
       }
       const linePoints = (points || []).filter((p) => p.longitude != null && p.latitude != null)
+      // 真实道路轨迹：按需查询（后端带 5 分钟缓存）；失败/为空 → 回退站点直线
+      let roadPoints = null
+      if (this._line && this._line.routeId) {
+        try {
+          const road = await api.getBusLinePolyline(this._line.routeId)
+          if (road && road.length >= 2) {
+            roadPoints = road.map((p) => ({ latitude: p.latitude, longitude: p.longitude }))
+          }
+        } catch (e) {
+          roadPoints = null
+        }
+      }
       const sim = found.dataSource === 'SIMULATED' || found.locationSource === 'SIMULATED'
       const markers = []
       if (me) {
@@ -100,7 +115,7 @@ Page({
           iconPath: sim ? '/images/marker-bus-sim.png' : '/images/marker-bus-real.png',
           width: 34, height: 34, zIndex: 8,
           callout: {
-            content: `${found.plateNo || '班车'}${sim ? ' · 模拟演示' : ' · 实时'}\n下一站：${found.nextStation || '—'}`,
+            content: `${found.plateNo || '班车'}${sim ? ' · 位置推算' : ' · 实时'}\n下一站：${found.nextStation || '—'}`,
             color: '#ffffff', bgColor: sim ? '#C75B2A' : '#2E7D32',
             fontSize: 11, borderRadius: 8, padding: 6, display: 'ALWAYS'
           }
@@ -111,12 +126,11 @@ Page({
         stops: this.buildStops(points, progress),
         progress,
         markers,
-        // 优先用真实道路 polyline（后端高德路网），回退到站点直线
+        // 优先用真实道路 polyline（后端高德路网，按需查询），回退到站点直线
         polyline: (() => {
-          const roadPts = found.roadPolyline || line.roadPolyline
-          const pts = (roadPts && roadPts.length >= 2)
-            ? roadPts
-            : (linePoints.length >= 2 ? linePoints : [])
+          const pts = (roadPoints && roadPoints.length >= 2)
+            ? roadPoints
+            : (linePoints.length >= 2 ? linePoints.map((p) => ({ latitude: p.latitude, longitude: p.longitude })) : [])
           return pts.length >= 2
             ? [{
                 points: pts.map((p) => ({ latitude: p.latitude, longitude: p.longitude })),
@@ -129,7 +143,7 @@ Page({
         mapCenter: found.latitude != null ? { latitude: found.latitude, longitude: found.longitude } : this.data.mapCenter,
         sourceText: found.locationSource === 'REAL_FRESH' ? '实时（司机上报）'
           : (found.locationSource === 'REAL_STALE' ? '位置可能过期'
-            : (sim ? '模拟演示' : '位置暂不可用')),
+            : (sim ? '班次推算位置' : '位置暂不可用')),
         // 是否有可靠车辆位置（无位置不显示假的实时信息）
         locationAvailable: !!(found.latitude != null && found.longitude != null),
         loading: false,

@@ -450,13 +450,13 @@ Page({
         nextStationText: b.nextStation || '—',
         sourceText: b.locationSource === 'REAL_FRESH' ? '实时'
           : (b.locationSource === 'REAL_STALE' ? '位置可能过期'
-              : (b.locationSource === 'SIMULATED' ? '模拟位置' : '位置暂不可用')),
+              : (b.locationSource === 'SIMULATED' ? '位置推算' : '位置暂不可用')),
         sourceDot: b.locationSource === 'REAL_FRESH', // 🟢 实时
         sourceStale: b.locationSource === 'REAL_STALE', // 🟠 位置可能过期（司机中断上报）
-        // 无 ETA 时按数据来源区分文案：模拟演示车辆说清"是演示"，真实车辆才提示"等待实时位置"
+        // 无 ETA 时按数据来源区分文案：班次推算车辆说明是"按班次计划推算"，真实车辆才提示"等待实时位置"
         etaText: hasEta ? b.etaMinutes + ' 分钟到站'
-          : (b.locationSource === 'SIMULATED' ? '模拟演示中' : '等待实时位置'),
-        etaLabel: hasEta ? '到站' : (b.locationSource === 'SIMULATED' ? '演示' : '到站'),
+          : (b.locationSource === 'SIMULATED' ? '预计到站' : '等待实时位置'),
+        etaLabel: hasEta ? '到站' : (b.locationSource === 'SIMULATED' ? '预计' : '到站'),
         etaMinutes: hasEta ? b.etaMinutes : null,
         distanceKm: typeof b.distanceToNextStationKm === 'number' ? b.distanceToNextStationKm : null,
         routeProvider: b.routeProvider || '',
