@@ -75,6 +75,8 @@ Page({
     servicePointDistanceKm: null,
     servicePointLatitude: null,
     servicePointLongitude: null,
+    // 所选取货站点车辆不可进入时的就近改站建议（一键更换，见 _checkStationAccess）
+    stationSuggestion: null,
     // 提交结果
     orderNo: '',
     elderlyMode: false,
@@ -270,6 +272,46 @@ Page({
       routeStatus: 'idle',
       routePreviewKey: ''
     })
+    // 站点不可直达（车辆进不去）时，后端会给出"就近可服务站点"，前端提示一键更换
+    this._checkStationAccess(s)
+  },
+
+  /**
+   * 校验所选取货站点是否真的能用：以站点坐标做一次可达性评估，
+   * 若该站点车辆无法进入（如校园/封闭园区里的自建站），提示改用就近可服务站点，
+   * 用户可一键更换 —— 避免"选了站点才发现不能寄"。
+   */
+  async _checkStationAccess(station) {
+    if (!station || station.longitude == null || station.latitude == null) {
+      this.setData({ stationSuggestion: null })
+      return
+    }
+    try {
+      const res = await api.getReachability(Number(station.longitude), Number(station.latitude))
+      const rec = res && res.recommendedStation
+      const needSwitch = !!(res && res.reachable === false && rec && rec.id !== station.id)
+      this.setData({
+        stationSuggestion: needSwitch
+          ? {
+              id: rec.id,
+              name: rec.name,
+              distanceKm: rec.distanceKm,
+              message: res.message || '当前站点车辆无法进入，建议就近更换交接站点'
+            }
+          : null
+      })
+    } catch (e) {
+      this.setData({ stationSuggestion: null })
+    }
+  },
+
+  /** 一键改用推荐的就近站点（不可达场景的首要操作） */
+  applyStationSuggestion() {
+    const s = this.data.stationSuggestion
+    if (!s) return
+    this.applyPickupStation({ id: s.id, name: s.name })
+    this.setData({ stationSuggestion: null })
+    wx.showToast({ title: `已改用「${s.name}」`, icon: 'success' })
   },
 
   /** 送达站点变更：同步 ID/名称；与取货相同则拦截；清空旧路线预估 */
@@ -573,6 +615,7 @@ Page({
       pickupMode: 'station',
       reachLoading: false,
       reachability: null,
+      stationSuggestion: null,
       originalAddress: '',
       originalLatitude: null,
       originalLongitude: null,

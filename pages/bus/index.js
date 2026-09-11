@@ -226,6 +226,10 @@ Page({
       const stations = transitAmap.dedupeStations((data && data.nearbyStations) || [])
       const lines = (data && data.lines) || []
       const buses = (data && data.buses) || []
+      const inServiceFlag = data && data.inService != null ? data.inService : null
+      // 不在运营时间：不展示车辆卡片（凌晨把一堆"待发车"卡片铺出来会让人误以为正在运行），
+      // 只保留"当前不在运营时间 + 下一班几点"的说明。
+      const visibleBuses = inServiceFlag === false ? [] : buses
       const visibleLines = this._buildVisibleLines(lines, stations)
       this.setData({
         nearbyStations: stations,
@@ -233,12 +237,12 @@ Page({
         nearbyLines: lines,
         nearbyLineCount: (data && data.lineCount) || lines.length,
         visibleLines: this.data.showAllLines ? visibleLines : visibleLines.slice(0, MAX_NEARBY_LINES),
-        vehicles: buses.map((b) => this._formatVehicle(b)),
+        vehicles: visibleBuses.map((b) => this._formatVehicle(b)),
         nearbyLocatedText: hasCoords
           ? (loc.source === location.SOURCE_DEMO ? `根据${loc.district || '演示地点'}展示` : '根据当前位置展示')
           : (district ? `根据${district}展示` : '定位不可用'),
         // 运营时段（无车时如实展示"当前不在运营时间 + 下一班几点"，不留空白）
-        inService: data && data.inService != null ? data.inService : null,
+        inService: inServiceFlag,
         serviceWindowText: (data && data.serviceWindowText) || '',
         nextDepartureText: (data && data.nextDepartureTime) || '',
         runningEmptyText: this._runningEmptyText(data, buses),
@@ -246,8 +250,8 @@ Page({
         loading: false
       })
       this._stations = stations
-      this._buses = buses
-      this._moveVehicles(buses)
+      this._buses = visibleBuses
+      this._moveVehicles(visibleBuses)
       // 地图中心优先级：用户位置 → 最近站点 → 项目线路首站
       if (!this._userPanned && !(loc && loc.success) && stations.length) {
         this.setData({ mapCenter: { latitude: stations[0].latitude, longitude: stations[0].longitude } })
@@ -403,6 +407,8 @@ Page({
       : (currentStation
         ? `${running ? '当前停靠' : '待发车'}：${currentStation}`
         : (b.endStation ? `已到终点站：${b.endStation}` : '位置待更新'))
+    // 卡片左侧大数字：在途才显示"到下一站分钟"；待发显示"待发"（等待时长写在下方小字里）
+    const waitMinutes = !running && hasEta ? b.etaMinutes : null
     return {
       busId: b.busId,
       plateNo: b.plateNo || '班车',
@@ -417,8 +423,11 @@ Page({
       distanceKm: typeof b.distanceToNextStationKm === 'number' ? b.distanceToNextStationKm : null,
       // 班次模拟车辆的预计到站：按班次计划时长推算，文案用"预计"而不是"演示"，
       // 车上显示的是真实线路上的推算位置（线路/站点均来自真实公交线网）
+      etaNumber: running ? (hasEta ? b.etaMinutes : '—') : (b.status === 'ARRIVED' ? '—' : '待发'),
+      etaUnit: running && hasEta ? '分钟' : '',
+      waitMinutes,
       etaText: !hasEta ? (simulated ? '待发车' : '—')
-        : (running ? `约 ${b.etaMinutes} 分钟` : `${b.etaMinutes} 分钟后发车`),
+        : (running ? `约 ${b.etaMinutes} 分钟到下一站` : `${b.etaMinutes} 分钟后发车`),
       simulated,
       isReal: b.locationSource === 'REAL_FRESH' || b.dataSource === 'REAL',
       sourceText: b.locationSource === 'REAL_FRESH' ? '实时'
