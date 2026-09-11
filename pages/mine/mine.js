@@ -103,6 +103,12 @@ Page({
     wx.navigateTo({ url: '/pages/mine/feedback/feedback' })
   },
 
+  /** 消息通知中心 */
+  goToNotification() {
+    if (!auth.requireLogin()) return
+    wx.navigateTo({ url: '/pages/notification/notification' })
+  },
+
   /** 去登录 */
   goToLogin() {
     wx.reLaunch({ url: '/pages/login/login' })

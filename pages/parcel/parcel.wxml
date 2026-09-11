@@ -187,6 +187,57 @@
         <view wx:if="{{trackResult.carrierLongitude}}" class="carrier-row" bindtap="goToBusTracking" hover-class="hover"><icon name="pin" size="28" color="{{iconColor}}" /><text class="carrier-link">查看车辆实时位置 ›</text></view>
       </view>
 
+      <!-- 多段联运：分段进度（第一段：A→B（司机张）→ 第二段：B→C（司机李）） -->
+      <view wx:if="{{trackResult.showMap}}" class="parcel-map-wrap">
+        <map
+          class="parcel-map"
+          latitude="{{trackResult.mapCenter.latitude}}"
+          longitude="{{trackResult.mapCenter.longitude}}"
+          scale="12"
+          polyline="{{trackResult.mapPolyline}}"
+          markers="{{trackResult.mapMarkers}}"
+          circles="{{trackResult.mapCircles}}"
+          include-points="{{trackResult.mapPoints}}"
+          show-location
+        ></map>
+        <view class="parcel-map-current" wx:if="{{trackResult.activeLegText}}">{{trackResult.activeLegText}}</view>
+        <view class="parcel-map-legend">
+          <text class="lg lg-done">━ 已完成段</text>
+          <text class="lg lg-doing">━ 当前段（加粗高亮）</text>
+          <text class="lg lg-todo">━ 未开始段</text>
+          <text class="lg lg-est">┅ 虚线＝估算段</text>
+          <text class="lg lg-hub">◆ 换乘站</text>
+        </view>
+      </view>
+
+      <view wx:if="{{trackResult.legs.length > 1}}" class="parcel-legs">
+        <text class="parcel-legs-title">多段联运 · 换乘进度</text>
+        <text wx:if="{{trackResult.planReason}}" class="parcel-plan-reason">方案说明：{{trackResult.planReason}}</text>
+        <view class="parcel-leg" wx:for="{{trackResult.legs}}" wx:key="legSequence">
+          <view class="leg-index">{{item.legSequence}}</view>
+          <view class="leg-body">
+            <text class="leg-route">{{item.progressText}}</text>
+            <text class="leg-sub">
+              {{item.statusName}}<block wx:if="{{item.driverName}}"> · 司机{{item.driverName}}</block><block wx:if="{{item.plateNo}}"> · {{item.plateNo}}</block>
+            </text>
+            <text class="leg-eta" wx:if="{{item.etaText}}">{{item.etaText}}</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 换乘交接（多段联运在换乘站的货物交接记录） -->
+      <view wx:if="{{trackResult.handovers.length > 0}}" class="parcel-legs">
+        <text class="parcel-legs-title">换乘交接</text>
+        <view class="parcel-leg" wx:for="{{trackResult.handovers}}" wx:key="id">
+          <view class="leg-index">🔄</view>
+          <view class="leg-body">
+            <text class="leg-route">{{item.stationName || '换乘站'}}</text>
+            <text class="leg-sub">{{item.statusName}}<block wx:if="{{item.fromDriverName}}"> · {{item.fromDriverName}} → {{item.toDriverName || '待接'}}</block></text>
+            <text class="leg-eta" wx:if="{{item.timeText}}">{{item.timeText}}</text>
+          </view>
+        </view>
+      </view>
+
       <!-- 进度条 -->
       <view class="progress-bar">
         <view class="progress-fill" style="width: {{trackResult.progress}}%"></view>

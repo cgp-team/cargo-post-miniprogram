@@ -59,6 +59,8 @@ Page({
     navTotalStops: 0,
     navStopIndex: 0,
     navStationName: '',
+    // 多段联运：待确认的换乘交接数量（>0 时工作台显示交接入口）
+    pendingHandoverCount: 0,
     navPickupCount: 0,
     navDeliverCount: 0,
     navBoardCount: 0,
@@ -141,6 +143,8 @@ Page({
         api.getDriverTasks(profile.driverId).catch(() => []),
         api.getDriverRoute(profile.driverId).catch(() => null)
       ])
+      // 多段联运：待确认交接数量（无多段/接口异常时为 0，不阻断工作台）
+      const handovers = await api.getDriverHandovers(profile.driverId).catch(() => [])
       this.setData({
         driverName: profile.name || '',
         plateNo: profile.plateNo || '',
@@ -151,7 +155,8 @@ Page({
         taskSegment: this.buildTaskSegment(tasks || []),
         // Phase 9：司机路线真实道路 polyline + 偏航判定（只报警不自动改方案）
         deviated: !!(route && route.deviated),
-        deviationMeters: route && route.deviationMeters != null ? route.deviationMeters : 0
+        deviationMeters: route && route.deviationMeters != null ? route.deviationMeters : 0,
+        pendingHandoverCount: (handovers || []).length
       })
       this.driverRoutePolyline = route && route.polyline && route.polyline.length >= 2
         ? route.polyline.map((p) => ({ longitude: p.longitude, latitude: p.latitude }))
@@ -877,6 +882,12 @@ Page({
   /**
    * 跳过装车，继续行驶
    */
+  /** 多段联运：进入货物交接页（拍照确认换乘交接） */
+  goHandover() {
+    feedback.tap()
+    wx.navigateTo({ url: '/pages/driver/handover/handover' })
+  },
+
   skipLoading() {
     this.continueToNextStation()
     wx.showToast({

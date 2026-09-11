@@ -42,10 +42,15 @@ const LOCATION_CACHE_TTL = 5 * 60 * 1000
  * 改为同步取一次新定位；定位失败才退回旧缓存（标记 stale）。
  */
 const CACHE_FRESH_TTL = 60 * 1000
-/** 高精度定位超时（毫秒）：给系统更多时间拿好精度（越大越准，但等待越久） */
-const HIGH_ACCURACY_EXPIRE_MS = 10000
-/** 可接受精度（米）：优于该值视为"够准"，不再补测 */
-const ACCEPTABLE_ACCURACY = 200
+/**
+ * 高精度定位超时（毫秒）：给系统更多时间拿好精度（越大越准，但等待越久）。
+ * 山区/校园遮挡场景（如南山）卫星收敛慢，10s 常只拿到粗糙结果，放宽到 15s 让系统有机会收敛到精确位置。
+ */
+const HIGH_ACCURACY_EXPIRE_MS = 15000
+/** 可接受精度（米）：优于该值视为"够准"，不再补测。收紧到 100m（与 PRECISE_ACCURACY 对齐），避免"看着有坐标其实偏几百米" */
+const ACCEPTABLE_ACCURACY = 100
+/** 精度择优补测次数上限：首次不够准时最多再补测 N 次，取其中精度最好的一次（山区定位收敛慢，多给几次机会） */
+const ACCURACY_RETRY_TIMES = 2
 /** 逆地理区域缓存有效期：30 分钟（行政区变化慢，可复用） */
 const DISTRICT_CACHE_TTL = 30 * 60 * 1000
 /** PRECISE 精度阈值（米）：accuracy <= 100m 视为精确 */
@@ -295,11 +300,14 @@ function amapReverse(latitude, longitude) {
 async function locateOnce() {
   let loc = await wechatGetLocation()
   if (!loc.success) return loc
-  if (!(typeof loc.accuracy === 'number' && loc.accuracy > 0 && loc.accuracy <= ACCEPTABLE_ACCURACY)) {
-    const second = await wechatGetLocation()
-    if (second.success && typeof second.accuracy === 'number'
-        && (typeof loc.accuracy !== 'number' || second.accuracy < loc.accuracy)) {
-      loc = second
+  // 精度择优：首次不够准（无 accuracy 或 > ACCEPTABLE_ACCURACY）时最多再补测 ACCURACY_RETRY_TIMES 次，
+  // 取精度最好的一次（山区/遮挡场景单次常拿到粗糙结果，补测能收敛到更准位置）。
+  for (let i = 0; i < ACCURACY_RETRY_TIMES; i++) {
+    if (typeof loc.accuracy === 'number' && loc.accuracy > 0 && loc.accuracy <= ACCEPTABLE_ACCURACY) break
+    const retry = await wechatGetLocation()
+    if (retry.success && typeof retry.accuracy === 'number'
+        && (typeof loc.accuracy !== 'number' || retry.accuracy < loc.accuracy)) {
+      loc = retry
     }
   }
   loc = applyPreciseReuse(loc)

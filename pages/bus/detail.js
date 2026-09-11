@@ -111,14 +111,21 @@ Page({
         stops: this.buildStops(points, progress),
         progress,
         markers,
-        polyline: linePoints.length >= 2
-          ? [{
-              points: linePoints.map((p) => ({ latitude: p.latitude, longitude: p.longitude })),
-              color: (appearance.THEMES[this.data.themeColor] || appearance.THEMES.green).primary,
-              width: 4,
-              arrowLine: true
-            }]
-          : [],
+        // 优先用真实道路 polyline（后端高德路网），回退到站点直线
+        polyline: (() => {
+          const roadPts = found.roadPolyline || line.roadPolyline
+          const pts = (roadPts && roadPts.length >= 2)
+            ? roadPts
+            : (linePoints.length >= 2 ? linePoints : [])
+          return pts.length >= 2
+            ? [{
+                points: pts.map((p) => ({ latitude: p.latitude, longitude: p.longitude })),
+                color: (appearance.THEMES[this.data.themeColor] || appearance.THEMES.green).primary,
+                width: 4,
+                arrowLine: true
+              }]
+            : []
+        })(),
         mapCenter: found.latitude != null ? { latitude: found.latitude, longitude: found.longitude } : this.data.mapCenter,
         sourceText: found.locationSource === 'REAL_FRESH' ? '实时（司机上报）'
           : (found.locationSource === 'REAL_STALE' ? '位置可能过期'
@@ -154,3 +161,4 @@ Page({
     this.loadDetail().finally(() => wx.stopPullDownRefresh())
   }
 })
+

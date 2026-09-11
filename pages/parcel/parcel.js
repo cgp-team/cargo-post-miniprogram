@@ -189,6 +189,118 @@ Page({
     this.setData({ trackingNo: e.detail.value })
   },
 
+  /** 多段运输进度（仅多段联运订单有分段；查询失败按"无多段"处理，不影响物流主流程） */
+  async loadLegs(no) {
+    try {
+      const legs = await api.getParcelLegs(no)
+      return (legs || []).map((l) => ({
+        ...l,
+        progressText: `第${l.legSequence}段：${l.fromStationName || ''} → ${l.toStationName || ''}`,
+        etaText: l.actualArrival ? '已到达'
+          : (l.estimatedArrival ? `预计 ${formatBackendTime(l.estimatedArrival)} 到达` : '')
+      }))
+    } catch (e) {
+      return []
+    }
+  },
+
+  /**
+   * 运输拓扑（一次拿到 分段 + 换乘交接 + 候选方案解释）：需求 §64/§69/§92，
+   * 前端不自行拼装 Order/Driver/Vehicle/Station，由后端一次返回完整拓扑。
+   */
+  async loadTopology(no) {
+    try {
+      const t = await api.getParcelTopology(no)
+      if (!t) return { legs: [], handovers: [] }
+      // 运输链地图：按段连线（已完成为绿色、进行中为橙色、未完成为灰色），换乘点标注在折线拐点
+      const points = []
+      const polyline = []
+      const markers = []
+      const circles = []
+      const legsAll = t.legs || []
+      // 当前执行段：优先"进行中"的段，其次最后一段未完成的
+      const activeLeg = legsAll.find((l) => l.status >= 4 && l.status <= 10)
+        || legsAll.filter((l) => l.status < 11).slice(-1)[0]
+      ;(t.legs || []).forEach((l) => {
+        if (l.fromLongitude == null || l.toLongitude == null) return
+        const from = { latitude: l.fromLatitude, longitude: l.fromLongitude }
+        const to = { latitude: l.toLatitude, longitude: l.toLongitude }
+        if (!points.length) points.push(from)
+        points.push(to)
+        // 白色+蓝色主题：已完成=深蓝、当前段=亮蓝、未开始=灰
+        const color = l.status === 11 ? '#1F5E9E' : (l.status >= 7 && l.status <= 10 ? '#2E7BBF' : '#9AA5B1')
+        const isActive = activeLeg && l.id === activeLeg.id
+        // 真实道路轨迹优先（navigationPolyline 来自高德路网）；无则站点直连
+        const road = (l.navigationPolyline || []).map((p) => ({ latitude: p.latitude, longitude: p.longitude }))
+        const path = road.length >= 2 ? road : [from, to]
+        if (road.length >= 2) {
+          road.forEach((p) => points.push(p))
+        }
+        polyline.push({
+          points: path, color, width: isActive ? 7 : 4, arrowLine: true,
+          dottedLine: road.length < 2 // 估算段用虚线，明确"非真实道路"
+        })
+        if (l.handoverRequired && l.toLongitude != null) {
+          markers.push({
+            id: 100 + (l.legSequence || 0),
+            latitude: l.toLatitude, longitude: l.toLongitude,
+            iconPath: '/images/marker-stop.png', width: 30, height: 30,
+            callout: {
+              content: '换乘站 ' + (l.toStationName || ''), color: '#123F6E',
+              fontSize: 11, borderRadius: 6, padding: 4, display: 'ALWAYS'
+            }
+          })
+        }
+      })
+      if (points.length) {
+        markers.unshift({
+          id: 1, latitude: points[0].latitude, longitude: points[0].longitude,
+          iconPath: '/images/marker-start.png', width: 30, height: 30,
+          callout: { content: '起点站', color: '#2E7D32', fontSize: 11, borderRadius: 6, padding: 4, display: 'BYCLICK' }
+        })
+        const last = points[points.length - 1]
+        markers.push({
+          id: 2, latitude: last.latitude, longitude: last.longitude,
+          iconPath: '/images/marker-end.png', width: 30, height: 30,
+          callout: { content: '目的站', color: '#1565C0', fontSize: 11, borderRadius: 6, padding: 4, display: 'BYCLICK' }
+        })
+        // 当前段两端高亮圈：一眼看出"货现在在哪一段"
+        if (activeLeg) {
+          circles.push({ latitude: activeLeg.fromLatitude, longitude: activeLeg.fromLongitude, radius: 90,
+            color: '#2E7BBFB3', fillColor: '#2E7BBF33', strokeWidth: 2 })
+          circles.push({ latitude: activeLeg.toLatitude, longitude: activeLeg.toLongitude, radius: 90,
+            color: '#2E7BBFB3', fillColor: '#2E7BBF33', strokeWidth: 2 })
+        }
+      }
+      return {
+        legs: (t.legs || []).map((l) => ({
+          ...l,
+          progressText: `第${l.legSequence}段：${l.fromStationName || ''} → ${l.toStationName || ''}`,
+          etaText: l.actualArrival ? '已到达'
+            : (l.estimatedArrival ? `预计 ${formatBackendTime(l.estimatedArrival)} 到达` : '')
+        })),
+        handovers: (t.handovers || []).map((h) => ({
+          ...h,
+          timeText: h.handoverCompletedAt ? formatBackendTime(h.handoverCompletedAt)
+            : (h.arrivedAt ? formatBackendTime(h.arrivedAt) : '')
+        })),
+        planReason: t.planReason || '',
+        planningModeName: t.planningModeName || '',
+        mapPoints: points,
+        mapPolyline: polyline,
+        mapMarkers: markers,
+        mapCircles: circles,
+        activeLegText: activeLeg
+          ? `当前第${activeLeg.legSequence}段：${activeLeg.fromStationName || ''} → ${activeLeg.toStationName || ''}（${activeLeg.statusName || ''}）`
+          : '',
+        mapCenter: points.length ? points[Math.floor(points.length / 2)] : null,
+        showMap: points.length >= 2
+      }
+    } catch (e) {
+      return { legs: [], handovers: [] }
+    }
+  },
+
   /** 单号查询 */
   async searchParcel() {
     const no = this.data.trackingNo.trim()
@@ -214,6 +326,19 @@ Page({
       res.arrived = !!res.carrierArrived
       res.arrivedText = this.buildArrivedText(res)
       res.servicePointText = this.buildServicePointText(res)
+      // 多段联运：一次拿运输拓扑（分段 + 换乘交接 + 方案解释）；失败退回仅分段进度
+      const topology = await this.loadTopology(no)
+      res.legs = topology.legs && topology.legs.length ? topology.legs : await this.loadLegs(no)
+      res.handovers = topology.handovers || []
+      res.planReason = topology.planReason
+      res.planningModeName = topology.planningModeName
+      res.mapPoints = topology.mapPoints || []
+      res.mapPolyline = topology.mapPolyline || []
+      res.mapMarkers = topology.mapMarkers || []
+      res.mapCircles = topology.mapCircles || []
+      res.activeLegText = topology.activeLegText || ''
+      res.mapCenter = topology.mapCenter
+      res.showMap = !!topology.showMap
       this.setData({ trackResult: res, noResult: false }, () => {
         this.notifyApproaching([res])
         this.notifyArrived([res])

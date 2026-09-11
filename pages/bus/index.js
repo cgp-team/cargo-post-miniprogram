@@ -286,33 +286,41 @@ Page({
   selectNearbyLine(e) {
     const key = e.currentTarget.dataset.key
     const name = e.currentTarget.dataset.name
-    const dataSource = e.currentTarget.dataset.source
-    if (key === this.data.activeLineKey) {
+    const source = e.currentTarget.dataset.source
+    const primary = (appearance.THEMES[this.data.themeColor] || appearance.THEMES.green).primary
+
+    // 再次点击同一条线路：取消选中，回到"附近线路"总览
+    if (key === this.data.activeLineKey || key === 'NEARBY') {
       this.setData({ activeLineKey: 'NEARBY', polyline: [] })
       return
     }
-    if (dataSource === 'REAL_TRANSIT') {
-      // 现实线路暂无道路几何：用该线路的现实站点顺序连线，并明确标注为现实公交
+
+    // 现实线路（高德 POI 途经线路）暂无道路几何：用附近现实站点的顺序连线，并明确标注为现实公交
+    if (source === 'REAL_TRANSIT') {
       const pts = (this._stations || [])
         .filter((s) => (s.lines || []).indexOf(name) >= 0)
         .slice(0, 30)
         .map((s) => ({ latitude: s.latitude, longitude: s.longitude }))
       this.setData({
         activeLineKey: key,
-        polyline: pts.length >= 2
-          ? [{ points: pts, color: '#C75B2A', width: 4, arrowLine: true }]
-          : []
+        polyline: pts.length >= 2 ? [{ points: pts, color: '#C75B2A', width: 4, arrowLine: true }] : [],
+        mapCenter: pts.length ? pts[0] : this.data.mapCenter,
+        mapScale: 13
       })
-      if (pts.length) this.setData({ mapCenter: pts[0], mapScale: 13 })
       return
     }
-    // 项目线路：用 /bus/lines 的真实线路几何
+
+    // 项目线路：优先真实道路 polyline（后端高德路网），回退到站点直线
     const line = (this.data.lines || []).find((l) => l.routeName === name)
-    if (!line) return
-    const pts = (line.points || [])
-      .filter((p) => p.longitude != null && p.latitude != null)
+    if (!line) {
+      this.setData({ activeLineKey: key, polyline: [] })
+      return
+    }
+    const pts = (line.roadPolyline && line.roadPolyline.length >= 2
+      ? line.roadPolyline
+      : (line.points || []))
+      .filter((p) => p && p.longitude != null && p.latitude != null)
       .map((p) => ({ latitude: p.latitude, longitude: p.longitude }))
-    const primary = (appearance.THEMES[this.data.themeColor] || appearance.THEMES.green).primary
     this.setData({
       activeLineKey: key,
       polyline: pts.length >= 2 ? [{ points: pts, color: primary, width: 4, arrowLine: true }] : [],
@@ -483,3 +491,4 @@ Page({
     Promise.all([this.loadLines(), this.loadNearby()]).finally(() => wx.stopPullDownRefresh())
   }
 })
+

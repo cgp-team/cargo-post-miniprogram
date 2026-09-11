@@ -58,6 +58,16 @@
     </view>
   </view>
 
+  <!-- ========== 多段联运：换乘交接待确认入口（有才显示） ========== -->
+  <view class="handover-entry" wx:if="{{pendingHandoverCount > 0}}" bindtap="goHandover" hover-class="hover">
+    <text class="handover-entry-icon">🔁</text>
+    <view class="handover-entry-info">
+      <text class="handover-entry-title">有 {{pendingHandoverCount}} 个换乘交接待确认</text>
+      <text class="handover-entry-sub">点击进入，拍照确认货物交接</text>
+    </view>
+    <text class="handover-entry-arrow">›</text>
+  </view>
+
   <!-- ========== 状态一：待发车 - 行李舱可视化 ========== -->
   <view class="idle-panel" wx:if="{{status === 'idle'}}">
     <!-- 大巴车行李舱图形 -->
