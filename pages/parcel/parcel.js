@@ -229,7 +229,16 @@ Page({
         points.push(to)
         const color = l.status === 11 ? '#2E7D32' : (l.status >= 7 && l.status <= 10 ? '#E08A2B' : '#A79E8C')
         const isActive = activeLeg && l.id === activeLeg.id
-        polyline.push({ points: [from, to], color, width: isActive ? 7 : 4, arrowLine: true })
+        // 真实道路轨迹优先（navigationPolyline 来自高德路网）；无则站点直连
+        const road = (l.navigationPolyline || []).map((p) => ({ latitude: p.latitude, longitude: p.longitude }))
+        const path = road.length >= 2 ? road : [from, to]
+        if (road.length >= 2) {
+          road.forEach((p) => points.push(p))
+        }
+        polyline.push({
+          points: path, color, width: isActive ? 7 : 4, arrowLine: true,
+          dottedLine: road.length < 2 // 估算段用虚线，明确"非真实道路"
+        })
         if (l.handoverRequired && l.toLongitude != null) {
           markers.push({
             id: 100 + (l.legSequence || 0),

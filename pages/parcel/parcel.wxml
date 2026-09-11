@@ -205,6 +205,7 @@
           <text class="lg lg-done">━ 已完成段</text>
           <text class="lg lg-doing">━ 当前段（加粗高亮）</text>
           <text class="lg lg-todo">━ 未开始段</text>
+          <text class="lg lg-est">┅ 虚线＝估算段</text>
           <text class="lg lg-hub">◆ 换乘站</text>
         </view>
       </view>

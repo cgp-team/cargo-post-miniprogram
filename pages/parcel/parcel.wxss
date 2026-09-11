@@ -654,6 +654,7 @@
 .lg-doing { color: #E08A2B; }
 .lg-todo { color: #A79E8C; }
 .lg-hub { color: #C75B2A; }
+.lg-est { color: #8A8778; }
 
 .parcel-leg {
   display: flex;
