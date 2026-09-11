@@ -73,6 +73,11 @@
         <text class="menu-text">意见反馈</text>
         <text class="menu-arrow">›</text>
       </view>
+      <view class="menu-item" bindtap="goToNotification" hover-class="hover">
+        <icon class="menu-emoji" name="notice" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
+        <text class="menu-text">消息通知</text>
+        <text class="menu-arrow">›</text>
+      </view>
       <view class="menu-item" bindtap="goToProfile" hover-class="hover">
         <icon class="menu-emoji" name="user" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
         <text class="menu-text">个人资料</text>

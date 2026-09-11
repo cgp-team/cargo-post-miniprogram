@@ -189,6 +189,65 @@ Page({
     this.setData({ trackingNo: e.detail.value })
   },
 
+  /** 多段运输进度（仅多段联运订单有分段；查询失败按"无多段"处理，不影响物流主流程） */
+  async loadLegs(no) {
+    try {
+      const legs = await api.getParcelLegs(no)
+      return (legs || []).map((l) => ({
+        ...l,
+        progressText: `第${l.legSequence}段：${l.fromStationName || ''} → ${l.toStationName || ''}`,
+        etaText: l.actualArrival ? '已到达'
+          : (l.estimatedArrival ? `预计 ${formatBackendTime(l.estimatedArrival)} 到达` : '')
+      }))
+    } catch (e) {
+      return []
+    }
+  },
+
+  /**
+   * 运输拓扑（一次拿到 分段 + 换乘交接 + 候选方案解释）：需求 §64/§69/§92，
+   * 前端不自行拼装 Order/Driver/Vehicle/Station，由后端一次返回完整拓扑。
+   */
+  async loadTopology(no) {
+    try {
+      const t = await api.getParcelTopology(no)
+      if (!t) return { legs: [], handovers: [] }
+      // 运输链地图：按段连线（已完成为绿色、进行中为橙色、未完成为灰色），换乘点标注在折线拐点
+      const points = []
+      const polyline = []
+      ;(t.legs || []).forEach((l) => {
+        if (l.fromLongitude == null || l.toLongitude == null) return
+        const from = { latitude: l.fromLatitude, longitude: l.fromLongitude }
+        const to = { latitude: l.toLatitude, longitude: l.toLongitude }
+        if (!points.length) points.push(from)
+        points.push(to)
+        const color = l.status === 11 ? '#2E7D32' : (l.status >= 7 && l.status <= 10 ? '#E08A2B' : '#A79E8C')
+        polyline.push({ points: [from, to], color, width: 4, arrowLine: true })
+      })
+      return {
+        legs: (t.legs || []).map((l) => ({
+          ...l,
+          progressText: `第${l.legSequence}段：${l.fromStationName || ''} → ${l.toStationName || ''}`,
+          etaText: l.actualArrival ? '已到达'
+            : (l.estimatedArrival ? `预计 ${formatBackendTime(l.estimatedArrival)} 到达` : '')
+        })),
+        handovers: (t.handovers || []).map((h) => ({
+          ...h,
+          timeText: h.handoverCompletedAt ? formatBackendTime(h.handoverCompletedAt)
+            : (h.arrivedAt ? formatBackendTime(h.arrivedAt) : '')
+        })),
+        planReason: t.planReason || '',
+        planningModeName: t.planningModeName || '',
+        mapPoints: points,
+        mapPolyline: polyline,
+        mapCenter: points.length ? points[Math.floor(points.length / 2)] : null,
+        showMap: points.length >= 2
+      }
+    } catch (e) {
+      return { legs: [], handovers: [] }
+    }
+  },
+
   /** 单号查询 */
   async searchParcel() {
     const no = this.data.trackingNo.trim()
@@ -214,6 +273,16 @@ Page({
       res.arrived = !!res.carrierArrived
       res.arrivedText = this.buildArrivedText(res)
       res.servicePointText = this.buildServicePointText(res)
+      // 多段联运：一次拿运输拓扑（分段 + 换乘交接 + 方案解释）；失败退回仅分段进度
+      const topology = await this.loadTopology(no)
+      res.legs = topology.legs && topology.legs.length ? topology.legs : await this.loadLegs(no)
+      res.handovers = topology.handovers || []
+      res.planReason = topology.planReason
+      res.planningModeName = topology.planningModeName
+      res.mapPoints = topology.mapPoints || []
+      res.mapPolyline = topology.mapPolyline || []
+      res.mapCenter = topology.mapCenter
+      res.showMap = !!topology.showMap
       this.setData({ trackResult: res, noResult: false }, () => {
         this.notifyApproaching([res])
         this.notifyArrived([res])

@@ -211,38 +211,95 @@
   color: var(--color-primary-dark);
 }
 
-/* ---------- 车辆卡片 ---------- */
+/* ---------- 车辆卡片（车来了风格：左侧大字ETA + 中间信息 + 右侧状态） ---------- */
 .vehicle-card {
   display: flex;
   align-items: center;
-  gap: 16rpx;
-  padding: 20rpx;
+  gap: 20rpx;
+  padding: 24rpx;
   margin-bottom: 16rpx;
   background: #fff;
   border-radius: 18rpx;
   box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.05);
 }
 
-.vehicle-main {
+.vehicle-eta-area {
+  flex-shrink: 0;
+  width: 140rpx;
+  text-align: center;
+  padding-right: 20rpx;
+  border-right: 2rpx solid #f0f0f0;
+}
+
+.vehicle-eta-num {
+  font-size: 52rpx;
+  font-weight: 800;
+  color: var(--color-primary-dark);
+  line-height: 1;
+  display: block;
+}
+
+.vehicle-eta-unit {
+  font-size: 22rpx;
+  color: var(--color-text-secondary);
+  display: block;
+  margin-top: 4rpx;
+}
+
+.vehicle-dist {
+  font-size: 22rpx;
+  color: var(--color-text-tertiary);
+  display: block;
+  margin-top: 6rpx;
+}
+
+.vehicle-info {
   flex: 1;
   min-width: 0;
 }
 
-.vehicle-row {
+.vehicle-route-tag {
+  display: inline-block;
+  font-size: 22rpx;
+  color: #fff;
+  background: var(--color-primary);
+  padding: 2rpx 14rpx;
+  border-radius: 6rpx;
+  margin-bottom: 8rpx;
+}
+
+.vehicle-plate-row {
   display: flex;
   align-items: center;
-  gap: 10rpx;
+  gap: 8rpx;
+  margin-bottom: 6rpx;
 }
 
 .vehicle-icon {
-  width: 44rpx;
-  height: 44rpx;
+  width: 36rpx;
+  height: 36rpx;
 }
 
 .vehicle-plate {
   font-size: 30rpx;
   font-weight: 700;
   color: var(--color-primary-dark);
+}
+
+.vehicle-next {
+  font-size: 24rpx;
+  color: var(--color-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vehicle-badge {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8rpx;
 }
 
 .vehicle-status {
@@ -268,37 +325,6 @@
 .src-real { background: var(--color-primary-light); color: var(--color-primary-dark); }
 .src-sim { background: #F8ECE3; color: var(--color-clay); }
 
-.vehicle-route {
-  margin-top: 8rpx;
-  font-size: 24rpx;
-  color: var(--color-text-secondary);
-}
-
-.vehicle-next {
-  margin-top: 6rpx;
-  font-size: 26rpx;
-  color: var(--color-ink);
-}
-
-.vehicle-stub {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6rpx;
-  min-width: 150rpx;
-}
-
-.stub-eta {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: var(--color-price);
-}
-
-.stub-dist {
-  font-size: 22rpx;
-  color: var(--color-text-tertiary);
-}
-
 /* ---------- 老年模式与安全区 ---------- */
 .elderly-mode .loc-text { font-size: 30rpx; }
 .elderly-mode .summary-main { font-size: 32rpx; }
@@ -311,3 +337,4 @@
 .safe-area-bottom {
   height: calc(24rpx + env(safe-area-inset-bottom));
 }
+

@@ -896,3 +896,42 @@
   border: 2rpx dashed rgba(217, 164, 65, 0.5);
   background: rgba(217, 164, 65, 0.08);
 }
+
+/* ==================== 多段联运：换乘交接入口 ==================== */
+.handover-entry {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  margin: 20rpx 24rpx;
+  padding: 26rpx 28rpx;
+  border-radius: 18rpx;
+  background: rgba(46, 125, 50, 0.16);
+  border: 2rpx solid rgba(46, 125, 50, 0.5);
+}
+
+.handover-entry-icon {
+  font-size: 44rpx;
+}
+
+.handover-entry-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.handover-entry-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #E8EDF2;
+}
+
+.handover-entry-sub {
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  color: #9DB0C0;
+}
+
+.handover-entry-arrow {
+  font-size: 40rpx;
+  color: #9DB0C0;
+}

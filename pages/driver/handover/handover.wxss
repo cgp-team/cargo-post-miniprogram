@@ -1,0 +1,209 @@
+page {
+  background: #10161C;
+  color: #E8EDF2;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 32rpx 24rpx 160rpx;
+  box-sizing: border-box;
+}
+
+.hero {
+  margin-bottom: 28rpx;
+}
+
+.hero-title {
+  display: block;
+  font-size: 44rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.hero-sub {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 26rpx;
+  color: #9DB0C0;
+}
+
+.section-title {
+  margin: 28rpx 4rpx 16rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #E8EDF2;
+}
+
+.list,
+.leg-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.card {
+  background: #1B242E;
+  border-radius: 20rpx;
+  padding: 28rpx;
+}
+
+.card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+
+.order-no {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #FFFFFF;
+}
+
+.status {
+  font-size: 24rpx;
+  color: #F0B429;
+  background: rgba(240, 180, 41, 0.14);
+  padding: 4rpx 14rpx;
+  border-radius: 8rpx;
+}
+
+.goods {
+  display: block;
+  font-size: 28rpx;
+  color: #9DB0C0;
+  margin-bottom: 16rpx;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8rpx 0;
+  font-size: 28rpx;
+}
+
+.label {
+  color: #7C8C9B;
+}
+
+.value {
+  color: #E8EDF2;
+  max-width: 60%;
+  text-align: right;
+}
+
+.confirm-btn {
+  margin-top: 22rpx;
+  height: 84rpx;
+  line-height: 84rpx;
+  text-align: center;
+  border-radius: 14rpx;
+  background: #2E7D32;
+  color: #FFFFFF;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.confirm-hover {
+  opacity: 0.85;
+}
+
+/* ==================== 当前运输段任务卡 ==================== */
+.current-leg {
+  background: #16202A;
+  border: 2rpx solid rgba(46, 125, 50, 0.6);
+  border-radius: 20rpx;
+  padding: 28rpx;
+  margin-bottom: 8rpx;
+}
+
+.cl-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cl-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.cl-status {
+  font-size: 24rpx;
+  color: #4CAF50;
+  background: rgba(76, 175, 80, 0.14);
+  border-radius: 8rpx;
+  padding: 4rpx 14rpx;
+}
+
+.cl-route {
+  display: block;
+  margin-top: 14rpx;
+  font-size: 30rpx;
+  color: #E8EDF2;
+}
+
+.cl-meta {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 26rpx;
+  color: #9DB0C0;
+}
+
+.cl-eta {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 26rpx;
+  color: #F0B429;
+}
+
+.cl-est {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 22rpx;
+  color: #7C8C9B;
+}
+
+.cl-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  margin-top: 22rpx;
+}
+
+.cl-btn {
+  flex: 1 1 40%;
+  min-width: 240rpx;
+  height: 84rpx;
+  line-height: 84rpx;
+  text-align: center;
+  border-radius: 14rpx;
+  background: #2E7D32;
+  color: #FFFFFF;
+  font-size: 30rpx;
+}
+
+.leg {
+  background: #1B242E;
+  border-radius: 16rpx;
+  padding: 22rpx 24rpx;
+}
+
+.leg-progress {
+  font-size: 30rpx;
+  color: #E8EDF2;
+}
+
+.leg-meta {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #7C8C9B;
+}
+
+.elderly-mode .hero-title { font-size: 52rpx; }
+.elderly-mode .order-no,
+.elderly-mode .goods,
+.elderly-mode .row { font-size: 34rpx; }

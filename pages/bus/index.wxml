@@ -94,22 +94,26 @@
       bindtap="goToBusDetail"
       hover-class="hover"
     >
-      <view class="vehicle-main">
-        <view class="vehicle-row">
+      <view class="vehicle-eta-area">
+        <text class="vehicle-eta-num">{{item.etaMinutes || '—'}}</text>
+        <text class="vehicle-eta-unit">分钟</text>
+        <text class="vehicle-dist" wx:if="{{item.distanceKm != null}}">{{item.distanceKm}}km</text>
+      </view>
+      <view class="vehicle-info">
+        <view class="vehicle-route-tag">{{item.routeName}}</view>
+        <view class="vehicle-plate-row">
           <image class="vehicle-icon" src="{{item.simulated ? '/images/marker-bus-sim.png' : '/images/marker-bus-real.png'}}" mode="aspectFit" />
           <text class="vehicle-plate">{{item.plateNo}}</text>
-          <text class="vehicle-status {{item.statusText === '行驶中' ? 'running' : ''}}">{{item.statusText}}</text>
-          <text class="vehicle-source {{item.simulated ? 'src-sim' : 'src-real'}}">{{item.sourceText}}</text>
         </view>
-        <view class="vehicle-route">{{item.routeName}}{{item.shiftCode ? ' · ' + item.shiftCode : ''}}</view>
         <view class="vehicle-next">下一站：{{item.nextStation}}</view>
       </view>
-      <view class="vehicle-stub">
-        <text class="stub-eta">{{item.etaText}}</text>
-        <text class="stub-dist" wx:if="{{item.distanceKm != null}}">{{item.distanceKm}} km</text>
+      <view class="vehicle-badge">
+        <text class="vehicle-status {{item.statusText === '行驶中' ? 'running' : ''}}">{{item.statusText}}</text>
+        <text class="vehicle-source {{item.simulated ? 'src-sim' : 'src-real'}}">{{item.sourceText}}</text>
       </view>
     </view>
   </view>
 
   <view class="safe-area-bottom"></view>
 </view>
+

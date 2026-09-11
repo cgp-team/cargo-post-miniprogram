@@ -385,6 +385,82 @@ function driverPickupVerify(driverId, orderId, pickupCode) {
   return request('/app-api/transport/driver/pickup-verify', 'POST', { driverId, orderId, pickupCode })
 }
 
+// ==================== 消息通知中心 ====================
+
+/** 我的消息分页（readStatus 可选：0未读 1已读） */
+function pageMyNotifications(params) {
+  return request('/app-api/transport/notification/page', 'GET', params)
+}
+
+/** 我的未读消息数（红点） */
+function getNotificationUnreadCount() {
+  return request('/app-api/transport/notification/unread-count', 'GET')
+}
+
+/** 标记单条消息已读 */
+function readNotification(id) {
+  return request(`/app-api/transport/notification/read?id=${id}`, 'PUT')
+}
+
+/** 全部标记已读（orderId 可选） */
+function readAllNotifications(orderId) {
+  return request('/app-api/transport/notification/read-all', 'PUT', { orderId })
+}
+
+// ==================== 多段联运（司机交接 / 运输段进度） ====================
+
+/** 待确认的货物交接任务 */
+function getDriverHandovers(driverId) {
+  return request('/app-api/transport/driver/handovers', 'GET', { driverId })
+}
+
+/** 确认货物交接（拍照核验） */
+function confirmDriverHandover(data) {
+  return request('/app-api/transport/driver/handover/confirm', 'POST', data)
+}
+
+/** 我的运输段进度 */
+function getDriverLegs(driverId) {
+  return request('/app-api/transport/driver/legs', 'GET', { driverId })
+}
+
+/** 用户端：按订单号查多段运输进度 */
+function getParcelLegs(no) {
+  return request('/app-api/transport/send/legs', 'GET', { no })
+}
+
+/** 用户端：按订单号查运输拓扑（订单+分段+换乘交接+候选方案解释+时间线，一次返回） */
+function getParcelTopology(no) {
+  return request('/app-api/transport/send/topology', 'GET', { no })
+}
+
+// ==================== 司机运输段任务（接受/导航/到达/装货/发车/交接/完成） ====================
+
+/** 当前运输段（司机任务详情） */
+function getDriverCurrentLeg(driverId) {
+  return request('/app-api/transport/driver/current-leg', 'GET', { driverId })
+}
+
+/** 运输段操作：action ∈ accept/navigate/arrive-origin/load/start/arrive-dest/handover-start/handover-confirm/complete */
+function driverLegAction(action, data) {
+  return request(`/app-api/transport/driver/leg/${action}`, 'POST', data)
+}
+
+/** 司机消息中心分页 */
+function pageDriverMessages(params) {
+  return request('/app-api/transport/driver/messages', 'GET', params)
+}
+
+/** 司机未读消息数 */
+function getDriverUnreadCount(driverId) {
+  return request('/app-api/transport/driver/messages/unread-count', 'GET', { driverId })
+}
+
+/** 标记司机消息已读 */
+function readDriverMessage(id, driverId) {
+  return request(`/app-api/transport/driver/messages/read?id=${id}&driverId=${driverId}`, 'PUT')
+}
+
 /** 上传文件（照片），返回文件 URL（infra app 文件上传，免登录） */
 function uploadFile(filePath) {
   const token = wx.getStorageSync('token')
@@ -473,5 +549,19 @@ module.exports = {
   getRealtimeBusLines,
   getNearbyRealtimeBuses,
   driverPickupVerify,
+  pageMyNotifications,
+  getNotificationUnreadCount,
+  readNotification,
+  readAllNotifications,
+  getDriverHandovers,
+  confirmDriverHandover,
+  getDriverLegs,
+  getParcelLegs,
+  getParcelTopology,
+  getDriverCurrentLeg,
+  driverLegAction,
+  pageDriverMessages,
+  getDriverUnreadCount,
+  readDriverMessage,
   uploadFile
 }
