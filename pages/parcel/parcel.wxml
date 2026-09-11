@@ -195,12 +195,17 @@
           longitude="{{trackResult.mapCenter.longitude}}"
           scale="12"
           polyline="{{trackResult.mapPolyline}}"
+          markers="{{trackResult.mapMarkers}}"
+          circles="{{trackResult.mapCircles}}"
           include-points="{{trackResult.mapPoints}}"
           show-location
         ></map>
+        <view class="parcel-map-current" wx:if="{{trackResult.activeLegText}}">{{trackResult.activeLegText}}</view>
         <view class="parcel-map-legend">
           <text class="lg lg-done">━ 已完成段</text>
-          <text class="lg lg-doing">━ 进行中/待执行段</text>
+          <text class="lg lg-doing">━ 当前段（加粗高亮）</text>
+          <text class="lg lg-todo">━ 未开始段</text>
+          <text class="lg lg-hub">◆ 换乘站</text>
         </view>
       </view>
 

@@ -637,13 +637,23 @@
 .parcel-map-legend {
   display: flex;
   gap: 24rpx;
+  flex-wrap: wrap;
   padding: 12rpx 20rpx;
   background: #FFFFFF;
   font-size: 22rpx;
 }
 
+.parcel-map-current {
+  padding: 10rpx 20rpx;
+  background: #FFF6E8;
+  color: #B4700F;
+  font-size: 24rpx;
+}
+
 .lg-done { color: #2E7D32; }
 .lg-doing { color: #E08A2B; }
+.lg-todo { color: #A79E8C; }
+.lg-hub { color: #C75B2A; }
 
 .parcel-leg {
   display: flex;

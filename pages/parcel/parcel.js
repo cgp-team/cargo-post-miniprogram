@@ -215,6 +215,12 @@ Page({
       // 运输链地图：按段连线（已完成为绿色、进行中为橙色、未完成为灰色），换乘点标注在折线拐点
       const points = []
       const polyline = []
+      const markers = []
+      const circles = []
+      const legsAll = t.legs || []
+      // 当前执行段：优先"进行中"的段，其次最后一段未完成的
+      const activeLeg = legsAll.find((l) => l.status >= 4 && l.status <= 10)
+        || legsAll.filter((l) => l.status < 11).slice(-1)[0]
       ;(t.legs || []).forEach((l) => {
         if (l.fromLongitude == null || l.toLongitude == null) return
         const from = { latitude: l.fromLatitude, longitude: l.fromLongitude }
@@ -222,8 +228,40 @@ Page({
         if (!points.length) points.push(from)
         points.push(to)
         const color = l.status === 11 ? '#2E7D32' : (l.status >= 7 && l.status <= 10 ? '#E08A2B' : '#A79E8C')
-        polyline.push({ points: [from, to], color, width: 4, arrowLine: true })
+        const isActive = activeLeg && l.id === activeLeg.id
+        polyline.push({ points: [from, to], color, width: isActive ? 7 : 4, arrowLine: true })
+        if (l.handoverRequired && l.toLongitude != null) {
+          markers.push({
+            id: 100 + (l.legSequence || 0),
+            latitude: l.toLatitude, longitude: l.toLongitude,
+            iconPath: '/images/marker-stop.png', width: 30, height: 30,
+            callout: {
+              content: '换乘站 ' + (l.toStationName || ''), color: '#C75B2A',
+              fontSize: 11, borderRadius: 6, padding: 4, display: 'ALWAYS'
+            }
+          })
+        }
       })
+      if (points.length) {
+        markers.unshift({
+          id: 1, latitude: points[0].latitude, longitude: points[0].longitude,
+          iconPath: '/images/marker-start.png', width: 30, height: 30,
+          callout: { content: '起点站', color: '#2E7D32', fontSize: 11, borderRadius: 6, padding: 4, display: 'BYCLICK' }
+        })
+        const last = points[points.length - 1]
+        markers.push({
+          id: 2, latitude: last.latitude, longitude: last.longitude,
+          iconPath: '/images/marker-end.png', width: 30, height: 30,
+          callout: { content: '目的站', color: '#1565C0', fontSize: 11, borderRadius: 6, padding: 4, display: 'BYCLICK' }
+        })
+        // 当前段两端高亮圈：一眼看出"货现在在哪一段"
+        if (activeLeg) {
+          circles.push({ latitude: activeLeg.fromLatitude, longitude: activeLeg.fromLongitude, radius: 90,
+            color: '#E08A2BB3', fillColor: '#E08A2B33', strokeWidth: 2 })
+          circles.push({ latitude: activeLeg.toLatitude, longitude: activeLeg.toLongitude, radius: 90,
+            color: '#E08A2BB3', fillColor: '#E08A2B33', strokeWidth: 2 })
+        }
+      }
       return {
         legs: (t.legs || []).map((l) => ({
           ...l,
@@ -240,6 +278,11 @@ Page({
         planningModeName: t.planningModeName || '',
         mapPoints: points,
         mapPolyline: polyline,
+        mapMarkers: markers,
+        mapCircles: circles,
+        activeLegText: activeLeg
+          ? `当前第${activeLeg.legSequence}段：${activeLeg.fromStationName || ''} → ${activeLeg.toStationName || ''}（${activeLeg.statusName || ''}）`
+          : '',
         mapCenter: points.length ? points[Math.floor(points.length / 2)] : null,
         showMap: points.length >= 2
       }
@@ -281,6 +324,9 @@ Page({
       res.planningModeName = topology.planningModeName
       res.mapPoints = topology.mapPoints || []
       res.mapPolyline = topology.mapPolyline || []
+      res.mapMarkers = topology.mapMarkers || []
+      res.mapCircles = topology.mapCircles || []
+      res.activeLegText = topology.activeLegText || ''
       res.mapCenter = topology.mapCenter
       res.showMap = !!topology.showMap
       this.setData({ trackResult: res, noResult: false }, () => {
