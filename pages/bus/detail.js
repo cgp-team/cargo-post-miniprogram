@@ -66,7 +66,18 @@ Page({
 
   async loadDetail() {
     try {
-      const lines = (await api.getRealtimeBusLines()) || []
+      // 我的位置（统一 LocationService，页面不直接调 wx.getLocation）；先定位再拉线路，
+      // 这样 /bus/lines 只返回附近线路（主城线网几百条，全量下发会超时）
+      let me = null
+      try {
+        const loc = await location.getCurrentLocation()
+        if (loc && loc.success) me = { latitude: loc.latitude, longitude: loc.longitude }
+      } catch (e) {
+        me = null
+      }
+      const lines = (await api.getRealtimeBusLines(
+        me ? me.latitude : null, me ? me.longitude : null, 15000
+      )) || []
       const busId = Number(this.data.busId)
       let found = null
       let points = []
@@ -84,14 +95,6 @@ Page({
         return
       }
       const progress = found.progress || 0
-      // 我的位置（统一 LocationService，页面不直接调 wx.getLocation）
-      let me = null
-      try {
-        const loc = await location.getCurrentLocation()
-        if (loc && loc.success) me = { latitude: loc.latitude, longitude: loc.longitude }
-      } catch (e) {
-        me = null
-      }
       const linePoints = (points || []).filter((p) => p.longitude != null && p.latitude != null)
       // 真实道路轨迹：按需查询（后端带 5 分钟缓存）；失败/为空 → 回退站点直线
       let roadPoints = null

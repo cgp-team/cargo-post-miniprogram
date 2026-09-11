@@ -404,7 +404,10 @@ Page({
         hasCoords ? loc.latitude : null,
         hasCoords ? loc.longitude : null
       )
-      const buses = this._formatBuses((data && data.buses) || [])
+      // 不在运营时间：不铺车辆卡片（避免首页出现一堆"待发"卡片被误读为正在运行）
+      const rawBuses = (data && data.buses) || []
+      const inService = data && data.inService != null ? data.inService : null
+      const buses = this._formatBuses(inService === false ? [] : rawBuses)
       const stations = (data && data.nearbyStations) || []
       const lines = (data && data.lines) || []
       this.setData({
@@ -412,8 +415,11 @@ Page({
         nearbyStations: stations,
         nearbyLines: lines,
         nearbyLineCount: (data && data.lineCount) || lines.length,
+        nearbyBusInService: inService,
+        nearbyBusWindow: (data && data.serviceWindowText) || '',
+        nearbyBusNextDeparture: (data && data.nextDepartureTime) || '',
         nearbyRealTransitAvailable: !!(data && data.realTransitAvailable),
-        nearbyBusStatus: buses.length ? 'ok' : 'empty',
+        nearbyBusStatus: buses.length ? 'ok' : (inService === false ? 'off' : 'empty'),
         nearbyBusUpdatedAt: Date.now(),
         nearbyBusUpdatedText: '已更新：刚刚',
         nearbyBusLocatedText: loc && loc.source === location.SOURCE_DEMO
@@ -436,6 +442,8 @@ Page({
     const statusText = { RUNNING: '行驶中', IDLE: '待发/停靠', ARRIVED: '已到站', NO_LOCATION: '无位置' }
     return (buses || []).map((b) => {
       const hasEta = typeof b.etaMinutes === 'number' && b.etaMinutes >= 0
+      const running = b.status === 'RUNNING'
+      const waitMinutes = typeof b.waitDepartureMinutes === 'number' ? b.waitDepartureMinutes : null
       return {
         busId: b.busId,
         routeName: b.routeName || '—',
@@ -454,14 +462,18 @@ Page({
         sourceDot: b.locationSource === 'REAL_FRESH', // 🟢 实时
         sourceStale: b.locationSource === 'REAL_STALE', // 🟠 位置可能过期（司机中断上报）
         // 无 ETA 时按数据来源区分文案：班次推算车辆说明是"按班次计划推算"，真实车辆才提示"等待实时位置"
-        etaText: hasEta ? b.etaMinutes + ' 分钟到站'
-          : (b.locationSource === 'SIMULATED' ? '预计到站' : '等待实时位置'),
-        etaLabel: hasEta ? '到站' : (b.locationSource === 'SIMULATED' ? '预计' : '到站'),
+        // 在途=到站分钟；待发=距发车分钟；其余不编造数字
+        etaText: running && hasEta ? b.etaMinutes + ' 分钟到站'
+          : (!running && waitMinutes != null ? waitMinutes + ' 分钟后发车'
+            : (b.status === 'ARRIVED' ? '已到终点站' : '待发车')),
+        etaLabel: running && hasEta ? '到站' : (!running && waitMinutes != null ? '发车' : '状态'),
         etaMinutes: hasEta ? b.etaMinutes : null,
+        waitMinutes,
+        running,
         distanceKm: typeof b.distanceToNextStationKm === 'number' ? b.distanceToNextStationKm : null,
         routeProvider: b.routeProvider || '',
         lastLocationText: b.lastLocationTime ? this._fmtTimeShort(b.lastLocationTime) : '',
-        locationUnavailable: !hasEta && b.locationSource !== 'REAL_FRESH'
+        locationUnavailable: !hasEta && !running && waitMinutes == null && b.locationSource !== 'REAL_FRESH'
       }
     })
   },

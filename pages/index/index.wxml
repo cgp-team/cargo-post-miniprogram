@@ -141,6 +141,19 @@
       <text class="bus-empty-text">正在加载附近公交…</text>
     </view>
 
+    <!-- 不在运营时间：如实说明服务时段与下一班，不铺"待发车"卡片 -->
+    <view wx:elif="{{nearbyBusStatus === 'off'}}" class="bus-empty">
+      <text class="bus-empty-title">当前不在运营时间</text>
+      <text class="bus-empty-text">
+        {{nearbyBusWindow ? '服务时段 ' + nearbyBusWindow : ''}}{{nearbyBusNextDeparture ? '，下一班 ' + nearbyBusNextDeparture + ' 发车' : ''}}
+      </text>
+      <block wx:if="{{nearbyLineCount}}">
+        <view class="bus-line-chip" wx:for="{{nearbyLines}}" wx:key="routeName">
+          {{item.routeName}}<text wx:if="{{item.dataSource === 'REAL_TRANSIT'}}"> · 现实公交</text><text wx:elif="{{item.dataSource === 'PROJECT_TRANSIT'}}"> · 项目线路</text>
+        </view>
+      </block>
+    </view>
+
     <!-- 空数据：有附近站点/线路但无运营车辆 = 不在运营时间，仍展示站点与线路说明 -->
     <view wx:elif="{{nearbyBusStatus === 'empty'}}" class="bus-empty">
       <!-- 附近有线路（现实公交或项目自建）但暂无实时车辆：不能说"附近没有公交" -->
@@ -189,7 +202,7 @@
           <!-- 山路线：本站到下站之间的路 -->
           <view class="road-line"></view>
           <view class="bus-info">
-            <text class="bus-next">下一站：{{item.nextStationText}}</text>
+            <text class="bus-next">{{item.running ? '下一站：' + item.nextStationText : (item.currentStation ? '当前位置：' + item.currentStation : '下一站：' + item.nextStationText)}}</text>
             <text wx:if="{{item.distanceKm != null}}" class="bus-dist">距 {{item.distanceKm}} km</text>
           </view>
           <view class="bus-tags">

@@ -376,7 +376,17 @@ Page({
     if (this._linesLoading) return
     this._linesLoading = true
     try {
-      const lines = (await api.getRealtimeBusLines()) || []
+      // 带坐标只取附近线路：主城全量线网几百条，全量下发会让小程序超时
+      const loc = this._userLocation
+      // 半径按定位精度自适应（5~15km）：主城线网 200+ 条，半径给太大仍会下发过多数据
+      const lineRadius = loc && loc.success
+        ? location.nearbyRadius(loc.accuracy, loc.level)
+        : null
+      const lines = (await api.getRealtimeBusLines(
+        loc && loc.success ? loc.latitude : null,
+        loc && loc.success ? loc.longitude : null,
+        lineRadius
+      )) || []
       this.setData({ lines })
       // 无用户定位时，用项目线路首站兜底地图中心（不用 103/30 这类无意义默认值）
       if (!this.data.mapCenter) {
@@ -408,7 +418,8 @@ Page({
         ? `${running ? '当前停靠' : '待发车'}：${currentStation}`
         : (b.endStation ? `已到终点站：${b.endStation}` : '位置待更新'))
     // 卡片左侧大数字：在途才显示"到下一站分钟"；待发显示"待发"（等待时长写在下方小字里）
-    const waitMinutes = !running && hasEta ? b.etaMinutes : null
+    // 待发车的"距发车分钟"来自后端 waitDepartureMinutes（etaMinutes 只在在途时才有值）
+    const waitMinutes = !running && typeof b.waitDepartureMinutes === 'number' ? b.waitDepartureMinutes : null
     return {
       busId: b.busId,
       plateNo: b.plateNo || '班车',
@@ -426,8 +437,9 @@ Page({
       etaNumber: running ? (hasEta ? b.etaMinutes : '—') : (b.status === 'ARRIVED' ? '—' : '待发'),
       etaUnit: running && hasEta ? '分钟' : '',
       waitMinutes,
-      etaText: !hasEta ? (simulated ? '待发车' : '—')
-        : (running ? `约 ${b.etaMinutes} 分钟到下一站` : `${b.etaMinutes} 分钟后发车`),
+      etaText: running && hasEta ? `约 ${b.etaMinutes} 分钟到下一站`
+        : (waitMinutes != null ? `${waitMinutes} 分钟后发车`
+          : (b.status === 'ARRIVED' ? '已到终点站' : '待发车')),
       simulated,
       isReal: b.locationSource === 'REAL_FRESH' || b.dataSource === 'REAL',
       sourceText: b.locationSource === 'REAL_FRESH' ? '实时'
