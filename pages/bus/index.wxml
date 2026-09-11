@@ -63,7 +63,7 @@
         hover-class="hover"
       >
         <text class="line-name">{{item.name}}</text>
-        <text class="line-tag {{item.dataSource === 'REAL_TRANSIT' ? 'tag-real' : 'tag-project'}}">{{item.dataSource === 'REAL_TRANSIT' ? '现实公交' : '客货邮'}}</text>
+        <text class="line-tag {{item.dataSource === 'REAL_TRANSIT' ? 'tag-real' : 'tag-project'}}">{{item.dataSource === 'REAL_TRANSIT' ? '现实公交站点' : '真实公交线路'}}</text>
       </view>
     </scroll-view>
     <view wx:elif="{{loading}}" class="empty">正在加载附近线路…</view>
