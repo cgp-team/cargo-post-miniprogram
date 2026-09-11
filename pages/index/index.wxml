@@ -148,9 +148,7 @@
         {{nearbyBusWindow ? '服务时段 ' + nearbyBusWindow : ''}}{{nearbyBusNextDeparture ? '，下一班 ' + nearbyBusNextDeparture + ' 发车' : ''}}
       </text>
       <block wx:if="{{nearbyLineCount}}">
-        <view class="bus-line-chip" wx:for="{{nearbyLines}}" wx:key="routeName">
-          {{item.routeName}}<text wx:if="{{item.dataSource === 'REAL_TRANSIT'}}"> · 现实公交</text><text wx:elif="{{item.dataSource === 'PROJECT_TRANSIT'}}"> · 项目线路</text>
-        </view>
+        <text class="bus-empty-text">附近共 {{nearbyLineCount}} 条公交线路，运营时段可查看运行车辆</text>
       </block>
     </view>
 
@@ -159,10 +157,10 @@
       <!-- 附近有线路（现实公交或项目自建）但暂无实时车辆：不能说"附近没有公交" -->
       <block wx:if="{{nearbyLineCount}}">
         <text class="bus-empty-title">附近有 {{nearbyLineCount}} 条公交线路</text>
-        <view class="bus-line-chip" wx:for="{{nearbyLines}}" wx:key="routeName">
+        <view class="bus-line-chip" wx:for="{{nearbyLinePreview}}" wx:key="routeName">
           {{item.routeName}}<text wx:if="{{item.dataSource === 'REAL_TRANSIT'}}"> · 现实公交</text><text wx:elif="{{item.dataSource === 'PROJECT_TRANSIT'}}"> · 项目线路</text>
         </view>
-        <text class="bus-empty-text">当前暂无实时车辆数据</text>
+        <text class="bus-empty-text">当前暂无实时车辆数据{{nearbyLineCount > 6 ? '（仅显示前 6 条）' : ''}}</text>
       </block>
       <block wx:elif="{{nearbyStations.length}}">
         <text class="bus-empty-title">附近有 {{nearbyStations.length}} 个公交站点</text>
