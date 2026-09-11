@@ -2,7 +2,9 @@
  * 商品图片助手
  *
  * 后端/演示数据里的 image 字段历史上是 emoji 字符。
- * 这里统一把商品映射到本地实拍图（miniprogram/images/product-*.png），
+ * 这里统一把商品映射到本地实拍图：
+ *   - 重庆特产：miniprogram/images/products/*.jpg（高清实拍，随包发布，不依赖外网）
+ *   - 农产品：miniprogram/images/product-*.png
  * 已经是图片路径/URL 的原样返回；都不匹配返回 ''（调用方显示占位图）。
  *
  * 用法：const productImg = require('../../utils/product-img')
@@ -10,6 +12,14 @@
  */
 
 const LOCAL_MAP = [
+  // ===== 重庆特产（真实照片，随小程序包发布）=====
+  [/火锅|底料|牛油/, '/images/products/hotpot-base.jpg'],
+  [/小面|麻辣面|豌杂/, '/images/products/xiaomian.jpg'],
+  [/榨菜/, '/images/products/zhacai.jpg'],
+  [/桃片/, '/images/products/taopian.jpg'],
+  [/米花糖/, '/images/products/mihuatang.jpg'],
+  [/腊肉|香肠|烟熏肉/, '/images/products/larou.jpg'],
+  // ===== 农产品 =====
   [/茶/, '/images/product-tea.png'],
   [/蛋/, '/images/product-egg.png'],
   [/面|粉|粉丝/, '/images/product-noodle.png'],

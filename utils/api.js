@@ -474,6 +474,8 @@ function uploadFile(filePath) {
       url: `${BASE_URL}/app-api/infra/file/upload`,
       filePath,
       name: 'file',
+      // 显式超时：默认不超时会让"上传中…"遮罩一直挂着，用户以为卡死在发布界面
+      timeout: 30000,
       // 与 request() 鉴权方式一致，无 token 时不带该头
       header: token ? { 'Authorization': `Bearer ${token}` } : {},
       success(res) {

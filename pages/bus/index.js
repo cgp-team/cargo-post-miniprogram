@@ -237,6 +237,11 @@ Page({
         nearbyLocatedText: hasCoords
           ? (loc.source === location.SOURCE_DEMO ? `根据${loc.district || '演示地点'}展示` : '根据当前位置展示')
           : (district ? `根据${district}展示` : '定位不可用'),
+        // 运营时段（无车时如实展示"当前不在运营时间 + 下一班几点"，不留空白）
+        inService: data && data.inService != null ? data.inService : null,
+        serviceWindowText: (data && data.serviceWindowText) || '',
+        nextDepartureText: (data && data.nextDepartureTime) || '',
+        runningEmptyText: this._runningEmptyText(data, buses),
         hasError: false,
         loading: false
       })
@@ -253,6 +258,24 @@ Page({
   },
 
   /** 附近线路：现实线路 + 项目线路分别标注来源；同名去重；按名称稳定排序 */
+  /**
+   * "正在运行"空态文案：有线路但没车时，如实说明是不是运营时间之外。
+   * 运营时段/下一班来自后端（按附近线路的启用班次推导）。
+   */
+  _runningEmptyText(data, buses) {
+    if (buses && buses.length) return ''
+    const window = (data && data.serviceWindowText) || this.data.serviceWindowText
+    const next = (data && data.nextDepartureTime) || this.data.nextDepartureText
+    const inService = data && data.inService != null ? data.inService : this.data.inService
+    if (inService === false) {
+      return `当前不在运营时间${window ? `（服务时段 ${window}）` : ''}${next ? `，下一班 ${next} 发车` : ''}`
+    }
+    if (inService === true) {
+      return '班次正在运行中，附近暂时没有车辆经过，稍后会自动刷新'
+    }
+    return '附近暂无正在运行的车辆'
+  },
+
   _buildVisibleLines(lines, stations) {
     const result = []
     const seen = {}
@@ -370,6 +393,13 @@ Page({
   _formatVehicle(b) {
     const hasEta = typeof b.etaMinutes === 'number' && b.etaMinutes >= 0
     const simulated = b.locationSource === 'SIMULATED' || b.dataSource === 'SIMULATED'
+    const nextStation = b.nextStation || ''
+    const currentStation = b.currentStation || ''
+    const running = b.status === 'RUNNING'
+    // 卡片主文案：永远有内容（无下一站时说明"已到站/待发车"，不留空白）
+    const stationText = nextStation
+      ? `下一站：${nextStation}`
+      : (currentStation ? `当前停靠：${currentStation}` : (b.endStation ? `已到终点站：${b.endStation}` : '位置待更新'))
     return {
       busId: b.busId,
       plateNo: b.plateNo || '班车',
@@ -377,7 +407,10 @@ Page({
       shiftCode: b.shiftCode || '',
       statusText: b.status === 'RUNNING' ? '行驶中'
         : (b.status === 'IDLE' ? '待发/停靠' : (b.status === 'ARRIVED' ? '已到站' : '无位置')),
-      nextStation: b.nextStation || '—',
+      nextStation: nextStation || (currentStation || b.endStation || '—'),
+      currentStation,
+      stationText,
+      running,
       distanceKm: typeof b.distanceToNextStationKm === 'number' ? b.distanceToNextStationKm : null,
       // 班次模拟车辆的预计到站：按班次计划时长推算，文案用"预计"而不是"演示"，
       // 车上显示的是真实线路上的推算位置（线路/站点均来自真实公交线网）
@@ -437,7 +470,20 @@ Page({
         iconPath: '/images/marker-stop.png',
         width: 22,
         height: 22,
-        zIndex: 5
+        zIndex: 5,
+        // 最近的 8 个站点带名称标签：避免"地图上站点乱标、看不出是哪个站"
+        label: i < 8 && s.name
+          ? {
+              content: s.name,
+              color: '#1F3B57',
+              fontSize: 10,
+              bgColor: '#FFFFFF',
+              borderRadius: 3,
+              padding: 2,
+              anchorX: -14,
+              anchorY: -8
+            }
+          : undefined
       })
     })
     // 车辆：动画帧优先，其次原始坐标

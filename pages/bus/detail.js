@@ -25,7 +25,12 @@ Page({
     mapScale: 14,
     markers: [],
     polyline: [],
-    sourceText: ''
+    sourceText: '',
+    // 头部信息（保证不空白）：当前站 / 下一站 / 预计到下一站 / 运行说明
+    currentStationText: '',
+    nextStationText: '',
+    etaText: '',
+    stateText: ''
   },
 
   async onLoad(options) {
@@ -101,6 +106,21 @@ Page({
         }
       }
       const sim = found.dataSource === 'SIMULATED' || found.locationSource === 'SIMULATED'
+      // 头部信息：当前站 → 下一站 → 预计到达（缺位置时如实说明，不留空白）
+      const nextName = found.nextStation || ''
+      const currentName = found.currentStation || ''
+      const etaRaw = found.etaToNextStationMinutes != null
+        ? found.etaToNextStationMinutes
+        : (typeof found.etaMinutes === 'number' ? found.etaMinutes : null)
+      const running = found.status === 1 || found.status === 'RUNNING'
+      const etaText = etaRaw != null ? `预计 ${Math.max(1, Math.ceil(etaRaw))} 分钟到达` : ''
+      const distText = found.distanceToNextStationKm != null ? `，约 ${found.distanceToNextStationKm} km` : ''
+      const hasLocation = found.latitude != null && found.longitude != null
+      const stateText = !hasLocation
+        ? '暂无该车位置信息'
+        : (nextName
+          ? `${running ? '行驶中' : '待发车'} · 下一站 ${nextName}${etaText ? '，' + etaText : ''}${distText}`
+          : `已到达终点站 ${currentName || found.endStation || '—'}，等待发车`)
       const markers = []
       if (me) {
         markers.push({
@@ -125,6 +145,10 @@ Page({
         bus: found,
         stops: this.buildStops(points, progress),
         progress,
+        currentStationText: currentName || '—',
+        nextStationText: nextName || (hasLocation ? '—（已到终点站）' : '—'),
+        etaText: etaText || (hasLocation && nextName ? '' : '—'),
+        stateText,
         markers,
         // 优先用真实道路 polyline（后端高德路网，按需查询），回退到站点直线
         polyline: (() => {
