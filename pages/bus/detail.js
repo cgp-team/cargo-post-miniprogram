@@ -118,9 +118,13 @@ Page({
       const hasLocation = found.latitude != null && found.longitude != null
       const stateText = !hasLocation
         ? '暂无该车位置信息'
-        : (nextName
-          ? `${running ? '行驶中' : '待发车'} · 下一站 ${nextName}${etaText ? '，' + etaText : ''}${distText}`
-          : `已到达终点站 ${currentName || found.endStation || '—'}，等待发车`)
+        : (running
+          ? (nextName
+            ? `行驶中 · 下一站 ${nextName}${etaText ? '，' + etaText : ''}${distText}`
+            : `行驶中 · 预计 ${etaText || '即将'} 到达终点站`)
+          : (currentName
+            ? `待发车 · 起点站 ${currentName}${etaRaw != null ? `，约 ${Math.max(1, Math.ceil(etaRaw))} 分钟后发车` : ''}`
+            : `已到达终点站 ${found.endStation || '—'}，等待下一班`))
       const markers = []
       if (me) {
         markers.push({

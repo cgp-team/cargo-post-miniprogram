@@ -396,10 +396,13 @@ Page({
     const nextStation = b.nextStation || ''
     const currentStation = b.currentStation || ''
     const running = b.status === 'RUNNING'
-    // 卡片主文案：永远有内容（无下一站时说明"已到站/待发车"，不留空白）
-    const stationText = nextStation
+    // 卡片主文案：永远有内容，且区分"在途"与"待发/收车"——
+    // 待发车的 etaMinutes 是"距发车分钟"，不能写成"到下一站分钟"（否则会出现"预计 464 分钟到达"）
+    const stationText = running && nextStation
       ? `下一站：${nextStation}`
-      : (currentStation ? `当前停靠：${currentStation}` : (b.endStation ? `已到终点站：${b.endStation}` : '位置待更新'))
+      : (currentStation
+        ? `${running ? '当前停靠' : '待发车'}：${currentStation}`
+        : (b.endStation ? `已到终点站：${b.endStation}` : '位置待更新'))
     return {
       busId: b.busId,
       plateNo: b.plateNo || '班车',
@@ -414,7 +417,8 @@ Page({
       distanceKm: typeof b.distanceToNextStationKm === 'number' ? b.distanceToNextStationKm : null,
       // 班次模拟车辆的预计到站：按班次计划时长推算，文案用"预计"而不是"演示"，
       // 车上显示的是真实线路上的推算位置（线路/站点均来自真实公交线网）
-      etaText: hasEta ? `约 ${b.etaMinutes} 分钟` : (simulated ? '预计到站' : '—'),
+      etaText: !hasEta ? (simulated ? '待发车' : '—')
+        : (running ? `约 ${b.etaMinutes} 分钟` : `${b.etaMinutes} 分钟后发车`),
       simulated,
       isReal: b.locationSource === 'REAL_FRESH' || b.dataSource === 'REAL',
       sourceText: b.locationSource === 'REAL_FRESH' ? '实时'
