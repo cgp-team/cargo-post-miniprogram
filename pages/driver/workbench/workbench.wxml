@@ -9,7 +9,11 @@
       <text class="driver-plate">{{plateNo}}</text>
       <text class="driver-capacity">货仓 {{cargoLimit}} 件</text>
       <text class="location-source {{locationSource === 'SIMULATED' ? 'sim' : ''}}" wx:if="{{locationSource === 'SIMULATED'}}">🧪 模拟运行</text>
-    </view>
+    
+      <view class="notif-bell" bindtap="goNotifications">
+        <text class="notif-icon">🔔</text>
+        <view class="notif-badge" wx:if="{{driverUnreadCount > 0}}">{{driverUnreadCount > 99 ? '99+' : driverUnreadCount}}</view>
+      </view></view>
     <view class="route-label">
       <text class="route-badge">{{routeName || '今日班次'}}</text>
       <text class="status-tag {{status}}">
@@ -68,6 +72,49 @@
     <text class="handover-entry-arrow">›</text>
   </view>
 
+  <!-- ========== 路线站点地图（行驶中显示站点进度） ========== -->
+  <view class="route-overview-map" wx:if="{{routeMapMarkers.length > 0}}">
+    <view class="map-section-header">
+      <text class="map-section-title">🗺️ 路线站点地图</text>
+      <text class="map-section-subtitle">共 {{navTotalStops}} 站</text>
+    </view>
+    <map
+      class="overview-map"
+      latitude="{{mapLatitude}}"
+      longitude="{{mapLongitude}}"
+      markers="{{routeMapMarkers}}"
+      polyline="{{routeMapPolyline}}"
+      show-location="{{true}}"
+      scale="13"
+      enable-zoom="{{true}}"
+      enable-scroll="{{true}}"
+    ></map>
+    <!-- 图例 -->
+    <view class="map-legend">
+      <view class="legend-item">
+        <view class="legend-dot passed"></view>
+        <text class="legend-text">已过站</text>
+      </view>
+      <view class="legend-item">
+        <view class="legend-dot current"></view>
+        <text class="legend-text">当前站</text>
+      </view>
+      <view class="legend-item">
+        <view class="legend-dot next"></view>
+        <text class="legend-text">下一站</text>
+      </view>
+      <view class="legend-item">
+        <view class="legend-dot future"></view>
+        <text class="legend-text">未到站</text>
+      </view>
+    </view>
+    <!-- 导航按钮 -->
+    <view class="map-nav-bar" wx:if="{{nextStation && status !== 'idle'}}" bindtap="navigateToNextStop" hover-class="hover">
+      <text class="map-nav-icon">🧭</text>
+      <text class="map-nav-text">导航到 {{nextStation}}</text>
+      <text class="map-nav-dist" wx:if="{{nextStationDistance > 0}}">约{{nextStationDistance}}m</text>
+    </view>
+  </view>
   <!-- ========== 状态一：待发车 - 行李舱可视化 ========== -->
   <view class="idle-panel" wx:if="{{status === 'idle'}}">
     <!-- 大巴车行李舱图形 -->
@@ -259,3 +306,5 @@
   <!-- ========== 底部自定义TabBar ========== -->
   <driver-tab-bar current="workbench" elderly="{{elderlyMode}}"></driver-tab-bar>
 </view>
+
+

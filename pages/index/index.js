@@ -414,6 +414,8 @@ Page({
         nearbyBuses: buses,
         nearbyStations: stations,
         nearbyLines: lines,
+        // 首页只展示前 6 条线路（主城线网 200+ 条，全列出来会把首页刷屏）
+        nearbyLinePreview: (lines || []).slice(0, 6),
         nearbyLineCount: (data && data.lineCount) || lines.length,
         nearbyBusInService: inService,
         nearbyBusWindow: (data && data.serviceWindowText) || '',

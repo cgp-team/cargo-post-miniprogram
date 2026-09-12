@@ -51,14 +51,54 @@ page {
   padding: 28rpx;
   box-shadow: 0 4rpx 16rpx rgba(60, 50, 30, 0.06);
   position: relative;
+  display: flex;
+  flex-direction: row;
 }
 
 .card.unread {
   border-left: 8rpx solid #2E7BBF;
 }
 
+/* 级别左边框样式 */
+.card.level-SUCCESS {
+  border-left: 8rpx solid #4CAF50;
+}
+
+.card.level-WARNING {
+  border-left: 8rpx solid #FF9800;
+}
+
+.card.level-EXCEPTION {
+  border-left: 8rpx solid #F44336;
+}
+
+.card.level-ACTION_REQUIRED {
+  border-left: 8rpx solid #9C27B0;
+}
+
+.card.level-INFO {
+  border-left: 8rpx solid #2196F3;
+}
+
 .card-hover {
   opacity: 0.85;
+}
+
+/* 左侧图标 */
+.card-left {
+  margin-right: 16rpx;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 4rpx;
+}
+
+.card-icon {
+  font-size: 40rpx;
+}
+
+.card-body {
+  flex: 1;
+  min-width: 0;
 }
 
 .card-top {
@@ -96,17 +136,16 @@ page {
   word-break: break-word;
 }
 
-.card-bottom {
-  margin-top: 18rpx;
+/* 标签行 */
+.card-tags {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  gap: 12rpx;
+  margin-top: 10rpx;
+  flex-wrap: wrap;
 }
 
 .tag {
   font-size: 22rpx;
-  color: #1F5E9E;
-  background: #E6EFF5;
   border-radius: 8rpx;
   padding: 4rpx 14rpx;
   white-space: nowrap;
@@ -115,10 +154,34 @@ page {
   text-overflow: ellipsis;
 }
 
+.event-tag {
+  background: #E6EFF5;
+  color: #1F5E9E;
+}
+
+.order-tag {
+  background: #FFF3E0;
+  color: #E65100;
+}
+
+.card-bottom {
+  margin-top: 18rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .time {
   font-size: 24rpx;
   color: #A79E8C;
   white-space: nowrap;
+}
+
+/* 操作提示 */
+.action-hint {
+  font-size: 24rpx;
+  color: #9C27B0;
+  font-weight: 500;
 }
 
 .more {

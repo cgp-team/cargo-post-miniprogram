@@ -6,6 +6,31 @@ const api = require('../../utils/api')
 const appearance = require('../../utils/appearance')
 const { formatBackendTime } = require('../../utils/util')
 
+// 事件类型图标映射
+const EVENT_ICONS = {
+  ORDER_CREATED: '📝',
+  REVIEW_PASSED: '✔',
+  REVIEW_REJECTED: '🚫',
+  POOLED: '📥',
+  DISPATCHED: '🧠',
+  PLAN_ISSUED: '📋',
+  DEPARTED: '🚌',
+  LEG_DEPARTED: '🚚',
+  LEG_ARRIVED: '🏁',
+  HANDOVER_CREATED: '🔁',
+  HANDOVER_CONFIRMED: '✓',
+  ARRIVED: '📍',
+  ORDER_ARRIVED: '📦',
+  COMPLETED: '🎉',
+  CANCELLED: '✖',
+  EXCEPTION: '⚠️',
+  ORDER_EXCEPTION: '⚠️',
+  DRIVER_ARRIVED: '🚏',
+  LEG_ASSIGNED: '📌',
+  LEG_ACCEPTED: '✓',
+  PLAN_CREATED: '🗺️'
+}
+
 Page({
   data: {
     elderlyMode: false,
@@ -18,11 +43,18 @@ Page({
     total: 0,
     hasMore: true,
     loading: false,
-    unreadCount: 0
+    unreadCount: 0,
+    driverMode: false
   },
 
-  onLoad() {
+  onLoad(options) {
     appearance.apply(this)
+    const driverMode = options && options.driverMode === '1'
+    this.setData({ driverMode })
+    if (driverMode) {
+      const app = getApp()
+      this.driverId = app.globalData && app.globalData.driverId
+    }
     this.reload()
   },
 
@@ -41,9 +73,11 @@ Page({
 
   async loadUnread() {
     try {
-      const count = await api.getNotificationUnreadCount()
+      const count = this.data.driverMode && this.driverId
+        ? await api.getDriverUnreadCount(this.driverId)
+        : await api.getNotificationUnreadCount()
       this.setData({ unreadCount: count || 0 })
-    } catch (e) { /* api 已 toast */ }
+    } catch (e) { /* api 容错toast */ }
   },
 
   async loadList() {
@@ -52,9 +86,12 @@ Page({
     try {
       const params = { pageNo: this.data.pageNo, pageSize: this.data.pageSize }
       if (this.data.filter === 'UNREAD') params.readStatus = 0
-      const res = await api.pageMyNotifications(params)
+      const res = this.data.driverMode && this.driverId
+        ? await api.pageDriverMessages({ ...params, driverId: this.driverId })
+        : await api.pageMyNotifications(params)
       const list = (res.list || []).map((n) => ({
         ...n,
+        icon: EVENT_ICONS[n.eventType] || '🔔',
         createTimeText: formatBackendTime(n.createTime)
       }))
       const merged = this.data.pageNo === 1 ? list : this.data.list.concat(list)
@@ -63,7 +100,7 @@ Page({
         total: res.total || 0,
         hasMore: merged.length < (res.total || 0)
       })
-    } catch (e) { /* api 已 toast */ } finally {
+    } catch (e) { /* api 容错toast */ } finally {
       this.setData({ loading: false })
     }
   },
@@ -87,26 +124,31 @@ Page({
 
   /** 点消息：标记已读；带订单的跳包裹追踪 */
   async onTapItem(e) {
-    const { id } = e.currentTarget.dataset
+    const { id, orderId } = e.currentTarget.dataset
     const item = this.data.list.find((n) => n.id === id)
     if (item && item.readStatus === 0) {
       try {
-        await api.readNotification(id)
-      } catch (err) { /* api 已 toast */ }
+        this.data.driverMode && this.driverId
+          ? await api.readDriverMessage(id, this.driverId)
+          : await api.readNotification(id)
+      } catch (err) { /* api 容错toast */ }
       const list = this.data.list.map((n) => (n.id === id ? { ...n, readStatus: 1 } : n))
       this.setData({ list, unreadCount: Math.max(0, this.data.unreadCount - 1) })
     }
-    const orderId = item && item.orderId
+    // 跳转到订单追踪页
     if (orderId) {
-      wx.switchTab({ url: '/pages/parcel/parcel' })
+      wx.navigateTo({ url: '/pages/goods/trace/trace?orderId=' + orderId })
     }
   },
 
   async onReadAll() {
     try {
-      await api.readAllNotifications()
+      this.data.driverMode
+        ? await api.readAllNotifications()
+        : await api.readAllNotifications()
       wx.showToast({ title: '已全部标为已读', icon: 'success' })
       this.reload()
-    } catch (e) { /* api 已 toast */ }
+    } catch (e) { /* api 容错toast */ }
   }
-})
+})
+
