@@ -1,4 +1,4 @@
-﻿/* 路线页 - 对齐用户端「山乡巴士·站牌与车票」米纸暖色主题 */
+/* 路线页 - 对齐用户端「山乡巴士·站牌与车票」米纸暖色主题 */
 .routes-page {
   min-height: 100vh;
   background: var(--color-paper, #F6F2E9);

@@ -1,4 +1,4 @@
-﻿<!-- 司机路线页 -->
+<!-- 司机路线页 -->
 <view class="routes-page {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
   <!-- 顶部 -->
   <view class="page-header">

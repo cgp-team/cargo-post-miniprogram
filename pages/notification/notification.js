@@ -8,27 +8,27 @@ const { formatBackendTime } = require('../../utils/util')
 
 // 事件类型图标映射
 const EVENT_ICONS = {
-  ORDER_CREATED: '??',
-  REVIEW_PASSED: '?',
-  REVIEW_REJECTED: '??',
-  POOLED: '??',
-  DISPATCHED: '??',
-  PLAN_ISSUED: '??',
-  DEPARTED: '??',
-  LEG_DEPARTED: '??',
-  LEG_ARRIVED: '??',
-  HANDOVER_CREATED: '??',
-  HANDOVER_CONFIRMED: '?',
-  ARRIVED: '??',
-  ORDER_ARRIVED: '??',
-  COMPLETED: '??',
-  CANCELLED: '?',
-  EXCEPTION: '??',
-  ORDER_EXCEPTION: '??',
-  DRIVER_ARRIVED: '??',
-  LEG_ASSIGNED: '??',
-  LEG_ACCEPTED: '?',
-  PLAN_CREATED: '??'
+  ORDER_CREATED: '📝',
+  REVIEW_PASSED: '✔',
+  REVIEW_REJECTED: '🚫',
+  POOLED: '📥',
+  DISPATCHED: '🧠',
+  PLAN_ISSUED: '📋',
+  DEPARTED: '🚌',
+  LEG_DEPARTED: '🚚',
+  LEG_ARRIVED: '🏁',
+  HANDOVER_CREATED: '🔁',
+  HANDOVER_CONFIRMED: '✓',
+  ARRIVED: '📍',
+  ORDER_ARRIVED: '📦',
+  COMPLETED: '🎉',
+  CANCELLED: '✖',
+  EXCEPTION: '⚠️',
+  ORDER_EXCEPTION: '⚠️',
+  DRIVER_ARRIVED: '🚏',
+  LEG_ASSIGNED: '📌',
+  LEG_ACCEPTED: '✓',
+  PLAN_CREATED: '🗺️'
 }
 
 Page({
@@ -91,7 +91,7 @@ Page({
         : await api.pageMyNotifications(params)
       const list = (res.list || []).map((n) => ({
         ...n,
-        icon: EVENT_ICONS[n.eventType] || '??',
+        icon: EVENT_ICONS[n.eventType] || '🔔',
         createTimeText: formatBackendTime(n.createTime)
       }))
       const merged = this.data.pageNo === 1 ? list : this.data.list.concat(list)

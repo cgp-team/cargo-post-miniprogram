@@ -335,10 +335,10 @@ Page({
       const passed = i < targetIndex
       const hasCargo = p.pickupCount > 0 || p.deliverCount > 0
       let content = p.stationName || ''
-      if (p.pickupCount) content += ' ??' + p.pickupCount
-      if (p.deliverCount) content += ' ??' + p.deliverCount
-      if (p.boardCount) content += ' ??' + p.boardCount
-      if (p.alightCount) content += ' ??' + p.alightCount
+      if (p.pickupCount) content += ' 📥' + p.pickupCount
+      if (p.deliverCount) content += ' 📤' + p.deliverCount
+      if (p.boardCount) content += ' 🚌' + p.boardCount
+      if (p.alightCount) content += ' 🚏' + p.alightCount
       return {
         id: i,
         latitude: p.latitude,
