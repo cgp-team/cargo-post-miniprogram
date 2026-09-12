@@ -248,6 +248,10 @@ Page({
             points: road, color, width: isActive ? 7 : 4, arrowLine: true
           })
         } else {
+          // 取不到真实轨迹时用虚线示意（与实线区分），并计数提示；后台「预热真实路线」后即变实线
+          polyline.push({
+            points: [from, to], color, width: isActive ? 7 : 4, arrowLine: true, dottedLine: true
+          })
           pendingRoadCount++
         }
         if (l.handoverRequired && l.toLongitude != null) {
