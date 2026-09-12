@@ -1,10 +1,35 @@
 /**
- * æ¶ˆæ¯é€šçŸ¥ä¸­å¿ƒ â€”â€” è®¢å•äº‹ä»¶é©±åŠ¨é€šçŸ¥åˆ—è¡¨ï¼Œæ”¯æŒæ ‡è®°å·²è¯»
- * æŽ¥å£ï¼štransport/notification/pageã€unread-countã€readã€read-all
+ * ÏûÏ¢Í¨ÖªÖÐÐÄ ¡ª¡ª ¶©µ¥ÊÂ¼þÇý¶¯Í¨ÖªÁÐ±í£¬Ö§³Ö±ê¼ÇÒÑ¶Á
+ * ½Ó¿Ú£ºtransport/notification/page¡¢unread-count¡¢read¡¢read-all
  */
 const api = require('../../utils/api')
 const appearance = require('../../utils/appearance')
 const { formatBackendTime } = require('../../utils/util')
+
+// ÊÂ¼þÀàÐÍÍ¼±êÓ³Éä
+const EVENT_ICONS = {
+  ORDER_CREATED: '??',
+  REVIEW_PASSED: '?',
+  REVIEW_REJECTED: '??',
+  POOLED: '??',
+  DISPATCHED: '??',
+  PLAN_ISSUED: '??',
+  DEPARTED: '??',
+  LEG_DEPARTED: '??',
+  LEG_ARRIVED: '??',
+  HANDOVER_CREATED: '??',
+  HANDOVER_CONFIRMED: '?',
+  ARRIVED: '??',
+  ORDER_ARRIVED: '??',
+  COMPLETED: '??',
+  CANCELLED: '?',
+  EXCEPTION: '??',
+  ORDER_EXCEPTION: '??',
+  DRIVER_ARRIVED: '??',
+  LEG_ASSIGNED: '??',
+  LEG_ACCEPTED: '?',
+  PLAN_CREATED: '??'
+}
 
 Page({
   data: {
@@ -18,11 +43,18 @@ Page({
     total: 0,
     hasMore: true,
     loading: false,
-    unreadCount: 0
+    unreadCount: 0,
+    driverMode: false
   },
 
-  onLoad() {
+  onLoad(options) {
     appearance.apply(this)
+    const driverMode = options && options.driverMode === '1'
+    this.setData({ driverMode })
+    if (driverMode) {
+      const app = getApp()
+      this.driverId = app.globalData && app.globalData.driverId
+    }
     this.reload()
   },
 
@@ -41,9 +73,11 @@ Page({
 
   async loadUnread() {
     try {
-      const count = await api.getNotificationUnreadCount()
+      const count = this.data.driverMode && this.driverId
+        ? await api.getDriverUnreadCount(this.driverId)
+        : await api.getNotificationUnreadCount()
       this.setData({ unreadCount: count || 0 })
-    } catch (e) { /* api å·² toast */ }
+    } catch (e) { /* api ÈÝ´ítoast */ }
   },
 
   async loadList() {
@@ -52,9 +86,12 @@ Page({
     try {
       const params = { pageNo: this.data.pageNo, pageSize: this.data.pageSize }
       if (this.data.filter === 'UNREAD') params.readStatus = 0
-      const res = await api.pageMyNotifications(params)
+      const res = this.data.driverMode && this.driverId
+        ? await api.pageDriverMessages({ ...params, driverId: this.driverId })
+        : await api.pageMyNotifications(params)
       const list = (res.list || []).map((n) => ({
         ...n,
+        icon: EVENT_ICONS[n.eventType] || '??',
         createTimeText: formatBackendTime(n.createTime)
       }))
       const merged = this.data.pageNo === 1 ? list : this.data.list.concat(list)
@@ -63,7 +100,7 @@ Page({
         total: res.total || 0,
         hasMore: merged.length < (res.total || 0)
       })
-    } catch (e) { /* api å·² toast */ } finally {
+    } catch (e) { /* api ÈÝ´ítoast */ } finally {
       this.setData({ loading: false })
     }
   },
@@ -85,28 +122,33 @@ Page({
     this.reload()
   },
 
-  /** ç‚¹æ¶ˆæ¯ï¼šæ ‡è®°å·²è¯»ï¼›å¸¦è®¢å•çš„è·³åŒ…è£¹è¿½è¸ª */
+  /** µãÏûÏ¢£º±ê¼ÇÒÑ¶Á£»´ø¶©µ¥µÄÌø°ü¹ü×·×Ù */
   async onTapItem(e) {
-    const { id } = e.currentTarget.dataset
+    const { id, orderId } = e.currentTarget.dataset
     const item = this.data.list.find((n) => n.id === id)
     if (item && item.readStatus === 0) {
       try {
-        await api.readNotification(id)
-      } catch (err) { /* api å·² toast */ }
+        this.data.driverMode && this.driverId
+          ? await api.readDriverMessage(id, this.driverId)
+          : await api.readNotification(id)
+      } catch (err) { /* api ÈÝ´ítoast */ }
       const list = this.data.list.map((n) => (n.id === id ? { ...n, readStatus: 1 } : n))
       this.setData({ list, unreadCount: Math.max(0, this.data.unreadCount - 1) })
     }
-    const orderId = item && item.orderId
+    // Ìø×ªµ½¶©µ¥×·×ÙÒ³
     if (orderId) {
-      wx.switchTab({ url: '/pages/parcel/parcel' })
+      wx.navigateTo({ url: '/pages/goods/trace/trace?orderId=' + orderId })
     }
   },
 
   async onReadAll() {
     try {
-      await api.readAllNotifications()
-      wx.showToast({ title: 'å·²å…¨éƒ¨æ ‡ä¸ºå·²è¯»', icon: 'success' })
+      this.data.driverMode
+        ? await api.readAllNotifications()
+        : await api.readAllNotifications()
+      wx.showToast({ title: 'ÒÑÈ«²¿±êÎªÒÑ¶Á', icon: 'success' })
       this.reload()
-    } catch (e) { /* api å·² toast */ }
+    } catch (e) { /* api ÈÝ´ítoast */ }
   }
 })
+

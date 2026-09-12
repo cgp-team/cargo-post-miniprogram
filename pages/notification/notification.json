@@ -1,8 +1,8 @@
-{
+﻿{
   "navigationBarTitleText": "消息通知",
   "navigationBarTextStyle": "white",
   "enablePullDownRefresh": true,
   "usingComponents": {
-    "empty-state": "/components/empty-state/index"
+    "empty-state": "/components/empty-state/empty-state"
   }
 }

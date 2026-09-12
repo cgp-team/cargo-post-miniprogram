@@ -1,4 +1,4 @@
-<!-- 司机路线页 -->
+﻿<!-- 司机路线页 -->
 <view class="routes-page {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
   <!-- 顶部 -->
   <view class="page-header">
@@ -30,7 +30,7 @@
     <view class="timeline">
       <view
         class="timeline-item {{index === item.currentStop ? 'current' : ''}} {{index < item.currentStop ? 'done' : ''}}"
-        wx:for="{{item.stops}}"
+        wx:for="{{item.stopNames}}"
         wx:key="*this"
         wx:for-item="stop"
         wx:for-index="index"
@@ -40,8 +40,34 @@
         </view>
         <text class="timeline-name">{{stop}}</text>
         <text class="timeline-tag" wx:if="{{index === 0}}">始发</text>
-        <text class="timeline-tag end" wx:if="{{index === item.stops.length - 1}}">终点</text>
+        <text class="timeline-tag end" wx:if="{{index === item.stopNames.length - 1}}">终点</text>
         <text class="timeline-tag current-tag" wx:if="{{index === item.currentStop}}">当前</text>
+      </view>
+    </view>
+
+    <!-- 路线地图 -->
+    <view class="route-map-section" wx:if="{{item.hasMap}}">
+      <view class="route-map-toggle" bindtap="toggleRouteMap" data-id="{{item.id}}" hover-class="hover">
+        <text class="route-map-toggle-icon">{{item.showMap ? '▼' : '▶'}}</text>
+        <text class="route-map-toggle-text">{{item.showMap ? '收起地图' : '查看地图'}}</text>
+      </view>
+      <view class="route-map-container" wx:if="{{item.showMap}}">
+        <map
+          class="route-map"
+          latitude="{{item.mapCenter.latitude}}"
+          longitude="{{item.mapCenter.longitude}}"
+          markers="{{item.mapMarkers}}"
+          polyline="{{item.mapPolyline}}"
+          show-location="{{false}}"
+          scale="13"
+          enable-zoom="{{true}}"
+          enable-scroll="{{true}}"
+        ></map>
+        <!-- 导航按钮 -->
+        <view class="route-map-nav" wx:if="{{item.status === 'running'}}" bindtap="navigateRoute" data-id="{{item.id}}" hover-class="hover">
+          <text class="route-map-nav-icon">🚗</text>
+          <text class="route-map-nav-text">导航到下一站</text>
+        </view>
       </view>
     </view>
   </view>

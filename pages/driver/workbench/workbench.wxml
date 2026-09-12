@@ -1,23 +1,27 @@
-<!-- å¸æœºå·¥ä½œå° - æš—é»‘ä¸»é¢˜ -->
+<!-- Ë¾»ú¹¤×÷Ì¨ - °µºÚÖ÷Ìâ -->
 <view class="workbench {{status}} {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
-  <!-- ========== é¡¶éƒ¨ï¼šç­æ¬¡è¿›åº¦æ¡ï¼ˆå–ä»£æ ‡é¢˜æ ï¼‰========== -->
+  <!-- ========== ¶¥²¿£º°à´Î½ø¶ÈÌõ£¨È¡´ú±êÌâÀ¸£©========== -->
   <view class="progress-header">
     <view class="header-safe" style="{{headerSafeStyle}}"></view>
     <view class="driver-bar" wx:if="{{driverName}}">
-      <text class="driver-emoji">ğŸ‘¨â€âœˆï¸</text>
+      <text class="driver-emoji">?????</text>
       <text class="driver-text">{{driverName}}</text>
       <text class="driver-plate">{{plateNo}}</text>
-      <text class="driver-capacity">è´§ä»“ {{cargoLimit}} ä»¶</text>
-      <text class="location-source {{locationSource === 'SIMULATED' ? 'sim' : ''}}" wx:if="{{locationSource === 'SIMULATED'}}">ğŸ§ª æ¨¡æ‹Ÿè¿è¡Œ</text>
-    </view>
+      <text class="driver-capacity">»õ²Ö {{cargoLimit}} ¼ş</text>
+      <text class="location-source {{locationSource === 'SIMULATED' ? 'sim' : ''}}" wx:if="{{locationSource === 'SIMULATED'}}">?? Ä£ÄâÔËĞĞ</text>
+    
+      <view class="notif-bell" bindtap="goNotifications">
+        <text class="notif-icon">ğŸ””</text>
+        <view class="notif-badge" wx:if="{{driverUnreadCount > 0}}">{{driverUnreadCount > 99 ? '99+' : driverUnreadCount}}</view>
+      </view></view>
     <view class="route-label">
-      <text class="route-badge">{{routeName || 'ä»Šæ—¥ç­æ¬¡'}}</text>
+      <text class="route-badge">{{routeName || '½ñÈÕ°à´Î'}}</text>
       <text class="status-tag {{status}}">
-        {{status === 'idle' ? 'å¾…å‘è½¦' : (status === 'driving' ? 'è¡Œé©¶ä¸­' : 'åœé ä¸­')}}
+        {{status === 'idle' ? '´ı·¢³µ' : (status === 'driving' ? 'ĞĞÊ»ÖĞ' : 'Í£¿¿ÖĞ')}}
       </text>
     </view>
 
-    <!-- è¿›åº¦æ¡ -->
+    <!-- ½ø¶ÈÌõ -->
     <view class="progress-bar-wrap">
       <view class="progress-stops">
         <text class="stop-label start">{{startStation}}</text>
@@ -28,49 +32,92 @@
         <view class="progress-dot" style="left: {{progressPercent}}%;"></view>
       </view>
       <view class="progress-info" wx:if="{{status === 'driving'}}">
-        <text class="next-stop-name">ä¸‹ä¸€ç«™ï¼š{{nextStation}}</text>
-        <text class="next-stop-dist">çº¦{{nextStationDistance}}m</text>
+        <text class="next-stop-name">ÏÂÒ»Õ¾£º{{nextStation}}</text>
+        <text class="next-stop-dist">Ô¼{{nextStationDistance}}m</text>
       </view>
     </view>
   </view>
 
-  <!-- åèˆªå‘Šè­¦ï¼ˆPhase 9ï¼š>100m åªæŠ¥è­¦ï¼Œä¸è‡ªåŠ¨æ”¹æ–¹æ¡ˆï¼‰ -->
+  <!-- Æ«º½¸æ¾¯£¨Phase 9£º>100m Ö»±¨¾¯£¬²»×Ô¶¯¸Ä·½°¸£© -->
   <view class="deviation-banner" wx:if="{{deviated}}">
-    <text>âš ï¸ åèˆªæé†’ï¼šè·è§„åˆ’è·¯çº¿çº¦ {{deviationMeters}} ç±³ï¼Œè¯·å›åˆ°è®¡åˆ’é“è·¯</text>
+    <text>?? Æ«º½ÌáĞÑ£º¾à¹æ»®Â·ÏßÔ¼ {{deviationMeters}} Ã×£¬Çë»Øµ½¼Æ»®µÀÂ·</text>
   </view>
 
-  <!-- ========== å®Œæ•´ä»»åŠ¡æ®µï¼ˆPhase 8ï¼‰ï¼šå¸æœºçœ‹åˆ°æ•´ä¸ªè¿è¥ä»»åŠ¡ï¼Œé"ä¸‹ä¸€ç«™" ========== -->
+  <!-- ========== ÍêÕûÈÎÎñ¶Î£¨Phase 8£©£ºË¾»ú¿´µ½Õû¸öÔËÓªÈÎÎñ£¬·Ç"ÏÂÒ»Õ¾" ========== -->
   <view class="task-segment-panel" wx:if="{{taskSegment && taskSegment.length}}">
-    <view class="task-segment-title">ğŸ“‹ ä»Šæ—¥è¿è¥ä»»åŠ¡</view>
+    <view class="task-segment-title">?? ½ñÈÕÔËÓªÈÎÎñ</view>
     <view class="task-segment" wx:for="{{taskSegment}}" wx:key="planId" wx:for-item="seg">
       <view class="task-window">{{seg.taskWindowStart || ''}} ~ {{seg.taskWindowEnd || ''}}</view>
       <view class="task-stop" wx:for="{{seg.stops}}" wx:key="index" wx:for-item="stop">
         <view class="task-stop-head">
-          <text class="task-stop-name">ğŸ›‘ {{stop.stationName}}</text>
+          <text class="task-stop-name">?? {{stop.stationName}}</text>
           <text class="task-stop-status">{{stop.statusName}}</text>
         </view>
         <view class="task-action" wx:for="{{stop.actions}}" wx:key="index" wx:for-item="act">
           <text class="task-action-name">{{act.actionName}}</text>
           <text wx:if="{{act.orderNo}}" class="task-action-order">{{act.orderNo}}</text>
-          <text wx:if="{{act.quantity}}" class="task-action-qty">Ã—{{act.quantity}}</text>
+          <text wx:if="{{act.quantity}}" class="task-action-qty">¡Á{{act.quantity}}</text>
         </view>
       </view>
     </view>
   </view>
 
-  <!-- ========== å¤šæ®µè”è¿ï¼šæ¢ä¹˜äº¤æ¥å¾…ç¡®è®¤å…¥å£ï¼ˆæœ‰æ‰æ˜¾ç¤ºï¼‰ ========== -->
+  <!-- ========== ¶à¶ÎÁªÔË£º»»³Ë½»½Ó´ıÈ·ÈÏÈë¿Ú£¨ÓĞ²ÅÏÔÊ¾£© ========== -->
   <view class="handover-entry" wx:if="{{pendingHandoverCount > 0}}" bindtap="goHandover" hover-class="hover">
-    <text class="handover-entry-icon">ğŸ”</text>
+    <text class="handover-entry-icon">??</text>
     <view class="handover-entry-info">
-      <text class="handover-entry-title">æœ‰ {{pendingHandoverCount}} ä¸ªæ¢ä¹˜äº¤æ¥å¾…ç¡®è®¤</text>
-      <text class="handover-entry-sub">ç‚¹å‡»è¿›å…¥ï¼Œæ‹ç…§ç¡®è®¤è´§ç‰©äº¤æ¥</text>
+      <text class="handover-entry-title">ÓĞ {{pendingHandoverCount}} ¸ö»»³Ë½»½Ó´ıÈ·ÈÏ</text>
+      <text class="handover-entry-sub">µã»÷½øÈë£¬ÅÄÕÕÈ·ÈÏ»õÎï½»½Ó</text>
     </view>
-    <text class="handover-entry-arrow">â€º</text>
+    <text class="handover-entry-arrow">?</text>
   </view>
 
-  <!-- ========== çŠ¶æ€ä¸€ï¼šå¾…å‘è½¦ - è¡Œæèˆ±å¯è§†åŒ– ========== -->
+  <!-- ========== Â·ÏßÕ¾µãµØÍ¼£¨ËùÓĞ×´Ì¬ÏÂ¾ùÏÔÊ¾£© ========== -->
+  <view class="route-overview-map" wx:if="{{routeMapMarkers.length > 0}}">
+    <view class="map-section-header">
+      <text class="map-section-title">?? ÏßÂ·Õ¾µãµØÍ¼</text>
+      <text class="map-section-subtitle">¹² {{navTotalStops}} Õ¾</text>
+    </view>
+    <map
+      class="overview-map"
+      latitude="{{mapLatitude}}"
+      longitude="{{mapLongitude}}"
+      markers="{{routeMapMarkers}}"
+      polyline="{{routeMapPolyline}}"
+      show-location="{{true}}"
+      scale="13"
+      enable-zoom="{{true}}"
+      enable-scroll="{{true}}"
+    ></map>
+    <!-- Í¼Àı -->
+    <view class="map-legend">
+      <view class="legend-item">
+        <view class="legend-dot passed"></view>
+        <text class="legend-text">ÒÑ¹ıÕ¾</text>
+      </view>
+      <view class="legend-item">
+        <view class="legend-dot current"></view>
+        <text class="legend-text">µ±Ç°Õ¾</text>
+      </view>
+      <view class="legend-item">
+        <view class="legend-dot next"></view>
+        <text class="legend-text">ÏÂÒ»Õ¾</text>
+      </view>
+      <view class="legend-item">
+        <view class="legend-dot future"></view>
+        <text class="legend-text">Î´µ½Õ¾</text>
+      </view>
+    </view>
+    <!-- µ¼º½°´Å¥ -->
+    <view class="map-nav-bar" wx:if="{{nextStation && status !== 'idle'}}" bindtap="navigateToNextStop" hover-class="hover">
+      <text class="map-nav-icon">??</text>
+      <text class="map-nav-text">µ¼º½µ½ {{nextStation}}</text>
+      <text class="map-nav-dist" wx:if="{{nextStationDistance > 0}}">Ô¼{{nextStationDistance}}m</text>
+    </view>
+  </view>
+  <!-- ========== ×´Ì¬Ò»£º´ı·¢³µ - ĞĞÀî²Õ¿ÉÊÓ»¯ ========== -->
   <view class="idle-panel" wx:if="{{status === 'idle'}}">
-    <!-- å¤§å·´è½¦è¡Œæèˆ±å›¾å½¢ -->
+    <!-- ´ó°Í³µĞĞÀî²ÕÍ¼ĞÎ -->
     <view class="cargo-visual">
       <view class="bus-graphic">
         <view class="bus-body">
@@ -92,49 +139,49 @@
           </view>
         </view>
         <view class="cargo-labels">
-          <text class="cargo-label-max">æ»¡ä»“</text>
+          <text class="cargo-label-max">Âú²Ö</text>
           <text class="cargo-label-half">50%</text>
-          <text class="cargo-label-empty">ç©ºä»“</text>
+          <text class="cargo-label-empty">¿Õ²Ö</text>
         </view>
       </view>
 
-      <!-- è¿åŠ›æ•°å€¼ -->
+      <!-- ÔËÁ¦ÊıÖµ -->
       <view class="cargo-stats">
         <text class="cargo-percent">{{cargoCapacity}}%</text>
-        <text class="cargo-title">å½“å‰ç©ºä½™ä»“ä½</text>
+        <text class="cargo-title">µ±Ç°¿ÕÓà²ÖÎ»</text>
       </view>
     </view>
 
-    <!-- è®¢é˜…æ´¾å•é€šçŸ¥ -->
+    <!-- ¶©ÔÄÅÉµ¥Í¨Öª -->
     <view class="subscribe-entry" bindtap="subscribeDispatch">
-      <text>ğŸ”” è®¢é˜…æ´¾å•é€šçŸ¥</text>
+      <text>?? ¶©ÔÄÅÉµ¥Í¨Öª</text>
     </view>
 
-    <!-- å‘è½¦æŒ‰é’® -->
+    <!-- ·¢³µ°´Å¥ -->
     <button class="start-btn" bindtap="startDrive" hover-class="hover">
-      <text class="start-icon">ğŸšŒ</text>
-      <text class="start-text">å‘ è½¦</text>
+      <text class="start-icon">??</text>
+      <text class="start-text">·¢ ³µ</text>
     </button>
   </view>
 
-  <!-- ========== çŠ¶æ€äºŒï¼šè¡Œé©¶ä¸­ - å¯¼èˆªæ¨¡å¼ ========== -->
+  <!-- ========== ×´Ì¬¶ş£ºĞĞÊ»ÖĞ - µ¼º½Ä£Ê½ ========== -->
   <view class="driving-panel" wx:if="{{status === 'driving'}}">
-    <!-- è¿ç»­ä»»åŠ¡å¯¼èˆªæ¨ªå¹…ï¼ˆç¬¬ N/æ€»ç«™ Â· ç«™å Â· å–/æ´¾ï¼‰ -->
+    <!-- Á¬ĞøÈÎÎñµ¼º½ºá·ù£¨µÚ N/×ÜÕ¾ ¡¤ Õ¾Ãû ¡¤ È¡/ÅÉ£© -->
     <view class="nav-banner" wx:if="{{navTotalStops > 0}}">
-      <view class="nav-seq">ç¬¬ {{navStopIndex}}/{{navTotalStops}} ç«™</view>
+      <view class="nav-seq">µÚ {{navStopIndex}}/{{navTotalStops}} Õ¾</view>
       <view class="nav-station-name">{{navStationName}}</view>
       <view class="nav-actions">
-        <text class="nav-chip pickup" wx:if="{{navPickupCount > 0}}">ğŸ“¥ å–è´§Ã—{{navPickupCount}}</text>
-        <text class="nav-chip deliver" wx:if="{{navDeliverCount > 0}}">ğŸ“¤ æ´¾è´§Ã—{{navDeliverCount}}</text>
-        <text class="nav-chip board" wx:if="{{navBoardCount > 0}}">ğŸšŒ æ¥å®¢Ã—{{navBoardCount}}</text>
-        <text class="nav-chip alight" wx:if="{{navAlightCount > 0}}">ğŸš é€å®¢Ã—{{navAlightCount}}</text>
-        <text class="nav-chip return" wx:if="{{navActionTotal === 0 && navReturnPoint}}">ğŸ è¿”åœºç¡®è®¤</text>
-        <text class="nav-chip none" wx:elif="{{navActionTotal === 0}}">ç»åœé€šè¿‡</text>
+        <text class="nav-chip pickup" wx:if="{{navPickupCount > 0}}">?? È¡»õ¡Á{{navPickupCount}}</text>
+        <text class="nav-chip deliver" wx:if="{{navDeliverCount > 0}}">?? ÅÉ»õ¡Á{{navDeliverCount}}</text>
+        <text class="nav-chip board" wx:if="{{navBoardCount > 0}}">?? ½Ó¿Í¡Á{{navBoardCount}}</text>
+        <text class="nav-chip alight" wx:if="{{navAlightCount > 0}}">?? ËÍ¿Í¡Á{{navAlightCount}}</text>
+        <text class="nav-chip return" wx:if="{{navActionTotal === 0 && navReturnPoint}}">?? ·µ³¡È·ÈÏ</text>
+        <text class="nav-chip none" wx:elif="{{navActionTotal === 0}}">¾­Í£Í¨¹ı</text>
       </view>
-      <view class="nav-amap" wx:if="{{nextStationDistance > 0}}" bindtap="openAmapNav">ğŸš— å¯¼èˆª</view>
+      <view class="nav-amap" wx:if="{{nextStationDistance > 0}}" bindtap="openAmapNav">?? µ¼º½</view>
     </view>
 
-    <!-- åœ°å›¾åŒºåŸŸï¼ˆç®€åŒ–ç‰ˆï¼Œå®é™…æ¥å…¥è…¾è®¯/é«˜å¾·åœ°å›¾ç»„ä»¶ï¼‰ -->
+    <!-- µØÍ¼ÇøÓò£¨¼ò»¯°æ£¬Êµ¼Ê½ÓÈëÌÚÑ¶/¸ßµÂµØÍ¼×é¼ş£© -->
     <view class="map-area">
       <map
         class="nav-map"
@@ -146,71 +193,71 @@
         scale="14"
       ></map>
 
-      <!-- é€Ÿåº¦æµ®å±‚ -->
+      <!-- ËÙ¶È¸¡²ã -->
       <view class="speed-overlay">
         <text class="speed-num">{{speed}}</text>
         <text class="speed-unit">km/h</text>
       </view>
 
-      <!-- å‰æ–¹åˆ°ç«™æç¤º -->
+      <!-- Ç°·½µ½Õ¾ÌáÊ¾ -->
       <view class="next-stop-card" wx:if="{{nextStationDistance < 1000}}">
-        <view class="stop-alert-icon">ğŸ“</view>
+        <view class="stop-alert-icon">??</view>
         <view class="stop-alert-info">
           <text class="stop-alert-name">{{nextStation}}</text>
-          <text class="stop-alert-dist">å‰æ–¹ {{nextStationDistance}}m</text>
+          <text class="stop-alert-dist">Ç°·½ {{nextStationDistance}}m</text>
           <view class="stop-alert-actions">
-            <text class="nav-chip pickup" wx:if="{{navPickupCount > 0}}">ğŸ“¥ å–è´§Ã—{{navPickupCount}}</text>
-            <text class="nav-chip deliver" wx:if="{{navDeliverCount > 0}}">ğŸ“¤ æ´¾è´§Ã—{{navDeliverCount}}</text>
-            <text class="nav-chip board" wx:if="{{navBoardCount > 0}}">ğŸšŒ æ¥å®¢Ã—{{navBoardCount}}</text>
-            <text class="nav-chip alight" wx:if="{{navAlightCount > 0}}">ğŸš é€å®¢Ã—{{navAlightCount}}</text>
+            <text class="nav-chip pickup" wx:if="{{navPickupCount > 0}}">?? È¡»õ¡Á{{navPickupCount}}</text>
+            <text class="nav-chip deliver" wx:if="{{navDeliverCount > 0}}">?? ÅÉ»õ¡Á{{navDeliverCount}}</text>
+            <text class="nav-chip board" wx:if="{{navBoardCount > 0}}">?? ½Ó¿Í¡Á{{navBoardCount}}</text>
+            <text class="nav-chip alight" wx:if="{{navAlightCount > 0}}">?? ËÍ¿Í¡Á{{navAlightCount}}</text>
           </view>
           <text class="stop-alert-task" wx:if="{{pendingPickups.length > 0}}">
-            âš ï¸ æœ‰ {{pendingPickups.length}} ä»¶è´§ç‰©å¾…è£…è½¦
+            ?? ÓĞ {{pendingPickups.length}} ¼ş»õÎï´ı×°³µ
           </text>
         </view>
       </view>
     </view>
 
-    <!-- ETAä¿¡æ¯ -->
+    <!-- ETAĞÅÏ¢ -->
     <view class="eta-bar">
       <view class="eta-item">
-        <text class="eta-label">é¢„è®¡åˆ°è¾¾</text>
+        <text class="eta-label">Ô¤¼Æµ½´ï</text>
         <text class="eta-value">{{eta}}</text>
       </view>
       <view class="eta-item">
-        <text class="eta-label">å‰©ä½™ç«™æ•°</text>
-        <text class="eta-value">{{totalStops - currentStopIndex}} ç«™</text>
+        <text class="eta-label">Ê£ÓàÕ¾Êı</text>
+        <text class="eta-value">{{totalStops - currentStopIndex}} Õ¾</text>
       </view>
       <view class="eta-item">
-        <text class="eta-label">å¾…è£…è´§ç‰©</text>
-        <text class="eta-value orange">{{pendingPickups.length}} ä»¶</text>
+        <text class="eta-label">´ı×°»õÎï</text>
+        <text class="eta-value orange">{{pendingPickups.length}} ¼ş</text>
       </view>
     </view>
 
-    <!-- åˆ°ç«™ç¡®è®¤æŒ‰é’® -->
+    <!-- µ½Õ¾È·ÈÏ°´Å¥ -->
     <button class="arrive-btn {{canArrive ? 'ready' : ''}}" bindtap="arriveAtStation" hover-class="hover">
-      <text class="arrive-icon">ğŸš</text>
-      <text class="arrive-text">{{canArrive ? 'ç¡®è®¤åˆ°è¾¾ ' + (navStationName || nextStation) : 'åˆ°è¾¾ ' + (navStationName || nextStation || 'ä¸‹ä¸€ç«™')}}</text>
+      <text class="arrive-icon">??</text>
+      <text class="arrive-text">{{canArrive ? 'È·ÈÏµ½´ï ' + (navStationName || nextStation) : 'µ½´ï ' + (navStationName || nextStation || 'ÏÂÒ»Õ¾')}}</text>
     </button>
   </view>
 
-  <!-- ========== çŠ¶æ€ä¸‰ï¼šåˆ°ç«™åœé  - æ‰«ç è£…è½¦ ========== -->
+  <!-- ========== ×´Ì¬Èı£ºµ½Õ¾Í£¿¿ - É¨Âë×°³µ ========== -->
   <view class="stopped-panel" wx:if="{{status === 'stopped'}}">
-    <!-- ç«™ç‚¹ä¿¡æ¯ -->
+    <!-- Õ¾µãĞÅÏ¢ -->
     <view class="stop-banner">
-      <text class="stop-icon">ğŸš</text>
-      <text class="stop-title">å·²åˆ°è¾¾ {{nextStation}}</text>
-      <text class="stop-subtitle">è¯·å®Œæˆè£…è½¦ä½œä¸š</text>
+      <text class="stop-icon">??</text>
+      <text class="stop-title">ÒÑµ½´ï {{nextStation}}</text>
+      <text class="stop-subtitle">ÇëÍê³É×°³µ×÷Òµ</text>
     </view>
 
-    <!-- å¾…è£…è´§ç‰©åˆ—è¡¨ï¼ˆè´§è¿ + é‚®å¿«ä»¶ï¼‰ -->
+    <!-- ´ı×°»õÎïÁĞ±í£¨»õÔË + ÓÊ¿ì¼ş£© -->
     <view class="pickup-list" wx:if="{{pendingPickups.length > 0}}">
       <view class="pickup-item" wx:for="{{pendingPickups}}" wx:key="orderId">
-        <text class="pickup-emoji">{{item.bizType === 'PRODUCT' ? 'ğŸ›’' : (item.orderType === 3 ? 'ğŸ“¬' : 'ğŸ“¦')}}</text>
+        <text class="pickup-emoji">{{item.bizType === 'PRODUCT' ? '??' : (item.orderType === 3 ? '??' : '??')}}</text>
         <view class="pickup-info">
-          <text class="pickup-name">{{item.bizType === 'PRODUCT' ? (item.goodsName || 'å•†åŸè®¢å•') : (item.orderType === 3 ? (item.mailNo || 'å¿«é€’') : (item.goodsName || 'å¯„è´§'))}}</text>
-          <text wx:if="{{item.bizType === 'PRODUCT'}}" class="pickup-detail">å•†åŸè®¢å• Â· é€è‡³ {{item.receiverAddress || 'è‡ªæç«™ç‚¹'}}ï¼ˆ{{item.receiverName || 'æ”¶ä»¶äºº'}} {{item.receiverMobile || ''}}ï¼‰</text>
-          <text wx:else class="pickup-detail">{{item.weightKg}}kg Â· {{item.orderType === 3 ? ('å–ä»¶ç  ' + (item.pickupCode || 'â€”')) : (item.receiverName || 'å¾…å®š')}}</text>
+          <text class="pickup-name">{{item.bizType === 'PRODUCT' ? (item.goodsName || 'ÉÌ³Ç¶©µ¥') : (item.orderType === 3 ? (item.mailNo || '¿ìµİ') : (item.goodsName || '¼Ä»õ'))}}</text>
+          <text wx:if="{{item.bizType === 'PRODUCT'}}" class="pickup-detail">ÉÌ³Ç¶©µ¥ ¡¤ ËÍÖÁ {{item.receiverAddress || '×ÔÌáÕ¾µã'}}£¨{{item.receiverName || 'ÊÕ¼şÈË'}} {{item.receiverMobile || ''}}£©</text>
+          <text wx:else class="pickup-detail">{{item.weightKg}}kg ¡¤ {{item.orderType === 3 ? ('È¡¼şÂë ' + (item.pickupCode || '¡ª')) : (item.receiverName || '´ı¶¨')}}</text>
           <text class="pickup-detail">{{item.orderNo}}</text>
         </view>
         <view class="pickup-check {{item.checked ? 'checked' : ''}}">
@@ -219,43 +266,45 @@
       </view>
     </view>
 
-    <!-- ç®—æ³•è°ƒåº¦ä»»åŠ¡ï¼ˆç®—æ³•æ´¾å•ç»“æœï¼Œé¢„ç•™åŒºï¼‰ -->
+    <!-- Ëã·¨µ÷¶ÈÈÎÎñ£¨Ëã·¨ÅÉµ¥½á¹û£¬Ô¤ÁôÇø£© -->
     <view class="task-list" wx:if="{{tasks.length > 0}}">
-      <text class="task-title">ğŸ“‹ è°ƒåº¦ä»»åŠ¡ï¼ˆç®—æ³•è§„åˆ’ï¼‰</text>
+      <text class="task-title">?? µ÷¶ÈÈÎÎñ£¨Ëã·¨¹æ»®£©</text>
       <view class="task-item" wx:for="{{tasks}}" wx:key="id">
-        <text class="task-station">{{item.stationName || 'â€”'}}</text>
+        <text class="task-station">{{item.stationName || '¡ª'}}</text>
         <text class="task-action">{{item.actionName}}</text>
         <text class="task-order" wx:if="{{item.orderNo}}">{{item.orderNo}}</text>
       </view>
     </view>
 
-    <!-- å·¨å¤§æ‰«ç æŒ‰é’® -->
+    <!-- ¾Ş´óÉ¨Âë°´Å¥ -->
     <button class="scan-btn" bindtap="scanToLoad" hover-class="hover">
-      <text class="scan-icon">ğŸ“·</text>
-      <text class="scan-text">æ‰«ç è£…è½¦</text>
-      <text class="scan-hint">æ‰«å¯„è´§å•/å•†åŸè®¢å•äºŒç»´ç ï¼Œæ‹ç…§æ ¸éªŒåè£…è½¦</text>
+      <text class="scan-icon">??</text>
+      <text class="scan-text">É¨Âë×°³µ</text>
+      <text class="scan-hint">É¨¼Ä»õµ¥/ÉÌ³Ç¶©µ¥¶şÎ¬Âë£¬ÅÄÕÕºËÑéºó×°³µ</text>
     </button>
 
-    <!-- å¦¥æŠ•æ‰«ç  -->
+    <!-- Í×Í¶É¨Âë -->
     <button class="scan-btn deliver-btn" bindtap="scanToDeliver" hover-class="hover">
-      <text class="scan-icon">âœ…</text>
-      <text class="scan-text">æ‰«ç å¦¥æŠ•</text>
-      <text class="scan-hint">é€è¾¾æ”¶ä»¶äººåæ‰«ç ï¼›å•†åŸè®¢å•å†æ‹äº¤ä»˜å‡­è¯</text>
+      <text class="scan-icon">?</text>
+      <text class="scan-text">É¨ÂëÍ×Í¶</text>
+      <text class="scan-hint">ËÍ´ïÊÕ¼şÈËºóÉ¨Âë£»ÉÌ³Ç¶©µ¥ÔÙÅÄ½»¸¶Æ¾Ö¤</text>
     </button>
 
-    <!-- å–ä»¶æ ¸é”€ï¼ˆé‚®å¿«ä»¶ï¼‰ -->
+    <!-- È¡¼şºËÏú£¨ÓÊ¿ì¼ş£© -->
     <button class="scan-btn verify-btn" bindtap="scanToVerify" hover-class="hover">
-      <text class="scan-icon">ğŸ“¬</text>
-      <text class="scan-text">å–ä»¶æ ¸é”€</text>
-      <text class="scan-hint">æ‰«æ”¶ä»¶äººå–ä»¶ç ï¼Œç¡®è®¤å–ä»¶</text>
+      <text class="scan-icon">??</text>
+      <text class="scan-text">È¡¼şºËÏú</text>
+      <text class="scan-hint">É¨ÊÕ¼şÈËÈ¡¼şÂë£¬È·ÈÏÈ¡¼ş</text>
     </button>
 
-    <!-- è·³è¿‡ -->
+    <!-- Ìø¹ı -->
     <view class="skip-btn" bindtap="skipLoading" hover-class="hover">
-      <text>è·³è¿‡ï¼Œç»§ç»­è¡Œé©¶ â†’</text>
+      <text>Ìø¹ı£¬¼ÌĞøĞĞÊ» ¡ú</text>
     </view>
   </view>
 
-  <!-- ========== åº•éƒ¨è‡ªå®šä¹‰TabBar ========== -->
+  <!-- ========== µ×²¿×Ô¶¨ÒåTabBar ========== -->
   <driver-tab-bar current="workbench" elderly="{{elderlyMode}}"></driver-tab-bar>
 </view>
+
+
