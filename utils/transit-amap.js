@@ -170,6 +170,65 @@ function searchNearbyStations(latitude, longitude) {
 }
 
 /**
+ * 地址关键词输入提示：村民手填取货/送达地址 → 返回候选地址与 GCJ-02 坐标。
+ *
+ * 用途："填地址 → 推荐站点"的第一步：拿到坐标后交给后端可达性评估
+ * （/transport/send/reachability）推荐最近可服务站点，全程不把用户地址覆盖成站点名。
+ * 过滤：只保留带有效坐标的 POI（公交线路名、纯道路提示没有坐标，无法定位，直接丢弃）。
+ */
+function searchAddressTips(keyword, city) {
+  return new Promise((resolve) => {
+    const kw = String(keyword || '').trim()
+    if (!available() || kw.length < 2) {
+      resolve([])
+      return
+    }
+    let settled = false
+    const finish = (value) => {
+      if (settled) return
+      settled = true
+      resolve(value)
+    }
+    const timer = setTimeout(() => finish([]), TIMEOUT_MS)
+    try {
+      const client = new amapSdk.AMapWX({ key: getKey() })
+      client.getInputtips({
+        keywords: kw,
+        city: city || '重庆',
+        citylimit: false,
+        success: (data) => {
+          clearTimeout(timer)
+          const tips = (data && data.tips) || []
+          finish(tips
+            .map((t) => {
+              const parts = String((t && t.location) || '').split(',')
+              const longitude = Number(parts[0])
+              const latitude = Number(parts[1])
+              if (!longitude || !latitude) return null
+              return {
+                name: (t && t.name) || '',
+                district: (t && t.district) || '',
+                address: (t && t.address) || '',
+                longitude,
+                latitude
+              }
+            })
+            .filter(Boolean)
+            .slice(0, 8))
+        },
+        fail: () => {
+          clearTimeout(timer)
+          finish([])
+        }
+      })
+    } catch (e) {
+      clearTimeout(timer)
+      finish([])
+    }
+  })
+}
+
+/**
  * 把客户端现实公交站点并入后端 nearby 结果。
  * - 后端已有现实层（realTransitAvailable=true）→ 原样返回，不重复请求（省配额）；
  * - 无坐标 → 原样返回；
@@ -201,5 +260,6 @@ module.exports = {
   dedupeStations,
   parsePois,
   searchNearbyStations,
+  searchAddressTips,
   enrichNearby
 }

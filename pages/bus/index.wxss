@@ -318,6 +318,16 @@
   color: var(--color-text-secondary);
 }
 
+/* 离用户最近的那台车：列表首条，一眼可辨 */
+.vehicle-nearest {
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+  background: var(--color-primary);
+  color: var(--color-on-primary);
+  font-weight: 600;
+}
+
 .vehicle-status.running {
   background: var(--color-primary-light);
   color: var(--color-primary-dark);

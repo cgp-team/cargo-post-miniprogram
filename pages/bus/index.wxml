@@ -110,6 +110,7 @@
         <view class="vehicle-next">{{item.stationText}}</view>
       </view>
       <view class="vehicle-badge">
+        <text wx:if="{{item.isNearest}}" class="vehicle-nearest">离你最近</text>
         <text class="vehicle-status {{item.statusText === '行驶中' ? 'running' : ''}}">{{item.statusText}}</text>
         <text class="vehicle-source {{item.simulated ? 'src-sim' : 'src-real'}}">{{item.sourceText}}</text>
       </view>

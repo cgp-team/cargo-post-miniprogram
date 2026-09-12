@@ -14,6 +14,7 @@ const reviewUtils = require('../../utils/review')
 const qrcodeRender = require('../../utils/qrcode-render')
 const util = require('../../utils/util')
 const location = require('../../utils/location')
+const transitAmap = require('../../utils/transit-amap')
 
 /** 货物类型可选值（与后端 cargoCategory 字段一致，缺省农产品） */
 const CARGO_CATEGORIES = ['农产品', '生鲜果蔬', '日用品', '文件票据', '其他']
@@ -62,6 +63,15 @@ Page({
     pickupStationName: '',
     deliveryStationId: null,
     deliveryStationName: '',
+    // 手填地址 → 推荐站点（取货/送达都支持）：tips = 高德输入提示候选地址
+    pickupAddressText: '',
+    deliveryAddressText: '',
+    pickupTips: [],
+    deliveryTips: [],
+    tipsLoading: false,
+    // 试算金额（件单价×件数 + 里程费）：取货/送达站点一选定就算好，提交前就能看到
+    quote: null,
+    quoteLoading: false,
     // 路线预估（点击"下一步"时查询；routeStatus: idle|loading|success|error）
     routePreview: null,
     routeStatus: 'idle',
@@ -79,6 +89,7 @@ Page({
     stationSuggestion: null,
     // 提交结果
     orderNo: '',
+    orderAmount: null,
     elderlyMode: false,
     themeColor: 'green',
     themeStyle: ''
@@ -136,7 +147,108 @@ Page({
   /** 货物件数：仅保留正整数 */
   onItemCountInput(e) {
     const value = String(e.detail.value || '').replace(/[^\d]/g, '')
-    this.setData({ itemCount: value })
+    this.setData({ itemCount: value }, () => this.refreshQuote())
+  },
+
+  // ==================== 手填地址 → 推荐站点（取货 / 送达） ====================
+
+  onPickupAddressInput(e) { this.setData({ pickupAddressText: e.detail.value, pickupTips: [] }) },
+  onDeliveryAddressInput(e) { this.setData({ deliveryAddressText: e.detail.value, deliveryTips: [] }) },
+
+  /** 取货地址：高德输入提示拿候选（村民不用自己找站点，写地址即可） */
+  async recommendPickupByAddress() {
+    const keyword = String(this.data.pickupAddressText || '').trim()
+    if (keyword.length < 2) {
+      wx.showToast({ title: '请输入更完整的取货地址', icon: 'none' })
+      return
+    }
+    this.setData({ tipsLoading: true })
+    const tips = await transitAmap.searchAddressTips(keyword).catch(() => [])
+    this.setData({ tipsLoading: false, pickupTips: tips || [] })
+    if (!tips || !tips.length) {
+      wx.showToast({ title: '没找到该地址，可改用「自选站点」', icon: 'none' })
+    }
+  },
+
+  /** 送达地址：同上 */
+  async recommendDeliveryByAddress() {
+    const keyword = String(this.data.deliveryAddressText || '').trim()
+    if (keyword.length < 2) {
+      wx.showToast({ title: '请输入更完整的送达地址', icon: 'none' })
+      return
+    }
+    this.setData({ tipsLoading: true })
+    const tips = await transitAmap.searchAddressTips(keyword).catch(() => [])
+    this.setData({ tipsLoading: false, deliveryTips: tips || [] })
+    if (!tips || !tips.length) {
+      wx.showToast({ title: '没找到该地址，可改用「自选站点」', icon: 'none' })
+    }
+  },
+
+  /** 选中取货候选地址：坐标 → 可达性评估 → 推荐取货站点 → 重新试算 */
+  async onPickupTipTap(e) {
+    const tip = this.data.pickupTips[Number(e.currentTarget.dataset.index)]
+    if (!tip) return
+    const address = [tip.name, tip.address].filter(Boolean).join(' ') || tip.name || ''
+    this.setData({
+      pickupTips: [],
+      pickupAddressText: tip.name || address,
+      pickupMode: 'location',
+      originalAddress: address,
+      originalLatitude: tip.latitude,
+      originalLongitude: tip.longitude,
+      locCoarse: false,
+      locAccuracyText: ''
+    })
+    await this._evaluateReachability(tip.latitude, tip.longitude)
+    this.refreshQuote()
+  },
+
+  /** 选中送达候选地址：坐标 → 推荐送达站点 → 重新试算 */
+  async onDeliveryTipTap(e) {
+    const tip = this.data.deliveryTips[Number(e.currentTarget.dataset.index)]
+    if (!tip) return
+    const address = [tip.name, tip.address].filter(Boolean).join(' ') || tip.name || ''
+    this.setData({
+      deliveryTips: [],
+      deliveryAddressText: tip.name || address
+    })
+    if (!String(this.data.receiverAddress || '').trim()) {
+      this.setData({ receiverAddress: address })
+    }
+    try {
+      const res = await api.getReachability(tip.latitude, tip.longitude)
+      const rec = res && res.recommendedStation
+      if (rec && rec.id !== this.data.pickupStationId) {
+        this.setData({
+          deliveryStationId: rec.id,
+          deliveryStationName: rec.name,
+          routePreview: null,
+          routeStatus: 'idle',
+          routePreviewKey: ''
+        })
+        wx.showToast({ title: `已按地址推荐送达站点「${rec.name}」`, icon: 'none' })
+      }
+    } catch (err) {
+      // 推荐失败不影响手填地址本身，用户仍可自选站点
+    }
+    this.refreshQuote()
+  },
+
+  /** 试算金额（取货 + 送达站点都选定才请求；失败静默，由提交时兜底） */
+  async refreshQuote() {
+    const { pickupStationId, deliveryStationId, itemCount } = this.data
+    if (!pickupStationId || !deliveryStationId || pickupStationId === deliveryStationId) {
+      this.setData({ quote: null })
+      return
+    }
+    this.setData({ quoteLoading: true })
+    try {
+      const quote = await api.quoteSendFee(pickupStationId, deliveryStationId, Number(itemCount) || 1)
+      this.setData({ quote: quote || null, quoteLoading: false })
+    } catch (e) {
+      this.setData({ quote: null, quoteLoading: false })
+    }
   },
 
   /** 长/宽/高（cm）输入：任一变化即重算体积（m³） */
@@ -248,7 +360,7 @@ Page({
       routePreview: null,
       routeStatus: 'idle',
       routePreviewKey: ''
-    })
+    }, () => this.refreshQuote())
   },
 
   /** 长×宽×高(cm) → 体积(m³)：0.01m 换算，保留 4 位小数（与 decimal(12,4) 对齐） */
@@ -271,7 +383,7 @@ Page({
       routePreview: null,
       routeStatus: 'idle',
       routePreviewKey: ''
-    })
+    }, () => this.refreshQuote())
     // 站点不可直达（车辆进不去）时，后端会给出"就近可服务站点"，前端提示一键更换
     this._checkStationAccess(s)
   },
@@ -327,7 +439,7 @@ Page({
       routePreview: null,
       routeStatus: 'idle',
       routePreviewKey: ''
-    })
+    }, () => this.refreshQuote())
   },
 
   /** 下一步：基础校验 → 路线预览（缓存命中直接复用）→ 成功才进入拍照页 */
@@ -480,7 +592,8 @@ Page({
       wx.hideLoading()
       // 订单已创建：先切到成功页（保证"已发布"一定可见），再补审核结果文案。
       // 展示层异常绝不能让用户以为"没发布成功"而重复提交。
-      this.setData({ orderNo: res.orderNo, step: 3 }, () => this.drawQr())
+      const amount = res.totalAmount != null ? res.totalAmount : (this.data.quote ? this.data.quote.amount : null)
+      this.setData({ orderNo: res.orderNo, orderAmount: amount, step: 3 }, () => this.drawQr())
       try {
         feedback.tap()
         this.setData(this.resolveReview(res))
@@ -626,6 +739,12 @@ Page({
       pickupStationName: '',
       deliveryStationId: null,
       deliveryStationName: '',
+      pickupAddressText: '',
+      deliveryAddressText: '',
+      pickupTips: [],
+      deliveryTips: [],
+      quote: null,
+      quoteLoading: false,
       routePreview: null,
       routeStatus: 'idle',
       routePreviewKey: '',
@@ -636,7 +755,8 @@ Page({
       servicePointDistanceKm: null,
       servicePointLatitude: null,
       servicePointLongitude: null,
-      orderNo: ''
+      orderNo: '',
+      orderAmount: null
     })
   },
 

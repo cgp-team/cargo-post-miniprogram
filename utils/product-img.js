@@ -29,6 +29,11 @@ const LOCAL_MAP = [
 /** 返回可直接用于 <image src> 的路径或 URL，无匹配返回 '' */
 function resolve(product) {
   if (!product) return ''
+  // 后台上传的图片优先（商品图以后台配置为准，不再靠商品名猜）
+  const url = product.imageUrl
+  if (typeof url === 'string' && /^(https?:\/\/|\/images\/|\/uploads\/|\/app-api\/)/.test(url.trim())) {
+    return url.trim()
+  }
   const img = product.image
   if (typeof img === 'string' && (/^https?:\/\//.test(img) || /^\/images\//.test(img))) {
     return img

@@ -237,7 +237,7 @@ Page({
         nearbyLines: lines,
         nearbyLineCount: (data && data.lineCount) || lines.length,
         visibleLines: this.data.showAllLines ? visibleLines : visibleLines.slice(0, MAX_NEARBY_LINES),
-        vehicles: visibleBuses.map((b) => this._formatVehicle(b)),
+        vehicles: visibleBuses.map((b, i) => this._formatVehicle(b, i)),
         nearbyLocatedText: hasCoords
           ? (loc.source === location.SOURCE_DEMO ? `根据${loc.district || '演示地点'}展示` : '根据当前位置展示')
           : (district ? `根据${district}展示` : '定位不可用'),
@@ -404,19 +404,26 @@ Page({
 
   // ==================== 车辆与地图 ====================
 
-  _formatVehicle(b) {
+  _formatVehicle(b, index) {
     const hasEta = typeof b.etaMinutes === 'number' && b.etaMinutes >= 0
     const simulated = b.locationSource === 'SIMULATED' || b.dataSource === 'SIMULATED'
     const nextStation = b.nextStation || ''
     const currentStation = b.currentStation || ''
     const running = b.status === 'RUNNING'
+    // 用户视角：优先回答"离我最近的那一站，这车还有几分钟到"（后端按线路站点序算好）
+    const nearestName = b.nearestStationName || ''
+    const nearestEta = typeof b.nearestStationEtaMinutes === 'number' ? b.nearestStationEtaMinutes : null
     // 卡片主文案：永远有内容，且区分"在途"与"待发/收车"——
     // 待发车的 etaMinutes 是"距发车分钟"，不能写成"到下一站分钟"（否则会出现"预计 464 分钟到达"）
-    const stationText = running && nextStation
-      ? `下一站：${nextStation}`
-      : (currentStation
-        ? `${running ? '当前停靠' : '待发车'}：${currentStation}`
-        : (b.endStation ? `已到终点站：${b.endStation}` : '位置待更新'))
+    const stationText = nearestName
+      ? (nearestEta != null
+        ? `离你最近的「${nearestName}」还有 ${b.stopsToNearestStation || 0} 站`
+        : `将经过离你最近的「${nearestName}」`)
+      : (running && nextStation
+        ? `下一站：${nextStation}`
+        : (currentStation
+          ? `${running ? '当前停靠' : '待发车'}：${currentStation}`
+          : (b.endStation ? `已到终点站：${b.endStation}` : '位置待更新')))
     // 卡片左侧大数字：在途才显示"到下一站分钟"；待发显示"待发"（等待时长写在下方小字里）
     // 待发车的"距发车分钟"来自后端 waitDepartureMinutes（etaMinutes 只在在途时才有值）
     const waitMinutes = !running && typeof b.waitDepartureMinutes === 'number' ? b.waitDepartureMinutes : null
@@ -434,12 +441,16 @@ Page({
       distanceKm: typeof b.distanceToNextStationKm === 'number' ? b.distanceToNextStationKm : null,
       // 班次模拟车辆的预计到站：按班次计划时长推算，文案用"预计"而不是"演示"，
       // 车上显示的是真实线路上的推算位置（线路/站点均来自真实公交线网）
-      etaNumber: running ? (hasEta ? b.etaMinutes : '—') : (b.status === 'ARRIVED' ? '—' : '待发'),
-      etaUnit: running && hasEta ? '分钟' : '',
+      etaNumber: nearestEta != null ? nearestEta
+        : (running ? (hasEta ? b.etaMinutes : '—') : (b.status === 'ARRIVED' ? '—' : '待发')),
+      etaUnit: nearestEta != null ? '分钟' : (running && hasEta ? '分钟' : ''),
       waitMinutes,
-      etaText: running && hasEta ? `约 ${b.etaMinutes} 分钟到下一站`
-        : (waitMinutes != null ? `${waitMinutes} 分钟后发车`
-          : (b.status === 'ARRIVED' ? '已到终点站' : '待发车')),
+      etaText: nearestEta != null ? `约 ${nearestEta} 分钟到「${nearestName}」`
+        : (running && hasEta ? `约 ${b.etaMinutes} 分钟到下一站`
+          : (waitMinutes != null ? `${waitMinutes} 分钟后发车`
+            : (b.status === 'ARRIVED' ? '已到终点站' : '待发车'))),
+      // 列表按"距用户直线距离"升序，第一条即离用户最近的车辆
+      isNearest: index === 0,
       simulated,
       isReal: b.locationSource === 'REAL_FRESH' || b.dataSource === 'REAL',
       sourceText: b.locationSource === 'REAL_FRESH' ? '实时'
@@ -488,6 +499,8 @@ Page({
       ? stations.slice().sort((a, b) => this._dist(center, a) - this._dist(center, b)).slice(0, MAX_STATION_MARKERS)
       : stations.slice(0, MAX_STATION_MARKERS)
     nearStations.forEach((s, i) => {
+      // 自建站点（客货邮驿站/村邮站）单独标注：后期村民要用自建线路寄货，地图上必须能认出来
+      const isSelfBuilt = (s.dataSource || 'PROJECT_TRANSIT') === 'PROJECT_TRANSIT'
       markers.push({
         id: MARKER_STATION_BASE + i,
         longitude: s.longitude,
@@ -499,10 +512,10 @@ Page({
         // 最近的 8 个站点带名称标签：避免"地图上站点乱标、看不出是哪个站"
         label: i < 8 && s.name
           ? {
-              content: s.name,
-              color: '#1F3B57',
+              content: isSelfBuilt ? `驿站·${s.name}` : s.name,
+              color: isSelfBuilt ? '#7A4B12' : '#1F3B57',
               fontSize: 10,
-              bgColor: '#FFFFFF',
+              bgColor: isSelfBuilt ? '#FFF6E8' : '#FFFFFF',
               borderRadius: 3,
               padding: 2,
               anchorX: -14,
