@@ -73,6 +73,14 @@ Page({
     this.setData({ currentVillage: app.globalData.currentVillage || '云山村' })
     // 同步老年模式 / 主题色
     this._applyAppearance()
+    // 从「我的订单 → 寄货订单」点卡片过来：直接打开这一单的物流详情（单号查询 tab）
+    const intent = app.globalData.parcelIntent
+    if (intent && typeof intent === 'object' && intent.type === 'track' && intent.no) {
+      app.globalData.parcelIntent = ''
+      this.setData({ activeTab: 2, trackingNo: intent.no })
+      this.searchParcel()
+      return
+    }
     // 从「我的寄货」切过来时进入寄货列表 tab
     if (app.globalData.parcelIntent === 'my') {
       app.globalData.parcelIntent = ''
