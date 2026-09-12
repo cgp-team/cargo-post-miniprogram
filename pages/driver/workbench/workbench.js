@@ -1,1010 +1,1010 @@
-/**
- * Ë¾»ú¹¤×÷Ì¨ - ºËĞÄÒ³Ãæ
- * ÈıÖÖ×´Ì¬£º´ı·¢³µ(idle) / ĞĞÊ»ÖĞ(driving) / µ½Õ¾Í£¿¿(stopped)
- * Êı¾İÀ´Ô´£ºÕæÊµºó¶Ë£¨Ë¾»úµµ°¸/½ñÈÕ°à´Î/´ı×°³µÈÎÎñ/µ÷¶ÈÈÎÎñ£©
- * Ğ´²Ù×÷£º·¢³µ / µ½Õ¾ / ×°³µÈ·ÈÏ / Í×Í¶ / Î»ÖÃÉÏ±¨£¬È«³Ì×´Ì¬ÕæÊµÂä¿â
- */
-const api = require('../../../utils/api')
-const appearance = require('../../../utils/appearance')
-const feedback = require('../../../utils/feedback')
-const nav = require('../../../utils/nav')
-const location = require('../../../utils/location')
-
-/** Î»ÖÃÉÏ±¨¼ä¸ô£¨ºÁÃë£© */
-const LOCATION_REPORT_INTERVAL = 10000
-/** Î»ÖÃ¼à¿Ø¼ä¸ô£¨ºÁÃë£©£ºÍ³Ò»²éÑ¯ºó¶Ë position£¬×Ô¶¯ÅĞ¶Ï REAL/SIMULATED */
-const POSITION_MONITOR_INTERVAL = 3000
-/** µ½Õ¾ÅĞ¶¨°ë¾¶£¨Ã×£©£º½øÈë¸Ã·¶Î§ÌáÊ¾µ½Õ¾£¨ÈÎÎñÊéÄ¬ÈÏ 50m£© */
-const ARRIVE_RADIUS_METERS = 50
-
-/** Á½µã¼äÇòÃæ¾àÀë£¨Ã×£© */
-function distanceMeters(lat1, lng1, lat2, lng2) {
-  const rad = Math.PI / 180
-  const dLat = (lat2 - lat1) * rad
-  const dLng = (lng2 - lng1) * rad
-  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-    Math.cos(lat1 * rad) * Math.cos(lat2 * rad) *
-    Math.sin(dLng / 2) * Math.sin(dLng / 2)
-  return 2 * 6371000 * Math.asin(Math.sqrt(a))
-}
-
-Page({
-  data: {
-    // ×´Ì¬À¸¸ß¶È£¨×Ô¶¨Òåµ¼º½À¸ÓÃ£©
-    statusBarHeight: 20,
-    headerSafeStyle: 'height: 20px;',
-
-    // µ±Ç°×´Ì¬: 'idle' | 'driving' | 'stopped'
-    status: 'idle',
-
-    // Ë¾»ú/³µÁ¾
-    driverName: '',
-    plateNo: '',
-    cargoLimit: 0,
-
-    // °à´ÎĞÅÏ¢
-    routeName: '',
-    startStation: '',
-    endStation: '',
-    currentStation: '',
-    nextStation: '',
-    nextStationDistance: 0,
-
-    // ½ø¶ÈÌõ
-    totalStops: 0,
-    currentStopIndex: 0,
-    progressPercent: 0,
-
-    // Á¬ĞøÈÎÎñµ¼º½£¨ÈÎÎñ¶ÎÍ¾¾­µã£©
-    navTotalStops: 0,
-    navStopIndex: 0,
-    navStationName: '',
-    // ¶à¶ÎÁªÔË£º´ıÈ·ÈÏµÄ»»³Ë½»½ÓÊıÁ¿£¨>0 Ê±¹¤×÷Ì¨ÏÔÊ¾½»½ÓÈë¿Ú£©
-    pendingHandoverCount: 0,
-    navPickupCount: 0,
-    navDeliverCount: 0,
-    navBoardCount: 0,
-    navAlightCount: 0,
-    navActionTotal: 0,
-    targetIndex: 0,
-    canArrive: false,
-
-    // Î»ÖÃÀ´Ô´£ºÓÉºó¶Ë Driver Position API ×Ô¶¯¾ö¶¨£¨REAL / SIMULATED / NONE£©
-    locationSource: 'NONE',
-
-    // ĞĞÀî²ÕÔËÁ¦
-    cargoCapacity: 0,        // ¿ÕÓà²ÖÎ»°Ù·Ö±È
-    cargoUsed: 0,            // ÒÑÓÃ²ÖÎ»°Ù·Ö±È
-
-    // µ½Õ¾ÈÎÎñ£¨ÕæÊµ»õÔË¶©µ¥£©
-    pendingPickups: [],
-
-    // µ÷¶ÈÈÎÎñ£¨Ëã·¨ÅÉµ¥½á¹û£¬Ô¤Áô£©
-    tasks: [],
-
-    // ĞĞÊ»Êı¾İ
-    speed: 0,
-    eta: '',
-
-    // µØÍ¼±ê¼Çµã
-    markers: [],
-    polyline: [],
-
-    // Â·Ïß¸ÅÀÀµØÍ¼£¨ËùÓĞ×´Ì¬ÏÂÏÔÊ¾£©
-    routeMapMarkers: [],
-    routeMapPolyline: [],
-
-    // µØÍ¼ÖĞĞÄ£¨¶µµ××ø±ê£¬onLoad Ê±ÓÃË¾»úÊµÊ±¶¨Î»¸²¸Ç£©
-    mapLatitude: 30.32,
-    mapLongitude: 108.21,
-
+/**
+ * å¸æœºå·¥ä½œå° - æ ¸å¿ƒé¡µé¢
+ * ä¸‰ç§çŠ¶æ€ï¼šå¾…å‘è½¦(idle) / è¡Œé©¶ä¸­(driving) / åˆ°ç«™åœé (stopped)
+ * æ•°æ®æ¥æºï¼šçœŸå®åç«¯ï¼ˆå¸æœºæ¡£æ¡ˆ/ä»Šæ—¥ç­æ¬¡/å¾…è£…è½¦ä»»åŠ¡/è°ƒåº¦ä»»åŠ¡ï¼‰
+ * å†™æ“ä½œï¼šå‘è½¦ / åˆ°ç«™ / è£…è½¦ç¡®è®¤ / å¦¥æŠ• / ä½ç½®ä¸ŠæŠ¥ï¼Œå…¨ç¨‹çŠ¶æ€çœŸå®è½åº“
+ */
+const api = require('../../../utils/api')
+const appearance = require('../../../utils/appearance')
+const feedback = require('../../../utils/feedback')
+const nav = require('../../../utils/nav')
+const location = require('../../../utils/location')
+
+/** ä½ç½®ä¸ŠæŠ¥é—´éš”ï¼ˆæ¯«ç§’ï¼‰ */
+const LOCATION_REPORT_INTERVAL = 10000
+/** ä½ç½®ç›‘æ§é—´éš”ï¼ˆæ¯«ç§’ï¼‰ï¼šç»Ÿä¸€æŸ¥è¯¢åç«¯ positionï¼Œè‡ªåŠ¨åˆ¤æ–­ REAL/SIMULATED */
+const POSITION_MONITOR_INTERVAL = 3000
+/** åˆ°ç«™åˆ¤å®šåŠå¾„ï¼ˆç±³ï¼‰ï¼šè¿›å…¥è¯¥èŒƒå›´æç¤ºåˆ°ç«™ï¼ˆä»»åŠ¡ä¹¦é»˜è®¤ 50mï¼‰ */
+const ARRIVE_RADIUS_METERS = 50
+
+/** ä¸¤ç‚¹é—´çƒé¢è·ç¦»ï¼ˆç±³ï¼‰ */
+function distanceMeters(lat1, lng1, lat2, lng2) {
+  const rad = Math.PI / 180
+  const dLat = (lat2 - lat1) * rad
+  const dLng = (lng2 - lng1) * rad
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * rad) * Math.cos(lat2 * rad) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2)
+  return 2 * 6371000 * Math.asin(Math.sqrt(a))
+}
+
+Page({
+  data: {
+    // çŠ¶æ€æ é«˜åº¦ï¼ˆè‡ªå®šä¹‰å¯¼èˆªæ ç”¨ï¼‰
+    statusBarHeight: 20,
+    headerSafeStyle: 'height: 20px;',
+
+    // å½“å‰çŠ¶æ€: 'idle' | 'driving' | 'stopped'
+    status: 'idle',
+
+    // å¸æœº/è½¦è¾†
+    driverName: '',
+    plateNo: '',
+    cargoLimit: 0,
+
+    // ç­æ¬¡ä¿¡æ¯
+    routeName: '',
+    startStation: '',
+    endStation: '',
+    currentStation: '',
+    nextStation: '',
+    nextStationDistance: 0,
+
+    // è¿›åº¦æ¡
+    totalStops: 0,
+    currentStopIndex: 0,
+    progressPercent: 0,
+
+    // è¿ç»­ä»»åŠ¡å¯¼èˆªï¼ˆä»»åŠ¡æ®µé€”ç»ç‚¹ï¼‰
+    navTotalStops: 0,
+    navStopIndex: 0,
+    navStationName: '',
+    // å¤šæ®µè”è¿ï¼šå¾…ç¡®è®¤çš„æ¢ä¹˜äº¤æ¥æ•°é‡ï¼ˆ>0 æ—¶å·¥ä½œå°æ˜¾ç¤ºäº¤æ¥å…¥å£ï¼‰
+    pendingHandoverCount: 0,
+    navPickupCount: 0,
+    navDeliverCount: 0,
+    navBoardCount: 0,
+    navAlightCount: 0,
+    navActionTotal: 0,
+    targetIndex: 0,
+    canArrive: false,
+
+    // ä½ç½®æ¥æºï¼šç”±åç«¯ Driver Position API è‡ªåŠ¨å†³å®šï¼ˆREAL / SIMULATED / NONEï¼‰
+    locationSource: 'NONE',
+
+    // è¡Œæèˆ±è¿åŠ›
+    cargoCapacity: 0,        // ç©ºä½™ä»“ä½ç™¾åˆ†æ¯”
+    cargoUsed: 0,            // å·²ç”¨ä»“ä½ç™¾åˆ†æ¯”
+
+    // åˆ°ç«™ä»»åŠ¡ï¼ˆçœŸå®è´§è¿è®¢å•ï¼‰
+    pendingPickups: [],
+
+    // è°ƒåº¦ä»»åŠ¡ï¼ˆç®—æ³•æ´¾å•ç»“æœï¼Œé¢„ç•™ï¼‰
+    tasks: [],
+
+    // è¡Œé©¶æ•°æ®
+    speed: 0,
+    eta: '',
+
+    // åœ°å›¾æ ‡è®°ç‚¹
+    markers: [],
+    polyline: [],
+
+    // è·¯çº¿æ¦‚è§ˆåœ°å›¾ï¼ˆæ‰€æœ‰çŠ¶æ€ä¸‹æ˜¾ç¤ºï¼‰
+    routeMapMarkers: [],
+    routeMapPolyline: [],
+
+    // åœ°å›¾ä¸­å¿ƒï¼ˆå…œåº•åæ ‡ï¼ŒonLoad æ—¶ç”¨å¸æœºå®æ—¶å®šä½è¦†ç›–ï¼‰
+    mapLatitude: 30.32,
+    mapLongitude: 108.21,
+
     loaded: false,
-    driverUnreadCount: 0
-  },
-
-  onLoad() {
-    const sysInfo = wx.getWindowInfo()
-    this.setData({ headerSafeStyle: 'height: ' + (sysInfo.statusBarHeight || 20) + 'px;' })
-    appearance.apply(this)
-    this.initMapCenter()
-    this.loadAll()
-  },
-
-  /** µØÍ¼ÖĞĞÄ¸úËæË¾»úµ±Ç°Î»ÖÃ£¬¶¨Î»Ê§°Ü±£Áô¶µµ××ø±ê */
-  async initMapCenter() {
-    // Í³Ò»×ß LocationService µÄÉè±¸¶¨Î»£¨GCJ-02£©£¬Ò³Ãæ²»ÔÙÖ±½Óµ÷ wx.getLocation
-    try {
-      const loc = await location.getDeviceLocationGcj02()
-      if (loc && loc.success) {
-        this.setData({ mapLatitude: loc.latitude, mapLongitude: loc.longitude })
-      }
-    } catch (e) {
-      // È¨ÏŞ±»¾Ü»ò¶¨Î»Ê§°ÜÊ±Ê¹ÓÃ¶µµ××ø±ê
-    }
-  },
-
-  onShow() {
-    appearance.apply(this)
-    // ´ÓÆäËûÒ³·µ»ØÊ±ÈôÔÚÍ¾£¨ĞĞÊ»ÖĞ»òµ½Õ¾Í£¿¿£©£¬È·±£ÉÏ±¨¶¨Ê±Æ÷ÔÚÅÜ
-    if ((this.data.status === 'driving' || this.data.status === 'stopped') && !this.locationTimer) {
-      this.startLocationReport()
-    }
-  },
-
-  /** ¼ÓÔØË¾»úÉí·İ + °à´Î + ÈÎÎñ */
-  async loadAll() {
-    try {
-      // Éí·İÓÉºó¶Ë°´µÇÂ¼»áÔ±½âÎö£¬Ç°¶Ë²»ÔÙ´«ÊÖ»úºÅ/driverId
-      const profile = await api.getDriverProfile()
-      if (!profile) {
-        wx.showToast({ title: 'Î´ÕÒµ½Ë¾»úµµ°¸£¬ÇëÁªÏµ¹ÜÀíÔ±', icon: 'none', duration: 2500 })
-        // ¼ÓÔØË¾»úÎ´¶ÁÏûÏ¢Êı
+    driverUnreadCount: 0
+  },
+
+  onLoad() {
+    const sysInfo = wx.getWindowInfo()
+    this.setData({ headerSafeStyle: 'height: ' + (sysInfo.statusBarHeight || 20) + 'px;' })
+    appearance.apply(this)
+    this.initMapCenter()
+    this.loadAll()
+  },
+
+  /** åœ°å›¾ä¸­å¿ƒè·Ÿéšå¸æœºå½“å‰ä½ç½®ï¼Œå®šä½å¤±è´¥ä¿ç•™å…œåº•åæ ‡ */
+  async initMapCenter() {
+    // ç»Ÿä¸€èµ° LocationService çš„è®¾å¤‡å®šä½ï¼ˆGCJ-02ï¼‰ï¼Œé¡µé¢ä¸å†ç›´æ¥è°ƒ wx.getLocation
+    try {
+      const loc = await location.getDeviceLocationGcj02()
+      if (loc && loc.success) {
+        this.setData({ mapLatitude: loc.latitude, mapLongitude: loc.longitude })
+      }
+    } catch (e) {
+      // æƒé™è¢«æ‹’æˆ–å®šä½å¤±è´¥æ—¶ä½¿ç”¨å…œåº•åæ ‡
+    }
+  },
+
+  onShow() {
+    appearance.apply(this)
+    // ä»å…¶ä»–é¡µè¿”å›æ—¶è‹¥åœ¨é€”ï¼ˆè¡Œé©¶ä¸­æˆ–åˆ°ç«™åœé ï¼‰ï¼Œç¡®ä¿ä¸ŠæŠ¥å®šæ—¶å™¨åœ¨è·‘
+    if ((this.data.status === 'driving' || this.data.status === 'stopped') && !this.locationTimer) {
+      this.startLocationReport()
+    }
+  },
+
+  /** åŠ è½½å¸æœºèº«ä»½ + ç­æ¬¡ + ä»»åŠ¡ */
+  async loadAll() {
+    try {
+      // èº«ä»½ç”±åç«¯æŒ‰ç™»å½•ä¼šå‘˜è§£æï¼Œå‰ç«¯ä¸å†ä¼ æ‰‹æœºå·/driverId
+      const profile = await api.getDriverProfile()
+      if (!profile) {
+        wx.showToast({ title: 'æœªæ‰¾åˆ°å¸æœºæ¡£æ¡ˆï¼Œè¯·è”ç³»ç®¡ç†å‘˜', icon: 'none', duration: 2500 })
+        // åŠ è½½å¸æœºæœªè¯»æ¶ˆæ¯æ•°
       api.getDriverUnreadCount(profile.driverId).then((count) => {
         this.setData({ driverUnreadCount: count || 0 })
       }).catch(() => {})
-      this.setData({ loaded: true })
-        return
-      }
-      this.driverId = profile.driverId
-      const [shifts, pickups, tasks, route] = await Promise.all([
-        api.getDriverShifts().catch(() => []),
-        api.getDriverPickups().catch(() => []),
-        api.getDriverTasks(profile.driverId).catch(() => []),
-        api.getDriverRoute(profile.driverId).catch(() => null)
-      ])
-      // ¶à¶ÎÁªÔË£º´ıÈ·ÈÏ½»½ÓÊıÁ¿£¨ÎŞ¶à¶Î/½Ó¿ÚÒì³£Ê±Îª 0£¬²»×è¶Ï¹¤×÷Ì¨£©
-      const handovers = await api.getDriverHandovers(profile.driverId).catch(() => [])
-      this.setData({
-        driverName: profile.name || '',
-        plateNo: profile.plateNo || '',
-        cargoLimit: profile.cargoCapacity || 0,
-        pendingPickups: pickups || [],
-        tasks: tasks || [],
-        // Phase 8£ºÍêÕûÈÎÎñ¶Î£¨°´·½°¸·Ö×é¡¢Õ¾µã¾ÛºÏ¶¯×÷£©¡ª¡ªË¾»ú¿´µ½Õû¸öÔËÓªÈÎÎñ¶ø·Ç"ÏÂÒ»Õ¾"
-        taskSegment: this.buildTaskSegment(tasks || []),
-        // Phase 9£ºË¾»úÂ·ÏßÕæÊµµÀÂ· polyline + Æ«º½ÅĞ¶¨£¨Ö»±¨¾¯²»×Ô¶¯¸Ä·½°¸£©
-        deviated: !!(route && route.deviated),
-        deviationMeters: route && route.deviationMeters != null ? route.deviationMeters : 0,
+      this.setData({ loaded: true })
+        return
+      }
+      this.driverId = profile.driverId
+      const [shifts, pickups, tasks, route] = await Promise.all([
+        api.getDriverShifts().catch(() => []),
+        api.getDriverPickups().catch(() => []),
+        api.getDriverTasks(profile.driverId).catch(() => []),
+        api.getDriverRoute(profile.driverId).catch(() => null)
+      ])
+      // å¤šæ®µè”è¿ï¼šå¾…ç¡®è®¤äº¤æ¥æ•°é‡ï¼ˆæ— å¤šæ®µ/æ¥å£å¼‚å¸¸æ—¶ä¸º 0ï¼Œä¸é˜»æ–­å·¥ä½œå°ï¼‰
+      const handovers = await api.getDriverHandovers(profile.driverId).catch(() => [])
+      this.setData({
+        driverName: profile.name || '',
+        plateNo: profile.plateNo || '',
+        cargoLimit: profile.cargoCapacity || 0,
+        pendingPickups: pickups || [],
+        tasks: tasks || [],
+        // Phase 8ï¼šå®Œæ•´ä»»åŠ¡æ®µï¼ˆæŒ‰æ–¹æ¡ˆåˆ†ç»„ã€ç«™ç‚¹èšåˆåŠ¨ä½œï¼‰â€”â€”å¸æœºçœ‹åˆ°æ•´ä¸ªè¿è¥ä»»åŠ¡è€Œé"ä¸‹ä¸€ç«™"
+        taskSegment: this.buildTaskSegment(tasks || []),
+        // Phase 9ï¼šå¸æœºè·¯çº¿çœŸå®é“è·¯ polyline + åèˆªåˆ¤å®šï¼ˆåªæŠ¥è­¦ä¸è‡ªåŠ¨æ”¹æ–¹æ¡ˆï¼‰
+        deviated: !!(route && route.deviated),
+        deviationMeters: route && route.deviationMeters != null ? route.deviationMeters : 0,
         pendingHandoverCount: (handovers || []).length,
-        driverUnreadCount: 0
-      })
-      this.driverRoutePolyline = route && route.polyline && route.polyline.length >= 2
-        ? route.polyline.map((p) => ({ longitude: p.longitude, latitude: p.latitude }))
-        : null
-      // Á¬ĞøÈÎÎñµ¼º½£ººÏ²¢ route(×ø±ê/Ë³Ğò/ÕæÊµµÀÂ·) + tasks(È¡/ÅÉÃ÷Ï¸) µÃ navPoints
-      const navPoints = nav.buildNavPoints(route || null, tasks || [])
-      this.navPoints = navPoints
-      if (navPoints.length >= 2) {
-        this.initFromNav(navPoints, shifts || [])
-      } else {
-        this.initFromShifts(shifts || [])
-      }
-      // ¼ÓÔØË¾»úÎ´¶ÁÏûÏ¢Êı
+        driverUnreadCount: 0
+      })
+      this.driverRoutePolyline = route && route.polyline && route.polyline.length >= 2
+        ? route.polyline.map((p) => ({ longitude: p.longitude, latitude: p.latitude }))
+        : null
+      // è¿ç»­ä»»åŠ¡å¯¼èˆªï¼šåˆå¹¶ route(åæ ‡/é¡ºåº/çœŸå®é“è·¯) + tasks(å–/æ´¾æ˜ç»†) å¾— navPoints
+      const navPoints = nav.buildNavPoints(route || null, tasks || [])
+      this.navPoints = navPoints
+      if (navPoints.length >= 2) {
+        this.initFromNav(navPoints, shifts || [])
+      } else {
+        this.initFromShifts(shifts || [])
+      }
+      // åŠ è½½å¸æœºæœªè¯»æ¶ˆæ¯æ•°
       api.getDriverUnreadCount(profile.driverId).then((count) => {
         this.setData({ driverUnreadCount: count || 0 })
       }).catch(() => {})
-      this.setData({ loaded: true })
-    } catch (e) {
-      // ¼ÓÔØË¾»úÎ´¶ÁÏûÏ¢Êı
+      this.setData({ loaded: true })
+    } catch (e) {
+      // åŠ è½½å¸æœºæœªè¯»æ¶ˆæ¯æ•°
       api.getDriverUnreadCount(profile.driverId).then((count) => {
         this.setData({ driverUnreadCount: count || 0 })
       }).catch(() => {})
-      this.setData({ loaded: true })
-    }
-  },
-
-  /**
-   * ÍêÕûÈÎÎñ¶Î£º°´ planId ·Ö×é¡¢°´ visitSequence ÅÅĞò£¬Í¬Õ¾¾ÛºÏ¶¯×÷£¨³Ë¿Í/»õÔËÍ¬Õ¾Ö´ĞĞ£©¡£
-   * À´Ô´ = ºó¶Ë /driver/tasks£¨ºó¶ËÎªÈÎÎñ×´Ì¬µÄ×îÖÕÀ´Ô´£¬Ç°¶Ë½öÕ¹Ê¾£©¡£
-   */
-  buildTaskSegment(tasks) {
-    if (!tasks || !tasks.length) return []
-    const byPlan = {}
-    tasks.forEach((t) => {
-      const key = String(t.planId)
-      if (!byPlan[key]) {
-        byPlan[key] = { planId: t.planId, taskWindowStart: t.taskWindowStart, taskWindowEnd: t.taskWindowEnd, stops: [] }
-      }
-      byPlan[key].stops.push(t)
-    })
-    return Object.values(byPlan).map((seg) => {
-      seg.stops.sort((a, b) => (a.visitSequence || 0) - (b.visitSequence || 0))
-      const stationMap = {}
-      seg.stops.forEach((s) => {
-        const sk = String(s.stationId || '')
-        if (!stationMap[sk]) {
-          stationMap[sk] = {
-            stationName: s.stationName || '',
-            status: s.status,
-            statusName: s.statusName || '´ıÖ´ĞĞ',
-            actions: []
-          }
-        }
-        stationMap[sk].actions.push({
-          actionName: s.actionName || '',
-          orderNo: s.orderNo || '',
-          quantity: s.quantity,
-          statusName: s.statusName || ''
-        })
-      })
-      seg.stops = Object.values(stationMap)
-      return seg
-    })
-  },
-
-  /**
-   * Ñ¡°à´Î£ºÓë±¾´ÎÅÉµ¥ÈÎÎñ¶Î£¨navPoints£©Õ¾µãÖØºÏ¶È×î¸ßÕßÓÅÏÈ£»
-   * Í¬·ÖÊ±ÔÚÍ¾(1)ÓÅÏÈ¡¢Æä´ÎÎ´·¢³µ(0)£¬×îºó°´Ô­Ë³Ğò¡£ÎŞ°à´Î·µ»Ø null¡£
-   * Ä¿µÄ£ºË¾»úÔÚÖØÇìÓÊµç´óÑ§Æ¬ÇøÖ´ĞĞÈÎÎñÊ±£¬·¢³µ/±íÍ·¶¼ÓÃÍ¬Æ¬ÇøµÄ°à´Î£¬²»´®µ½±ğµÄÏßÂ·¡£
-   */
-  pickShiftForNav(navPoints, shifts) {
-    const list = shifts || []
-    if (!list.length) return null
-    const targetIds = (navPoints || []).map((p) => String(p.stationId)).filter(Boolean)
-    if (!targetIds.length) return list.find((s) => s.status === 1) || list[0]
-    let best = null
-    list.forEach((s) => {
-      const stopIds = ((s && s.stops) || []).map((x) => String(x.stationId))
-      const overlap = stopIds.filter((id) => targetIds.indexOf(id) >= 0).length
-      const score = overlap * 10 + (s.status === 1 ? 2 : s.status === 0 ? 1 : 0)
-      if (!best || score > best.score) best = { shift: s, score, overlap }
-    })
-    // ÍêÈ«ÎŞÖØºÏ£¨ÀıÈçÅÉµ¥Õ¾µã²»ÔÚÈÎºÎ°à´ÎÏßÂ·ÉÏ£©¡ú »ØÍËÔ­Âß¼­£¬±£Ö¤ÈÔÄÜ³ö·½°¸
-    if (!best || best.overlap === 0) return list.find((s) => s.status === 1) || list[0]
-    return best.shift
-  },
-
-  /**
-   * Á¬ĞøÈÎÎñµ¼º½³õÊ¼»¯£ºÒÔËã·¨ÈÎÎñ¶Î¾­Í£µã£¨navPoints£©Îªµ¼º½Êı¾İÔ´¡£
-   * °à´ÎĞÅÏ¢ÈÔÓÃÓÚ·¢³µ/µ½Õ¾£¨shiftId£©+ ÔËÁ¦Õ¹Ê¾£¬µ«µØÍ¼/ÏÂÒ»Õ¾/½ø¶È×ßÈÎÎñ¶Î¡£
-   */
-  initFromNav(navPoints, shifts) {
-    // °à´ÎÑ¡Ôñ£ºÓÅÏÈ"¾­Í£Õ¾Óë±¾´ÎÅÉµ¥ÈÎÎñ¶ÎÖØºÏ¶È×î¸ß"µÄ°à´Î£¨Æ¬ÇøÒ»ÖÂ£©£¬
-    // ·ñÔòÍË»¯ÎªÔÚÍ¾°à´Î/Ê×¸ö°à´Î ¡ª¡ª ±ÜÃâ³öÏÖ"ÈÎÎñÔÚÖØÇìÓÊµç´óÑ§Æ¬Çø¡¢·¢³µÈ´ÊÇ³É¶¼ÏßÂ·"µÄ´íÅä
-    const current = this.pickShiftForNav(navPoints, shifts)
-    if (current) {
-      this.shiftId = current.shiftId
-      const cap = this.data.cargoLimit
-      const used = (current.loadedCount != null ? current.loadedCount : this.data.pendingPickups.length) || 0
-      const pct = cap > 0 ? Math.max(0, Math.round((cap - used) / cap * 100)) : 100
-      const usedPct = cap > 0 ? Math.min(100, Math.round(used / cap * 100)) : 0
-      this.setData({
-        routeName: current.routeName || current.shiftCode,
-        cargoCapacity: pct,
-        cargoUsed: usedPct,
-        eta: this.calcEta(current)
-      })
-    }
-
-    // »Ö¸´½ø¶È£ºÓÅÏÈºó¶ËÈÎÎñ×´Ì¬£¨µÚÒ»¸ö"ÓĞ×÷Òµ"ÇÒ PENDING µÄÕ¾£©£¬»ØÍË°à´Î currentStationId¡£
-    // Ìø¹ı·¢³µ³¡Õ¾±¾Éí£¨Ö»ÓĞ DEPART/RETURN¡¢Ã»ÓĞÈ¡ÅÉ/ÉÏÏÂ¿ÍµÄ¾­Í££©¡ª¡ª·¢³µºó²»¸ÃËµ"ÏÂÒ»Õ¾=³ö·¢µã"¡£
-    const pendingIdx = (p) => (p.status == null ? 0 : p.status) === 0
-    const firstWorkIdx = navPoints.findIndex((p) => pendingIdx(p) && (p.actionTotal || 0) > 0)
-    const pendIdx = firstWorkIdx >= 0 ? firstWorkIdx : navPoints.findIndex(pendingIdx)
-    const lastDone = navPoints.length > 0 && navPoints[navPoints.length - 1].status === 7
-    let resumeIdx = pendIdx >= 0 ? pendIdx : (lastDone ? navPoints.length : 0)
-    if (resumeIdx === 0 && current && current.currentStationId != null) {
-      const matched = navPoints.findIndex((p) => p.stationId === current.currentStationId)
-      if (matched > 0) resumeIdx = matched
-    }
-    resumeIdx = Math.min(resumeIdx, navPoints.length - 1)
-
-    this.applyNavView(resumeIdx)
-
-    if (current && current.status === 1 && resumeIdx < navPoints.length) {
-      this.setData({ status: 'driving' })
-      this.startLocationReport()
-    }
-  },
-
-  /** Í³Ò»äÖÈ¾µ¼º½ÊÓÍ¼£¨ÏÂÒ»Õ¾/½ø¶È/markers/polyline£©£¬targetIndex ÊÇÎ¨Ò»ÊÂÊµÀ´Ô´ */
-  applyNavView(targetIndex) {
-    const points = this.navPoints || []
-    const total = points.length
-    const idx = Math.min(targetIndex, total - 1)
-    const t = points[idx] || {}
-    this.setData({
-      targetIndex: idx,
-      currentStopIndex: idx,
-      totalStops: total,
-      navTotalStops: total,
-      navStopIndex: total ? idx + 1 : 0,
-      navStationName: t.stationName || '',
-      navPickupCount: t.pickupCount || 0,
-      navDeliverCount: t.deliverCount || 0,
-      navBoardCount: t.boardCount || 0,
-      navAlightCount: t.alightCount || 0,
-      navActionTotal: t.actionTotal || 0,
-      navReturnPoint: !!t.isReturn,
-      nextStation: t.stationName || '',
-      currentStation: idx > 0 ? (points[idx - 1] || {}).stationName : '',
-      progressPercent: total > 1 ? Math.round(idx / (total - 1) * 100) : 0,
-      markers: this.buildNavMarkers(idx),
-      polyline: this.buildNavPolyline(),
-      routeMapMarkers: this.buildRouteOverviewMarkers(idx),
-      routeMapPolyline: this.buildRouteOverviewPolyline(),
-      canArrive: false
-    })
-  },
-
-  /** ÈÎÎñ¶ÎÍ¾¾­µã markers£ºÄ¿±ê¸ßÁÁ / ÒÑ¹ı»Ò / Î´µ½Õı³££»¶¯×÷ÓÃ callout ÎÄ×Ö+±³¾°É«Çø·Ö */
-  buildNavMarkers(targetIndex) {
-    const theme = appearance.THEMES[this.data.themeColor] || appearance.THEMES.green
-    return (this.navPoints || []).map((p, i) => {
-      const isTarget = i === targetIndex
-      const passed = i < targetIndex
-      const hasCargo = p.pickupCount > 0 || p.deliverCount > 0
-      let content = p.stationName || ''
-      if (p.pickupCount) content += ' ??' + p.pickupCount
-      if (p.deliverCount) content += ' ??' + p.deliverCount
-      if (p.boardCount) content += ' ??' + p.boardCount
-      if (p.alightCount) content += ' ??' + p.alightCount
-      return {
-        id: i,
-        latitude: p.latitude,
-        longitude: p.longitude,
-        iconPath: passed ? '/images/marker-end.png'
-          : isTarget ? '/images/marker-start.png' : '/images/marker-stop.png',
-        width: isTarget ? 32 : 26,
-        height: isTarget ? 32 : 26,
-        callout: {
-          content,
-          color: '#fff',
-          fontSize: isTarget ? 14 : 11,
-          bgColor: passed ? '#666' : isTarget ? (theme.primary || '#2E7D32') : hasCargo ? (theme.clay || '#C75B2A') : '#444',
-          padding: 6,
-          borderRadius: 8,
-          display: isTarget ? 'ALWAYS' : 'BYCLICK'
-        }
-      }
-    })
-  },
-
-  /** µ¼º½ polyline£ºÕæÊµµÀÂ·ÓÅÏÈ£¬¶µµ×Õ¾Á¬Ïß */
-  buildNavPolyline() {
-    const points = (this.driverRoutePolyline && this.driverRoutePolyline.length >= 2)
-      ? this.driverRoutePolyline
-      : (this.navPoints || []).map((p) => ({ latitude: p.latitude, longitude: p.longitude }))
-    const accent = (appearance.THEMES[this.data.themeColor] || appearance.THEMES.green).accent
-    return [{ points, color: accent, width: 6, arrowLine: true }]
-  },
-
-    /** Â·Ïß¸ÅÀÀµØÍ¼markers£º´øĞòºÅµÄÕ¾µã±ê×¢£¬ÑÕÉ«Çø·ÖÒÑ¹ı/µ±Ç°/ÏÂÒ»Õ¾/Î´µ½ */
-    buildRouteOverviewMarkers(targetIndex) {
-      const points = this.navPoints || []
-      if (!points.length) return []
-      const ti = Math.min(targetIndex || 0, points.length - 1)
-      return points.map((p, i) => {
-        const isPassed = i < ti
-        const isCurrent = i === ti
-        const isNext = i === ti + 1
-        let bgColor = '#42A5F5'
-        if (isPassed) bgColor = '#9E9E9E'
-        else if (isCurrent) bgColor = '#FF9800'
-        else if (isNext) bgColor = '#1976D2'
-        const label = (i + 1) + '. ' + (p.stationName || '')
-        return {
-          id: 2000 + i,
-          latitude: p.latitude,
-          longitude: p.longitude,
-          width: (isCurrent || isNext) ? 34 : 26,
-          height: (isCurrent || isNext) ? 34 : 26,
-          iconPath: '/images/marker-stop.png',
-          callout: {
-            content: label,
-            color: '#ffffff',
-            bgColor: bgColor,
-            padding: 8,
-            borderRadius: 10,
-            display: 'ALWAYS',
-            fontSize: 13,
-            anchorX: 0,
-            anchorY: -16
-          }
-        }
-      })
-    },
-
-    /** Â·Ïß¸ÅÀÀpolyline£ºÕæÊµµÀÂ·ÓÅÏÈ£¬¶µµ×Õ¾µãÁ¬Ïß */
-    buildRouteOverviewPolyline() {
-      const points = (this.driverRoutePolyline && this.driverRoutePolyline.length >= 2)
-        ? this.driverRoutePolyline
-        : (this.navPoints || []).map((p) => ({ latitude: p.latitude, longitude: p.longitude }))
-      if (!points || points.length < 2) return []
-      return [{
-        points: points,
-        color: '#2E7D32',
-        width: 5,
-        arrowLine: true
-      }]
-    },
-
-    /** µ¼º½µ½ÏÂÒ»Õ¾£ºµ÷ÓÃÎ¢ĞÅÄÚÖÃµ¼º½ */
-    navigateToNextStop() {
-      const points = this.navPoints || []
-      const ti = Math.min(this.data.targetIndex || 0, points.length - 1)
-      const target = points[ti]
-      if (!target || target.latitude == null || target.longitude == null) {
-        wx.showToast({ title: 'ÔİÎŞµ¼º½Ä¿±ê', icon: 'none' })
-        return
-      }
-      wx.openLocation({
-        latitude: target.latitude,
-        longitude: target.longitude,
-        name: target.stationName || 'ÏÂÒ»Õ¾',
-        scale: 16
-      })
-    },
-
-
-  /** ´ÓÕæÊµ°à´Î³õÊ¼»¯µ±Ç°°à´Î¡¢Õ¾µã¡¢µØÍ¼¡¢ÔËÁ¦£»ÔÚÍ¾°à´Î»Ö¸´ĞĞÊ»×´Ì¬ */
-  initFromShifts(shifts) {
-    if (!shifts.length) return
-    // ÓÅÏÈÔÚÍ¾°à´Î£¬·ñÔòÈ¡µÚÒ»°à
-    const current = shifts.find((s) => s.status === 1) || shifts[0]
-    const stops = current.stops || []
-    if (!stops.length) return
-
-    this.shiftId = current.shiftId
-    this.shiftStops = stops
-
-    const markers = stops.map((s, i) => ({
-      id: i,
-      latitude: s.latitude,
-      longitude: s.longitude,
-      title: s.stationName,
-      iconPath: '',
-      width: 20,
-      height: 20,
-      callout: { content: s.stationName, fontSize: 12, padding: 4, display: 'ALWAYS' }
-    }))
-    // Phase 9£ºµØÍ¼¹ì¼£ÓÅÏÈÓÃºó¶Ë·µ»ØµÄÕæÊµµÀÂ· polyline£¨RoadSegments£©£¬·ñÔòÍË»¯ÎªÕ¾µãÁ¬Ïß£¨¶µµ×£©
-    const routePoints = this.driverRoutePolyline && this.driverRoutePolyline.length >= 2
-      ? this.driverRoutePolyline
-      : stops.map((s) => ({ latitude: s.latitude, longitude: s.longitude }))
-    const polyline = [{
-      points: routePoints,
-      color: (appearance.THEMES[this.data.themeColor] || appearance.THEMES.green).accent,
-      width: 6,
-      arrowLine: true
-    }]
-
-    // ÔËÁ¦£ºÒÑ×°¼şÊıÒÔºó¶ËÖ´ĞĞ¼ÇÂ¼ loadedCount Îª×¼£¨ÕæÊµÂä¿â£©£¬¿ÕÓà = (ÉÏÏŞ - ÒÑ×°) / ÉÏÏŞ
-    const cap = this.data.cargoLimit
-    const used = (current.loadedCount != null ? current.loadedCount : this.data.pendingPickups.length) || 0
-    const pct = cap > 0 ? Math.max(0, Math.round((cap - used) / cap * 100)) : 100
-    const usedPct = cap > 0 ? Math.min(100, Math.round(used / cap * 100)) : 0
-
-    // ÖØ½øĞ¡³ÌĞòÊ±°´ºó¶Ëµ±Ç°Õ¾µã»Ö¸´½ø¶È£¨ÔÚÍ¾²»¶ªÕ¾£©
-    let resumeIndex = 0
-    if (current.currentStationId != null) {
-      const idx = stops.findIndex((s) => s.stationId === current.currentStationId)
-      if (idx >= 0) resumeIndex = idx
-    }
-    const resumePercent = stops.length > 1 ? Math.round(resumeIndex / (stops.length - 1) * 100) : 0
-
-    this.setData({
-      routeName: current.routeName || current.shiftCode,
-      startStation: stops[0].stationName,
-      endStation: stops[stops.length - 1].stationName,
-      totalStops: stops.length,
-      currentStopIndex: resumeIndex,
-      progressPercent: resumePercent,
-      currentStation: resumeIndex > 0 ? stops[resumeIndex - 1].stationName : '',
-      nextStation: stops[Math.min(resumeIndex, stops.length - 1)].stationName,
-      markers,
-      polyline,
-      cargoCapacity: pct,
-      cargoUsed: usedPct,
-      eta: this.calcEta(current)
-    })
-
-    // °à´ÎÒÑÔÚÍ¾£º»Ö¸´ĞĞÊ»×´Ì¬£¨ÖØ½øĞ¡³ÌĞò²»¶ª½ø¶È£©
-    if (current.status === 1) {
-      this.setData({ status: 'driving' })
-      this.startLocationReport()
-    }
-  },
-
-  /** Ô¤¼Æµ½´ïÊ±¼ä = ¼Æ»®·¢³µ + ¼Æ»®Ê±³¤ */
-  calcEta(shift) {
-    if (!shift.plannedDepartureTime || !shift.plannedDurationMinutes) return ''
-    const parts = shift.plannedDepartureTime.split(':')
-    if (parts.length < 2) return ''
-    const total = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10) + shift.plannedDurationMinutes
-    const hh = String(Math.floor(total / 60) % 24).padStart(2, '0')
-    const mm = String(total % 60).padStart(2, '0')
-    return `${hh}:${mm}`
-  },
-
-  /**
-   * ·¢³µ - µ÷ºó¶Ë´´½¨Ö´ĞĞ¼ÇÂ¼£¬³É¹¦ºó½øÈëĞĞÊ»ÖĞ²¢¿ªÊ¼Î»ÖÃÉÏ±¨
-   */
-  async startDrive() {
-    if (!this.driverId || !this.shiftId || this.submitting) return
-    this.submitting = true
-    try {
-      await api.driverDepart(this.driverId, this.shiftId)
-    } catch (e) {
-      this.submitting = false
-      return // request ÒÑ toast ´íÎóĞÅÏ¢
-    }
-    this.submitting = false
-    feedback.tap()
-    // Á¬ĞøÈÎÎñµ¼º½£º·¢³µºó´ÓÊ×¸öÓĞĞ§Õ¾¿ªÊ¼£»Ê×Õ¾Îª´¿¾­Í£Ê±Ìøµ½ÏÂÒ»ÓĞĞ§Õ¾
-    if (this.navPoints && this.navPoints.length >= 2) {
-      const startIdx = (this.navPoints[0] && !(this.navPoints[0].actionTotal > 0) && this.navPoints.length > 1) ? 1 : 0
-      this.applyNavView(startIdx)
-    }
-    this.setData({ status: 'driving', progressPercent: 0 })
-    wx.showToast({ title: '³µÁ¾ÒÑ³ö·¢', icon: 'success', duration: 1500 })
-    this.startLocationReport()
-  },
-
-  /**
-   * Í³Ò»Î»ÖÃ¼à¿Ø£º²éÑ¯ºó¶Ë Driver Position API£¬×Ô¶¯ÅĞ¶ÏÎ»ÖÃÀ´Ô´¡£
-   * - SIMULATED£ºÊ¹ÓÃºó¶ËÄ£ÄâÒıÇæ×ø±ê£¬²»ÉÏ±¨ÕæÊµ GPS£¨±ÜÃâ REAL ¶¥µôÄ£Äâ£©
-   * - REAL£ºÊ¹ÓÃ wx.getLocation ÕæÊµ GPS ²¢ÉÏ±¨
-   * - NONE£ºµÈ´ıÏÂ´ÎÂÖÑ¯
-   */
-  startLocationReport() {
-    if (this.locationTimer) clearInterval(this.locationTimer)
-    this.monitorTick()
-    this.locationTimer = setInterval(() => this.monitorTick(), POSITION_MONITOR_INTERVAL)
-  },
-
-  /** µ¥´ÎÎ»ÖÃ¼à¿Ø£º²éÑ¯ºó¶Ë ¡ú ÅĞ¶ÏÀ´Ô´ ¡ú ¸üĞÂµ¼º½ */
-  async monitorTick() {
-    if (!this.driverId) return
-    try {
-      const pos = await api.getDriverPosition(this.driverId)
-      if (!pos) return
-
-      const source = pos.dataSource || 'NONE'
-      this.setData({ locationSource: source })
-
-      if (source === 'SIMULATED' && pos.simRunning && pos.simLatitude != null && pos.simLongitude != null) {
-        // SIMULATED£ºÊ¹ÓÃÄ£ÄâÒıÇæ×ø±ê£¬²»ÉÏ±¨ÕæÊµ GPS
-        this.updateNavByCoord(pos.simLatitude, pos.simLongitude, 0)
-      } else if (source === 'REAL' && pos.latitude != null && pos.longitude != null) {
-        // REAL£ºÊ¹ÓÃºó¶ËÒÑÉÏ±¨µÄÕæÊµ×ø±ê¸üĞÂµ¼º½
-        this.updateNavByCoord(pos.latitude, pos.longitude, 0)
-        // Í¬Ê±¼ÌĞøÉÏ±¨×îĞÂ GPS£¨±£³ÖÉÏ±¨Á´Â·»îÔ¾£©
-        this.reportRealLocation()
-      } else {
-        // NONE »òÎŞÓĞĞ§×ø±ê£º³¢ÊÔÓÃÕæÊµ GPS
-        this.reportRealLocation()
-      }
-    } catch (e) {
-      // ¾²Ä¬£¬µÈ´ıÏÂÒ»ÂÖ
-    }
-  },
-
-  /** ÉÏ±¨ÕæÊµ GPS£¨½ö REAL ×´Ì¬µ÷ÓÃ£© */
-  async reportRealLocation() {
-    // Í³Ò»×ß LocationService£¨GCJ-02£¬ÓëÕ¾µã±í/¸ßµÂ/µØÍ¼Ò»ÖÂ£©£¬±ÜÃâÒ³Ãæ¸÷×Ôµ÷ wx.getLocation
-    try {
-      const loc = await location.getDeviceLocationGcj02()
-      if (!loc || !loc.success) return // È¨ÏŞÎÊÌâÓÉ onLocationFail ´¦Àí
-      api.reportDriverLocation({
-        driverId: this.driverId,
-        shiftId: this.shiftId,
-        longitude: loc.longitude,
-        latitude: loc.latitude,
-        speedKmh: 0 // LocationService ²»·µ»ØËÙ¶È£»³µÁ¾ËÙ¶ÈÓÉºó¶Ë°´Àï³Ì/Ê±³¤¹ÀËã
-      }).catch(() => {})
-    } catch (e) {
-      // ¾²Ä¬£¬µÈ´ıÏÂÒ»ÂÖ
-    }
-  },
-
-  /** ¶©ÔÄÅÉµ¥Í¨Öª£ºÀ­Ä£°åÁĞ±í ¡ú wx.requestSubscribeMessage ÊÚÈ¨£¨Ò»´ÎĞÔÄ£°å£¬ÅÉµ¥Ç°ĞèÔÙ´Î¶©ÔÄ£© */
-  async subscribeDispatch() {
-    try {
-      const templates = await api.getSubscribeTemplateList()
-      if (!templates || !templates.length) {
-        wx.showToast({ title: 'ÔİÎŞ¿ÉÓÃ¶©ÔÄÄ£°å', icon: 'none' })
-        return
-      }
-      const tpl = templates.find((t) => t.title === 'ÅÉµ¥Í¨Öª') || templates[0]
-      wx.requestSubscribeMessage({
-        tmplIds: [tpl.id],
-        success: (res) => {
-          if (res[tpl.id] === 'accept') {
-            wx.showToast({ title: '¶©ÔÄ³É¹¦', icon: 'success' })
-          } else {
-            wx.showToast({ title: 'Î´¶©ÔÄ', icon: 'none' })
-          }
-        },
-        fail: () => wx.showToast({ title: '¶©ÔÄÊ§°Ü', icon: 'none' })
-      })
-    } catch (e) {
-      wx.showToast({ title: '¶©ÔÄÊ§°Ü', icon: 'none' })
-    }
-  },
-
-  /** ¶¨Î»Ê§°Ü£ºÈ¨ÏŞ±»¾ÜÊ±ÌáÊ¾²¢Í£Ö¹ÉÏ±¨£¬ÆäÓà¾²Ä¬µÈ´ıÏÂ¸öÖÜÆÚ */
-  onLocationFail(err) {
-    const msg = (err && err.errMsg) || ''
-    if (msg.indexOf('auth deny') >= 0 || msg.indexOf('auth denied') >= 0 || msg.indexOf('authorize') >= 0) {
-      if (this.locationTimer) {
-        clearInterval(this.locationTimer)
-        this.locationTimer = null
-      }
-      wx.showModal({
-        title: 'ĞèÒª¶¨Î»È¨ÏŞ',
-        content: 'ĞĞÊ»ÖĞĞè»ñÈ¡Î»ÖÃÉÏ±¨¼à¿ØÖĞĞÄ£¬ÇëÔÚÉèÖÃÖĞ¿ªÆô¶¨Î»È¨ÏŞ',
-        confirmText: 'È¥ÉèÖÃ',
-        success: (r) => {
-          if (r.confirm) wx.openSetting()
-        }
-      })
-    }
-  },
-
-  /** ÊÕµ½Ò»´ÎÕæÊµ¶¨Î»£ºÉÏ±¨ºó¶Ë + Çı¶¯µ¼º½£¨ÓÉ monitorTick ÖĞ REAL ·ÖÖ§µ÷ÓÃ£© */
-  onLocation(res) {
-    const speedKmh = Math.round((res.speed || 0) * 3.6)
-    api.reportDriverLocation({
-      driverId: this.driverId,
-      shiftId: this.shiftId,
-      longitude: res.longitude,
-      latitude: res.latitude,
-      speedKmh
-    }).catch(() => {})
-    this.updateNavByCoord(res.latitude, res.longitude, speedKmh)
-  },
-
-  /** ´¿µ¼º½ÍÆ½ø£º¸ø¶¨×ø±ê¸üĞÂµØÍ¼ÖĞĞÄ/ÏÂÒ»Õ¾¾àÀë/½ø¶È/µ½Õ¾£¨Ä£ÄâÄ£Ê½ÓëÕæÊµ GPS ¹²ÓÃ£© */
-  updateNavByCoord(latitude, longitude, speedKmh) {
-    // µØÍ¼¸úËæµ±Ç°Î»ÖÃ
-    this.setData({ mapLatitude: longitude, mapLongitude: latitude })
-
-    if (this.data.status !== 'driving') {
-      this.setData({ speed: speedKmh })
-      return
-    }
-
-    const points = this.navPoints || []
-    // ÎŞÈÎÎñ¶Îµ¼º½Ê±»ØÍË¾É°à´ÎÕ¾µãÂß¼­
-    if (points.length < 2) {
-      const stops = this.shiftStops || []
-      if (stops.length < 2) { this.setData({ speed: speedKmh }); return }
-      const nextIdx = Math.min(this.data.currentStopIndex + 1, stops.length - 1)
-      const next = stops[nextIdx]
-      const dist = Math.round(distanceMeters(latitude, longitude, next.latitude, next.longitude))
-      const prev = stops[nextIdx - 1]
-      const segLen = distanceMeters(prev.latitude, prev.longitude, next.latitude, next.longitude)
-      const ratio = segLen > 0 ? Math.max(0, Math.min(1, 1 - dist / segLen)) : 0
-      const percent = Math.round(((nextIdx - 1 + ratio) / (stops.length - 1)) * 100)
-      this.setData({
-        speed: speedKmh,
-        currentStation: prev.stationName,
-        nextStation: next.stationName,
-        nextStationDistance: dist,
-        progressPercent: percent
-      })
-      return
-    }
-
-    // ÈÎÎñ¶Îµ¼º½
-    const ti = Math.min(this.data.targetIndex, points.length - 1)
-    const target = points[ti]
-    const dist = Math.round(distanceMeters(latitude, longitude, target.latitude, target.longitude))
-
-    // ´¿¾­Í£Õ¾£¨ÎŞÈÎºÎÈ¡/ÅÉ/ÉÏÏÂ¿Í¶¯×÷£©£º½ø°ë¾¶×Ô¶¯Ìø¹ı£¬±£Ö¤Á¬ĞøĞĞÊ»
-    if (dist <= ARRIVE_RADIUS_METERS && !(target.actionTotal > 0)) {
-      const next = ti + 1
-      if (next < points.length) {
-        this.applyNavView(next)
-        this.setData({ speed: speedKmh, nextStationDistance: 0 })
-      } else {
-        this.setData({ speed: speedKmh })
-      }
-      return
-    }
-
-    // ¾àÄ¿±ê ¡Ü50m ¡ú µãÁÁ¡¸µ½´ï¡¹°´Å¥
-    if (dist <= ARRIVE_RADIUS_METERS) this.setData({ canArrive: true })
-    else if (this.data.canArrive) this.setData({ canArrive: false })
-
-    // ½ø¶È£ºÕ¾¼ä°´¾àÀëÏßĞÔ²åÖµ
-    const prev = points[ti - 1] || target
-    const segLen = distanceMeters(prev.latitude, prev.longitude, target.latitude, target.longitude)
-    const ratio = segLen > 0 ? Math.max(0, Math.min(1, 1 - dist / segLen)) : 0
-    const percent = Math.round(((ti - 1 + ratio) / (points.length - 1)) * 100)
-
-    this.setData({
-      speed: speedKmh,
-      nextStation: target.stationName,
-      nextStationDistance: dist,
-      progressPercent: percent
-    })
-  },
-
-  /**
-   * È·ÈÏµ½Õ¾ - µ÷ºó¶Ë¼ÇÂ¼£»ÖÕµãÕ¾×Ô¶¯Íê³ÉÈÎÎñ¶Î
-   */
-  async arriveAtStation() {
-    const points = this.navPoints || []
-    const useNav = points.length >= 2
-    if (!this.driverId || !this.shiftId || this.submitting) return
-
-    let stationId
-    let ti
-    if (useNav) {
-      ti = Math.min(this.data.targetIndex, points.length - 1)
-      stationId = points[ti].stationId
-    } else {
-      const stops = this.shiftStops || []
-      if (!stops.length) return
-      ti = Math.min(this.data.currentStopIndex + 1, stops.length - 1)
-      stationId = stops[ti].stationId
-    }
-
-    this.submitting = true
-    try {
-      await api.driverArrive(this.driverId, this.shiftId, stationId)
-    } catch (e) {
-      this.submitting = false
-      return
-    }
-    this.submitting = false
-    feedback.tap()
-
-    if (useNav && points[ti]) points[ti].reached = true
-
-    const totalLen = useNav ? points.length : (this.shiftStops || []).length
-    const isTerminal = ti === totalLen - 1
-    if (isTerminal) {
-      // ÈÎÎñ¶Î/°à´ÎÍê³É
-      if (this.locationTimer) {
-        clearInterval(this.locationTimer)
-        this.locationTimer = null
-      }
-      this.setData({ status: 'idle', currentStopIndex: ti, progressPercent: 100, speed: 0, canArrive: false })
-      wx.showToast({ title: '±¾´ÎÈÎÎñÍê³É', icon: 'success', duration: 2000 })
-      this.loadAll()
-      return
-    }
-    this.setData({
-      status: 'stopped',
-      currentStopIndex: ti,
-      currentStation: useNav ? points[ti].stationName : (this.shiftStops || [])[ti].stationName,
-      canArrive: false,
-      markers: useNav ? this.buildNavMarkers(ti) : this.data.markers,
-        routeMapMarkers: useNav ? this.buildRouteOverviewMarkers(ti) : this.data.routeMapMarkers
-    })
-  },
-
-  /** Õ¾ÄÚ×÷ÒµÍê³ÉºóÍÆ½øµ½ÏÂÒ»Õ¾£¨ÃİµÈ£º½ö stopped Ì¬Ö´ĞĞ£¬·ÀÉ¨ÂëÁ¬µãÖØ¸´ÍÆ½ø£© */
-  continueToNextStation() {
-    if (this.data.status !== 'stopped') return
-    const points = this.navPoints || []
-    if (points.length >= 2) {
-      const next = this.data.targetIndex + 1
-      if (next >= points.length) {
-        this.setData({ status: 'idle', progressPercent: 100 })
-        wx.showToast({ title: '±¾´ÎÈÎÎñÍê³É', icon: 'success', duration: 2000 })
-        this.loadAll()
-        return
-      }
-      this.applyNavView(next)
-      this.setData({ status: 'driving', nextStationDistance: 0 })
-    } else {
-      this.setData({ status: 'driving' })
-    }
-    this.startLocationReport()
-  },
-
-  /** µ¥¶ÎÌø×ªÏµÍ³µØÍ¼£¨¿ÉÑ¡¸ßµÂ App ³µµÀ¼¶µ¼º½£©£ºÌøµ±Ç°Ä¿±êÕ¾ */
-  openAmapNav() {
-    const points = this.navPoints || []
-    const t = points.length >= 2 ? points[Math.min(this.data.targetIndex, points.length - 1)] : null
-    if (!t || t.latitude == null || t.longitude == null) {
-      wx.showToast({ title: 'ÔİÎŞµ¼º½Ä¿±ê', icon: 'none' })
-      return
-    }
-    wx.openLocation({ latitude: t.latitude, longitude: t.longitude, name: t.stationName || 'ÈÎÎñµã', scale: 16 })
-  },
-
-  /**
-   * É¨Âë×°³µ£ºÆ¥Åä´ı×°¶©µ¥²¢µ÷ºó¶ËÈ·ÈÏ£¨»õÔËÉ¢¼şÇ¿ÖÆË¾»úÊÕ¼şÅÄÕÕ£¬¿ìµİ×ÜÕ¾ºË¶ÔÆ¾Ö¤£©
-   */
-  scanToLoad() {
-    this.scanOrder(async (order) => {
-      // ÉÌ³Ç¶©µ¥£ºÍ¬ÑùÅÄÕÕºËÑé£¬×ßÉÌ³Ç¶©µ¥½Ó¿Ú£¨¶©µ¥ÈÔÎªÒÑ·¢»õ£¬±ê¼Ç"ÒÑ×°³µ/ÅäËÍÖĞ"£©
-      if (order.bizType === 'PRODUCT') {
-        const productPhoto = await this.takeCargoPhoto()
-        return api.driverProductLoad(this.driverId, order.orderId, productPhoto)
-      }
-      let photoUrl = ''
-      if (order.orderType !== 3) { // ÓÊ¿ì¼şÓĞ¿ìµİÃæµ¥£¬²»Ç¿ÖÆÅÄÕÕ
-        photoUrl = await this.takeCargoPhoto()
-      }
-      return api.driverPickupConfirm(this.driverId, order.orderId, photoUrl)
-    }, '×°³µÈ·ÈÏ³É¹¦')
-  },
-
-  /**
-   * É¨ÂëÍ×Í¶£ºÆ¥Åä´ı×°¶©µ¥²¢µ÷ºó¶ËÍê³ÉÅÉËÍ
-   */
-  scanToDeliver() {
-    this.scanOrder(async (order) => {
-      // ÉÌ³Ç¶©µ¥£ºÍ×Í¶¼´½»¸¶Íê³É£¨ÅÄ½»¸¶Æ¾Ö¤ ¡ú ¶©µ¥×ªÒÑÍê³É£¬ÓÃ»§¶Ë¿É¼û"ÒÑËÍ´ï"£©
-      if (order.bizType === 'PRODUCT') {
-        const proof = await this.takeCargoPhoto()
-        return api.driverProductDeliver(this.driverId, order.orderId, proof)
-      }
-      return api.driverDeliver(this.driverId, order.orderId)
-    }, 'Í×Í¶³É¹¦')
-  },
-
-  /**
-   * È¡¼şºËÏú£ºÉ¨ÊÕ¼şÈËÈ¡¼şÂë¶şÎ¬Âë£¬Ë¾»úÈ·ÈÏÈ¡¼ş£¨ÓÊ¿ì¼şÏÂĞĞ£©
-   */
-  scanToVerify() {
-    if (this.submitting) return
-    wx.scanCode({
-      scanType: ['qrCode', 'barCode'],
-      success: async (res) => {
-        const code = (res.result || '').trim()
-        const order = this.data.pendingPickups.find((p) => p.pickupCode === code || p.orderNo === code)
-        if (!order) {
-          wx.showToast({ title: 'Î´Æ¥Åäµ½´ıÈ¡¿ìµİ', icon: 'none', duration: 2000 })
-          return
-        }
-        this.submitting = true
-        try {
-          await api.driverPickupVerify(this.driverId, order.orderId, order.pickupCode)
-        } catch (e) {
-          this.submitting = false
-          return
-        }
-        this.submitting = false
-        feedback.tap()
-        wx.showToast({ title: 'È¡¼şºËÏú³É¹¦', icon: 'success' })
-        const pickups = this.data.pendingPickups.filter((p) => p.orderId !== order.orderId)
-        this.refreshCargo(pickups)
-      },
-      fail: () => wx.showToast({ title: 'ÒÑÈ¡ÏûÉ¨Âë', icon: 'none' })
-    })
-  },
-
-  /** ÅÄÕÕ²¢ÉÏ´«£¬·µ»ØÕÕÆ¬ URL£¨»õÔË×°³µÇ¿ÖÆ£¬¿ìµİ×ÜÕ¾ºË¶ÔÆ¾Ö¤£© */
-  takeCargoPhoto() {
-    return new Promise((resolve, reject) => {
-      wx.chooseMedia({
-        count: 1,
-        mediaType: ['image'],
-        sourceType: ['camera'],
-        success: async (res) => {
-          if (!res.tempFiles || !res.tempFiles[0]) {
-            reject(new Error('no photo'))
-            return
-          }
-          const temp = res.tempFiles[0].tempFilePath
-          wx.showLoading({ title: 'ÉÏ´«ÕÕÆ¬¡­', mask: true })
-          try {
-            const url = await api.uploadFile(temp)
-            wx.hideLoading()
-            resolve(url)
-          } catch (e) {
-            wx.hideLoading()
-            wx.showToast({ title: 'ÕÕÆ¬ÉÏ´«Ê§°Ü£¬ÇëÖØÅÄ', icon: 'none' })
-            reject(e)
-          }
-        },
-        fail: () => reject(new Error('cancelled'))
-      })
-    })
-  },
-
-  /** É¨Âë²¢Æ¥Åä´ı°ì¶©µ¥£¬Ö´ĞĞ action ºóË¢ĞÂÁĞ±í */
-  scanOrder(action, successText) {
-    if (this.submitting) return
-    wx.scanCode({
-      scanType: ['qrCode', 'barCode'],
-      success: (res) => this.handleScannedCode((res.result || '').trim(), action, successText),
-      // ÏÖ³¡É¨Âë²»¿ÉÓÃ£¨¹âÏß/ÉãÏñÍ·/¶şÎ¬ÂëÆÆËğ£©Ê±µÄ¶µµ×£ºÊÖ¶¯ÊäÈëµ¥ºÅ£¬Á÷³Ì²»ÖĞ¶Ï
-      fail: () => this.promptManualOrderNo(action, successText)
-    })
-  },
-
-  /** ÊÖÊäµ¥ºÅ¶µµ×£¨wx.showModal editable£¬Ğè»ù´¡¿â 2.17.1+£© */
-  promptManualOrderNo(action, successText) {
-    wx.showModal({
-      title: 'ÊÖ¶¯ÊäÈëµ¥ºÅ',
-      editable: true,
-      placeholderText: 'É¨Âë²»¿ÉÓÃÊ±£¬ÊäÈë¶©µ¥ºÅ',
-      success: (res) => {
-        if (!res.confirm) {
-          wx.showToast({ title: 'ÒÑÈ¡Ïû', icon: 'none' })
-          return
-        }
-        const no = String(res.content || '').trim()
-        if (!no) return
-        this.handleScannedCode(no, action, successText)
-      }
-    })
-  },
-
-  /** É¨Âë/ÊÖÊäµÃµ½µ¥ºÅºóÍ³Ò»´¦Àí£ºÆ¥Åä´ı°ì ¡ú Ö´ĞĞ¶¯×÷ ¡ú Ë¢ĞÂ ¡ú ÍÆ½øÏÂÒ»Õ¾ */
-  async handleScannedCode(no, action, successText) {
-    if (!no) return
-    const order = this.data.pendingPickups.find((p) => p.orderNo === no)
-    if (!order) {
-      wx.showToast({ title: 'Î´Æ¥Åäµ½´ı°ì¶©µ¥', icon: 'none', duration: 2000 })
-      return
-    }
-    this.submitting = true
-    try {
-      await action(order)
-    } catch (e) {
-      this.submitting = false
-      return
-    }
-    this.submitting = false
-    feedback.tap()
-    wx.showToast({ title: successText, icon: 'success' })
-    const pickups = this.data.pendingPickups.filter((p) => p.orderId !== order.orderId)
-    this.refreshCargo(pickups)
-    // ×°³µÍê³É¼ÌĞøĞĞÊ»£¨Á¬ĞøÈÎÎñµ¼º½£ºÍÆ½øµ½ÏÂÒ»Õ¾£©
-    setTimeout(() => {
-      this.continueToNextStation()
-    }, 1500)
-  },
-
-  /** ×°³µ/Í×Í¶ºóË¢ĞÂ´ı°ìÁĞ±íÓëĞĞÀî²ÕÔËÁ¦ */
-  refreshCargo(pickups) {
-    const cap = this.data.cargoLimit
-    const used = pickups.length
-    const pct = cap > 0 ? Math.max(0, Math.round((cap - used) / cap * 100)) : 100
-    const usedPct = cap > 0 ? Math.min(100, Math.round(used / cap * 100)) : 0
-    this.setData({
-      pendingPickups: pickups,
-      cargoCapacity: pct,
-      cargoUsed: usedPct
-    })
-  },
-
-  /**
-   * Ìø¹ı×°³µ£¬¼ÌĞøĞĞÊ»
-   */
-  /** ¶à¶ÎÁªÔË£º½øÈë»õÎï½»½ÓÒ³£¨ÅÄÕÕÈ·ÈÏ»»³Ë½»½Ó£© */
-  goHandover() {
-    feedback.tap()
-    wx.navigateTo({ url: '/pages/driver/handover/handover' })
-  },
-
-  skipLoading() {
-    this.continueToNextStation()
-    wx.showToast({
-      title: '¼ÌĞøĞĞÊ»',
-      icon: 'none'
-    })
-  },
-
-  onHide() {
-    // ÇĞºóÌ¨Ê±Í£µôÎ»ÖÃÉÏ±¨¶¨Ê±Æ÷£¬onShow »Ö¸´ÔÚÍ¾Ê±ÖØÆô£¬±ÜÃâºóÌ¨³ÖĞø¶¨Î»ºÄµç
-    if (this.locationTimer) {
-      clearInterval(this.locationTimer)
-      this.locationTimer = null
-    }
-  },
-
-  onUnload() {
-    if (this.locationTimer) {
-      clearInterval(this.locationTimer)
-      this.locationTimer = null
-    }
-  }
-})
-
-
-
-
-
-
-
-
+      this.setData({ loaded: true })
+    }
+  },
+
+  /**
+   * å®Œæ•´ä»»åŠ¡æ®µï¼šæŒ‰ planId åˆ†ç»„ã€æŒ‰ visitSequence æ’åºï¼ŒåŒç«™èšåˆåŠ¨ä½œï¼ˆä¹˜å®¢/è´§è¿åŒç«™æ‰§è¡Œï¼‰ã€‚
+   * æ¥æº = åç«¯ /driver/tasksï¼ˆåç«¯ä¸ºä»»åŠ¡çŠ¶æ€çš„æœ€ç»ˆæ¥æºï¼Œå‰ç«¯ä»…å±•ç¤ºï¼‰ã€‚
+   */
+  buildTaskSegment(tasks) {
+    if (!tasks || !tasks.length) return []
+    const byPlan = {}
+    tasks.forEach((t) => {
+      const key = String(t.planId)
+      if (!byPlan[key]) {
+        byPlan[key] = { planId: t.planId, taskWindowStart: t.taskWindowStart, taskWindowEnd: t.taskWindowEnd, stops: [] }
+      }
+      byPlan[key].stops.push(t)
+    })
+    return Object.values(byPlan).map((seg) => {
+      seg.stops.sort((a, b) => (a.visitSequence || 0) - (b.visitSequence || 0))
+      const stationMap = {}
+      seg.stops.forEach((s) => {
+        const sk = String(s.stationId || '')
+        if (!stationMap[sk]) {
+          stationMap[sk] = {
+            stationName: s.stationName || '',
+            status: s.status,
+            statusName: s.statusName || 'å¾…æ‰§è¡Œ',
+            actions: []
+          }
+        }
+        stationMap[sk].actions.push({
+          actionName: s.actionName || '',
+          orderNo: s.orderNo || '',
+          quantity: s.quantity,
+          statusName: s.statusName || ''
+        })
+      })
+      seg.stops = Object.values(stationMap)
+      return seg
+    })
+  },
+
+  /**
+   * é€‰ç­æ¬¡ï¼šä¸æœ¬æ¬¡æ´¾å•ä»»åŠ¡æ®µï¼ˆnavPointsï¼‰ç«™ç‚¹é‡åˆåº¦æœ€é«˜è€…ä¼˜å…ˆï¼›
+   * åŒåˆ†æ—¶åœ¨é€”(1)ä¼˜å…ˆã€å…¶æ¬¡æœªå‘è½¦(0)ï¼Œæœ€åæŒ‰åŸé¡ºåºã€‚æ— ç­æ¬¡è¿”å› nullã€‚
+   * ç›®çš„ï¼šå¸æœºåœ¨é‡åº†é‚®ç”µå¤§å­¦ç‰‡åŒºæ‰§è¡Œä»»åŠ¡æ—¶ï¼Œå‘è½¦/è¡¨å¤´éƒ½ç”¨åŒç‰‡åŒºçš„ç­æ¬¡ï¼Œä¸ä¸²åˆ°åˆ«çš„çº¿è·¯ã€‚
+   */
+  pickShiftForNav(navPoints, shifts) {
+    const list = shifts || []
+    if (!list.length) return null
+    const targetIds = (navPoints || []).map((p) => String(p.stationId)).filter(Boolean)
+    if (!targetIds.length) return list.find((s) => s.status === 1) || list[0]
+    let best = null
+    list.forEach((s) => {
+      const stopIds = ((s && s.stops) || []).map((x) => String(x.stationId))
+      const overlap = stopIds.filter((id) => targetIds.indexOf(id) >= 0).length
+      const score = overlap * 10 + (s.status === 1 ? 2 : s.status === 0 ? 1 : 0)
+      if (!best || score > best.score) best = { shift: s, score, overlap }
+    })
+    // å®Œå…¨æ— é‡åˆï¼ˆä¾‹å¦‚æ´¾å•ç«™ç‚¹ä¸åœ¨ä»»ä½•ç­æ¬¡çº¿è·¯ä¸Šï¼‰â†’ å›é€€åŸé€»è¾‘ï¼Œä¿è¯ä»èƒ½å‡ºæ–¹æ¡ˆ
+    if (!best || best.overlap === 0) return list.find((s) => s.status === 1) || list[0]
+    return best.shift
+  },
+
+  /**
+   * è¿ç»­ä»»åŠ¡å¯¼èˆªåˆå§‹åŒ–ï¼šä»¥ç®—æ³•ä»»åŠ¡æ®µç»åœç‚¹ï¼ˆnavPointsï¼‰ä¸ºå¯¼èˆªæ•°æ®æºã€‚
+   * ç­æ¬¡ä¿¡æ¯ä»ç”¨äºå‘è½¦/åˆ°ç«™ï¼ˆshiftIdï¼‰+ è¿åŠ›å±•ç¤ºï¼Œä½†åœ°å›¾/ä¸‹ä¸€ç«™/è¿›åº¦èµ°ä»»åŠ¡æ®µã€‚
+   */
+  initFromNav(navPoints, shifts) {
+    // ç­æ¬¡é€‰æ‹©ï¼šä¼˜å…ˆ"ç»åœç«™ä¸æœ¬æ¬¡æ´¾å•ä»»åŠ¡æ®µé‡åˆåº¦æœ€é«˜"çš„ç­æ¬¡ï¼ˆç‰‡åŒºä¸€è‡´ï¼‰ï¼Œ
+    // å¦åˆ™é€€åŒ–ä¸ºåœ¨é€”ç­æ¬¡/é¦–ä¸ªç­æ¬¡ â€”â€” é¿å…å‡ºç°"ä»»åŠ¡åœ¨é‡åº†é‚®ç”µå¤§å­¦ç‰‡åŒºã€å‘è½¦å´æ˜¯æˆéƒ½çº¿è·¯"çš„é”™é…
+    const current = this.pickShiftForNav(navPoints, shifts)
+    if (current) {
+      this.shiftId = current.shiftId
+      const cap = this.data.cargoLimit
+      const used = (current.loadedCount != null ? current.loadedCount : this.data.pendingPickups.length) || 0
+      const pct = cap > 0 ? Math.max(0, Math.round((cap - used) / cap * 100)) : 100
+      const usedPct = cap > 0 ? Math.min(100, Math.round(used / cap * 100)) : 0
+      this.setData({
+        routeName: current.routeName || current.shiftCode,
+        cargoCapacity: pct,
+        cargoUsed: usedPct,
+        eta: this.calcEta(current)
+      })
+    }
+
+    // æ¢å¤è¿›åº¦ï¼šä¼˜å…ˆåç«¯ä»»åŠ¡çŠ¶æ€ï¼ˆç¬¬ä¸€ä¸ª"æœ‰ä½œä¸š"ä¸” PENDING çš„ç«™ï¼‰ï¼Œå›é€€ç­æ¬¡ currentStationIdã€‚
+    // è·³è¿‡å‘è½¦åœºç«™æœ¬èº«ï¼ˆåªæœ‰ DEPART/RETURNã€æ²¡æœ‰å–æ´¾/ä¸Šä¸‹å®¢çš„ç»åœï¼‰â€”â€”å‘è½¦åä¸è¯¥è¯´"ä¸‹ä¸€ç«™=å‡ºå‘ç‚¹"ã€‚
+    const pendingIdx = (p) => (p.status == null ? 0 : p.status) === 0
+    const firstWorkIdx = navPoints.findIndex((p) => pendingIdx(p) && (p.actionTotal || 0) > 0)
+    const pendIdx = firstWorkIdx >= 0 ? firstWorkIdx : navPoints.findIndex(pendingIdx)
+    const lastDone = navPoints.length > 0 && navPoints[navPoints.length - 1].status === 7
+    let resumeIdx = pendIdx >= 0 ? pendIdx : (lastDone ? navPoints.length : 0)
+    if (resumeIdx === 0 && current && current.currentStationId != null) {
+      const matched = navPoints.findIndex((p) => p.stationId === current.currentStationId)
+      if (matched > 0) resumeIdx = matched
+    }
+    resumeIdx = Math.min(resumeIdx, navPoints.length - 1)
+
+    this.applyNavView(resumeIdx)
+
+    if (current && current.status === 1 && resumeIdx < navPoints.length) {
+      this.setData({ status: 'driving' })
+      this.startLocationReport()
+    }
+  },
+
+  /** ç»Ÿä¸€æ¸²æŸ“å¯¼èˆªè§†å›¾ï¼ˆä¸‹ä¸€ç«™/è¿›åº¦/markers/polylineï¼‰ï¼ŒtargetIndex æ˜¯å”¯ä¸€äº‹å®æ¥æº */
+  applyNavView(targetIndex) {
+    const points = this.navPoints || []
+    const total = points.length
+    const idx = Math.min(targetIndex, total - 1)
+    const t = points[idx] || {}
+    this.setData({
+      targetIndex: idx,
+      currentStopIndex: idx,
+      totalStops: total,
+      navTotalStops: total,
+      navStopIndex: total ? idx + 1 : 0,
+      navStationName: t.stationName || '',
+      navPickupCount: t.pickupCount || 0,
+      navDeliverCount: t.deliverCount || 0,
+      navBoardCount: t.boardCount || 0,
+      navAlightCount: t.alightCount || 0,
+      navActionTotal: t.actionTotal || 0,
+      navReturnPoint: !!t.isReturn,
+      nextStation: t.stationName || '',
+      currentStation: idx > 0 ? (points[idx - 1] || {}).stationName : '',
+      progressPercent: total > 1 ? Math.round(idx / (total - 1) * 100) : 0,
+      markers: this.buildNavMarkers(idx),
+      polyline: this.buildNavPolyline(),
+      routeMapMarkers: this.buildRouteOverviewMarkers(idx),
+      routeMapPolyline: this.buildRouteOverviewPolyline(),
+      canArrive: false
+    })
+  },
+
+  /** ä»»åŠ¡æ®µé€”ç»ç‚¹ markersï¼šç›®æ ‡é«˜äº® / å·²è¿‡ç° / æœªåˆ°æ­£å¸¸ï¼›åŠ¨ä½œç”¨ callout æ–‡å­—+èƒŒæ™¯è‰²åŒºåˆ† */
+  buildNavMarkers(targetIndex) {
+    const theme = appearance.THEMES[this.data.themeColor] || appearance.THEMES.green
+    return (this.navPoints || []).map((p, i) => {
+      const isTarget = i === targetIndex
+      const passed = i < targetIndex
+      const hasCargo = p.pickupCount > 0 || p.deliverCount > 0
+      let content = p.stationName || ''
+      if (p.pickupCount) content += ' ??' + p.pickupCount
+      if (p.deliverCount) content += ' ??' + p.deliverCount
+      if (p.boardCount) content += ' ??' + p.boardCount
+      if (p.alightCount) content += ' ??' + p.alightCount
+      return {
+        id: i,
+        latitude: p.latitude,
+        longitude: p.longitude,
+        iconPath: passed ? '/images/marker-end.png'
+          : isTarget ? '/images/marker-start.png' : '/images/marker-stop.png',
+        width: isTarget ? 32 : 26,
+        height: isTarget ? 32 : 26,
+        callout: {
+          content,
+          color: '#fff',
+          fontSize: isTarget ? 14 : 11,
+          bgColor: passed ? '#666' : isTarget ? (theme.primary || '#2E7D32') : hasCargo ? (theme.clay || '#C75B2A') : '#444',
+          padding: 6,
+          borderRadius: 8,
+          display: isTarget ? 'ALWAYS' : 'BYCLICK'
+        }
+      }
+    })
+  },
+
+  /** å¯¼èˆª polylineï¼šçœŸå®é“è·¯ä¼˜å…ˆï¼Œå…œåº•ç«™è¿çº¿ */
+  buildNavPolyline() {
+    const points = (this.driverRoutePolyline && this.driverRoutePolyline.length >= 2)
+      ? this.driverRoutePolyline
+      : (this.navPoints || []).map((p) => ({ latitude: p.latitude, longitude: p.longitude }))
+    const accent = (appearance.THEMES[this.data.themeColor] || appearance.THEMES.green).accent
+    return [{ points, color: accent, width: 6, arrowLine: true }]
+  },
+
+    /** è·¯çº¿æ¦‚è§ˆåœ°å›¾markersï¼šå¸¦åºå·çš„ç«™ç‚¹æ ‡æ³¨ï¼Œé¢œè‰²åŒºåˆ†å·²è¿‡/å½“å‰/ä¸‹ä¸€ç«™/æœªåˆ° */
+    buildRouteOverviewMarkers(targetIndex) {
+      const points = this.navPoints || []
+      if (!points.length) return []
+      const ti = Math.min(targetIndex || 0, points.length - 1)
+      return points.map((p, i) => {
+        const isPassed = i < ti
+        const isCurrent = i === ti
+        const isNext = i === ti + 1
+        let bgColor = '#42A5F5'
+        if (isPassed) bgColor = '#9E9E9E'
+        else if (isCurrent) bgColor = '#FF9800'
+        else if (isNext) bgColor = '#1976D2'
+        const label = (i + 1) + '. ' + (p.stationName || '')
+        return {
+          id: 2000 + i,
+          latitude: p.latitude,
+          longitude: p.longitude,
+          width: (isCurrent || isNext) ? 34 : 26,
+          height: (isCurrent || isNext) ? 34 : 26,
+          iconPath: '/images/marker-stop.png',
+          callout: {
+            content: label,
+            color: '#ffffff',
+            bgColor: bgColor,
+            padding: 8,
+            borderRadius: 10,
+            display: 'ALWAYS',
+            fontSize: 13,
+            anchorX: 0,
+            anchorY: -16
+          }
+        }
+      })
+    },
+
+    /** è·¯çº¿æ¦‚è§ˆpolylineï¼šçœŸå®é“è·¯ä¼˜å…ˆï¼Œå…œåº•ç«™ç‚¹è¿çº¿ */
+    buildRouteOverviewPolyline() {
+      const points = (this.driverRoutePolyline && this.driverRoutePolyline.length >= 2)
+        ? this.driverRoutePolyline
+        : (this.navPoints || []).map((p) => ({ latitude: p.latitude, longitude: p.longitude }))
+      if (!points || points.length < 2) return []
+      return [{
+        points: points,
+        color: '#2E7D32',
+        width: 5,
+        arrowLine: true
+      }]
+    },
+
+    /** å¯¼èˆªåˆ°ä¸‹ä¸€ç«™ï¼šè°ƒç”¨å¾®ä¿¡å†…ç½®å¯¼èˆª */
+    navigateToNextStop() {
+      const points = this.navPoints || []
+      const ti = Math.min(this.data.targetIndex || 0, points.length - 1)
+      const target = points[ti]
+      if (!target || target.latitude == null || target.longitude == null) {
+        wx.showToast({ title: 'æš‚æ— å¯¼èˆªç›®æ ‡', icon: 'none' })
+        return
+      }
+      wx.openLocation({
+        latitude: target.latitude,
+        longitude: target.longitude,
+        name: target.stationName || 'ä¸‹ä¸€ç«™',
+        scale: 16
+      })
+    },
+
+
+  /** ä»çœŸå®ç­æ¬¡åˆå§‹åŒ–å½“å‰ç­æ¬¡ã€ç«™ç‚¹ã€åœ°å›¾ã€è¿åŠ›ï¼›åœ¨é€”ç­æ¬¡æ¢å¤è¡Œé©¶çŠ¶æ€ */
+  initFromShifts(shifts) {
+    if (!shifts.length) return
+    // ä¼˜å…ˆåœ¨é€”ç­æ¬¡ï¼Œå¦åˆ™å–ç¬¬ä¸€ç­
+    const current = shifts.find((s) => s.status === 1) || shifts[0]
+    const stops = current.stops || []
+    if (!stops.length) return
+
+    this.shiftId = current.shiftId
+    this.shiftStops = stops
+
+    const markers = stops.map((s, i) => ({
+      id: i,
+      latitude: s.latitude,
+      longitude: s.longitude,
+      title: s.stationName,
+      iconPath: '',
+      width: 20,
+      height: 20,
+      callout: { content: s.stationName, fontSize: 12, padding: 4, display: 'ALWAYS' }
+    }))
+    // Phase 9ï¼šåœ°å›¾è½¨è¿¹ä¼˜å…ˆç”¨åç«¯è¿”å›çš„çœŸå®é“è·¯ polylineï¼ˆRoadSegmentsï¼‰ï¼Œå¦åˆ™é€€åŒ–ä¸ºç«™ç‚¹è¿çº¿ï¼ˆå…œåº•ï¼‰
+    const routePoints = this.driverRoutePolyline && this.driverRoutePolyline.length >= 2
+      ? this.driverRoutePolyline
+      : stops.map((s) => ({ latitude: s.latitude, longitude: s.longitude }))
+    const polyline = [{
+      points: routePoints,
+      color: (appearance.THEMES[this.data.themeColor] || appearance.THEMES.green).accent,
+      width: 6,
+      arrowLine: true
+    }]
+
+    // è¿åŠ›ï¼šå·²è£…ä»¶æ•°ä»¥åç«¯æ‰§è¡Œè®°å½• loadedCount ä¸ºå‡†ï¼ˆçœŸå®è½åº“ï¼‰ï¼Œç©ºä½™ = (ä¸Šé™ - å·²è£…) / ä¸Šé™
+    const cap = this.data.cargoLimit
+    const used = (current.loadedCount != null ? current.loadedCount : this.data.pendingPickups.length) || 0
+    const pct = cap > 0 ? Math.max(0, Math.round((cap - used) / cap * 100)) : 100
+    const usedPct = cap > 0 ? Math.min(100, Math.round(used / cap * 100)) : 0
+
+    // é‡è¿›å°ç¨‹åºæ—¶æŒ‰åç«¯å½“å‰ç«™ç‚¹æ¢å¤è¿›åº¦ï¼ˆåœ¨é€”ä¸ä¸¢ç«™ï¼‰
+    let resumeIndex = 0
+    if (current.currentStationId != null) {
+      const idx = stops.findIndex((s) => s.stationId === current.currentStationId)
+      if (idx >= 0) resumeIndex = idx
+    }
+    const resumePercent = stops.length > 1 ? Math.round(resumeIndex / (stops.length - 1) * 100) : 0
+
+    this.setData({
+      routeName: current.routeName || current.shiftCode,
+      startStation: stops[0].stationName,
+      endStation: stops[stops.length - 1].stationName,
+      totalStops: stops.length,
+      currentStopIndex: resumeIndex,
+      progressPercent: resumePercent,
+      currentStation: resumeIndex > 0 ? stops[resumeIndex - 1].stationName : '',
+      nextStation: stops[Math.min(resumeIndex, stops.length - 1)].stationName,
+      markers,
+      polyline,
+      cargoCapacity: pct,
+      cargoUsed: usedPct,
+      eta: this.calcEta(current)
+    })
+
+    // ç­æ¬¡å·²åœ¨é€”ï¼šæ¢å¤è¡Œé©¶çŠ¶æ€ï¼ˆé‡è¿›å°ç¨‹åºä¸ä¸¢è¿›åº¦ï¼‰
+    if (current.status === 1) {
+      this.setData({ status: 'driving' })
+      this.startLocationReport()
+    }
+  },
+
+  /** é¢„è®¡åˆ°è¾¾æ—¶é—´ = è®¡åˆ’å‘è½¦ + è®¡åˆ’æ—¶é•¿ */
+  calcEta(shift) {
+    if (!shift.plannedDepartureTime || !shift.plannedDurationMinutes) return ''
+    const parts = shift.plannedDepartureTime.split(':')
+    if (parts.length < 2) return ''
+    const total = parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10) + shift.plannedDurationMinutes
+    const hh = String(Math.floor(total / 60) % 24).padStart(2, '0')
+    const mm = String(total % 60).padStart(2, '0')
+    return `${hh}:${mm}`
+  },
+
+  /**
+   * å‘è½¦ - è°ƒåç«¯åˆ›å»ºæ‰§è¡Œè®°å½•ï¼ŒæˆåŠŸåè¿›å…¥è¡Œé©¶ä¸­å¹¶å¼€å§‹ä½ç½®ä¸ŠæŠ¥
+   */
+  async startDrive() {
+    if (!this.driverId || !this.shiftId || this.submitting) return
+    this.submitting = true
+    try {
+      await api.driverDepart(this.driverId, this.shiftId)
+    } catch (e) {
+      this.submitting = false
+      return // request å·² toast é”™è¯¯ä¿¡æ¯
+    }
+    this.submitting = false
+    feedback.tap()
+    // è¿ç»­ä»»åŠ¡å¯¼èˆªï¼šå‘è½¦åä»é¦–ä¸ªæœ‰æ•ˆç«™å¼€å§‹ï¼›é¦–ç«™ä¸ºçº¯ç»åœæ—¶è·³åˆ°ä¸‹ä¸€æœ‰æ•ˆç«™
+    if (this.navPoints && this.navPoints.length >= 2) {
+      const startIdx = (this.navPoints[0] && !(this.navPoints[0].actionTotal > 0) && this.navPoints.length > 1) ? 1 : 0
+      this.applyNavView(startIdx)
+    }
+    this.setData({ status: 'driving', progressPercent: 0 })
+    wx.showToast({ title: 'è½¦è¾†å·²å‡ºå‘', icon: 'success', duration: 1500 })
+    this.startLocationReport()
+  },
+
+  /**
+   * ç»Ÿä¸€ä½ç½®ç›‘æ§ï¼šæŸ¥è¯¢åç«¯ Driver Position APIï¼Œè‡ªåŠ¨åˆ¤æ–­ä½ç½®æ¥æºã€‚
+   * - SIMULATEDï¼šä½¿ç”¨åç«¯æ¨¡æ‹Ÿå¼•æ“åæ ‡ï¼Œä¸ä¸ŠæŠ¥çœŸå® GPSï¼ˆé¿å… REAL é¡¶æ‰æ¨¡æ‹Ÿï¼‰
+   * - REALï¼šä½¿ç”¨ wx.getLocation çœŸå® GPS å¹¶ä¸ŠæŠ¥
+   * - NONEï¼šç­‰å¾…ä¸‹æ¬¡è½®è¯¢
+   */
+  startLocationReport() {
+    if (this.locationTimer) clearInterval(this.locationTimer)
+    this.monitorTick()
+    this.locationTimer = setInterval(() => this.monitorTick(), POSITION_MONITOR_INTERVAL)
+  },
+
+  /** å•æ¬¡ä½ç½®ç›‘æ§ï¼šæŸ¥è¯¢åç«¯ â†’ åˆ¤æ–­æ¥æº â†’ æ›´æ–°å¯¼èˆª */
+  async monitorTick() {
+    if (!this.driverId) return
+    try {
+      const pos = await api.getDriverPosition(this.driverId)
+      if (!pos) return
+
+      const source = pos.dataSource || 'NONE'
+      this.setData({ locationSource: source })
+
+      if (source === 'SIMULATED' && pos.simRunning && pos.simLatitude != null && pos.simLongitude != null) {
+        // SIMULATEDï¼šä½¿ç”¨æ¨¡æ‹Ÿå¼•æ“åæ ‡ï¼Œä¸ä¸ŠæŠ¥çœŸå® GPS
+        this.updateNavByCoord(pos.simLatitude, pos.simLongitude, 0)
+      } else if (source === 'REAL' && pos.latitude != null && pos.longitude != null) {
+        // REALï¼šä½¿ç”¨åç«¯å·²ä¸ŠæŠ¥çš„çœŸå®åæ ‡æ›´æ–°å¯¼èˆª
+        this.updateNavByCoord(pos.latitude, pos.longitude, 0)
+        // åŒæ—¶ç»§ç»­ä¸ŠæŠ¥æœ€æ–° GPSï¼ˆä¿æŒä¸ŠæŠ¥é“¾è·¯æ´»è·ƒï¼‰
+        this.reportRealLocation()
+      } else {
+        // NONE æˆ–æ— æœ‰æ•ˆåæ ‡ï¼šå°è¯•ç”¨çœŸå® GPS
+        this.reportRealLocation()
+      }
+    } catch (e) {
+      // é™é»˜ï¼Œç­‰å¾…ä¸‹ä¸€è½®
+    }
+  },
+
+  /** ä¸ŠæŠ¥çœŸå® GPSï¼ˆä»… REAL çŠ¶æ€è°ƒç”¨ï¼‰ */
+  async reportRealLocation() {
+    // ç»Ÿä¸€èµ° LocationServiceï¼ˆGCJ-02ï¼Œä¸ç«™ç‚¹è¡¨/é«˜å¾·/åœ°å›¾ä¸€è‡´ï¼‰ï¼Œé¿å…é¡µé¢å„è‡ªè°ƒ wx.getLocation
+    try {
+      const loc = await location.getDeviceLocationGcj02()
+      if (!loc || !loc.success) return // æƒé™é—®é¢˜ç”± onLocationFail å¤„ç†
+      api.reportDriverLocation({
+        driverId: this.driverId,
+        shiftId: this.shiftId,
+        longitude: loc.longitude,
+        latitude: loc.latitude,
+        speedKmh: 0 // LocationService ä¸è¿”å›é€Ÿåº¦ï¼›è½¦è¾†é€Ÿåº¦ç”±åç«¯æŒ‰é‡Œç¨‹/æ—¶é•¿ä¼°ç®—
+      }).catch(() => {})
+    } catch (e) {
+      // é™é»˜ï¼Œç­‰å¾…ä¸‹ä¸€è½®
+    }
+  },
+
+  /** è®¢é˜…æ´¾å•é€šçŸ¥ï¼šæ‹‰æ¨¡æ¿åˆ—è¡¨ â†’ wx.requestSubscribeMessage æˆæƒï¼ˆä¸€æ¬¡æ€§æ¨¡æ¿ï¼Œæ´¾å•å‰éœ€å†æ¬¡è®¢é˜…ï¼‰ */
+  async subscribeDispatch() {
+    try {
+      const templates = await api.getSubscribeTemplateList()
+      if (!templates || !templates.length) {
+        wx.showToast({ title: 'æš‚æ— å¯ç”¨è®¢é˜…æ¨¡æ¿', icon: 'none' })
+        return
+      }
+      const tpl = templates.find((t) => t.title === 'æ´¾å•é€šçŸ¥') || templates[0]
+      wx.requestSubscribeMessage({
+        tmplIds: [tpl.id],
+        success: (res) => {
+          if (res[tpl.id] === 'accept') {
+            wx.showToast({ title: 'è®¢é˜…æˆåŠŸ', icon: 'success' })
+          } else {
+            wx.showToast({ title: 'æœªè®¢é˜…', icon: 'none' })
+          }
+        },
+        fail: () => wx.showToast({ title: 'è®¢é˜…å¤±è´¥', icon: 'none' })
+      })
+    } catch (e) {
+      wx.showToast({ title: 'è®¢é˜…å¤±è´¥', icon: 'none' })
+    }
+  },
+
+  /** å®šä½å¤±è´¥ï¼šæƒé™è¢«æ‹’æ—¶æç¤ºå¹¶åœæ­¢ä¸ŠæŠ¥ï¼Œå…¶ä½™é™é»˜ç­‰å¾…ä¸‹ä¸ªå‘¨æœŸ */
+  onLocationFail(err) {
+    const msg = (err && err.errMsg) || ''
+    if (msg.indexOf('auth deny') >= 0 || msg.indexOf('auth denied') >= 0 || msg.indexOf('authorize') >= 0) {
+      if (this.locationTimer) {
+        clearInterval(this.locationTimer)
+        this.locationTimer = null
+      }
+      wx.showModal({
+        title: 'éœ€è¦å®šä½æƒé™',
+        content: 'è¡Œé©¶ä¸­éœ€è·å–ä½ç½®ä¸ŠæŠ¥ç›‘æ§ä¸­å¿ƒï¼Œè¯·åœ¨è®¾ç½®ä¸­å¼€å¯å®šä½æƒé™',
+        confirmText: 'å»è®¾ç½®',
+        success: (r) => {
+          if (r.confirm) wx.openSetting()
+        }
+      })
+    }
+  },
+
+  /** æ”¶åˆ°ä¸€æ¬¡çœŸå®å®šä½ï¼šä¸ŠæŠ¥åç«¯ + é©±åŠ¨å¯¼èˆªï¼ˆç”± monitorTick ä¸­ REAL åˆ†æ”¯è°ƒç”¨ï¼‰ */
+  onLocation(res) {
+    const speedKmh = Math.round((res.speed || 0) * 3.6)
+    api.reportDriverLocation({
+      driverId: this.driverId,
+      shiftId: this.shiftId,
+      longitude: res.longitude,
+      latitude: res.latitude,
+      speedKmh
+    }).catch(() => {})
+    this.updateNavByCoord(res.latitude, res.longitude, speedKmh)
+  },
+
+  /** çº¯å¯¼èˆªæ¨è¿›ï¼šç»™å®šåæ ‡æ›´æ–°åœ°å›¾ä¸­å¿ƒ/ä¸‹ä¸€ç«™è·ç¦»/è¿›åº¦/åˆ°ç«™ï¼ˆæ¨¡æ‹Ÿæ¨¡å¼ä¸çœŸå® GPS å…±ç”¨ï¼‰ */
+  updateNavByCoord(latitude, longitude, speedKmh) {
+    // åœ°å›¾è·Ÿéšå½“å‰ä½ç½®
+    this.setData({ mapLatitude: longitude, mapLongitude: latitude })
+
+    if (this.data.status !== 'driving') {
+      this.setData({ speed: speedKmh })
+      return
+    }
+
+    const points = this.navPoints || []
+    // æ— ä»»åŠ¡æ®µå¯¼èˆªæ—¶å›é€€æ—§ç­æ¬¡ç«™ç‚¹é€»è¾‘
+    if (points.length < 2) {
+      const stops = this.shiftStops || []
+      if (stops.length < 2) { this.setData({ speed: speedKmh }); return }
+      const nextIdx = Math.min(this.data.currentStopIndex + 1, stops.length - 1)
+      const next = stops[nextIdx]
+      const dist = Math.round(distanceMeters(latitude, longitude, next.latitude, next.longitude))
+      const prev = stops[nextIdx - 1]
+      const segLen = distanceMeters(prev.latitude, prev.longitude, next.latitude, next.longitude)
+      const ratio = segLen > 0 ? Math.max(0, Math.min(1, 1 - dist / segLen)) : 0
+      const percent = Math.round(((nextIdx - 1 + ratio) / (stops.length - 1)) * 100)
+      this.setData({
+        speed: speedKmh,
+        currentStation: prev.stationName,
+        nextStation: next.stationName,
+        nextStationDistance: dist,
+        progressPercent: percent
+      })
+      return
+    }
+
+    // ä»»åŠ¡æ®µå¯¼èˆª
+    const ti = Math.min(this.data.targetIndex, points.length - 1)
+    const target = points[ti]
+    const dist = Math.round(distanceMeters(latitude, longitude, target.latitude, target.longitude))
+
+    // çº¯ç»åœç«™ï¼ˆæ— ä»»ä½•å–/æ´¾/ä¸Šä¸‹å®¢åŠ¨ä½œï¼‰ï¼šè¿›åŠå¾„è‡ªåŠ¨è·³è¿‡ï¼Œä¿è¯è¿ç»­è¡Œé©¶
+    if (dist <= ARRIVE_RADIUS_METERS && !(target.actionTotal > 0)) {
+      const next = ti + 1
+      if (next < points.length) {
+        this.applyNavView(next)
+        this.setData({ speed: speedKmh, nextStationDistance: 0 })
+      } else {
+        this.setData({ speed: speedKmh })
+      }
+      return
+    }
+
+    // è·ç›®æ ‡ â‰¤50m â†’ ç‚¹äº®ã€Œåˆ°è¾¾ã€æŒ‰é’®
+    if (dist <= ARRIVE_RADIUS_METERS) this.setData({ canArrive: true })
+    else if (this.data.canArrive) this.setData({ canArrive: false })
+
+    // è¿›åº¦ï¼šç«™é—´æŒ‰è·ç¦»çº¿æ€§æ’å€¼
+    const prev = points[ti - 1] || target
+    const segLen = distanceMeters(prev.latitude, prev.longitude, target.latitude, target.longitude)
+    const ratio = segLen > 0 ? Math.max(0, Math.min(1, 1 - dist / segLen)) : 0
+    const percent = Math.round(((ti - 1 + ratio) / (points.length - 1)) * 100)
+
+    this.setData({
+      speed: speedKmh,
+      nextStation: target.stationName,
+      nextStationDistance: dist,
+      progressPercent: percent
+    })
+  },
+
+  /**
+   * ç¡®è®¤åˆ°ç«™ - è°ƒåç«¯è®°å½•ï¼›ç»ˆç‚¹ç«™è‡ªåŠ¨å®Œæˆä»»åŠ¡æ®µ
+   */
+  async arriveAtStation() {
+    const points = this.navPoints || []
+    const useNav = points.length >= 2
+    if (!this.driverId || !this.shiftId || this.submitting) return
+
+    let stationId
+    let ti
+    if (useNav) {
+      ti = Math.min(this.data.targetIndex, points.length - 1)
+      stationId = points[ti].stationId
+    } else {
+      const stops = this.shiftStops || []
+      if (!stops.length) return
+      ti = Math.min(this.data.currentStopIndex + 1, stops.length - 1)
+      stationId = stops[ti].stationId
+    }
+
+    this.submitting = true
+    try {
+      await api.driverArrive(this.driverId, this.shiftId, stationId)
+    } catch (e) {
+      this.submitting = false
+      return
+    }
+    this.submitting = false
+    feedback.tap()
+
+    if (useNav && points[ti]) points[ti].reached = true
+
+    const totalLen = useNav ? points.length : (this.shiftStops || []).length
+    const isTerminal = ti === totalLen - 1
+    if (isTerminal) {
+      // ä»»åŠ¡æ®µ/ç­æ¬¡å®Œæˆ
+      if (this.locationTimer) {
+        clearInterval(this.locationTimer)
+        this.locationTimer = null
+      }
+      this.setData({ status: 'idle', currentStopIndex: ti, progressPercent: 100, speed: 0, canArrive: false })
+      wx.showToast({ title: 'æœ¬æ¬¡ä»»åŠ¡å®Œæˆ', icon: 'success', duration: 2000 })
+      this.loadAll()
+      return
+    }
+    this.setData({
+      status: 'stopped',
+      currentStopIndex: ti,
+      currentStation: useNav ? points[ti].stationName : (this.shiftStops || [])[ti].stationName,
+      canArrive: false,
+      markers: useNav ? this.buildNavMarkers(ti) : this.data.markers,
+        routeMapMarkers: useNav ? this.buildRouteOverviewMarkers(ti) : this.data.routeMapMarkers
+    })
+  },
+
+  /** ç«™å†…ä½œä¸šå®Œæˆåæ¨è¿›åˆ°ä¸‹ä¸€ç«™ï¼ˆå¹‚ç­‰ï¼šä»… stopped æ€æ‰§è¡Œï¼Œé˜²æ‰«ç è¿ç‚¹é‡å¤æ¨è¿›ï¼‰ */
+  continueToNextStation() {
+    if (this.data.status !== 'stopped') return
+    const points = this.navPoints || []
+    if (points.length >= 2) {
+      const next = this.data.targetIndex + 1
+      if (next >= points.length) {
+        this.setData({ status: 'idle', progressPercent: 100 })
+        wx.showToast({ title: 'æœ¬æ¬¡ä»»åŠ¡å®Œæˆ', icon: 'success', duration: 2000 })
+        this.loadAll()
+        return
+      }
+      this.applyNavView(next)
+      this.setData({ status: 'driving', nextStationDistance: 0 })
+    } else {
+      this.setData({ status: 'driving' })
+    }
+    this.startLocationReport()
+  },
+
+  /** å•æ®µè·³è½¬ç³»ç»Ÿåœ°å›¾ï¼ˆå¯é€‰é«˜å¾· App è½¦é“çº§å¯¼èˆªï¼‰ï¼šè·³å½“å‰ç›®æ ‡ç«™ */
+  openAmapNav() {
+    const points = this.navPoints || []
+    const t = points.length >= 2 ? points[Math.min(this.data.targetIndex, points.length - 1)] : null
+    if (!t || t.latitude == null || t.longitude == null) {
+      wx.showToast({ title: 'æš‚æ— å¯¼èˆªç›®æ ‡', icon: 'none' })
+      return
+    }
+    wx.openLocation({ latitude: t.latitude, longitude: t.longitude, name: t.stationName || 'ä»»åŠ¡ç‚¹', scale: 16 })
+  },
+
+  /**
+   * æ‰«ç è£…è½¦ï¼šåŒ¹é…å¾…è£…è®¢å•å¹¶è°ƒåç«¯ç¡®è®¤ï¼ˆè´§è¿æ•£ä»¶å¼ºåˆ¶å¸æœºæ”¶ä»¶æ‹ç…§ï¼Œå¿«é€’æ€»ç«™æ ¸å¯¹å‡­è¯ï¼‰
+   */
+  scanToLoad() {
+    this.scanOrder(async (order) => {
+      // å•†åŸè®¢å•ï¼šåŒæ ·æ‹ç…§æ ¸éªŒï¼Œèµ°å•†åŸè®¢å•æ¥å£ï¼ˆè®¢å•ä»ä¸ºå·²å‘è´§ï¼Œæ ‡è®°"å·²è£…è½¦/é…é€ä¸­"ï¼‰
+      if (order.bizType === 'PRODUCT') {
+        const productPhoto = await this.takeCargoPhoto()
+        return api.driverProductLoad(this.driverId, order.orderId, productPhoto)
+      }
+      let photoUrl = ''
+      if (order.orderType !== 3) { // é‚®å¿«ä»¶æœ‰å¿«é€’é¢å•ï¼Œä¸å¼ºåˆ¶æ‹ç…§
+        photoUrl = await this.takeCargoPhoto()
+      }
+      return api.driverPickupConfirm(this.driverId, order.orderId, photoUrl)
+    }, 'è£…è½¦ç¡®è®¤æˆåŠŸ')
+  },
+
+  /**
+   * æ‰«ç å¦¥æŠ•ï¼šåŒ¹é…å¾…è£…è®¢å•å¹¶è°ƒåç«¯å®Œæˆæ´¾é€
+   */
+  scanToDeliver() {
+    this.scanOrder(async (order) => {
+      // å•†åŸè®¢å•ï¼šå¦¥æŠ•å³äº¤ä»˜å®Œæˆï¼ˆæ‹äº¤ä»˜å‡­è¯ â†’ è®¢å•è½¬å·²å®Œæˆï¼Œç”¨æˆ·ç«¯å¯è§"å·²é€è¾¾"ï¼‰
+      if (order.bizType === 'PRODUCT') {
+        const proof = await this.takeCargoPhoto()
+        return api.driverProductDeliver(this.driverId, order.orderId, proof)
+      }
+      return api.driverDeliver(this.driverId, order.orderId)
+    }, 'å¦¥æŠ•æˆåŠŸ')
+  },
+
+  /**
+   * å–ä»¶æ ¸é”€ï¼šæ‰«æ”¶ä»¶äººå–ä»¶ç äºŒç»´ç ï¼Œå¸æœºç¡®è®¤å–ä»¶ï¼ˆé‚®å¿«ä»¶ä¸‹è¡Œï¼‰
+   */
+  scanToVerify() {
+    if (this.submitting) return
+    wx.scanCode({
+      scanType: ['qrCode', 'barCode'],
+      success: async (res) => {
+        const code = (res.result || '').trim()
+        const order = this.data.pendingPickups.find((p) => p.pickupCode === code || p.orderNo === code)
+        if (!order) {
+          wx.showToast({ title: 'æœªåŒ¹é…åˆ°å¾…å–å¿«é€’', icon: 'none', duration: 2000 })
+          return
+        }
+        this.submitting = true
+        try {
+          await api.driverPickupVerify(this.driverId, order.orderId, order.pickupCode)
+        } catch (e) {
+          this.submitting = false
+          return
+        }
+        this.submitting = false
+        feedback.tap()
+        wx.showToast({ title: 'å–ä»¶æ ¸é”€æˆåŠŸ', icon: 'success' })
+        const pickups = this.data.pendingPickups.filter((p) => p.orderId !== order.orderId)
+        this.refreshCargo(pickups)
+      },
+      fail: () => wx.showToast({ title: 'å·²å–æ¶ˆæ‰«ç ', icon: 'none' })
+    })
+  },
+
+  /** æ‹ç…§å¹¶ä¸Šä¼ ï¼Œè¿”å›ç…§ç‰‡ URLï¼ˆè´§è¿è£…è½¦å¼ºåˆ¶ï¼Œå¿«é€’æ€»ç«™æ ¸å¯¹å‡­è¯ï¼‰ */
+  takeCargoPhoto() {
+    return new Promise((resolve, reject) => {
+      wx.chooseMedia({
+        count: 1,
+        mediaType: ['image'],
+        sourceType: ['camera'],
+        success: async (res) => {
+          if (!res.tempFiles || !res.tempFiles[0]) {
+            reject(new Error('no photo'))
+            return
+          }
+          const temp = res.tempFiles[0].tempFilePath
+          wx.showLoading({ title: 'ä¸Šä¼ ç…§ç‰‡â€¦', mask: true })
+          try {
+            const url = await api.uploadFile(temp)
+            wx.hideLoading()
+            resolve(url)
+          } catch (e) {
+            wx.hideLoading()
+            wx.showToast({ title: 'ç…§ç‰‡ä¸Šä¼ å¤±è´¥ï¼Œè¯·é‡æ‹', icon: 'none' })
+            reject(e)
+          }
+        },
+        fail: () => reject(new Error('cancelled'))
+      })
+    })
+  },
+
+  /** æ‰«ç å¹¶åŒ¹é…å¾…åŠè®¢å•ï¼Œæ‰§è¡Œ action ååˆ·æ–°åˆ—è¡¨ */
+  scanOrder(action, successText) {
+    if (this.submitting) return
+    wx.scanCode({
+      scanType: ['qrCode', 'barCode'],
+      success: (res) => this.handleScannedCode((res.result || '').trim(), action, successText),
+      // ç°åœºæ‰«ç ä¸å¯ç”¨ï¼ˆå…‰çº¿/æ‘„åƒå¤´/äºŒç»´ç ç ´æŸï¼‰æ—¶çš„å…œåº•ï¼šæ‰‹åŠ¨è¾“å…¥å•å·ï¼Œæµç¨‹ä¸ä¸­æ–­
+      fail: () => this.promptManualOrderNo(action, successText)
+    })
+  },
+
+  /** æ‰‹è¾“å•å·å…œåº•ï¼ˆwx.showModal editableï¼Œéœ€åŸºç¡€åº“ 2.17.1+ï¼‰ */
+  promptManualOrderNo(action, successText) {
+    wx.showModal({
+      title: 'æ‰‹åŠ¨è¾“å…¥å•å·',
+      editable: true,
+      placeholderText: 'æ‰«ç ä¸å¯ç”¨æ—¶ï¼Œè¾“å…¥è®¢å•å·',
+      success: (res) => {
+        if (!res.confirm) {
+          wx.showToast({ title: 'å·²å–æ¶ˆ', icon: 'none' })
+          return
+        }
+        const no = String(res.content || '').trim()
+        if (!no) return
+        this.handleScannedCode(no, action, successText)
+      }
+    })
+  },
+
+  /** æ‰«ç /æ‰‹è¾“å¾—åˆ°å•å·åç»Ÿä¸€å¤„ç†ï¼šåŒ¹é…å¾…åŠ â†’ æ‰§è¡ŒåŠ¨ä½œ â†’ åˆ·æ–° â†’ æ¨è¿›ä¸‹ä¸€ç«™ */
+  async handleScannedCode(no, action, successText) {
+    if (!no) return
+    const order = this.data.pendingPickups.find((p) => p.orderNo === no)
+    if (!order) {
+      wx.showToast({ title: 'æœªåŒ¹é…åˆ°å¾…åŠè®¢å•', icon: 'none', duration: 2000 })
+      return
+    }
+    this.submitting = true
+    try {
+      await action(order)
+    } catch (e) {
+      this.submitting = false
+      return
+    }
+    this.submitting = false
+    feedback.tap()
+    wx.showToast({ title: successText, icon: 'success' })
+    const pickups = this.data.pendingPickups.filter((p) => p.orderId !== order.orderId)
+    this.refreshCargo(pickups)
+    // è£…è½¦å®Œæˆç»§ç»­è¡Œé©¶ï¼ˆè¿ç»­ä»»åŠ¡å¯¼èˆªï¼šæ¨è¿›åˆ°ä¸‹ä¸€ç«™ï¼‰
+    setTimeout(() => {
+      this.continueToNextStation()
+    }, 1500)
+  },
+
+  /** è£…è½¦/å¦¥æŠ•ååˆ·æ–°å¾…åŠåˆ—è¡¨ä¸è¡Œæèˆ±è¿åŠ› */
+  refreshCargo(pickups) {
+    const cap = this.data.cargoLimit
+    const used = pickups.length
+    const pct = cap > 0 ? Math.max(0, Math.round((cap - used) / cap * 100)) : 100
+    const usedPct = cap > 0 ? Math.min(100, Math.round(used / cap * 100)) : 0
+    this.setData({
+      pendingPickups: pickups,
+      cargoCapacity: pct,
+      cargoUsed: usedPct
+    })
+  },
+
+  /**
+   * è·³è¿‡è£…è½¦ï¼Œç»§ç»­è¡Œé©¶
+   */
+  /** å¤šæ®µè”è¿ï¼šè¿›å…¥è´§ç‰©äº¤æ¥é¡µï¼ˆæ‹ç…§ç¡®è®¤æ¢ä¹˜äº¤æ¥ï¼‰ */
+  goHandover() {
+    feedback.tap()
+    wx.navigateTo({ url: '/pages/driver/handover/handover' })
+  },
+
+  skipLoading() {
+    this.continueToNextStation()
+    wx.showToast({
+      title: 'ç»§ç»­è¡Œé©¶',
+      icon: 'none'
+    })
+  },
+
+  onHide() {
+    // åˆ‡åå°æ—¶åœæ‰ä½ç½®ä¸ŠæŠ¥å®šæ—¶å™¨ï¼ŒonShow æ¢å¤åœ¨é€”æ—¶é‡å¯ï¼Œé¿å…åå°æŒç»­å®šä½è€—ç”µ
+    if (this.locationTimer) {
+      clearInterval(this.locationTimer)
+      this.locationTimer = null
+    }
+  },
+
+  onUnload() {
+    if (this.locationTimer) {
+      clearInterval(this.locationTimer)
+      this.locationTimer = null
+    }
+  }
+})
+
+
+
+
+
+
+
+

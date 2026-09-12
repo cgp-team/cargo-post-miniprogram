@@ -1,12 +1,12 @@
 /**
- * ÏûÏ¢Í¨ÖªÖĞĞÄ ¡ª¡ª ¶©µ¥ÊÂ¼şÇı¶¯Í¨ÖªÁĞ±í£¬Ö§³Ö±ê¼ÇÒÑ¶Á
- * ½Ó¿Ú£ºtransport/notification/page¡¢unread-count¡¢read¡¢read-all
+ * æ¶ˆæ¯é€šçŸ¥ä¸­å¿ƒ â€”â€” è®¢å•äº‹ä»¶é©±åŠ¨é€šçŸ¥åˆ—è¡¨ï¼Œæ”¯æŒæ ‡è®°å·²è¯»
+ * æ¥å£ï¼štransport/notification/pageã€unread-countã€readã€read-all
  */
 const api = require('../../utils/api')
 const appearance = require('../../utils/appearance')
 const { formatBackendTime } = require('../../utils/util')
 
-// ÊÂ¼şÀàĞÍÍ¼±êÓ³Éä
+// äº‹ä»¶ç±»å‹å›¾æ ‡æ˜ å°„
 const EVENT_ICONS = {
   ORDER_CREATED: '??',
   REVIEW_PASSED: '?',
@@ -77,7 +77,7 @@ Page({
         ? await api.getDriverUnreadCount(this.driverId)
         : await api.getNotificationUnreadCount()
       this.setData({ unreadCount: count || 0 })
-    } catch (e) { /* api Èİ´ítoast */ }
+    } catch (e) { /* api å®¹é”™toast */ }
   },
 
   async loadList() {
@@ -100,7 +100,7 @@ Page({
         total: res.total || 0,
         hasMore: merged.length < (res.total || 0)
       })
-    } catch (e) { /* api Èİ´ítoast */ } finally {
+    } catch (e) { /* api å®¹é”™toast */ } finally {
       this.setData({ loading: false })
     }
   },
@@ -122,7 +122,7 @@ Page({
     this.reload()
   },
 
-  /** µãÏûÏ¢£º±ê¼ÇÒÑ¶Á£»´ø¶©µ¥µÄÌø°ü¹ü×·×Ù */
+  /** ç‚¹æ¶ˆæ¯ï¼šæ ‡è®°å·²è¯»ï¼›å¸¦è®¢å•çš„è·³åŒ…è£¹è¿½è¸ª */
   async onTapItem(e) {
     const { id, orderId } = e.currentTarget.dataset
     const item = this.data.list.find((n) => n.id === id)
@@ -131,11 +131,11 @@ Page({
         this.data.driverMode && this.driverId
           ? await api.readDriverMessage(id, this.driverId)
           : await api.readNotification(id)
-      } catch (err) { /* api Èİ´ítoast */ }
+      } catch (err) { /* api å®¹é”™toast */ }
       const list = this.data.list.map((n) => (n.id === id ? { ...n, readStatus: 1 } : n))
       this.setData({ list, unreadCount: Math.max(0, this.data.unreadCount - 1) })
     }
-    // Ìø×ªµ½¶©µ¥×·×ÙÒ³
+    // è·³è½¬åˆ°è®¢å•è¿½è¸ªé¡µ
     if (orderId) {
       wx.navigateTo({ url: '/pages/goods/trace/trace?orderId=' + orderId })
     }
@@ -146,9 +146,9 @@ Page({
       this.data.driverMode
         ? await api.readAllNotifications()
         : await api.readAllNotifications()
-      wx.showToast({ title: 'ÒÑÈ«²¿±êÎªÒÑ¶Á', icon: 'success' })
+      wx.showToast({ title: 'å·²å…¨éƒ¨æ ‡ä¸ºå·²è¯»', icon: 'success' })
       this.reload()
-    } catch (e) { /* api Èİ´ítoast */ }
+    } catch (e) { /* api å®¹é”™toast */ }
   }
-})
-
+})
+
