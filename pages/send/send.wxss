@@ -163,6 +163,105 @@
   font-weight: 600;
 }
 
+/* 手填地址 → 推荐站点：输入框 + 一键推荐 */
+.addr-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-top: 16rpx;
+}
+
+.addr-input {
+  flex: 1;
+  height: 80rpx;
+  padding: 0 20rpx;
+  border-radius: 14rpx;
+  border: 2rpx solid #E8ECEE;
+  background: #FFFFFF;
+  font-size: 27rpx;
+  color: var(--color-ink);
+}
+
+.addr-btn {
+  flex: none;
+  height: 80rpx;
+  line-height: 80rpx;
+  padding: 0 24rpx;
+  border-radius: 14rpx;
+  border: 2rpx solid var(--color-primary);
+  color: var(--color-primary);
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.addr-btn:active {
+  background: var(--color-primary-light);
+}
+
+/* 地址候选（高德输入提示）：点一条即按该坐标推荐站点 */
+.tip-list {
+  margin-top: 10rpx;
+  border-radius: 14rpx;
+  border: 2rpx solid #E8ECEE;
+  background: #FFFFFF;
+  overflow: hidden;
+}
+
+.tip-item {
+  padding: 18rpx 20rpx;
+  border-bottom: 2rpx solid #F0F3F1;
+}
+
+.tip-item:last-child {
+  border-bottom: none;
+}
+
+.tip-item:active {
+  background: var(--color-primary-light);
+}
+
+.tip-name {
+  display: block;
+  font-size: 27rpx;
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.tip-addr {
+  display: block;
+  margin-top: 4rpx;
+  font-size: 23rpx;
+  color: var(--color-text-tertiary);
+}
+
+/* 费用试算卡片：填完取货/送达地址即显示金额（件单价×件数 + 里程费） */
+.quote-card {
+  margin-bottom: 26rpx;
+  padding: 20rpx 22rpx;
+  border-radius: 16rpx;
+  background: var(--color-primary-light);
+  border: 2rpx solid rgba(28, 75, 46, 0.12);
+}
+
+.quote-amount {
+  display: block;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
+.quote-detail {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  color: var(--color-text-secondary);
+}
+
+.quote-hint {
+  font-size: 25rpx;
+  color: var(--color-text-tertiary);
+}
+
 /* 可达性评估卡片：warn=车辆无法直接进入（推荐送站） */
 .reach-card {
   margin-top: 14rpx;

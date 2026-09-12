@@ -125,6 +125,34 @@
         </view>
       </view>
 
+      <!-- 手填取货地址 → 推荐站点：村民不用先懂"站点"，写地址即可 -->
+      <view class="addr-row">
+        <input
+          class="addr-input"
+          placeholder="填写取货地址，如：重庆大学A区…"
+          value="{{pickupAddressText}}"
+          bindinput="onPickupAddressInput"
+          confirm-type="search"
+          bindconfirm="recommendPickupByAddress"
+        />
+        <view class="addr-btn" bindtap="recommendPickupByAddress" hover-class="hover">
+          {{tipsLoading ? '查询中' : '推荐站点'}}
+        </view>
+      </view>
+      <view wx:if="{{pickupTips.length}}" class="tip-list">
+        <view
+          wx:for="{{pickupTips}}"
+          wx:key="index"
+          class="tip-item"
+          data-index="{{index}}"
+          bindtap="onPickupTipTap"
+          hover-class="hover"
+        >
+          <text class="tip-name">{{item.name}}</text>
+          <text class="tip-addr">{{item.district}}{{item.address}}</text>
+        </view>
+      </view>
+
       <view wx:if="{{locCoarse}}" class="reach-card warn">
         <text class="reach-title">当前定位精度较低（约 {{locAccuracyText}}）</text>
         <text class="reach-line">位置可能偏差几百米到几公里，建议点「手动选位置」在地图上点准，或开启手机「精确位置」</text>
@@ -166,6 +194,33 @@
 
     <view class="form-group">
       <text class="form-label">送达站点 *</text>
+      <!-- 手填送达地址 → 推荐送达站点：与取货侧同一套逻辑 -->
+      <view class="addr-row">
+        <input
+          class="addr-input"
+          placeholder="填写送达地址，如：沙坪坝重庆大学A区…"
+          value="{{deliveryAddressText}}"
+          bindinput="onDeliveryAddressInput"
+          confirm-type="search"
+          bindconfirm="recommendDeliveryByAddress"
+        />
+        <view class="addr-btn" bindtap="recommendDeliveryByAddress" hover-class="hover">
+          {{tipsLoading ? '查询中' : '推荐站点'}}
+        </view>
+      </view>
+      <view wx:if="{{deliveryTips.length}}" class="tip-list">
+        <view
+          wx:for="{{deliveryTips}}"
+          wx:key="index"
+          class="tip-item"
+          data-index="{{index}}"
+          bindtap="onDeliveryTipTap"
+          hover-class="hover"
+        >
+          <text class="tip-name">{{item.name}}</text>
+          <text class="tip-addr">{{item.district}}{{item.address}}</text>
+        </view>
+      </view>
       <station-picker
         title="选择送达站点"
         placeholder="请选择送达站点"
@@ -176,6 +231,18 @@
         bindchange="onDeliveryStationChange"
         bindretry="loadStations"
       />
+    </view>
+
+    <!-- 费用试算：填完取货/送达地址即出金额（件单价×件数 + 里程费），不用等提交后才看得到 -->
+    <view class="quote-card">
+      <view wx:if="{{quoteLoading}}" class="quote-hint">正在试算费用…</view>
+      <block wx:elif="{{quote}}">
+        <text class="quote-amount">预计费用 ¥{{quote.amount}}</text>
+        <text class="quote-detail">
+          件数费 ¥{{quote.itemFee}}{{quote.distanceFee > 0 ? ' + 里程费 ¥' + quote.distanceFee : ''}}（{{quote.itemCount}} 件{{quote.distanceKm != null ? ' · 计价里程 ' + quote.distanceKm + ' km' : ''}}）
+        </text>
+      </block>
+      <view wx:else class="quote-hint">选好取货与送达站点后，这里会直接显示费用</view>
     </view>
 
     <!-- 路线预估：点击"下一步"后展示（loading / 成功 / 失败重试） -->
@@ -324,6 +391,7 @@
       <canvas type="2d" id="qrCanvas" class="qr-canvas"></canvas>
       <text class="order-no-display">{{orderNo}}</text>
       <text class="bus-detail">寄货订单号 · 请妥善保存</text>
+      <text wx:if="{{orderAmount != null}}" class="bus-detail">订单金额 ¥{{orderAmount}}</text>
       <view class="qr-actions">
         <button class="qr-btn" bindtap="copyOrderNo">复制单号</button>
         <button class="qr-btn" open-type="share" bindtap="noop">分享查件</button>

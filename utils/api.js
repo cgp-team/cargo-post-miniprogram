@@ -272,6 +272,14 @@ function previewSendRoute(pickupStationId, deliveryStationId) {
   return request('/app-api/transport/send/route-preview', 'POST', { pickupStationId, deliveryStationId })
 }
 
+/**
+ * 寄货试算：件单价×件数 + 里程费（与后台方案预计收入同源）。
+ * 村民在寄货页填完取货/送达地址即显示金额，不必等提交后才看得到。
+ */
+function quoteSendFee(pickupStationId, deliveryStationId, itemCount) {
+  return request('/app-api/transport/send/quote', 'POST', { pickupStationId, deliveryStationId, itemCount })
+}
+
 /** 我的乘车安排（客运订单已分配/在途/完成，含承运车辆，供村民到站通知） */
 function getMyArrangements() {
   return request('/app-api/transport/send/arrangements')
@@ -535,6 +543,7 @@ module.exports = {
   trackParcel,
   listSendStations,
   previewSendRoute,
+  quoteSendFee,
   getReachability,
   getMyArrangements,
   confirmStationAction,
