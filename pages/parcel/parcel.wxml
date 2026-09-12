@@ -223,6 +223,7 @@
           <text class="lg lg-todo">━ 未开始段</text>
           <text class="lg lg-est">┅ 虚线＝估算段</text>
           <text class="lg lg-hub">◆ 换乘站</text>
+          <text wx:if="{{trackResult.pendingRoadCount}}" class="lg">⚠ {{trackResult.pendingRoadCount}} 段真实路线获取中</text>
         </view>
       </view>
 
