@@ -77,23 +77,39 @@
 
   <!-- Tab0: 我的寄货列表 -->
   <view wx:if="{{activeTab === 0}}" class="parcel-list">
-    <view class="parcel-card" wx:for="{{sendList}}" wx:key="id">
+    <view
+      class="parcel-card"
+      wx:for="{{sendList}}"
+      wx:key="id"
+      data-source="{{item.source}}"
+      data-no="{{item.orderNo}}"
+      data-id="{{item.productOrderId}}"
+      bindtap="openParcelDetail"
+      hover-class="hover"
+    >
       <view class="parcel-header">
         <view class="parcel-title-row">
           <icon name="box" size="48" color="{{iconColor}}" />
           <view class="parcel-info">
-            <text class="parcel-name">{{item.goodsName || '寄货'}}</text>
+            <text class="parcel-name">
+              {{item.goodsName || '寄货'}}
+              <text style="font-size:20rpx;padding:2rpx 10rpx;border-radius:10rpx;margin-left:8rpx;background:{{item.source === 'PRODUCT' ? '#E8F3EC' : '#FFF3E0'}};color:{{item.source === 'PRODUCT' ? '#1C4B2E' : '#B26A00'}};">{{item.source === 'PRODUCT' ? '商城' : '寄货'}}</text>
+            </text>
             <text class="parcel-no">单号: {{item.orderNo}}</text>
           </view>
         </view>
         <view class="parcel-status {{item.statusClass}}">{{item.statusName}}</view>
       </view>
       <view class="parcel-route">
-        <view class="route-weight"><icon name="bus" size="26" color="#6B675C" /><text>重量 {{item.goodsWeight}}kg</text></view>
+        <view class="route-weight">
+          <icon name="bus" size="26" color="#6B675C" />
+          <text wx:if="{{item.source === 'PRODUCT'}}">{{item.itemCount || 1}} 件 · {{item.amountText}}</text>
+          <text wx:else>重量 {{item.goodsWeight}}kg</text>
+        </view>
         <text class="parcel-eta">{{item.createTimeText}}</text>
       </view>
       <!-- 物体信息（寄货页填写）：类型 / 件数 / 体积 / 生鲜 -->
-      <view wx:if="{{item.cargoCategory || item.itemCount}}" class="parcel-cargo-row">
+      <view wx:if="{{item.source !== 'PRODUCT' && (item.cargoCategory || item.itemCount)}}" class="parcel-cargo-row">
         <text class="cargo-chip">{{item.cargoCategory || '农产品'}}</text>
         <text class="cargo-chip">{{item.itemCount || 1}} 件</text>
         <text wx:if="{{item.volumeM3}}" class="cargo-chip">{{item.volumeM3}} m³</text>
