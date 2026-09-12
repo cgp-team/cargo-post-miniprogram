@@ -5,6 +5,7 @@
 const api = require('../../utils/api')
 const qrcodeRender = require('../../utils/qrcode-render')
 const reviewUtils = require('../../utils/review')
+const productImg = require('../../utils/product-img')
 const { formatBackendTime, VILLAGES } = require('../../utils/util')
 
 /** 运输订单状态流（对应 TransportOrderStatusEnum，含 Phase 2 承运审核前置状态） */
@@ -42,7 +43,13 @@ Page({
     arrangements: [],
     // 单号查询结果
     trackResult: null,
-    noResult: false
+    noResult: false,
+    // 我的购物（商城订单）：我买的东西同样由大巴司机送到交付站点，进度也在这里看
+    productOrders: [],
+    productPageNo: 1,
+    productTotal: 0,
+    productHasMore: true,
+    productLoading: false
   },
 
   onLoad(options) {
@@ -73,8 +80,17 @@ Page({
       this.reloadSendList()
       return
     }
+    // 从「我的购物」切过来时进入购物订单 tab（我买的东西由大巴送到交付站点）
+    if (app.globalData.parcelIntent === 'shopping') {
+      app.globalData.parcelIntent = ''
+      this.setData({ activeTab: 1 })
+      this.reloadProductOrders()
+      return
+    }
     if (this.data.activeTab === 0) {
       this.reloadSendList()
+    } else if (this.data.activeTab === 1) {
+      this.reloadProductOrders()
     }
     this.loadArrangements()
   },
@@ -92,17 +108,84 @@ Page({
     wx.navigateTo({ url: '/pages/bus/index' })
   },
 
-  /** 车来取货/送货提醒文案：承运车辆实时位置 → 距目标站点分钟（无实时位置返回空） */
+  /** 车来取货/送货提醒文案：承运车辆位置（真实上报或按班次推算）→ 距目标站点分钟（无位置返回空） */
   buildCarrierText(o) {
     if (!o || o.carrierEtaMinutes == null || o.carrierEtaMinutes <= 0) return ''
     const station = o.targetStation || '站点'
     const dist = o.carrierDistanceKm != null ? `（约 ${o.carrierDistanceKm} km）` : ''
-    return `${o.vehiclePlate || '班车'} 距${station}约 ${o.carrierEtaMinutes} 分钟${dist}`
+    const source = o.carrierLocationSource === 'SIMULATED' ? ' · 位置推算' : ''
+    return `${o.vehiclePlate || '班车'} 距${station}约 ${o.carrierEtaMinutes} 分钟${dist}${source}`
+  },
+
+  /**
+   * 司机已到达文案：站点 + 司机姓名/电话（后端按派单经停状态给出）。
+   * 已装车/已派送完成时给出对应进度文案（用户端一眼看到"到哪一步了"）。
+   */
+  buildArrivedText(o) {
+    if (!o || !o.carrierArrived) return ''
+    const station = o.carrierArrivedStation || o.targetStation || '交接站点'
+    const driver = o.driverName ? `${o.driverName}${o.driverMobile ? ' ' + o.driverMobile : ''} ` : ''
+    if (o.carrierDelivered) return `${driver}已在该站点完成派送`
+    if (o.carrierLoaded) return `${driver}已在该站点揽收装车`
+    return `${driver}已到达${station}，请前往交接`
+  },
+
+  /** 司机已到达提醒：按单去重，只弹一次（不打扰重复刷新） */
+  notifyArrived(list) {
+    const shown = this._arrivedShown || (this._arrivedShown = {})
+    const arrived = (list || []).filter((o) => o && o.carrierArrived)
+    const fresh = arrived.filter((o) => !shown[o.orderNo])
+    if (!fresh.length) return
+    fresh.forEach((o) => { shown[o.orderNo] = true })
+    const first = fresh[0]
+    const more = fresh.length > 1 ? `（另有 ${fresh.length - 1} 单）` : ''
+    wx.showToast({
+      title: `${this.buildArrivedText(first)}${more}`,
+      icon: 'none',
+      duration: 3500
+    })
+  },
+
+  /** 车辆接近提醒：批量检查"车快到了"的订单，首次进入阈值时弹一次 toast（不重复打扰） */
+  notifyApproaching(list) {
+    const shown = this._approachingShown || (this._approachingShown = {})
+    const arriving = (list || []).filter((o) => o && o.carrierApproaching)
+    if (!arriving.length) return
+    const fresh = arriving.filter((o) => !shown[o.orderNo])
+    if (!fresh.length) return
+    fresh.forEach((o) => { shown[o.orderNo] = true })
+    const first = fresh[0]
+    const more = fresh.length > 1 ? `（另有 ${fresh.length - 1} 单）` : ''
+    const simulated = first.carrierLocationSource === 'SIMULATED' ? '（位置推算）' : ''
+    wx.showToast({
+      title: `${first.vehiclePlate || '班车'} 快到了：距${first.targetStation || '站点'}约 ${first.carrierEtaMinutes} 分钟${simulated}${more}`,
+      icon: 'none',
+      duration: 3500
+    })
+  },
+
+  /** 需客户送站（status=7 待客户操作）：显示后端匹配的"就近交接站点 + 距取货点公里数" */
+  buildServicePointText(o) {
+    if (!o || o.status !== 7 || !o.servicePointStationName) return ''
+    const km = o.servicePointDistanceKm
+    return `请送往就近站点：${o.servicePointStationName}${km != null ? `（距取货点约 ${km} km）` : ''}`
+  },
+
+  /** 导航到就近交接站点（用后端返回的站点坐标调 wx.openLocation） */
+  openServicePoint(e) {
+    const { lat, lng, name } = e.currentTarget.dataset
+    if (typeof lat !== 'number' || typeof lng !== 'number') {
+      wx.showToast({ title: '站点暂无坐标', icon: 'none' })
+      return
+    }
+    wx.openLocation({ latitude: lat, longitude: lng, name: name || '交接站点', scale: 16 })
   },
 
   onPullDownRefresh() {
     if (this.data.activeTab === 0) {
       this.reloadSendList().finally(() => wx.stopPullDownRefresh())
+    } else if (this.data.activeTab === 1) {
+      this.reloadProductOrders().finally(() => wx.stopPullDownRefresh())
     } else {
       wx.stopPullDownRefresh()
     }
@@ -110,18 +193,218 @@ Page({
 
   onReachBottom() {
     if (this.data.activeTab === 0) this.loadMore()
+    else if (this.data.activeTab === 1) this.loadMoreProductOrders()
   },
 
-  /** 切换 tab */
+  /** 切换 tab：0 我的寄货 · 1 我的购物 · 2 单号查询 */
   switchTab(e) {
     const idx = Number(e.currentTarget.dataset.index)
     if (idx === this.data.activeTab) return
     this.setData({ activeTab: idx })
     if (idx === 0) this.reloadSendList()
+    else if (idx === 1) this.reloadProductOrders()
+  },
+
+  // ==================== 我的购物（商城订单） ====================
+
+  reloadProductOrders() {
+    this.setData({ productPageNo: 1, productOrders: [], productTotal: 0, productHasMore: true })
+    return this.loadProductOrders()
+  },
+
+  /** 我买到的商品订单：商品名/图片/金额 + 送货进度（承运司机/交付站点） */
+  async loadProductOrders() {
+    this.setData({ productLoading: true })
+    try {
+      const res = await api.pageMyProductOrders({
+        pageNo: this.data.productPageNo,
+        pageSize: this.data.pageSize
+      })
+      const list = (res.list || []).map((o) => ({
+        ...o,
+        statusName: o.statusName || this.productStatusText(o.status),
+        statusClass: this.productStatusClass(o.status),
+        createTimeText: formatBackendTime(o.createTime),
+        totalAmountText: o.totalAmount != null ? Number(o.totalAmount).toFixed(2) : '0.00',
+        deliveryHint: this.productDeliveryHint(o),
+        items: (o.items || []).map((g) => ({
+          ...g,
+          imageUrl: productImg.resolve({ name: g.productName, image: g.productImage })
+        }))
+      }))
+      const merged = this.data.productPageNo === 1 ? list : this.data.productOrders.concat(list)
+      const total = res.total || 0
+      this.setData({
+        productOrders: merged,
+        productTotal: total,
+        productHasMore: merged.length < total
+      })
+    } catch (e) {
+      // 错误提示已由 api.js 统一处理
+    } finally {
+      this.setData({ productLoading: false })
+    }
+  },
+
+  loadMoreProductOrders() {
+    if (this.data.productLoading || !this.data.productHasMore) return
+    this.setData({ productPageNo: this.data.productPageNo + 1 })
+    this.loadProductOrders()
+  },
+
+  /** 商品订单状态：0 待发货 1 已发货（配送中） 2 已完成 3 已取消 */
+  productStatusText(s) {
+    return { 0: '待发货', 1: '配送中', 2: '已完成', 3: '已取消' }[s] || '—'
+  },
+
+  productStatusClass(s) {
+    return { 0: 'status-pending', 1: 'status-shipping', 2: 'status-done', 3: 'status-done' }[s] || 'status-done'
+  },
+
+  /** 送货进度一句话（和寄货卡片同一套口径：司机已到达 / 已装车 / 已妥投） */
+  productDeliveryHint(o) {
+    const driver = o.driverName ? `${o.driverName}${o.driverMobile ? ' ' + o.driverMobile : ''}` : ''
+    if (o.deliverTime) return '司机已妥投交付'
+    if (o.loadTime) return `${driver || '司机'}已装车，配送中`
+    if (o.vehiclePlate) return `${o.vehiclePlate}${driver ? ' ' + driver : ''} 正在送往${o.deliverStationName || '交付站点'}`
+    if (o.status === 0) return '商家还未发货'
+    return ''
+  },
+
+  /** 点商品订单卡片 → 订单详情页（商品清单 / 收货信息 / 承运司机 / 配送进度） */
+  goToProductOrderDetail(e) {
+    const id = e.currentTarget.dataset.id
+    if (!id) return
+    wx.navigateTo({ url: `/pages/orders/detail/detail?id=${id}` })
+  },
+
+  /** 点寄货卡片 → 直接看这单的完整物流详情（复用"单号查询"渲染：分段/交接/时间轴/二维码） */
+  openSendDetail(e) {
+    const no = e.currentTarget.dataset.no
+    if (!no) return
+    this.setData({ activeTab: 2, trackingNo: no })
+    this.searchParcel()
+  },
+
+  /** 购物订单空态：去商城逛逛 */
+  goShopping() {
+    wx.switchTab({ url: '/pages/goods/goods' })
   },
 
   onTrackingInput(e) {
     this.setData({ trackingNo: e.detail.value })
+  },
+
+  /** 多段运输进度（仅多段联运订单有分段；查询失败按"无多段"处理，不影响物流主流程） */
+  async loadLegs(no) {
+    try {
+      const legs = await api.getParcelLegs(no)
+      return (legs || []).map((l) => ({
+        ...l,
+        progressText: `第${l.legSequence}段：${l.fromStationName || ''} → ${l.toStationName || ''}`,
+        etaText: l.actualArrival ? '已到达'
+          : (l.estimatedArrival ? `预计 ${formatBackendTime(l.estimatedArrival)} 到达` : '')
+      }))
+    } catch (e) {
+      return []
+    }
+  },
+
+  /**
+   * 运输拓扑（一次拿到 分段 + 换乘交接 + 候选方案解释）：需求 §64/§69/§92，
+   * 前端不自行拼装 Order/Driver/Vehicle/Station，由后端一次返回完整拓扑。
+   */
+  async loadTopology(no) {
+    try {
+      const t = await api.getParcelTopology(no)
+      if (!t) return { legs: [], handovers: [] }
+      // 运输链地图：按段连线（已完成为绿色、进行中为橙色、未完成为灰色），换乘点标注在折线拐点
+      const points = []
+      const polyline = []
+      const markers = []
+      const circles = []
+      const legsAll = t.legs || []
+      // 当前执行段：优先"进行中"的段，其次最后一段未完成的
+      const activeLeg = legsAll.find((l) => l.status >= 4 && l.status <= 10)
+        || legsAll.filter((l) => l.status < 11).slice(-1)[0]
+      ;(t.legs || []).forEach((l) => {
+        if (l.fromLongitude == null || l.toLongitude == null) return
+        const from = { latitude: l.fromLatitude, longitude: l.fromLongitude }
+        const to = { latitude: l.toLatitude, longitude: l.toLongitude }
+        if (!points.length) points.push(from)
+        points.push(to)
+        // 白色+蓝色主题：已完成=深蓝、当前段=亮蓝、未开始=灰
+        const color = l.status === 11 ? '#1F5E9E' : (l.status >= 7 && l.status <= 10 ? '#2E7BBF' : '#9AA5B1')
+        const isActive = activeLeg && l.id === activeLeg.id
+        // 真实道路轨迹优先（navigationPolyline 来自高德路网）；无则站点直连
+        const road = (l.navigationPolyline || []).map((p) => ({ latitude: p.latitude, longitude: p.longitude }))
+        const path = road.length >= 2 ? road : [from, to]
+        if (road.length >= 2) {
+          road.forEach((p) => points.push(p))
+        }
+        polyline.push({
+          points: path, color, width: isActive ? 7 : 4, arrowLine: true,
+          dottedLine: road.length < 2 // 估算段用虚线，明确"非真实道路"
+        })
+        if (l.handoverRequired && l.toLongitude != null) {
+          markers.push({
+            id: 100 + (l.legSequence || 0),
+            latitude: l.toLatitude, longitude: l.toLongitude,
+            iconPath: '/images/marker-stop.png', width: 30, height: 30,
+            callout: {
+              content: '换乘站 ' + (l.toStationName || ''), color: '#123F6E',
+              fontSize: 11, borderRadius: 6, padding: 4, display: 'ALWAYS'
+            }
+          })
+        }
+      })
+      if (points.length) {
+        markers.unshift({
+          id: 1, latitude: points[0].latitude, longitude: points[0].longitude,
+          iconPath: '/images/marker-start.png', width: 30, height: 30,
+          callout: { content: '起点站', color: '#2E7D32', fontSize: 11, borderRadius: 6, padding: 4, display: 'BYCLICK' }
+        })
+        const last = points[points.length - 1]
+        markers.push({
+          id: 2, latitude: last.latitude, longitude: last.longitude,
+          iconPath: '/images/marker-end.png', width: 30, height: 30,
+          callout: { content: '目的站', color: '#1565C0', fontSize: 11, borderRadius: 6, padding: 4, display: 'BYCLICK' }
+        })
+        // 当前段两端高亮圈：一眼看出"货现在在哪一段"
+        if (activeLeg) {
+          circles.push({ latitude: activeLeg.fromLatitude, longitude: activeLeg.fromLongitude, radius: 90,
+            color: '#2E7BBFB3', fillColor: '#2E7BBF33', strokeWidth: 2 })
+          circles.push({ latitude: activeLeg.toLatitude, longitude: activeLeg.toLongitude, radius: 90,
+            color: '#2E7BBFB3', fillColor: '#2E7BBF33', strokeWidth: 2 })
+        }
+      }
+      return {
+        legs: (t.legs || []).map((l) => ({
+          ...l,
+          progressText: `第${l.legSequence}段：${l.fromStationName || ''} → ${l.toStationName || ''}`,
+          etaText: l.actualArrival ? '已到达'
+            : (l.estimatedArrival ? `预计 ${formatBackendTime(l.estimatedArrival)} 到达` : '')
+        })),
+        handovers: (t.handovers || []).map((h) => ({
+          ...h,
+          timeText: h.handoverCompletedAt ? formatBackendTime(h.handoverCompletedAt)
+            : (h.arrivedAt ? formatBackendTime(h.arrivedAt) : '')
+        })),
+        planReason: t.planReason || '',
+        planningModeName: t.planningModeName || '',
+        mapPoints: points,
+        mapPolyline: polyline,
+        mapMarkers: markers,
+        mapCircles: circles,
+        activeLegText: activeLeg
+          ? `当前第${activeLeg.legSequence}段：${activeLeg.fromStationName || ''} → ${activeLeg.toStationName || ''}（${activeLeg.statusName || ''}）`
+          : '',
+        mapCenter: points.length ? points[Math.floor(points.length / 2)] : null,
+        showMap: points.length >= 2
+      }
+    } catch (e) {
+      return { legs: [], handovers: [] }
+    }
   },
 
   /** 单号查询 */
@@ -143,7 +426,30 @@ Page({
       res.etaText = this.buildEtaText(res)
       // 承运审核拒运提示（reviewStatus=4 审核不通过 + 原因）
       res.reviewNotice = this.buildReviewNotice(res)
-      this.setData({ trackResult: res, noResult: false }, () => this.drawParcelQr())
+      // 车来取货/送货提醒（单号查询同样生效，演示时可直接查单看到倒计时）
+      res.carrierText = this.buildCarrierText(res)
+      res.approaching = !!res.carrierApproaching
+      res.arrived = !!res.carrierArrived
+      res.arrivedText = this.buildArrivedText(res)
+      res.servicePointText = this.buildServicePointText(res)
+      // 多段联运：一次拿运输拓扑（分段 + 换乘交接 + 方案解释）；失败退回仅分段进度
+      const topology = await this.loadTopology(no)
+      res.legs = topology.legs && topology.legs.length ? topology.legs : await this.loadLegs(no)
+      res.handovers = topology.handovers || []
+      res.planReason = topology.planReason
+      res.planningModeName = topology.planningModeName
+      res.mapPoints = topology.mapPoints || []
+      res.mapPolyline = topology.mapPolyline || []
+      res.mapMarkers = topology.mapMarkers || []
+      res.mapCircles = topology.mapCircles || []
+      res.activeLegText = topology.activeLegText || ''
+      res.mapCenter = topology.mapCenter
+      res.showMap = !!topology.showMap
+      this.setData({ trackResult: res, noResult: false }, () => {
+        this.notifyApproaching([res])
+        this.notifyArrived([res])
+        this.drawParcelQr()
+      })
     } catch (e) {
       wx.hideLoading()
       this.setData({ trackResult: null, noResult: true })
@@ -226,10 +532,19 @@ Page({
         statusClass: this.statusClass(o.status),
         showCode: false,
         createTimeText: formatBackendTime(o.createTime),
-        carrierText: this.buildCarrierText(o)
+        carrierText: this.buildCarrierText(o),
+        approaching: !!o.carrierApproaching,
+        // 司机到站提醒：司机端「确认到达」后 carriedArrived=true（后端为源，含司机姓名/站点）
+        arrived: !!o.carrierArrived,
+        arrivedText: this.buildArrivedText(o),
+        servicePointText: this.buildServicePointText(o)
       }))
       const merged = this.data.pageNo === 1 ? list : this.data.sendList.concat(list)
       const total = res.total || 0
+      // 车快到了：首次进入阈值弹一次提醒（演示时最直观；重复刷新不打扰）
+      this.notifyApproaching(list)
+      // 司机已到达：首次出现弹一次提醒（用户端"司机已到达"消息）
+      this.notifyArrived(list)
       this.setData({
         sendList: merged,
         total,

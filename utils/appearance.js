@@ -15,7 +15,8 @@
  *   图标：  <icon color="{{iconColor}}" />（见 apply 注释）
  */
 
-const DEFAULT_THEME = 'green'
+/** 默认主题：白色 + 蓝色（答辩/演示要求；绿色/橙色/红色仍可在设置里切换） */
+const DEFAULT_THEME = 'blue'
 
 /* 导航栏换色去重：wx.setNavigationBarColor 只作用于当前页面，
  * 主题或页面任一变化时才重新设置，避免同页 onShow 重复调用 */
@@ -63,7 +64,7 @@ const THEMES = {
     shadow: 'rgba(31,94,158,0.2)',
     clay: '#C75B2A',
     gold: '#D9A441',
-    paper: '#F6F2E9',
+    paper: '#F5F8FC',
     ink: '#2B2B28'
   },
   red: {

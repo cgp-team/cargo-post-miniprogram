@@ -1,0 +1,41 @@
+<view class="page {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
+  <view class="toolbar">
+    <view class="tabs">
+      <view class="tab {{filter === 'ALL' ? 'active' : ''}}" bindtap="onFilter" data-filter="ALL">全部</view>
+      <view class="tab {{filter === 'UNREAD' ? 'active' : ''}}" bindtap="onFilter" data-filter="UNREAD">未读</view>
+    </view>
+    <view class="read-all" wx:if="{{unreadCount > 0}}" bindtap="onReadAll">全部已读</view>
+  </view>
+
+  <view class="list" wx:if="{{list.length > 0}}">
+    <view class="card {{item.readStatus === 0 ? 'unread' : ''}} level-{{item.level || 'INFO'}}"
+          wx:for="{{list}}" wx:key="id"
+          bindtap="onTapItem" data-id="{{item.id}}" data-order-id="{{item.orderId}}" hover-class="card-hover">
+      <view class="card-left">
+        <text class="card-icon">{{item.icon}}</text>
+      </view>
+      <view class="card-body">
+        <view class="card-top">
+          <text class="card-title">{{item.title}}</text>
+          <view class="dot" wx:if="{{item.readStatus === 0}}"></view>
+        </view>
+        <text class="card-content">{{item.content}}</text>
+        <view class="card-tags">
+          <text class="tag event-tag">{{item.eventTypeName || '通知'}}</text>
+          <text class="tag order-tag" wx:if="{{item.orderNo}}">📦 {{item.orderNo}}</text>
+        </view>
+        <view class="card-bottom">
+          <text class="time">{{item.createTimeText}}</text>
+          <text class="action-hint" wx:if="{{item.actionRequired}}">⚠️ 需要处理</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <empty-state wx:elif="{{!loading}}" emoji="📭" text="暂无消息" subText="订单状态更新后会在这里推送" />
+
+  <view class="more" wx:if="{{hasMore && list.length > 0}}" bindtap="loadMore">
+    {{loading ? '加载中...' : '点击加载更多'}}
+  </view>
+</view>
+

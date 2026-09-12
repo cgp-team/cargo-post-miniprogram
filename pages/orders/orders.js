@@ -47,7 +47,11 @@ Page({
 
   /** 切换状态 tab */
   switchTab(e) {
-    const key = e.currentTarget.dataset.key
+    // dataset 可能回传字符串（如 '0'），统一归一为数字或 ''（全部），
+    // 保证 status 参数始终是数字，避免后端 Integer 绑定失败
+    const raw = e.currentTarget.dataset.key
+    const num = Number(raw)
+    const key = raw === '' || raw === undefined || raw === null || isNaN(num) ? '' : num
     if (key === this.data.activeTab) return
     this.setData({ activeTab: key })
     this.reload()
@@ -62,14 +66,20 @@ Page({
     const { activeTab, pageNo, pageSize } = this.data
     this.setData({ loading: true })
     try {
-      const res = await api.pageMyProductOrders({
-        pageNo,
-        pageSize,
-        status: activeTab === '' ? undefined : activeTab
-      })
+      // 不传 status: undefined —— wx.request 会把它序列化成字符串 "undefined"，
+      // 后端 ProductOrderPageReqVO.status(Integer) 绑定失败报
+      // Failed to convert property value ... For input string: "undefined"
+      const params = { pageNo, pageSize }
+      if (activeTab !== '') {
+        params.status = activeTab
+      }
+      const res = await api.pageMyProductOrders(params)
       const list = (res.list || []).map((o) => ({
         ...o,
         statusClass: this.statusClass(o.status),
+        // 配送提示：已发货=司机配送中（点溯源看司机/轨迹/到站提醒），已完成=已送达
+        deliveryHint: o.status === 1 ? '司机配送中 · 点「产地溯源」看司机与到站提醒'
+          : (o.status === 2 ? '已送达 · 点「产地溯源」看交付凭证' : ''),
         createTimeText: formatBackendTime(o.createTime),
         items: (o.items || []).map((g) => ({
           ...g,
@@ -123,6 +133,13 @@ Page({
   goToTrace(e) {
     const id = e.currentTarget.dataset.id
     wx.navigateTo({ url: `/pages/goods/trace/trace?id=${id}` })
+  },
+
+  /** 点订单卡片 → 订单详情（商品清单 / 收货信息 / 承运司机 / 配送进度与核验凭证） */
+  goToDetail(e) {
+    const id = e.currentTarget.dataset.id
+    if (!id) return
+    wx.navigateTo({ url: `/pages/orders/detail/detail?id=${id}` })
   },
 
   goHome() {

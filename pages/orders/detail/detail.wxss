@@ -1,0 +1,243 @@
+/* 商城（购物）订单详情：与「我的订单」同一套纸张/卡片语言 */
+.page-order-detail {
+  min-height: 100vh;
+  background: var(--color-paper, #F6F2E9);
+  padding: 24rpx 24rpx 0;
+  box-sizing: border-box;
+}
+.page-order-detail.elderly-mode {
+  font-size: 34rpx;
+}
+
+/* 状态头 */
+.detail-status {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  padding: 28rpx 28rpx;
+  border-radius: 20rpx;
+  background: var(--color-primary, #1F5E9E);
+  color: #ffffff;
+  box-shadow: 0 10rpx 24rpx var(--color-primary-shadow, rgba(31, 94, 158, 0.2));
+}
+.detail-status-name {
+  font-size: 38rpx;
+  font-weight: 700;
+}
+.detail-status-no {
+  font-size: 24rpx;
+  opacity: 0.9;
+}
+
+/* 当前配送状态 */
+.detail-arrival {
+  margin-top: 20rpx;
+  padding: 20rpx 24rpx;
+  border-radius: 16rpx;
+  background: #FFF4E5;
+  border: 1rpx solid #F0C98A;
+  color: #8A5A12;
+  font-size: 28rpx;
+  line-height: 1.5;
+}
+.detail-arrival.done {
+  background: #E9F6EC;
+  border-color: #A9D8B6;
+  color: #1C6B32;
+}
+
+/* 卡片 */
+.detail-card {
+  margin-top: 20rpx;
+  padding: 24rpx 26rpx;
+  border-radius: 20rpx;
+  background: #ffffff;
+  border: 1rpx solid #EDE7DA;
+}
+.detail-card-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-ink, #2B2B28);
+  margin-bottom: 16rpx;
+}
+
+/* 配送进度 */
+.step-row {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  padding: 8rpx 0;
+}
+.step-dot {
+  width: 18rpx;
+  height: 18rpx;
+  border-radius: 50%;
+  background: #D8D2C6;
+  flex-shrink: 0;
+}
+.step-dot.done {
+  background: var(--color-primary, #1F5E9E);
+}
+.step-name {
+  flex: 1;
+  font-size: 28rpx;
+  color: var(--color-text-tertiary, #8A8778);
+}
+.step-name.done {
+  color: var(--color-ink, #2B2B28);
+  font-weight: 600;
+}
+.step-time {
+  font-size: 22rpx;
+  color: var(--color-text-tertiary, #8A8778);
+}
+
+/* 商品清单 */
+.goods-row {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  padding: 12rpx 0;
+}
+.goods-img,
+.goods-img-ph {
+  width: 108rpx;
+  height: 108rpx;
+  border-radius: 14rpx;
+  flex-shrink: 0;
+  background: var(--color-primary-light, #EAF0F7);
+}
+.goods-img-ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.goods-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  min-width: 0;
+}
+.goods-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--color-ink, #2B2B28);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.goods-sub {
+  font-size: 24rpx;
+  color: var(--color-text-secondary, #6B675C);
+}
+.goods-amount {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--color-price, #C75B2A);
+  flex-shrink: 0;
+}
+.detail-total-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: baseline;
+  gap: 12rpx;
+  margin-top: 12rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx dashed #EDE7DA;
+}
+.detail-total-label {
+  font-size: 26rpx;
+  color: var(--color-text-secondary, #6B675C);
+}
+.detail-total-value {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: var(--color-price, #C75B2A);
+}
+
+/* 信息行 */
+.info-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+  padding: 8rpx 0;
+  font-size: 28rpx;
+}
+.info-label {
+  width: 140rpx;
+  flex-shrink: 0;
+  color: var(--color-text-secondary, #6B675C);
+}
+.info-value {
+  flex: 1;
+  color: var(--color-ink, #2B2B28);
+  line-height: 1.5;
+  word-break: break-all;
+}
+
+/* 操作按钮 */
+.detail-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 20rpx;
+}
+.detail-btn {
+  flex: 1;
+  text-align: center;
+  padding: 18rpx 0;
+  border-radius: 999rpx;
+  background: var(--color-primary, #1F5E9E);
+  color: #ffffff;
+  font-size: 28rpx;
+}
+.detail-btn.ghost {
+  background: #ffffff;
+  color: var(--color-primary, #1F5E9E);
+  border: 1rpx solid var(--color-primary, #1F5E9E);
+}
+
+/* 核验凭证 */
+.proof-row {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  padding: 10rpx 0;
+}
+.proof-img {
+  width: 150rpx;
+  height: 150rpx;
+  border-radius: 14rpx;
+  background: #F1EDE3;
+  flex-shrink: 0;
+}
+.proof-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+.proof-label {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--color-ink, #2B2B28);
+}
+.proof-time {
+  font-size: 24rpx;
+  color: var(--color-text-tertiary, #8A8778);
+}
+
+.detail-foot {
+  margin: 24rpx 0 8rpx;
+  text-align: center;
+  font-size: 24rpx;
+  color: var(--color-text-tertiary, #8A8778);
+}
+.loading-state {
+  padding: 80rpx 0;
+  text-align: center;
+  font-size: 28rpx;
+  color: var(--color-text-secondary, #6B675C);
+}
+.safe-area-bottom {
+  height: env(safe-area-inset-bottom);
+}

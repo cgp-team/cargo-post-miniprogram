@@ -9,7 +9,11 @@
       <text class="driver-plate">{{plateNo}}</text>
       <text class="driver-capacity">货仓 {{cargoLimit}} 件</text>
       <text class="location-source {{locationSource === 'SIMULATED' ? 'sim' : ''}}" wx:if="{{locationSource === 'SIMULATED'}}">🧪 模拟运行</text>
-    </view>
+    
+      <view class="notif-bell" bindtap="goNotifications">
+        <text class="notif-icon">🔔</text>
+        <view class="notif-badge" wx:if="{{driverUnreadCount > 0}}">{{driverUnreadCount > 99 ? '99+' : driverUnreadCount}}</view>
+      </view></view>
     <view class="route-label">
       <text class="route-badge">{{routeName || '今日班次'}}</text>
       <text class="status-tag {{status}}">
@@ -58,6 +62,59 @@
     </view>
   </view>
 
+  <!-- ========== 多段联运：换乘交接待确认入口（有才显示） ========== -->
+  <view class="handover-entry" wx:if="{{pendingHandoverCount > 0}}" bindtap="goHandover" hover-class="hover">
+    <text class="handover-entry-icon">🔁</text>
+    <view class="handover-entry-info">
+      <text class="handover-entry-title">有 {{pendingHandoverCount}} 个换乘交接待确认</text>
+      <text class="handover-entry-sub">点击进入，拍照确认货物交接</text>
+    </view>
+    <text class="handover-entry-arrow">›</text>
+  </view>
+
+  <!-- ========== 路线站点地图（行驶中显示站点进度） ========== -->
+  <view class="route-overview-map" wx:if="{{routeMapMarkers.length > 0}}">
+    <view class="map-section-header">
+      <text class="map-section-title">🗺️ 路线站点地图</text>
+      <text class="map-section-subtitle">共 {{navTotalStops}} 站</text>
+    </view>
+    <map
+      class="overview-map"
+      latitude="{{mapLatitude}}"
+      longitude="{{mapLongitude}}"
+      markers="{{routeMapMarkers}}"
+      polyline="{{routeMapPolyline}}"
+      show-location="{{true}}"
+      scale="13"
+      enable-zoom="{{true}}"
+      enable-scroll="{{true}}"
+    ></map>
+    <!-- 图例 -->
+    <view class="map-legend">
+      <view class="legend-item">
+        <view class="legend-dot passed"></view>
+        <text class="legend-text">已过站</text>
+      </view>
+      <view class="legend-item">
+        <view class="legend-dot current"></view>
+        <text class="legend-text">当前站</text>
+      </view>
+      <view class="legend-item">
+        <view class="legend-dot next"></view>
+        <text class="legend-text">下一站</text>
+      </view>
+      <view class="legend-item">
+        <view class="legend-dot future"></view>
+        <text class="legend-text">未到站</text>
+      </view>
+    </view>
+    <!-- 导航按钮 -->
+    <view class="map-nav-bar" wx:if="{{nextStation && status !== 'idle'}}" bindtap="navigateToNextStop" hover-class="hover">
+      <text class="map-nav-icon">🧭</text>
+      <text class="map-nav-text">导航到 {{nextStation}}</text>
+      <text class="map-nav-dist" wx:if="{{nextStationDistance > 0}}">约{{nextStationDistance}}m</text>
+    </view>
+  </view>
   <!-- ========== 状态一：待发车 - 行李舱可视化 ========== -->
   <view class="idle-panel" wx:if="{{status === 'idle'}}">
     <!-- 大巴车行李舱图形 -->
@@ -118,7 +175,8 @@
         <text class="nav-chip deliver" wx:if="{{navDeliverCount > 0}}">📤 派货×{{navDeliverCount}}</text>
         <text class="nav-chip board" wx:if="{{navBoardCount > 0}}">🚌 接客×{{navBoardCount}}</text>
         <text class="nav-chip alight" wx:if="{{navAlightCount > 0}}">🚏 送客×{{navAlightCount}}</text>
-        <text class="nav-chip none" wx:if="{{navActionTotal === 0}}">经停通过</text>
+        <text class="nav-chip return" wx:if="{{navActionTotal === 0 && navReturnPoint}}">🏁 返场确认</text>
+        <text class="nav-chip none" wx:elif="{{navActionTotal === 0}}">经停通过</text>
       </view>
       <view class="nav-amap" wx:if="{{nextStationDistance > 0}}" bindtap="openAmapNav">🚗 导航</view>
     </view>
@@ -195,10 +253,11 @@
     <!-- 待装货物列表（货运 + 邮快件） -->
     <view class="pickup-list" wx:if="{{pendingPickups.length > 0}}">
       <view class="pickup-item" wx:for="{{pendingPickups}}" wx:key="orderId">
-        <text class="pickup-emoji">{{item.orderType === 3 ? '📬' : '📦'}}</text>
+        <text class="pickup-emoji">{{item.bizType === 'PRODUCT' ? '🛒' : (item.orderType === 3 ? '📬' : '📦')}}</text>
         <view class="pickup-info">
-          <text class="pickup-name">{{item.orderType === 3 ? (item.mailNo || '快递') : (item.goodsName || '寄货')}}</text>
-          <text class="pickup-detail">{{item.weightKg}}kg · {{item.orderType === 3 ? ('取件码 ' + (item.pickupCode || '—')) : (item.receiverName || '待定')}}</text>
+          <text class="pickup-name">{{item.bizType === 'PRODUCT' ? (item.goodsName || '商城订单') : (item.orderType === 3 ? (item.mailNo || '快递') : (item.goodsName || '寄货'))}}</text>
+          <text wx:if="{{item.bizType === 'PRODUCT'}}" class="pickup-detail">商城订单 · 送至 {{item.receiverAddress || '自提站点'}}（{{item.receiverName || '收件人'}} {{item.receiverMobile || ''}}）</text>
+          <text wx:else class="pickup-detail">{{item.weightKg}}kg · {{item.orderType === 3 ? ('取件码 ' + (item.pickupCode || '—')) : (item.receiverName || '待定')}}</text>
           <text class="pickup-detail">{{item.orderNo}}</text>
         </view>
         <view class="pickup-check {{item.checked ? 'checked' : ''}}">
@@ -221,14 +280,14 @@
     <button class="scan-btn" bindtap="scanToLoad" hover-class="hover">
       <text class="scan-icon">📷</text>
       <text class="scan-text">扫码装车</text>
-      <text class="scan-hint">请扫描农户手机上的二维码</text>
+      <text class="scan-hint">扫寄货单/商城订单二维码，拍照核验后装车</text>
     </button>
 
     <!-- 妥投扫码 -->
     <button class="scan-btn deliver-btn" bindtap="scanToDeliver" hover-class="hover">
       <text class="scan-icon">✅</text>
       <text class="scan-text">扫码妥投</text>
-      <text class="scan-hint">送达收件人后扫码完成派送</text>
+      <text class="scan-hint">送达收件人后扫码；商城订单再拍交付凭证</text>
     </button>
 
     <!-- 取件核销（邮快件） -->
@@ -247,3 +306,5 @@
   <!-- ========== 底部自定义TabBar ========== -->
   <driver-tab-bar current="workbench" elderly="{{elderlyMode}}"></driver-tab-bar>
 </view>
+
+

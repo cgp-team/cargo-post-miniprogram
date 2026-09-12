@@ -1,0 +1,72 @@
+<view class="page {{elderlyMode ? 'elderly-mode' : ''}}">
+  <view class="hero">
+    <text class="hero-title">货物交接</text>
+    <text class="hero-sub">换乘站把货交给下一段司机，拍照确认后自动推进订单</text>
+  </view>
+
+  <!-- 当前运输段任务（司机只能看到自己的段，需求 §55~§58） -->
+  <view class="current-leg" wx:if="{{currentLeg}}">
+    <view class="cl-head">
+      <text class="cl-title">当前任务 · 第{{currentLeg.legSequence}}段</text>
+      <text class="cl-status">{{currentLeg.statusName}}</text>
+    </view>
+    <text class="cl-route">{{currentLeg.routeText}}</text>
+    <text class="cl-meta">
+      订单 {{currentLeg.orderNo || currentLeg.orderId}}
+      <block wx:if="{{currentLeg.distanceKm}}"> · {{currentLeg.distanceKm}}km</block>
+      <block wx:if="{{currentLeg.durationMinutes}}"> · 预计{{currentLeg.durationMinutes}}分钟</block>
+      <block wx:if="{{currentLeg.plateNo}}"> · {{currentLeg.plateNo}}</block>
+    </text>
+    <text class="cl-eta" wx:if="{{currentLeg.etaText}}">预计到达：{{currentLeg.etaText}}</text>
+    <text class="cl-est" wx:if="{{currentLeg.navigationSource === 'ESTIMATED'}}">距离/时间为估算值（非实时道路导航）</text>
+    <view class="cl-actions">
+      <view class="cl-btn" wx:for="{{legActions}}" wx:key="action" hover-class="confirm-hover"
+            bindtap="onLegAction" data-action="{{item.action}}">{{item.label}}</view>
+    </view>
+  </view>
+
+  <view class="section-title">待交接（{{handovers.length}}）</view>
+  <view class="list" wx:if="{{handovers.length > 0}}">
+    <view class="card" wx:for="{{handovers}}" wx:key="id">
+      <view class="card-head">
+        <text class="order-no">{{item.orderNo || ('订单 ' + item.orderId)}}</text>
+        <text class="status">{{item.statusName}}</text>
+      </view>
+      <text class="goods">{{item.goodsName || '货物'}} · {{item.itemCount}} 件<block wx:if="{{item.weightKg}}"> · {{item.weightKg}}kg</block></text>
+      <view class="row">
+        <text class="label">换乘站</text>
+        <text class="value">{{item.stationName || '—'}}</text>
+      </view>
+      <view class="row">
+        <text class="label">交出司机</text>
+        <text class="value">{{item.fromDriverName || '—'}}</text>
+      </view>
+      <view class="row">
+        <text class="label">接收司机</text>
+        <text class="value">{{item.toDriverName || '待认领'}}</text>
+      </view>
+      <view class="row" wx:if="{{item.handoverTimeText}}">
+        <text class="label">交接时间</text>
+        <text class="value">{{item.handoverTimeText}}</text>
+      </view>
+      <view class="confirm-btn" hover-class="confirm-hover" bindtap="onConfirm" data-id="{{item.id}}">
+        拍照确认交接
+      </view>
+    </view>
+  </view>
+  <empty-state wx:elif="{{!loading}}" emoji="📦" text="暂无待交接任务" subText="多段联运到达换乘站后会在这里提醒" />
+
+  <view class="section-title" wx:if="{{legs.length > 0}}">我的运输段</view>
+  <view class="leg-list" wx:if="{{legs.length > 0}}">
+    <view class="leg" wx:for="{{legs}}" wx:key="id">
+      <view class="leg-progress">{{item.progressText}}</view>
+      <view class="leg-meta">
+        <text class="leg-status">{{item.statusName}}</text>
+        <text class="leg-eta" wx:if="{{item.etaText}}">预计 {{item.etaText}}</text>
+        <text class="leg-plate" wx:if="{{item.plateNo}}">{{item.plateNo}}</text>
+      </view>
+    </view>
+  </view>
+
+  <driver-tab-bar current="workbench" elderly="{{elderlyMode}}" />
+</view>

@@ -146,6 +146,16 @@
   border-top: 1rpx solid #F0F0F0;
 }
 
+/* 配送提示：已发货=司机配送中（引导看溯源与到站提醒） */
+.order-delivery-hint {
+  margin-top: 12rpx;
+  padding: 12rpx 18rpx;
+  border-radius: 12rpx;
+  background: #EAF4EC;
+  color: #2E7D32;
+  font-size: 24rpx;
+}
+
 .order-time {
   font-size: 24rpx;
   color: var(--color-text-tertiary);

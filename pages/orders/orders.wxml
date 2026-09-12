@@ -13,7 +13,14 @@
 
   <!-- 订单列表 -->
   <view class="order-list" wx:if="{{list.length}}">
-    <view class="order-card" wx:for="{{list}}" wx:key="id">
+    <view
+      class="order-card"
+      wx:for="{{list}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="goToDetail"
+      hover-class="hover"
+    >
       <view class="order-head">
         <text class="order-no">单号 {{item.orderNo}}</text>
         <text class="order-status {{item.statusClass}}">{{item.statusName}}</text>
@@ -27,12 +34,13 @@
         </view>
         <text class="order-goods-amount">¥{{g.amount}}</text>
       </view>
+      <view wx:if="{{item.deliveryHint}}" class="order-delivery-hint">{{item.deliveryHint}}</view>
       <view class="order-foot">
         <text class="order-time">{{item.createTimeText}}</text>
         <view class="order-foot-right">
           <text class="order-total">合计 ¥{{item.totalAmount}}</text>
-          <view wx:if="{{item.status === 1 || item.status === 2}}" class="order-trace" data-id="{{item.id}}" bindtap="goToTrace" hover-class="hover">产地溯源</view>
-          <view wx:if="{{item.status === 0}}" class="order-cancel" data-id="{{item.id}}" bindtap="cancelOrder" hover-class="hover">取消订单</view>
+          <view wx:if="{{item.status === 1 || item.status === 2}}" class="order-trace" data-id="{{item.id}}" catchtap="goToTrace" hover-class="hover">产地溯源</view>
+          <view wx:if="{{item.status === 0}}" class="order-cancel" data-id="{{item.id}}" catchtap="cancelOrder" hover-class="hover">取消订单</view>
         </view>
       </view>
     </view>

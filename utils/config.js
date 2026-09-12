@@ -20,6 +20,18 @@ const BASE_URLS = {
   release: 'https://YOUR_DOMAIN/api'
 }
 
+/**
+ * 高德「微信小程序」key（官方 amap-wx.js 路线，见 docs/miniprogram.md「现实公交接入」）。
+ *
+ * 申请：高德控制台 → 应用管理 → 创建应用 → 添加 Key → 服务平台选「微信小程序」，绑定小程序 AppID。
+ * 配置：填到下面；同时把 https://restapi.amap.com 加入微信公众平台的 request 合法域名。
+ * 留空 = 不启用客户端现实公交层（项目自建线路 + 模拟车辆仍正常，不伪造现实公交）。
+ *
+ * 注意：小程序 key 与 AppID 绑定、只允许白名单域名调用，可以放在小程序里；
+ * 而「Web 服务」key 不能放客户端，那种 key 请配到后端（yudao.transport.amap.key）。
+ */
+const AMAP_MINI_KEY = 'f35fa96247bd40fa437a485d710d4d02'
+
 function getBaseUrl() {
   try {
     const info = wx.getAccountInfoSync()
@@ -29,4 +41,9 @@ function getBaseUrl() {
   }
 }
 
-module.exports = { getBaseUrl }
+/** 高德小程序 key（未配置返回 ''，调用方据此禁用客户端现实公交层） */
+function getAmapMiniKey() {
+  return AMAP_MINI_KEY || ''
+}
+
+module.exports = { getBaseUrl, getAmapMiniKey }

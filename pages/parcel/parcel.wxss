@@ -90,6 +90,66 @@
   padding: 0 28rpx;
 }
 
+/* 我的购物：商品明细 + 点击看详情提示 */
+.mall-goods-row {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  padding: 6rpx 0 12rpx;
+}
+.mall-goods-img,
+.mall-goods-img-ph {
+  width: 108rpx;
+  height: 108rpx;
+  border-radius: 14rpx;
+  flex-shrink: 0;
+  background: var(--color-primary-light, #EAF0F7);
+}
+.mall-goods-img-ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mall-goods-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  min-width: 0;
+}
+.mall-goods-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--color-ink, #2B2B28);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.mall-goods-sub {
+  font-size: 24rpx;
+  color: var(--color-text-secondary, #6B675C);
+}
+.mall-goods-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6rpx;
+  flex-shrink: 0;
+}
+.mall-goods-amount {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-price, #C75B2A);
+}
+.mall-goods-more {
+  font-size: 22rpx;
+  color: var(--color-text-tertiary, #8A8778);
+}
+.parcel-tap-hint {
+  font-size: 24rpx;
+  color: var(--color-primary, #1F5E9E);
+}
+
 .parcel-card {
   background: #fff;
   border-radius: 20rpx;
@@ -170,6 +230,27 @@
 .parcel-eta {
   color: var(--color-clay);
   font-weight: 600;
+}
+
+/* 物体信息标签（类型/件数/体积/生鲜），寄货页填写后在此回显 */
+.parcel-cargo-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-bottom: 14rpx;
+}
+
+.cargo-chip {
+  padding: 6rpx 16rpx;
+  border-radius: 999rpx;
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  font-size: 22rpx;
+}
+
+.cargo-chip-fresh {
+  background: #F8ECE3;
+  color: var(--color-clay);
 }
 
 /* 列表项取件码：默认打码降层级，点「查看」展开明文 */
@@ -364,6 +445,62 @@
   color: var(--color-primary);
   font-size: 26rpx;
 }
+
+/* 车快到了：高亮提醒条（≤10 分钟），演示时一眼可见 */
+.parcel-service-point {
+  margin-top: 12rpx;
+  padding: 14rpx 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  border-radius: 14rpx;
+  background: #F8ECE3;
+}
+
+.service-point-text {
+  flex: 1;
+  font-size: 25rpx;
+  color: var(--color-clay);
+  font-weight: 600;
+}
+
+.service-point-nav {
+  padding: 8rpx 20rpx;
+  border-radius: 999rpx;
+  background: var(--color-clay);
+  color: #fff;
+  font-size: 23rpx;
+  font-weight: 600;
+}
+
+.parcel-approach {
+  margin-top: 12rpx;
+  padding: 16rpx 20rpx;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  border-radius: 14rpx;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 26rpx;
+  font-weight: 600;
+  box-shadow: 0 4rpx 12rpx var(--color-primary-shadow);
+}
+
+.parcel-approach-text {
+  color: #fff;
+  flex: 1;
+}
+/* 司机已到达：醒目的到达提醒（红色，区别于"车快到了"的绿色） */
+.parcel-approach.parcel-arrived {
+  background: #C0392B;
+  box-shadow: 0 4rpx 12rpx rgba(192, 57, 43, 0.28);
+}
+.parcel-carrier-arrived {
+  color: #C0392B;
+  font-weight: 600;
+}
 .carrier-link {
   color: var(--color-primary);
   font-weight: 600;
@@ -507,9 +644,14 @@
   margin-top: 20rpx;
   width: 100%;
   height: 76rpx;
-  line-height: 76rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16rpx;
+  box-sizing: border-box;
+  line-height: 1.2;
   border-radius: 38rpx;
-  background: #C75B2A;
+  background: #1F5E9E;
   color: #FFFFFF;
   font-size: 28rpx;
   font-weight: 600;
@@ -519,3 +661,115 @@
 }
 .btn-station-confirm::after { border: none; }
 .elderly-mode .btn-station-confirm { font-size: 32rpx; height: 88rpx; line-height: 88rpx; }
+
+/* ==================== 多段联运 · 分段进度 ==================== */
+.parcel-legs {
+  margin: 20rpx 0 8rpx;
+  padding: 24rpx;
+  background: #FFFFFF;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 14rpx rgba(60, 50, 30, 0.06);
+}
+
+.parcel-legs-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #2B2B28;
+  margin-bottom: 16rpx;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.parcel-plan-reason {
+  display: block;
+  margin: -6rpx 0 16rpx;
+  font-size: 24rpx;
+  line-height: 1.5;
+  color: #6B6355;
+  word-break: break-word;
+}
+
+.parcel-map-wrap {
+  margin: 20rpx 0 8rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+  box-shadow: 0 4rpx 14rpx rgba(60, 50, 30, 0.08);
+}
+
+.parcel-map {
+  width: 100%;
+  height: 420rpx;
+}
+
+.parcel-map-legend {
+  display: flex;
+  gap: 24rpx;
+  flex-wrap: wrap;
+  padding: 12rpx 20rpx;
+  background: #FFFFFF;
+  font-size: 22rpx;
+}
+
+.parcel-map-current {
+  padding: 10rpx 20rpx;
+  background: #E6EFF5;
+  color: #1F5E9E;
+  font-size: 24rpx;
+  word-break: break-word;
+}
+
+/* 白色 + 蓝色主题：完成/当前统一蓝色系，未开始灰色，仅异常用暖色 */
+.lg-done { color: #1F5E9E; }
+.lg-doing { color: #2E7BBF; }
+.lg-todo { color: #9AA5B1; }
+.lg-hub { color: #123F6E; }
+.lg-est { color: #8A93A0; }
+
+.parcel-leg {
+  display: flex;
+  align-items: flex-start;
+  gap: 18rpx;
+  padding: 12rpx 0;
+}
+
+.leg-index {
+  flex: none;
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  background: #1F5E9E;
+  color: #FFFFFF;
+  font-size: 26rpx;
+  text-align: center;
+  line-height: 44rpx;
+}
+
+.leg-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.leg-route {
+  font-size: 30rpx;
+  color: #2B2B28;
+}
+
+.leg-sub {
+  margin-top: 6rpx;
+  font-size: 26rpx;
+  color: #6B6355;
+}
+
+.leg-eta {
+  margin-top: 4rpx;
+  font-size: 24rpx;
+  color: #A79E8C;
+}
+
+.elderly-mode .parcel-legs-title,
+.elderly-mode .leg-route { font-size: 34rpx; }
+.elderly-mode .leg-sub,
+.elderly-mode .leg-eta { font-size: 30rpx; }

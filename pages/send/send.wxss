@@ -77,6 +77,281 @@
   font-weight: 600;
 }
 
+/* 货物类型选择器（与输入框同视觉） */
+.picker-value {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 88rpx;
+  border: 2rpx solid #E8ECEE;
+  border-radius: 14rpx;
+  padding: 0 24rpx;
+  font-size: 30rpx;
+  color: #333;
+  background: #F8FAF8;
+  box-sizing: border-box;
+}
+
+.picker-arrow {
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 体积：长 × 宽 × 高（cm） */
+.size-row {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.size-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0 12rpx;
+  text-align: center;
+}
+
+.size-x {
+  font-size: 28rpx;
+  color: #999;
+}
+
+.form-hint {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #8A8778;
+}
+
+/* 生鲜/冷链开关行 */
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.switch-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.switch-text .form-label { margin-bottom: 6rpx; }
+
+/* 需客户送站：就近交接站点 + 导航按钮 */
+.pickup-mode-row {
+  display: flex;
+  gap: 16rpx;
+}
+
+.mode-btn {
+  flex: 1;
+  height: 80rpx;
+  line-height: 80rpx;
+  text-align: center;
+  border-radius: 14rpx;
+  border: 2rpx solid #E8ECEE;
+  background: #F8FAF8;
+  font-size: 27rpx;
+  color: #555;
+}
+
+.mode-btn.active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  font-weight: 600;
+}
+
+/* 手填地址 → 推荐站点：输入框 + 一键推荐 */
+.addr-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-top: 16rpx;
+}
+
+.addr-input {
+  flex: 1;
+  height: 80rpx;
+  padding: 0 20rpx;
+  border-radius: 14rpx;
+  border: 2rpx solid #E8ECEE;
+  background: #FFFFFF;
+  font-size: 27rpx;
+  color: var(--color-ink);
+}
+
+.addr-btn {
+  flex: none;
+  height: 80rpx;
+  line-height: 80rpx;
+  padding: 0 24rpx;
+  border-radius: 14rpx;
+  border: 2rpx solid var(--color-primary);
+  color: var(--color-primary);
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.addr-btn:active {
+  background: var(--color-primary-light);
+}
+
+/* 地址候选（高德输入提示）：点一条即按该坐标推荐站点 */
+.tip-list {
+  margin-top: 10rpx;
+  border-radius: 14rpx;
+  border: 2rpx solid #E8ECEE;
+  background: #FFFFFF;
+  overflow: hidden;
+}
+
+.tip-item {
+  padding: 18rpx 20rpx;
+  border-bottom: 2rpx solid #F0F3F1;
+}
+
+.tip-item:last-child {
+  border-bottom: none;
+}
+
+.tip-item:active {
+  background: var(--color-primary-light);
+}
+
+.tip-name {
+  display: block;
+  font-size: 27rpx;
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.tip-addr {
+  display: block;
+  margin-top: 4rpx;
+  font-size: 23rpx;
+  color: var(--color-text-tertiary);
+}
+
+/* 费用试算卡片：填完取货/送达地址即显示金额（件单价×件数 + 里程费） */
+.quote-card {
+  margin-bottom: 26rpx;
+  padding: 20rpx 22rpx;
+  border-radius: 16rpx;
+  background: var(--color-primary-light);
+  border: 2rpx solid rgba(28, 75, 46, 0.12);
+}
+
+.quote-amount {
+  display: block;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
+.quote-detail {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  color: var(--color-text-secondary);
+}
+
+.quote-hint {
+  font-size: 25rpx;
+  color: var(--color-text-tertiary);
+}
+
+/* 可达性评估卡片：warn=车辆无法直接进入（推荐送站） */
+.reach-card {
+  margin-top: 14rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 14rpx;
+  background: #F8FAF8;
+  font-size: 25rpx;
+  color: #555;
+}
+
+.reach-card.ok {
+  background: var(--color-primary-light);
+}
+
+.reach-card.warn {
+  background: #F8ECE3;
+}
+
+.reach-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--color-ink);
+  margin-bottom: 8rpx;
+}
+
+.reach-line {
+  display: block;
+  margin-top: 4rpx;
+  font-size: 25rpx;
+  color: #555;
+}
+
+.reach-reason {
+  color: #8A8778;
+}
+
+.reach-btn {
+  margin-top: 14rpx;
+  height: 72rpx;
+  line-height: 72rpx;
+  text-align: center;
+  border-radius: 999rpx;
+  background: var(--color-clay);
+  color: #fff;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.pickup-summary {
+  margin-top: 20rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 14rpx;
+  background: #F8FAF8;
+}
+
+.pickup-summary-tip {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 23rpx;
+  color: var(--color-text-tertiary);
+}
+
+.review-station {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+  margin-top: 16rpx;
+  padding: 16rpx 20rpx;
+  border-radius: 14rpx;
+  background: #F8ECE3;
+}
+
+.review-station-name {
+  flex: 1;
+  font-size: 26rpx;
+  color: var(--color-clay);
+  font-weight: 600;
+}
+
+.review-station-btn {
+  padding: 10rpx 24rpx;
+  border-radius: 999rpx;
+  background: var(--color-clay);
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: 600;
+}
+
 .form-textarea {
   width: 100%;
   height: 160rpx;
@@ -336,6 +611,8 @@
 .elderly-mode .step-title { font-size: 40rpx; }
 .elderly-mode .form-label { font-size: 32rpx; }
 .elderly-mode .form-input { font-size: 34rpx; height: 100rpx; }
+.elderly-mode .picker-value { font-size: 34rpx; height: 100rpx; }
+.elderly-mode .form-hint { font-size: 28rpx; }
 .elderly-mode .form-textarea { font-size: 32rpx; }
 .elderly-mode .photo-hint { font-size: 36rpx; }
 .elderly-mode .photo-sub { font-size: 28rpx; }
@@ -367,3 +644,29 @@
 .review-hint { display: block; margin-top: 8rpx; font-size: 26rpx; color: #6B5A4A; }
 .elderly-mode .review-title { font-size: 34rpx; }
 .elderly-mode .review-reason, .elderly-mode .review-hint { font-size: 30rpx; }
+
+/* ============ 站点不可达：就近换站建议 ============ */
+.station-suggest {
+  margin-top: 12rpx;
+  padding: 16rpx 20rpx;
+  border-radius: 16rpx;
+  background: #FDF3E7;
+  border: 2rpx solid #F0D9B8;
+}
+.station-suggest-text {
+  display: block;
+  font-size: 24rpx;
+  color: #8A5A2B;
+  line-height: 1.5;
+}
+.station-suggest-btn {
+  display: inline-block;
+  margin-top: 12rpx;
+  padding: 10rpx 24rpx;
+  border-radius: 999rpx;
+  background: #1F5E9E;
+  color: #FFFFFF;
+  font-size: 24rpx;
+}
+.elderly-mode .station-suggest-text { font-size: 28rpx; }
+.elderly-mode .station-suggest-btn { font-size: 28rpx; padding: 14rpx 28rpx; }

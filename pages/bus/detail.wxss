@@ -33,6 +33,9 @@
 .tag.status.running {
   background: var(--color-gold);
 }
+.tag.demo {
+  background: var(--color-clay);
+}
 .head-meta {
   display: flex;
   justify-content: space-between;
@@ -179,4 +182,14 @@
 }
 .elderly-mode .empty {
   font-size: 30rpx;
+}
+/* 顶部地图：车辆实时位置 + 线路 + 我的位置 */
+.detail-map-wrap {
+  height: 40vh;
+  overflow: hidden;
+}
+
+.detail-map {
+  width: 100%;
+  height: 100%;
 }

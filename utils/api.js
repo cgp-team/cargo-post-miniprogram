@@ -12,6 +12,18 @@ const BASE_URL = getBaseUrl()
 let last401At = 0
 
 function handle401() {
+  // 记录来源页并在重新登录后跳回：401 会强制 reLaunch 登录页，
+  // 不记录的话「商城下单/寄货提交」这类写到一半的操作现场会丢失（用户只能从头再来）。
+  try {
+    const pages = getCurrentPages()
+    const current = pages[pages.length - 1]
+    if (current && current.route && current.route !== 'pages/login/login') {
+      const isTab = ['pages/index/index', 'pages/goods/goods', 'pages/parcel/parcel', 'pages/mine/mine'].indexOf(current.route) >= 0
+      wx.setStorageSync('loginRedirect', { url: '/' + current.route, isTab })
+    }
+  } catch (e) {
+    // 记录失败不影响登录跳转
+  }
   wx.removeStorageSync('token')
   wx.removeStorageSync('userInfo')
   wx.removeStorageSync('refreshToken')
@@ -19,8 +31,30 @@ function handle401() {
   const now = Date.now()
   if (now - last401At < 2000) return
   last401At = now
-  wx.showToast({ title: '登录已失效，请重新登录', icon: 'none' })
+  wx.showToast({ title: '登录已失效，请重新登录', icon: 'none', duration: 2500 })
   wx.reLaunch({ url: '/pages/login/login' })
+}
+
+/**
+ * 请求参数清理：过滤 undefined / null / 空字符串。
+ *
+ * 背景：微信 wx.request 会把 undefined 序列化成字符串 "undefined"（GET 拼进 query、POST 拼进 body），
+ * 后端 Integer/Long/Double 等类型绑定会直接失败，例如订单页
+ * `status: undefined` → `For input string: "undefined"` 的线上报错。
+ *
+ * 约定：
+ * - 只清理对象自身的键（浅层），嵌套对象/数组原样保留（避免误删结构）；
+ * - 保留 0 / false / 非空字符串（0 是合法业务值，如「待发货」status=0、页码等）。
+ */
+function cleanParams(data) {
+  if (!data || typeof data !== 'object' || Array.isArray(data)) return data
+  const cleaned = {}
+  Object.keys(data).forEach((key) => {
+    const value = data[key]
+    if (value === undefined || value === null || value === '') return
+    cleaned[key] = value
+  })
+  return cleaned
 }
 
 /**
@@ -28,12 +62,14 @@ function handle401() {
  */
 function request(url, method = 'GET', data = {}) {
   const token = wx.getStorageSync('token')
+  // GET/POST 统一清理参数：空值不进 query/body，避免 "undefined" 字符串打到后端
+  const payload = cleanParams(data)
 
   return new Promise((resolve, reject) => {
     wx.request({
       url: `${BASE_URL}${url}`,
       method,
-      data,
+      data: payload,
       timeout: 10000,
       header: {
         'Content-Type': 'application/json',
@@ -223,9 +259,25 @@ function listSendStations() {
   return request('/app-api/transport/send/stations')
 }
 
+/**
+ * 当前位置可达性评估：车辆能否直接到达用户位置；
+ * 不可达时返回最近可服务站点 + 距离 + 步行时间（服务端按道路距离优先、直线兜底）。
+ */
+function getReachability(latitude, longitude) {
+  return request('/app-api/transport/send/reachability', 'POST', { latitude, longitude })
+}
+
 /** 路线预览：取货/送达站点路网距离 + 预计时间（POST，后端校验站点有效性） */
 function previewSendRoute(pickupStationId, deliveryStationId) {
   return request('/app-api/transport/send/route-preview', 'POST', { pickupStationId, deliveryStationId })
+}
+
+/**
+ * 寄货试算：件单价×件数 + 里程费（与后台方案预计收入同源）。
+ * 村民在寄货页填完取货/送达地址即显示金额，不必等提交后才看得到。
+ */
+function quoteSendFee(pickupStationId, deliveryStationId, itemCount) {
+  return request('/app-api/transport/send/quote', 'POST', { pickupStationId, deliveryStationId, itemCount })
 }
 
 /** 我的乘车安排（客运订单已分配/在途/完成，含承运车辆，供村民到站通知） */
@@ -290,6 +342,16 @@ function driverDeliver(driverId, orderId) {
   return request('/app-api/transport/driver/deliver', 'POST', { driverId, orderId })
 }
 
+/** 商城订单装车确认（司机拍照核验凭证，订单保持已发货/配送中） */
+function driverProductLoad(driverId, orderId, driverPhotoUrl) {
+  return request('/app-api/transport/driver/product-load', 'POST', { driverId, orderId, driverPhotoUrl })
+}
+
+/** 商城订单妥投完成（司机交付凭证，订单转已完成，用户端可见） */
+function driverProductDeliver(driverId, orderId, driverPhotoUrl) {
+  return request('/app-api/transport/driver/product-deliver', 'POST', { driverId, orderId, driverPhotoUrl })
+}
+
 /** 上报车辆位置（行驶中定时调用） */
 function reportDriverLocation(data) {
   return request('/app-api/transport/driver/location', 'POST', data)
@@ -313,19 +375,21 @@ function getRealtimeBuses() {
 }
 
 /** 实时公交线路（含经停点与该线在线车辆，车来了式地图+列表，免登录） */
-function getRealtimeBusLines() {
-  return request('/app-api/transport/bus/lines')
+/** 实时公交线路（传坐标时只取附近线路：主城全量线网几百条，全量下发会超时） */
+function getRealtimeBusLines(latitude, longitude, radius) {
+  return request('/app-api/transport/bus/lines', 'GET', { latitude, longitude, radius })
+}
+
+/** 单条线路的真实道路轨迹（点开线路时按需查询，带缓存；失败由前端回退站点直线） */
+function getBusLinePolyline(routeId) {
+  return request(`/app-api/transport/bus/line-polyline?routeId=${routeId}`)
 }
 
 /** 附近实时公交（按用户坐标 Haversine 过滤 radius 内站点/车辆；无坐标时传 district 区域 fallback）。
- *  过滤 undefined 参数：微信 wx.request 会把 undefined 序列化成字符串 "undefined"，导致后端 Double 转换 400。 */
+ *  空值参数（无定位/无区域/未指定 radius）统一由 request() 的 cleanParams 过滤，
+ *  避免 wx.request 把 undefined 序列化成字符串 "undefined" 导致后端 Double 转换 400。 */
 function getNearbyRealtimeBuses(latitude, longitude, radius, district) {
-  const params = {}
-  if (latitude != null) params.latitude = latitude
-  if (longitude != null) params.longitude = longitude
-  if (radius != null) params.radius = radius
-  if (district) params.district = district
-  return request('/app-api/transport/bus/nearby', 'GET', params)
+  return request('/app-api/transport/bus/nearby', 'GET', { latitude, longitude, radius, district })
 }
 
 // ==================== 取件核销 + 文件上传 ====================
@@ -333,6 +397,82 @@ function getNearbyRealtimeBuses(latitude, longitude, radius, district) {
 /** 取件核销：邮快件收件人取件，司机确认（校验取件码） */
 function driverPickupVerify(driverId, orderId, pickupCode) {
   return request('/app-api/transport/driver/pickup-verify', 'POST', { driverId, orderId, pickupCode })
+}
+
+// ==================== 消息通知中心 ====================
+
+/** 我的消息分页（readStatus 可选：0未读 1已读） */
+function pageMyNotifications(params) {
+  return request('/app-api/transport/notification/page', 'GET', params)
+}
+
+/** 我的未读消息数（红点） */
+function getNotificationUnreadCount() {
+  return request('/app-api/transport/notification/unread-count', 'GET')
+}
+
+/** 标记单条消息已读 */
+function readNotification(id) {
+  return request(`/app-api/transport/notification/read?id=${id}`, 'PUT')
+}
+
+/** 全部标记已读（orderId 可选） */
+function readAllNotifications(orderId) {
+  return request('/app-api/transport/notification/read-all', 'PUT', { orderId })
+}
+
+// ==================== 多段联运（司机交接 / 运输段进度） ====================
+
+/** 待确认的货物交接任务 */
+function getDriverHandovers(driverId) {
+  return request('/app-api/transport/driver/handovers', 'GET', { driverId })
+}
+
+/** 确认货物交接（拍照核验） */
+function confirmDriverHandover(data) {
+  return request('/app-api/transport/driver/handover/confirm', 'POST', data)
+}
+
+/** 我的运输段进度 */
+function getDriverLegs(driverId) {
+  return request('/app-api/transport/driver/legs', 'GET', { driverId })
+}
+
+/** 用户端：按订单号查多段运输进度 */
+function getParcelLegs(no) {
+  return request('/app-api/transport/send/legs', 'GET', { no })
+}
+
+/** 用户端：按订单号查运输拓扑（订单+分段+换乘交接+候选方案解释+时间线，一次返回） */
+function getParcelTopology(no) {
+  return request('/app-api/transport/send/topology', 'GET', { no })
+}
+
+// ==================== 司机运输段任务（接受/导航/到达/装货/发车/交接/完成） ====================
+
+/** 当前运输段（司机任务详情） */
+function getDriverCurrentLeg(driverId) {
+  return request('/app-api/transport/driver/current-leg', 'GET', { driverId })
+}
+
+/** 运输段操作：action ∈ accept/navigate/arrive-origin/load/start/arrive-dest/handover-start/handover-confirm/complete */
+function driverLegAction(action, data) {
+  return request(`/app-api/transport/driver/leg/${action}`, 'POST', data)
+}
+
+/** 司机消息中心分页 */
+function pageDriverMessages(params) {
+  return request('/app-api/transport/driver/messages', 'GET', params)
+}
+
+/** 司机未读消息数 */
+function getDriverUnreadCount(driverId) {
+  return request('/app-api/transport/driver/messages/unread-count', 'GET', { driverId })
+}
+
+/** 标记司机消息已读 */
+function readDriverMessage(id, driverId) {
+  return request(`/app-api/transport/driver/messages/read?id=${id}&driverId=${driverId}`, 'PUT')
 }
 
 /** 上传文件（照片），返回文件 URL（infra app 文件上传，免登录） */
@@ -343,6 +483,8 @@ function uploadFile(filePath) {
       url: `${BASE_URL}/app-api/infra/file/upload`,
       filePath,
       name: 'file',
+      // 显式超时：默认不超时会让"上传中…"遮罩一直挂着，用户以为卡死在发布界面
+      timeout: 30000,
       // 与 request() 鉴权方式一致，无 token 时不带该头
       header: token ? { 'Authorization': `Bearer ${token}` } : {},
       success(res) {
@@ -371,6 +513,7 @@ function uploadFile(filePath) {
 
 module.exports = {
   request,
+  cleanParams,
   smsLogin,
   sendSmsCode,
   wechatMiniAppLogin,
@@ -400,6 +543,8 @@ module.exports = {
   trackParcel,
   listSendStations,
   previewSendRoute,
+  quoteSendFee,
+  getReachability,
   getMyArrangements,
   confirmStationAction,
   getDriverProfile,
@@ -414,10 +559,27 @@ module.exports = {
   driverArrive,
   driverPickupConfirm,
   driverDeliver,
+  driverProductLoad,
+  driverProductDeliver,
   reportDriverLocation,
   getRealtimeBuses,
   getRealtimeBusLines,
+  getBusLinePolyline,
   getNearbyRealtimeBuses,
   driverPickupVerify,
+  pageMyNotifications,
+  getNotificationUnreadCount,
+  readNotification,
+  readAllNotifications,
+  getDriverHandovers,
+  confirmDriverHandover,
+  getDriverLegs,
+  getParcelLegs,
+  getParcelTopology,
+  getDriverCurrentLeg,
+  driverLegAction,
+  pageDriverMessages,
+  getDriverUnreadCount,
+  readDriverMessage,
   uploadFile
 }
