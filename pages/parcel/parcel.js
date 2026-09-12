@@ -5,6 +5,7 @@
 const api = require('../../utils/api')
 const qrcodeRender = require('../../utils/qrcode-render')
 const reviewUtils = require('../../utils/review')
+const productImg = require('../../utils/product-img')
 const { formatBackendTime, VILLAGES } = require('../../utils/util')
 
 /** 运输订单状态流（对应 TransportOrderStatusEnum，含 Phase 2 承运审核前置状态） */
@@ -42,7 +43,13 @@ Page({
     arrangements: [],
     // 单号查询结果
     trackResult: null,
-    noResult: false
+    noResult: false,
+    // 我的购物（商城订单）：我买的东西同样由大巴司机送到交付站点，进度也在这里看
+    productOrders: [],
+    productPageNo: 1,
+    productTotal: 0,
+    productHasMore: true,
+    productLoading: false
   },
 
   onLoad(options) {
@@ -66,6 +73,14 @@ Page({
     this.setData({ currentVillage: app.globalData.currentVillage || '云山村' })
     // 同步老年模式 / 主题色
     this._applyAppearance()
+    // 从「我的订单 → 寄货订单」点卡片过来：直接打开这一单的物流详情（单号查询 tab）
+    const intent = app.globalData.parcelIntent
+    if (intent && typeof intent === 'object' && intent.type === 'track' && intent.no) {
+      app.globalData.parcelIntent = ''
+      this.setData({ activeTab: 2, trackingNo: intent.no })
+      this.searchParcel()
+      return
+    }
     // 从「我的寄货」切过来时进入寄货列表 tab
     if (app.globalData.parcelIntent === 'my') {
       app.globalData.parcelIntent = ''
@@ -73,16 +88,17 @@ Page({
       this.reloadSendList()
       return
     }
-    // 「我的订单 → 寄货订单」点卡片进来：直接切到「单号查询」并展开该单物流详情
-    const intent = app.globalData.parcelIntent
-    if (intent && intent.type === 'track' && intent.no) {
+    // 从「我的购物」切过来时进入购物订单 tab（我买的东西由大巴送到交付站点）
+    if (app.globalData.parcelIntent === 'shopping') {
       app.globalData.parcelIntent = ''
-      this.setData({ activeTab: 1, trackingNo: intent.no, trackResult: null, noResult: false })
-      this.searchParcel()
+      this.setData({ activeTab: 1 })
+      this.reloadProductOrders()
       return
     }
     if (this.data.activeTab === 0) {
       this.reloadSendList()
+    } else if (this.data.activeTab === 1) {
+      this.reloadProductOrders()
     }
     this.loadArrangements()
   },
@@ -176,6 +192,8 @@ Page({
   onPullDownRefresh() {
     if (this.data.activeTab === 0) {
       this.reloadSendList().finally(() => wx.stopPullDownRefresh())
+    } else if (this.data.activeTab === 1) {
+      this.reloadProductOrders().finally(() => wx.stopPullDownRefresh())
     } else {
       wx.stopPullDownRefresh()
     }
@@ -183,14 +201,102 @@ Page({
 
   onReachBottom() {
     if (this.data.activeTab === 0) this.loadMore()
+    else if (this.data.activeTab === 1) this.loadMoreProductOrders()
   },
 
-  /** 切换 tab */
+  /** 切换 tab：0 我的寄货 · 1 我的购物 · 2 单号查询 */
   switchTab(e) {
     const idx = Number(e.currentTarget.dataset.index)
     if (idx === this.data.activeTab) return
     this.setData({ activeTab: idx })
     if (idx === 0) this.reloadSendList()
+    else if (idx === 1) this.reloadProductOrders()
+  },
+
+  // ==================== 我的购物（商城订单） ====================
+
+  reloadProductOrders() {
+    this.setData({ productPageNo: 1, productOrders: [], productTotal: 0, productHasMore: true })
+    return this.loadProductOrders()
+  },
+
+  /** 我买到的商品订单：商品名/图片/金额 + 送货进度（承运司机/交付站点） */
+  async loadProductOrders() {
+    this.setData({ productLoading: true })
+    try {
+      const res = await api.pageMyProductOrders({
+        pageNo: this.data.productPageNo,
+        pageSize: this.data.pageSize
+      })
+      const list = (res.list || []).map((o) => ({
+        ...o,
+        statusName: o.statusName || this.productStatusText(o.status),
+        statusClass: this.productStatusClass(o.status),
+        createTimeText: formatBackendTime(o.createTime),
+        totalAmountText: o.totalAmount != null ? Number(o.totalAmount).toFixed(2) : '0.00',
+        deliveryHint: this.productDeliveryHint(o),
+        items: (o.items || []).map((g) => ({
+          ...g,
+          imageUrl: productImg.resolve({ name: g.productName, image: g.productImage })
+        }))
+      }))
+      const merged = this.data.productPageNo === 1 ? list : this.data.productOrders.concat(list)
+      const total = res.total || 0
+      this.setData({
+        productOrders: merged,
+        productTotal: total,
+        productHasMore: merged.length < total
+      })
+    } catch (e) {
+      // 错误提示已由 api.js 统一处理
+    } finally {
+      this.setData({ productLoading: false })
+    }
+  },
+
+  loadMoreProductOrders() {
+    if (this.data.productLoading || !this.data.productHasMore) return
+    this.setData({ productPageNo: this.data.productPageNo + 1 })
+    this.loadProductOrders()
+  },
+
+  /** 商品订单状态：0 待发货 1 已发货（配送中） 2 已完成 3 已取消 */
+  productStatusText(s) {
+    return { 0: '待发货', 1: '配送中', 2: '已完成', 3: '已取消' }[s] || '—'
+  },
+
+  productStatusClass(s) {
+    return { 0: 'status-pending', 1: 'status-shipping', 2: 'status-done', 3: 'status-done' }[s] || 'status-done'
+  },
+
+  /** 送货进度一句话（和寄货卡片同一套口径：司机已到达 / 已装车 / 已妥投） */
+  productDeliveryHint(o) {
+    const driver = o.driverName ? `${o.driverName}${o.driverMobile ? ' ' + o.driverMobile : ''}` : ''
+    if (o.deliverTime) return '司机已妥投交付'
+    if (o.loadTime) return `${driver || '司机'}已装车，配送中`
+    if (o.vehiclePlate) return `${o.vehiclePlate}${driver ? ' ' + driver : ''} 正在送往${o.deliverStationName || '交付站点'}`
+    if (o.status === 0) return '商家还未发货'
+    return ''
+  },
+
+  /** 点商品订单卡片 → 订单详情页（商品清单 / 收货信息 / 承运司机 / 配送进度） */
+  goToProductOrderDetail(e) {
+    const id = e.currentTarget.dataset.id
+    if (!id) return
+    wx.navigateTo({ url: `/pages/orders/detail/detail?id=${id}` })
+  },
+
+  /** 点寄货卡片 → 直接看这单的完整物流详情（复用"单号查询"渲染：分段/交接/时间轴/二维码） */
+  openSendDetail(e) {
+    const no = e.currentTarget.dataset.no
+    if (!no) return
+    this.setData({ activeTab: 2, trackingNo: no })
+    this.searchParcel()
+  },
+
+  /** 购物订单空态：去商城逛逛 */
+  goShopping() {
+    wx.switchTab({ url: '/pages/goods/goods' })
   },
 
   onTrackingInput(e) {
@@ -225,7 +331,6 @@ Page({
       const polyline = []
       const markers = []
       const circles = []
-      let pendingRoadCount = 0
       const legsAll = t.legs || []
       // 当前执行段：优先"进行中"的段，其次最后一段未完成的
       const activeLeg = legsAll.find((l) => l.status >= 4 && l.status <= 10)
@@ -239,21 +344,16 @@ Page({
         // 白色+蓝色主题：已完成=深蓝、当前段=亮蓝、未开始=灰
         const color = l.status === 11 ? '#1F5E9E' : (l.status >= 7 && l.status <= 10 ? '#2E7BBF' : '#9AA5B1')
         const isActive = activeLeg && l.id === activeLeg.id
-        // 真实道路轨迹优先（navigationPolyline 来自高德路网）；没取到就不画这一段
-        // （演示口径：地图上不出现两点直线；取到真实轨迹后刷新即可看到）
+        // 真实道路轨迹优先（navigationPolyline 来自高德路网）；无则站点直连
         const road = (l.navigationPolyline || []).map((p) => ({ latitude: p.latitude, longitude: p.longitude }))
+        const path = road.length >= 2 ? road : [from, to]
         if (road.length >= 2) {
           road.forEach((p) => points.push(p))
-          polyline.push({
-            points: road, color, width: isActive ? 7 : 4, arrowLine: true
-          })
-        } else {
-          // 取不到真实轨迹时用虚线示意（与实线区分），并计数提示；后台「预热真实路线」后即变实线
-          polyline.push({
-            points: [from, to], color, width: isActive ? 7 : 4, arrowLine: true, dottedLine: true
-          })
-          pendingRoadCount++
         }
+        polyline.push({
+          points: path, color, width: isActive ? 7 : 4, arrowLine: true,
+          dottedLine: road.length < 2 // 估算段用虚线，明确"非真实道路"
+        })
         if (l.handoverRequired && l.toLongitude != null) {
           markers.push({
             id: 100 + (l.legSequence || 0),
@@ -302,7 +402,6 @@ Page({
         planningModeName: t.planningModeName || '',
         mapPoints: points,
         mapPolyline: polyline,
-        pendingRoadCount,
         mapMarkers: markers,
         mapCircles: circles,
         activeLegText: activeLeg
@@ -435,8 +534,7 @@ Page({
     this.setData({ loading: true })
     try {
       const res = await api.pageMySendOrders({ pageNo: this.data.pageNo, pageSize: this.data.pageSize })
-      const sendList = (res.list || []).map((o) => ({
-        source: 'SEND',
+      const list = (res.list || []).map((o) => ({
         ...o,
         statusName: o.statusName || this.statusText(o.status),
         statusClass: this.statusClass(o.status),
@@ -449,10 +547,6 @@ Page({
         arrivedText: this.buildArrivedText(o),
         servicePointText: this.buildServicePointText(o)
       }))
-      // 商城订单也算快递包裹：已发货/已完成的商城订单并入同一列表（首页只并一次）
-      const productList = this.data.pageNo === 1 ? await this.loadProductParcels() : []
-      const list = sendList.concat(productList)
-        .sort((a, b) => String(b.createTime || '').localeCompare(String(a.createTime || '')))
       const merged = this.data.pageNo === 1 ? list : this.data.sendList.concat(list)
       const total = res.total || 0
       // 车快到了：首次进入阈值弹一次提醒（演示时最直观；重复刷新不打扰）
@@ -469,55 +563,6 @@ Page({
     } finally {
       this.setData({ loading: false })
     }
-  },
-
-  /**
-   * 商城订单作为"快递"并入包裹列表：只取已发货(1)/已完成(2)——待发货还没寄出、已取消不算包裹。
-   * 字段映射到寄货卡片同一套结构，卡片上以「商城」标签区分，点卡片跳订单溯源详情。
-   */
-  async loadProductParcels() {
-    const res = await api.pageMyProductOrders({ pageNo: 1, pageSize: 50 }).catch(() => ({}))
-    return (res.list || [])
-      .filter((o) => o.status === 1 || o.status === 2)
-      .map((o) => {
-        const items = o.items || []
-        const count = items.reduce((sum, g) => sum + (g.quantity || 0), 0) || items.length || 1
-        const first = items[0] || {}
-        return {
-          source: 'PRODUCT',
-          id: o.id,
-          productOrderId: o.id,
-          orderNo: o.orderNo,
-          goodsName: items.length > 1
-            ? `${first.productName || '商城商品'} 等 ${items.length} 种`
-            : (first.productName || '商城商品'),
-          itemCount: count,
-          amountText: o.totalAmount != null ? `¥${o.totalAmount}` : '',
-          status: o.status,
-          statusName: (o.status === 1 ? '已发货 · 配送中' : '已完成 · 已送达'),
-          statusClass: o.status === 1 ? 'status-shipping' : 'status-done',
-          createTime: o.createTime || '',
-          createTimeText: formatBackendTime(o.createTime),
-          showCode: false
-        }
-      })
-  },
-
-  /**
-   * 点包裹卡片看详情：
-   * · 寄货订单 → 切到「单号查询」并展开该单的物流详情（时间轴/多段联运/换乘交接/取件码/地图）；
-   * · 商城订单 → 跳「产地溯源」订单详情（承运司机 + 到站/交付凭证）。
-   */
-  openParcelDetail(e) {
-    const dataset = e.currentTarget.dataset || {}
-    if (dataset.source === 'PRODUCT') {
-      if (!dataset.id) return
-      wx.navigateTo({ url: `/pages/goods/trace/trace?id=${dataset.id}` })
-      return
-    }
-    if (!dataset.no) return
-    this.setData({ activeTab: 1, trackingNo: dataset.no, trackResult: null, noResult: false })
-    this.searchParcel()
   },
 
   loadMore() {

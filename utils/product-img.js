@@ -31,11 +31,16 @@ function resolve(product) {
   if (!product) return ''
   // 后台上传的图片优先（商品图以后台配置为准，不再靠商品名猜）
   const url = product.imageUrl
-  if (typeof url === 'string' && /^(https?:\/\/|\/images\/|\/uploads\/|\/app-api\/)/.test(url.trim())) {
+  // 注意：后台上传返回的地址可能是绝对地址（http(s)://域名/admin-api/infra/file/...），
+  // 也可能是相对地址（/admin-api/infra/file/...）——两种都要认，否则会被下面的"按名字猜本地图"覆盖，
+  // 表现就是"后台换了商品图片，小程序里还是旧图/占位图"。
+  if (typeof url === 'string'
+    && /^(https?:\/\/|\/\/|\/images\/|\/uploads\/|\/app-api\/|\/admin-api\/|\/infra\/)/.test(url.trim())) {
     return url.trim()
   }
   const img = product.image
-  if (typeof img === 'string' && (/^https?:\/\//.test(img) || /^\/images\//.test(img))) {
+  if (typeof img === 'string'
+    && (/^https?:\/\//.test(img) || /^\/\//.test(img) || /^\/images\//.test(img) || /^\/admin-api\//.test(img))) {
     return img
   }
   const text = String(product.name || '') + String(img || '')

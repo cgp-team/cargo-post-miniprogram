@@ -54,6 +54,11 @@
         <text class="menu-text">我的寄货</text>
         <text class="menu-arrow">›</text>
       </view>
+      <view class="menu-item" bindtap="goToMyShopping" hover-class="hover">
+        <icon class="menu-emoji" name="shop" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
+        <text class="menu-text">我的购物</text>
+        <text class="menu-arrow">›</text>
+      </view>
       <view class="menu-item" bindtap="switchToDriver" hover-class="hover">
         <icon class="menu-emoji" name="bus" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
         <text class="menu-text">切换为司机模式</text>

@@ -172,7 +172,8 @@ Page({
       return
     }
     if (!dataset.id) return
-    wx.navigateTo({ url: `/pages/goods/trace/trace?id=${dataset.id}` })
+    // 商城订单 → 订单详情页（商品清单/收货信息/承运司机/配送进度与装车妥投凭证）
+    wx.navigateTo({ url: `/pages/orders/detail/detail?id=${dataset.id}` })
   },
 
   /** 订单状态 → 语义 class（chip 配色在 wxss，不再内联色值）：0 待发货 1 已发货 2 已完成 3 已取消 */

@@ -66,6 +66,8 @@ Page({
     this.setData({ currentVillage: app.globalData.currentVillage || '云山村' })
     // 同步老年模式 / 主题色（设置页改动后回来立即生效）
     this._applyAppearance()
+    // 后台改了商品（价格/描述/图片/上下架）后回到商城要看到最新数据，而不是首屏的缓存
+    if (this._loaded) this.reloadProducts()
   },
 
   /** 加载上架商品（分页，追加到 allProducts） */
@@ -81,6 +83,7 @@ Page({
       }))
       const allProducts = this.data.pageNo === 1 ? list : this.data.allProducts.concat(list)
       const total = res.total || 0
+      this._loaded = true
       this.setData({
         allProducts,
         total,

@@ -72,6 +72,11 @@
       class="tab-item {{activeTab === 1 ? 'active' : ''}}"
       data-index="{{1}}"
       bindtap="switchTab" hover-class="hover"
+    >我的购物</view>
+    <view
+      class="tab-item {{activeTab === 2 ? 'active' : ''}}"
+      data-index="{{2}}"
+      bindtap="switchTab" hover-class="hover"
     >单号查询</view>
   </view>
 
@@ -81,35 +86,26 @@
       class="parcel-card"
       wx:for="{{sendList}}"
       wx:key="id"
-      data-source="{{item.source}}"
       data-no="{{item.orderNo}}"
-      data-id="{{item.productOrderId}}"
-      bindtap="openParcelDetail"
+      bindtap="openSendDetail"
       hover-class="hover"
     >
       <view class="parcel-header">
         <view class="parcel-title-row">
           <icon name="box" size="48" color="{{iconColor}}" />
           <view class="parcel-info">
-            <text class="parcel-name">
-              {{item.goodsName || '寄货'}}
-              <text style="font-size:20rpx;padding:2rpx 10rpx;border-radius:10rpx;margin-left:8rpx;background:{{item.source === 'PRODUCT' ? '#E8F3EC' : '#FFF3E0'}};color:{{item.source === 'PRODUCT' ? '#1C4B2E' : '#B26A00'}};">{{item.source === 'PRODUCT' ? '商城' : '寄货'}}</text>
-            </text>
+            <text class="parcel-name">{{item.goodsName || '寄货'}}</text>
             <text class="parcel-no">单号: {{item.orderNo}}</text>
           </view>
         </view>
         <view class="parcel-status {{item.statusClass}}">{{item.statusName}}</view>
       </view>
       <view class="parcel-route">
-        <view class="route-weight">
-          <icon name="bus" size="26" color="#6B675C" />
-          <text wx:if="{{item.source === 'PRODUCT'}}">{{item.itemCount || 1}} 件 · {{item.amountText}}</text>
-          <text wx:else>重量 {{item.goodsWeight}}kg</text>
-        </view>
+        <view class="route-weight"><icon name="bus" size="26" color="#6B675C" /><text>重量 {{item.goodsWeight}}kg</text></view>
         <text class="parcel-eta">{{item.createTimeText}}</text>
       </view>
       <!-- 物体信息（寄货页填写）：类型 / 件数 / 体积 / 生鲜 -->
-      <view wx:if="{{item.source !== 'PRODUCT' && (item.cargoCategory || item.itemCount)}}" class="parcel-cargo-row">
+      <view wx:if="{{item.cargoCategory || item.itemCount}}" class="parcel-cargo-row">
         <text class="cargo-chip">{{item.cargoCategory || '农产品'}}</text>
         <text class="cargo-chip">{{item.itemCount || 1}} 件</text>
         <text wx:if="{{item.volumeM3}}" class="cargo-chip">{{item.volumeM3}} m³</text>
@@ -120,11 +116,11 @@
         <icon name="notice" size="30" color="#FFFFFF" />
         <text class="parcel-approach-text">{{item.arrivedText}}</text>
       </view>
-      <view wx:if="{{item.approaching}}" class="parcel-approach" bindtap="goToBusTracking" hover-class="hover">
+      <view wx:if="{{item.approaching}}" class="parcel-approach" catchtap="goToBusTracking" hover-class="hover">
         <icon name="bus" size="30" color="#FFFFFF" />
         <text class="parcel-approach-text">车快到了 {{item.carrierEtaMinutes}} 分钟 · {{item.vehiclePlate || '班车'}} 距{{item.targetStation || '站点'}}{{item.carrierLocationSource === 'SIMULATED' ? '（位置推算）' : ''}}</text>
       </view>
-      <view wx:elif="{{item.carrierText}}" class="parcel-carrier-list" bindtap="goToBusTracking" hover-class="hover">
+      <view wx:elif="{{item.carrierText}}" class="parcel-carrier-list" catchtap="goToBusTracking" hover-class="hover">
         <icon name="bus" size="26" color="{{iconColor}}" />
         <text>{{item.carrierText}}</text>
       </view>
@@ -135,10 +131,10 @@
           wx:if="{{item.showCode}}"
           class="parcel-code-value"
           data-code="{{item.pickupCode}}"
-          bindtap="copyPickupCode" hover-class="hover"
+          catchtap="copyPickupCode" hover-class="hover"
         >{{item.pickupCode}}</text>
         <text wx:else class="parcel-code-value masked">＊＊＊＊</text>
-        <text class="parcel-code-toggle" data-index="{{index}}" bindtap="toggleCode" hover-class="hover">{{item.showCode ? '收起' : '查看'}}</text>
+        <text class="parcel-code-toggle" data-index="{{index}}" catchtap="toggleCode" hover-class="hover">{{item.showCode ? '收起' : '查看'}}</text>
       </view>
       <!-- 待客户操作：确认已送站 → 待入池 -->
       <view wx:if="{{item.status === 7 && item.servicePointText}}" class="parcel-service-point">
@@ -147,10 +143,10 @@
           wx:if="{{item.servicePointLatitude && item.servicePointLongitude}}"
           class="service-point-nav"
           data-lat="{{item.servicePointLatitude}}" data-lng="{{item.servicePointLongitude}}" data-name="{{item.servicePointStationName}}"
-          bindtap="openServicePoint" hover-class="hover"
+          catchtap="openServicePoint" hover-class="hover"
         >导航前往</text>
       </view>
-      <button wx:if="{{item.status === 7}}" class="btn-station-confirm" data-id="{{item.id}}" bindtap="confirmStationAction" hover-class="hover">我已送到指定站点，确认入池</button>
+      <button wx:if="{{item.status === 7}}" class="btn-station-confirm" data-id="{{item.id}}" catchtap="confirmStationAction" hover-class="hover">我已送到指定站点，确认入池</button>
     </view>
 
     <view class="loading-state" wx:if="{{loading && sendList.length}}">加载中…</view>
@@ -159,8 +155,60 @@
     <empty-state wx:if="{{!sendList.length && !loading}}" icon="box" text="还没有寄货记录" />
   </view>
 
-  <!-- Tab1: 单号查询结果 -->
+  <!-- Tab1: 我的购物（商城订单：我买的东西由大巴司机送到交付站点，进度在这里看） -->
   <view wx:if="{{activeTab === 1}}" class="parcel-list">
+    <view
+      class="parcel-card"
+      wx:for="{{productOrders}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      bindtap="goToProductOrderDetail"
+      hover-class="hover"
+    >
+      <view class="parcel-header">
+        <view class="parcel-title-row">
+          <icon name="box" size="48" color="{{iconColor}}" />
+          <view class="parcel-info">
+            <text class="parcel-name">{{item.items[0] ? item.items[0].productName : '购物订单'}}</text>
+            <text class="parcel-no">单号: {{item.orderNo}}</text>
+          </view>
+        </view>
+        <view class="parcel-status {{item.statusClass}}">{{item.statusName}}</view>
+      </view>
+
+      <!-- 商品明细（第一个商品 + 其余件数） -->
+      <view class="mall-goods-row" wx:if="{{item.items.length}}">
+        <image wx:if="{{item.items[0].imageUrl}}" class="mall-goods-img" src="{{item.items[0].imageUrl}}" mode="aspectFill" lazy-load />
+        <view wx:else class="mall-goods-img-ph"><icon name="leaf" size="40" color="{{iconColor}}" /></view>
+        <view class="mall-goods-info">
+          <text class="mall-goods-name">{{item.items[0].productName}}</text>
+          <text class="mall-goods-sub">¥{{item.items[0].productPrice}} × {{item.items[0].quantity}}</text>
+        </view>
+        <view class="mall-goods-right">
+          <text class="mall-goods-amount">¥{{item.totalAmountText}}</text>
+          <text wx:if="{{item.items.length > 1}}" class="mall-goods-more">等 {{item.items.length}} 件商品</text>
+        </view>
+      </view>
+
+      <view wx:if="{{item.deliveryHint}}" class="parcel-carrier-list">
+        <icon name="bus" size="26" color="{{iconColor}}" />
+        <text>{{item.deliveryHint}}</text>
+      </view>
+
+      <view class="parcel-route">
+        <text class="parcel-tap-hint">点击查看订单详情 ›</text>
+        <text class="parcel-eta">{{item.createTimeText}}</text>
+      </view>
+    </view>
+
+    <view class="loading-state" wx:if="{{productLoading && productOrders.length}}">加载中…</view>
+    <view class="loading-state" wx:elif="{{!productHasMore && productOrders.length}}">没有更多了</view>
+
+    <empty-state wx:if="{{!productOrders.length && !productLoading}}" icon="box" text="还没有购物订单" btnText="去逛逛" bind:tapbtn="goShopping" />
+  </view>
+
+  <!-- Tab2: 单号查询结果 -->
+  <view wx:if="{{activeTab === 2}}" class="parcel-list">
     <view wx:if="{{trackResult}}" class="parcel-card">
       <view class="parcel-header">
         <view class="parcel-title-row">
@@ -223,7 +271,6 @@
           <text class="lg lg-todo">━ 未开始段</text>
           <text class="lg lg-est">┅ 虚线＝估算段</text>
           <text class="lg lg-hub">◆ 换乘站</text>
-          <text wx:if="{{trackResult.pendingRoadCount}}" class="lg">⚠ {{trackResult.pendingRoadCount}} 段真实路线获取中</text>
         </view>
       </view>
 

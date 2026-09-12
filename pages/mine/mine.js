@@ -55,6 +55,13 @@ Page({
     wx.switchTab({ url: '/pages/parcel/parcel' })
   },
 
+  /** 我的购物（商城买到的商品由大巴司机送到交付站点；快递页"我的购物"tab 看进度） */
+  goToMyShopping() {
+    if (!auth.requireLogin()) return
+    getApp().globalData.parcelIntent = 'shopping'
+    wx.switchTab({ url: '/pages/parcel/parcel' })
+  },
+
   /** 设置 */
   goToSettings() {
     wx.navigateTo({ url: '/pages/settings/settings' })

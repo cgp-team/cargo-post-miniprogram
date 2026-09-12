@@ -13,6 +13,7 @@
     "pages/notification/notification",
     "pages/send/send",
     "pages/orders/orders",
+    "pages/orders/detail/detail",
     "pages/settings/settings",
     "pages/driver/workbench/workbench",
     "pages/driver/routes/routes",
