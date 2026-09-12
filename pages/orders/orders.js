@@ -7,8 +7,24 @@ const productImg = require('../../utils/product-img')
 const feedback = require('../../utils/feedback')
 const { formatBackendTime } = require('../../utils/util')
 
+/** 寄货订单状态（TransportOrderStatusEnum）：文案与「快递」页保持一致 */
+const SEND_STATUS = {
+  0: '已创建', 6: '待审核', 7: '待客户操作', 8: '待入池',
+  1: '已入池', 2: '已分配', 3: '已发车', 4: '已完成', 5: '已取消'
+}
+const SEND_STATUS_CLASS = {
+  0: 'status-pending', 6: 'status-pending', 7: 'status-pending', 8: 'status-pending', 1: 'status-pending',
+  2: 'status-shipping', 3: 'status-shipping', 4: 'status-done', 5: 'status-done'
+}
+
 Page({
   data: {
+    // 订单来源：商城订单（默认，行为不变）/ 寄货订单（与「快递」页同一批数据）
+    sourceTabs: [
+      { key: 'PRODUCT', name: '商城订单' },
+      { key: 'SEND', name: '寄货订单' }
+    ],
+    source: 'PRODUCT',
     statusTabs: [
       { key: '', name: '全部' },
       { key: 0, name: '待发货' },
@@ -63,9 +79,13 @@ Page({
   },
 
   async loadOrders() {
-    const { activeTab, pageNo, pageSize } = this.data
+    const { source, activeTab, pageNo, pageSize } = this.data
     this.setData({ loading: true })
     try {
+      if (source === 'SEND') {
+        await this.loadSendOrders()
+        return
+      }
       // 不传 status: undefined —— wx.request 会把它序列化成字符串 "undefined"，
       // 后端 ProductOrderPageReqVO.status(Integer) 绑定失败报
       // Failed to convert property value ... For input string: "undefined"
@@ -104,6 +124,55 @@ Page({
     if (this.data.loading || !this.data.hasMore) return
     this.setData({ pageNo: this.data.pageNo + 1 })
     this.loadOrders()
+  },
+
+  /** 切换订单来源（商城 / 寄货） */
+  switchSource(e) {
+    const key = e.currentTarget.dataset.key
+    if (!key || key === this.data.source) return
+    // 寄货订单的状态语义与商城不同，切来源时状态筛选重置为「全部」
+    this.setData({ source: key, activeTab: '' })
+    this.reload()
+  },
+
+  /** 寄货订单列表（transport_order）：字段映射到同一张卡片，点卡片进快递页物流详情 */
+  async loadSendOrders() {
+    const { pageNo } = this.data
+    const res = await api.pageMySendOrders({ pageNo, pageSize: this.data.pageSize })
+    const list = (res.list || []).map((o) => ({
+      source: 'SEND',
+      id: o.id,
+      orderNo: o.orderNo,
+      status: o.status,
+      statusName: o.statusName || SEND_STATUS[o.status] || '',
+      statusClass: SEND_STATUS_CLASS[o.status] || 'status-done',
+      createTime: o.createTime || '',
+      createTimeText: formatBackendTime(o.createTime),
+      goodsName: o.goodsName || '寄货',
+      itemCount: o.itemCount || 1,
+      goodsWeight: o.goodsWeight,
+      items: []
+    }))
+    const total = res.total || 0
+    const merged = pageNo === 1 ? list : this.data.list.concat(list)
+    this.setData({ list: merged, total, hasMore: merged.length < total })
+  },
+
+  /**
+   * 点订单卡片看详情：
+   * · 商城订单 → 「产地溯源」订单详情（承运司机 + 到站/交付凭证）；
+   * · 寄货订单 → 切到「快递」页并展开该单物流详情（时间轴/多段联运/取件码/地图）。
+   */
+  openOrderDetail(e) {
+    const dataset = e.currentTarget.dataset || {}
+    if (dataset.source === 'SEND') {
+      if (!dataset.no) return
+      getApp().globalData.parcelIntent = { type: 'track', no: dataset.no }
+      wx.switchTab({ url: '/pages/parcel/parcel' })
+      return
+    }
+    if (!dataset.id) return
+    wx.navigateTo({ url: `/pages/goods/trace/trace?id=${dataset.id}` })
   },
 
   /** 订单状态 → 语义 class（chip 配色在 wxss，不再内联色值）：0 待发货 1 已发货 2 已完成 3 已取消 */

@@ -73,6 +73,14 @@ Page({
       this.reloadSendList()
       return
     }
+    // 「我的订单 → 寄货订单」点卡片进来：直接切到「单号查询」并展开该单物流详情
+    const intent = app.globalData.parcelIntent
+    if (intent && intent.type === 'track' && intent.no) {
+      app.globalData.parcelIntent = ''
+      this.setData({ activeTab: 1, trackingNo: intent.no, trackResult: null, noResult: false })
+      this.searchParcel()
+      return
+    }
     if (this.data.activeTab === 0) {
       this.reloadSendList()
     }
@@ -217,6 +225,7 @@ Page({
       const polyline = []
       const markers = []
       const circles = []
+      let pendingRoadCount = 0
       const legsAll = t.legs || []
       // 当前执行段：优先"进行中"的段，其次最后一段未完成的
       const activeLeg = legsAll.find((l) => l.status >= 4 && l.status <= 10)
@@ -230,16 +239,21 @@ Page({
         // 白色+蓝色主题：已完成=深蓝、当前段=亮蓝、未开始=灰
         const color = l.status === 11 ? '#1F5E9E' : (l.status >= 7 && l.status <= 10 ? '#2E7BBF' : '#9AA5B1')
         const isActive = activeLeg && l.id === activeLeg.id
-        // 真实道路轨迹优先（navigationPolyline 来自高德路网）；无则站点直连
+        // 真实道路轨迹优先（navigationPolyline 来自高德路网）；没取到就不画这一段
+        // （演示口径：地图上不出现两点直线；取到真实轨迹后刷新即可看到）
         const road = (l.navigationPolyline || []).map((p) => ({ latitude: p.latitude, longitude: p.longitude }))
-        const path = road.length >= 2 ? road : [from, to]
         if (road.length >= 2) {
           road.forEach((p) => points.push(p))
+          polyline.push({
+            points: road, color, width: isActive ? 7 : 4, arrowLine: true
+          })
+        } else {
+          // 取不到真实轨迹时用虚线示意（与实线区分），并计数提示；后台「预热真实路线」后即变实线
+          polyline.push({
+            points: [from, to], color, width: isActive ? 7 : 4, arrowLine: true, dottedLine: true
+          })
+          pendingRoadCount++
         }
-        polyline.push({
-          points: path, color, width: isActive ? 7 : 4, arrowLine: true,
-          dottedLine: road.length < 2 // 估算段用虚线，明确"非真实道路"
-        })
         if (l.handoverRequired && l.toLongitude != null) {
           markers.push({
             id: 100 + (l.legSequence || 0),
@@ -288,6 +302,7 @@ Page({
         planningModeName: t.planningModeName || '',
         mapPoints: points,
         mapPolyline: polyline,
+        pendingRoadCount,
         mapMarkers: markers,
         mapCircles: circles,
         activeLegText: activeLeg
@@ -420,7 +435,8 @@ Page({
     this.setData({ loading: true })
     try {
       const res = await api.pageMySendOrders({ pageNo: this.data.pageNo, pageSize: this.data.pageSize })
-      const list = (res.list || []).map((o) => ({
+      const sendList = (res.list || []).map((o) => ({
+        source: 'SEND',
         ...o,
         statusName: o.statusName || this.statusText(o.status),
         statusClass: this.statusClass(o.status),
@@ -433,6 +449,10 @@ Page({
         arrivedText: this.buildArrivedText(o),
         servicePointText: this.buildServicePointText(o)
       }))
+      // 商城订单也算快递包裹：已发货/已完成的商城订单并入同一列表（首页只并一次）
+      const productList = this.data.pageNo === 1 ? await this.loadProductParcels() : []
+      const list = sendList.concat(productList)
+        .sort((a, b) => String(b.createTime || '').localeCompare(String(a.createTime || '')))
       const merged = this.data.pageNo === 1 ? list : this.data.sendList.concat(list)
       const total = res.total || 0
       // 车快到了：首次进入阈值弹一次提醒（演示时最直观；重复刷新不打扰）
@@ -449,6 +469,55 @@ Page({
     } finally {
       this.setData({ loading: false })
     }
+  },
+
+  /**
+   * 商城订单作为"快递"并入包裹列表：只取已发货(1)/已完成(2)——待发货还没寄出、已取消不算包裹。
+   * 字段映射到寄货卡片同一套结构，卡片上以「商城」标签区分，点卡片跳订单溯源详情。
+   */
+  async loadProductParcels() {
+    const res = await api.pageMyProductOrders({ pageNo: 1, pageSize: 50 }).catch(() => ({}))
+    return (res.list || [])
+      .filter((o) => o.status === 1 || o.status === 2)
+      .map((o) => {
+        const items = o.items || []
+        const count = items.reduce((sum, g) => sum + (g.quantity || 0), 0) || items.length || 1
+        const first = items[0] || {}
+        return {
+          source: 'PRODUCT',
+          id: o.id,
+          productOrderId: o.id,
+          orderNo: o.orderNo,
+          goodsName: items.length > 1
+            ? `${first.productName || '商城商品'} 等 ${items.length} 种`
+            : (first.productName || '商城商品'),
+          itemCount: count,
+          amountText: o.totalAmount != null ? `¥${o.totalAmount}` : '',
+          status: o.status,
+          statusName: (o.status === 1 ? '已发货 · 配送中' : '已完成 · 已送达'),
+          statusClass: o.status === 1 ? 'status-shipping' : 'status-done',
+          createTime: o.createTime || '',
+          createTimeText: formatBackendTime(o.createTime),
+          showCode: false
+        }
+      })
+  },
+
+  /**
+   * 点包裹卡片看详情：
+   * · 寄货订单 → 切到「单号查询」并展开该单的物流详情（时间轴/多段联运/换乘交接/取件码/地图）；
+   * · 商城订单 → 跳「产地溯源」订单详情（承运司机 + 到站/交付凭证）。
+   */
+  openParcelDetail(e) {
+    const dataset = e.currentTarget.dataset || {}
+    if (dataset.source === 'PRODUCT') {
+      if (!dataset.id) return
+      wx.navigateTo({ url: `/pages/goods/trace/trace?id=${dataset.id}` })
+      return
+    }
+    if (!dataset.no) return
+    this.setData({ activeTab: 1, trackingNo: dataset.no, trackResult: null, noResult: false })
+    this.searchParcel()
   },
 
   loadMore() {
