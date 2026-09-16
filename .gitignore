@@ -1,0 +1,18 @@
+# 微信开发者工具 - 本地个人配置
+project.private.config.json
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# 依赖与构建
+node_modules/
+dist/
+
+# 日志与临时文件
+*.log
+*.swp
+
+# IDE
+.idea
+.vscode

@@ -1,7 +1,7 @@
 /**
  * 请求参数清理单元测试（Node 直跑）
  *
- * 运行：node miniprogram/tests/api-params.test.js
+ * 运行：node tests/api-params.test.js
  * 覆盖：cleanParams 过滤规则（undefined/null/'' 过滤，0/false 保留）；request() 实际发出的 data 已清理。
  *
  * 背景：wx.request 会把 undefined 序列化成字符串 "undefined"（GET 拼 query、POST 拼 body），

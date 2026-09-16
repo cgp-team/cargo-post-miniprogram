@@ -3,7 +3,7 @@
  *
  * 接入步骤（与 https://lbs.amap.com/api/wx/gettingstarted 一致）：
  *   1) 高德控制台申请 key：服务平台选「微信小程序」，绑定小程序 AppID（本项目 wx687e9bf8544ac559）；
- *   2) amap-wx.js 放到 miniprogram/libs/（仓库已内置一份，可替换为「相关下载」页的最新版）；
+ *   2) amap-wx.js 放到 libs/（仓库已内置一份，可替换为「相关下载」页的最新版）；
  *   3) 微信公众平台 → 开发设置 → request 合法域名加入 https://restapi.amap.com；
  *   4) utils/config.js 的 AMAP_MINI_KEY 填上该 key。
  *

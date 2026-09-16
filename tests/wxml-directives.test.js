@@ -1,7 +1,7 @@
 /**
  * WXML 条件指令校验（Node 直跑，无需微信工具）
  *
- * 运行：node miniprogram/tests/wxml-directives.test.js
+ * 运行：node tests/wxml-directives.test.js
  *
  * 背景：微信 WXML 只认 `wx:if` / `wx:elif` / `wx:else` 三个指令。
  *   1. 写成 `wx:else-if`（Vue 习惯）不会报错，但它是"未知属性" → 该元素永远渲染，

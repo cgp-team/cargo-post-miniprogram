@@ -1,7 +1,7 @@
 /**
  * 商城订单页参数测试（Node 直跑）
  *
- * 运行：node miniprogram/tests/orders-params.test.js
+ * 运行：node tests/orders-params.test.js
  * 覆盖（对应线上报错回归）：
  *   - 首次打开「全部」不带 status 参数（原 bug：status=undefined → 后端 Integer 绑定失败）
  *   - 待发货 status=0 / 已发货 1 / 已完成 2 / 已取消 3（数字，且 0 不被当空值过滤）

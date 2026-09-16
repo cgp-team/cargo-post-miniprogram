@@ -1,7 +1,7 @@
 /**
  * buildNavPoints 单元测试（Node 直跑）
  *
- * 运行：node miniprogram/tests/nav.test.js
+ * 运行：node tests/nav.test.js
  * 覆盖：去重/数量聚合/计单数退化/顺序/纯经停/planId 过滤/route 为空。
  */
 const assert = require('assert')

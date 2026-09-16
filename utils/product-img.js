@@ -3,8 +3,8 @@
  *
  * 后端/演示数据里的 image 字段历史上是 emoji 字符。
  * 这里统一把商品映射到本地实拍图：
- *   - 重庆特产：miniprogram/images/products/*.jpg（高清实拍，随包发布，不依赖外网）
- *   - 农产品：miniprogram/images/product-*.png
+ *   - 重庆特产：images/products/*.jpg（高清实拍，随包发布，不依赖外网）
+ *   - 农产品：images/product-*.png
  * 已经是图片路径/URL 的原样返回；都不匹配返回 ''（调用方显示占位图）。
  *
  * 用法：const productImg = require('../../utils/product-img')

@@ -21,7 +21,7 @@ const BASE_URLS = {
 }
 
 /**
- * 高德「微信小程序」key（官方 amap-wx.js 路线，见 docs/miniprogram.md「现实公交接入」）。
+ * 高德「微信小程序」key（官方 amap-wx.js 路线，见 README.md「现实公交接入」）。
  *
  * 申请：高德控制台 → 应用管理 → 创建应用 → 添加 Key → 服务平台选「微信小程序」，绑定小程序 AppID。
  * 配置：填到下面；同时把 https://restapi.amap.com 加入微信公众平台的 request 合法域名。

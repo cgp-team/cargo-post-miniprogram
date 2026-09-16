@@ -1,7 +1,7 @@
 /**
  * 现实公交客户端数据源单测（高德微信小程序 SDK 路线）
  *
- * 运行：node miniprogram/tests/transit-amap.test.js
+ * 运行：node tests/transit-amap.test.js
  * 覆盖：未配 key 不启用（不影响项目线路/模拟车辆）；POI 解析（缺坐标/非法坐标跳过、按距离排序）；
  *       配置 key 后经 amap-wx 的 getPoiAround 拿到真实站点并标注 REAL_TRANSIT；
  *       后端已有现实层时不再重复请求（省配额）；enrichNearby 合并后更新分层计数。

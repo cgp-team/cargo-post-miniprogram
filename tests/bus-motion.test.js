@@ -1,7 +1,7 @@
 /**
  * 车辆移动动画层单测（Node 直跑）
  *
- * 运行：node miniprogram/tests/bus-motion.test.js
+ * 运行：node tests/bus-motion.test.js
  * 覆盖：插值（不跳跃、端点精确）、朝向（左/右）、统一动画循环（单定时器、结束自停、destroy 清理）。
  */
 const assert = require('assert')

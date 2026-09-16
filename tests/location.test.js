@@ -1,7 +1,7 @@
 /**
  * LocationService 单元测试（Node 直跑，mock 全局 wx + weather）
  *
- * 运行：node miniprogram/tests/location.test.js
+ * 运行：node tests/location.test.js
  * 覆盖：定位成功/失败/权限拒绝/permission deny/高精度/accuracy差/缓存命中/无缓存/缓存过期/
  *       逆地理失败/并发去重/缓存秒出/旧缓存 stale 兜底。
  */

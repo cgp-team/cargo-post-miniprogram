@@ -1,7 +1,7 @@
 /**
  * util 单元测试（Node 直跑）
  *
- * 运行：node miniprogram/tests/util.test.js
+ * 运行：node tests/util.test.js
  * 覆盖：寄货「长×宽×高(cm) → 体积(m³)」换算（正数/零/负数/非法/精度）。
  */
 const assert = require('assert')
