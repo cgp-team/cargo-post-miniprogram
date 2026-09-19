@@ -4,6 +4,7 @@
  */
 const api = require('../../utils/api')
 const auth = require('../../utils/auth')
+const feedback = require('../../utils/feedback')
 
 Page({
   behaviors: [require('../../behaviors/page-base')],
@@ -78,6 +79,8 @@ Page({
     wx.showModal({
       title: '退出登录',
       content: '确定要退出登录吗？',
+      confirmText: '退出登录',
+      confirmColor: '#C75B2A',
       success: async (res) => {
         if (res.confirm) {
           try { await api.logout() } catch (e) { /* 注销失败不阻塞本地退出 */ }
@@ -86,10 +89,18 @@ Page({
           wx.removeStorageSync('refreshToken')
           wx.removeStorageSync('userId')
           this.setData({ userInfo: {}, isLoggedIn: false })
+          feedback.tap()
           wx.reLaunch({ url: '/pages/login/login' })
         }
       }
     })
+  },
+
+  /** 长按预览头像（点按仍进个人资料页，不冲突） */
+  previewAvatar() {
+    const url = this.data.userInfo && this.data.userInfo.avatar
+    if (!url) return
+    wx.previewImage({ urls: [url], current: url })
   },
 
   /** 编辑个人资料 */

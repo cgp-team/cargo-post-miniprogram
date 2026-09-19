@@ -90,8 +90,10 @@ Page({
         hasMore: list.length >= this.data.pageSize && allProducts.length < total
       })
       this.applyCategory()
+      return true
     } catch (e) {
-      // 错误提示已由 api.js 统一处理
+      // 错误提示已由 api.js 统一处理；返回失败标记，避免下拉刷新误弹"已刷新"
+      return false
     } finally {
       this.setData({ loading: false })
     }
@@ -151,9 +153,9 @@ Page({
 
   /** 下拉刷新 */
   onPullDownRefresh() {
-    this.reloadProducts().then(() => {
+    this.reloadProducts().then((ok) => {
       wx.stopPullDownRefresh()
-      wx.showToast({ title: '已刷新', icon: 'success', duration: 1000 })
+      if (ok !== false) wx.showToast({ title: '已刷新', icon: 'success', duration: 1000 })
     })
   }
 })

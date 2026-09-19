@@ -41,7 +41,7 @@
     </view>
     <view class="arrange-card ticket-card" wx:for="{{arrangements}}" wx:key="orderId">
       <view class="ticket-card__main">
-        <view class="ticket-card__serial">单号: {{item.orderNo}}</view>
+        <view class="ticket-card__serial" data-no="{{item.orderNo}}" bindlongpress="copySerialNo">单号: {{item.orderNo}}</view>
         <!-- 上下车站：虚线山路 + 大巴连接 -->
         <view class="arrange-route">
           <view class="arrange-station">
@@ -101,7 +101,7 @@
       hover-class="hover"
     >
       <view class="ticket-card__main">
-        <view class="ticket-card__serial">单号: {{item.orderNo}}</view>
+        <view class="ticket-card__serial" data-no="{{item.orderNo}}" bindlongpress="copySerialNo">单号: {{item.orderNo}}</view>
         <view class="parcel-head">
           <icon name="box" size="40" color="{{iconColor}}" />
           <text class="parcel-name">{{item.goodsName || '寄货'}}</text>
@@ -204,7 +204,7 @@
       hover-class="hover"
     >
       <view class="ticket-card__main">
-        <view class="ticket-card__serial">单号: {{item.orderNo}}</view>
+        <view class="ticket-card__serial" data-no="{{item.orderNo}}" bindlongpress="copySerialNo">单号: {{item.orderNo}}</view>
         <view class="parcel-head">
           <icon name="shop" size="40" color="{{iconColor}}" />
           <text class="parcel-name">{{item.items[0] ? item.items[0].productName : '购物订单'}}</text>
@@ -212,7 +212,7 @@
 
         <!-- 商品明细（第一个商品 + 其余件数） -->
         <view class="mall-goods-row" wx:if="{{item.items.length}}">
-          <image wx:if="{{item.items[0].imageUrl}}" class="mall-goods-img" src="{{item.items[0].imageUrl}}" mode="aspectFill" lazy-load />
+          <image wx:if="{{item.items[0].imageUrl}}" class="mall-goods-img" src="{{item.items[0].imageUrl}}" mode="aspectFill" lazy-load data-url="{{item.items[0].imageUrl}}" bindlongpress="previewProductImg" hover-class="hover" />
           <view wx:else class="mall-goods-img-ph"><icon name="leaf" size="40" color="{{iconColor}}" /></view>
           <view class="mall-goods-info">
             <text class="mall-goods-name">{{item.items[0].productName}}</text>
@@ -276,7 +276,7 @@
   <view wx:if="{{activeTab === 2}}" class="parcel-list">
     <view wx:if="{{trackResult}}" class="parcel-card ticket-card track-card anim-pop">
       <view class="ticket-card__main">
-        <view class="ticket-card__serial">单号: {{trackResult.orderNo}}</view>
+        <view class="ticket-card__serial" data-no="{{trackResult.orderNo}}" bindlongpress="copySerialNo">单号: {{trackResult.orderNo}}</view>
         <view class="parcel-head">
           <icon name="box" size="40" color="{{iconColor}}" />
           <text class="parcel-name">{{trackResult.goodsName || '寄货'}}</text>
@@ -384,7 +384,7 @@
 
         <!-- 查件二维码：票面末联（撕票线之上），取件 / 司机扫码核销 -->
         <view class="parcel-qr-block">
-          <text class="parcel-pickup-code" wx:if="{{trackResult.pickupCode}}">取件码：{{trackResult.pickupCode}}</text>
+          <text class="parcel-pickup-code" wx:if="{{trackResult.pickupCode}}" data-code="{{trackResult.pickupCode}}" bindlongpress="copyPickupCode" hover-class="hover">取件码：{{trackResult.pickupCode}}</text>
           <canvas type="2d" id="parcelQrCanvas" class="parcel-qr-canvas"></canvas>
           <text class="parcel-qr-tip">取件 · 司机扫码核销</text>
           <text class="parcel-qr-receiver" wx:if="{{trackResult.pickupCode && (trackResult.receiverName || trackResult.receiverMobile)}}">

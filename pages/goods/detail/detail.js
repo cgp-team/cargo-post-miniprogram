@@ -22,7 +22,8 @@ Page({
     receiverMobile: '',
     receiverAddress: '',
     remark: '',
-    totalAmount: '0.00'
+    totalAmount: '0.00',
+    submitting: false
   },
 
   onLoad(options) {
@@ -114,8 +115,16 @@ Page({
     return (Number(this.data.product.price) * q).toFixed(2)
   },
 
+  /** 预览商品主图 */
+  previewImage() {
+    const url = this.data.product && this.data.product.imageUrl
+    if (!url) return
+    wx.previewImage({ urls: [url], current: url })
+  },
+
   /** 提交订单 */
   async submitOrder() {
+    if (this.data.submitting) return
     const { quantity, receiverName, receiverMobile, receiverAddress, remark, product } = this.data
     if (!receiverName.trim()) {
       wx.showToast({ title: '请输入收货人姓名', icon: 'none' })
@@ -129,6 +138,7 @@ Page({
       wx.showToast({ title: '请输入收货地址', icon: 'none' })
       return
     }
+    this.setData({ submitting: true })
     wx.showLoading({ title: '提交中…', mask: true })
     try {
       const userInfo = wx.getStorageSync('userInfo') || {}
@@ -146,12 +156,13 @@ Page({
       }
       wx.hideLoading()
       feedback.tap()
-      this.setData({ showOrderPop: false })
+      this.setData({ showOrderPop: false, submitting: false })
       wx.showModal({
         title: '下单成功',
         content: `订单号：${res.orderNo}\n货到付款，请等待商家发货`,
         showCancel: false,
         confirmText: '查看订单',
+        confirmColor: '#C75B2A',
         success: () => {
           // redirectTo：避免订单页叠在详情页之上造成返回栈混乱；
           // 若本页来自商城列表，返回时仍回到列表，体验更顺。
@@ -160,6 +171,7 @@ Page({
       })
     } catch (e) {
       wx.hideLoading()
+      this.setData({ submitting: false })
       // 401 已由 api.js 统一提示并跳登录（登录后回到本页，收货信息保留在弹窗 data 中）
       if (e && e.code === 401) return
       // 其余失败给出可读原因：api.js 的 toast 只闪现一次，这里用弹窗把后端原因说清楚，避免"一串失败"
@@ -168,7 +180,8 @@ Page({
         title: '下单失败',
         content: `${reason}\n可稍后重试；如持续失败，请把此提示反馈给平台客服。`,
         showCancel: false,
-        confirmText: '知道了'
+        confirmText: '知道了',
+        confirmColor: '#C75B2A'
       })
     }
   }

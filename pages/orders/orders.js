@@ -164,6 +164,7 @@ Page({
    * · 寄货订单 → 切到「快递」页并展开该单物流详情（时间轴/多段联运/取件码/地图）。
    */
   openOrderDetail(e) {
+    if (this._justCopied) return
     const dataset = e.currentTarget.dataset || {}
     if (dataset.source === 'SEND') {
       if (!dataset.no) return
@@ -187,15 +188,33 @@ Page({
     wx.showModal({
       title: '取消订单',
       content: '确定取消该订单吗？',
+      confirmText: '确认取消',
+      cancelText: '再想想',
+      confirmColor: '#C75B2A',
       success: async (res) => {
-        if (!res.confirm) return
+        if (!res.confirm || this._cancelling) return
+        this._cancelling = true
         try {
           await api.cancelProductOrder(id)
           feedback.tap()
           wx.showToast({ title: '已取消', icon: 'success' })
           this.reload()
-        } catch (e) { /* 错误已 toast */ }
+        } catch (e) { /* 错误已 toast */ } finally {
+          this._cancelling = false
+        }
       }
+    })
+  },
+
+  /** 长按单号复制（_justCopied 守卫：长按松手会补发一次 tap，避免误跳详情） */
+  copyOrderNo(e) {
+    const no = e.currentTarget.dataset.no
+    if (!no) return
+    this._justCopied = true
+    setTimeout(() => { this._justCopied = false }, 500)
+    wx.setClipboardData({
+      data: no,
+      success: () => wx.showToast({ title: '单号已复制', icon: 'success' })
     })
   },
 

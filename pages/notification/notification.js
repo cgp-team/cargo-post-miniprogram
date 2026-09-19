@@ -4,6 +4,7 @@
  */
 const api = require('../../utils/api')
 const appearance = require('../../utils/appearance')
+const feedback = require('../../utils/feedback')
 const { formatBackendTime } = require('../../utils/util')
 
 // 事件类型图标映射
@@ -124,6 +125,11 @@ Page({
 
   /** 点消息：标记已读；带订单的跳包裹追踪 */
   async onTapItem(e) {
+    // 长按复制单号后松手会补发一次 tap，吞掉避免误标已读/误跳详情
+    if (this._suppressTapUntil && Date.now() < this._suppressTapUntil) {
+      this._suppressTapUntil = 0
+      return
+    }
     const { id, orderId } = e.currentTarget.dataset
     const item = this.data.list.find((n) => n.id === id)
     if (item && item.readStatus === 0) {
@@ -141,14 +147,34 @@ Page({
     }
   },
 
-  async onReadAll() {
+  /** 长按复制单号；系统自带「已复制」提示 */
+  copyOrderNo(e) {
+    const no = e.currentTarget.dataset.no
+    if (!no) return
+    this._suppressTapUntil = Date.now() + 600
     try {
-      this.data.driverMode
-        ? await api.readAllNotifications()
-        : await api.readAllNotifications()
+      wx.setClipboardData({ data: String(no) })
+    } catch (err) {
+      // 桩环境/低版本静默降级
+    }
+  },
+
+  async onReadAll() {
+    if (this._readingAll) return
+    // 司机消息无「全部已读」接口（后端仅用户侧 read-all），如实提示逐条点读
+    if (this.data.driverMode) {
+      wx.showToast({ title: '司机消息请逐条点击已读', icon: 'none' })
+      return
+    }
+    this._readingAll = true
+    try {
+      await api.readAllNotifications()
+      feedback.tap()
       wx.showToast({ title: '已全部标为已读', icon: 'success' })
       this.reload()
-    } catch (e) { /* api 容错toast */ }
+    } catch (e) { /* api 容错toast */ } finally {
+      this._readingAll = false
+    }
   }
 })
 

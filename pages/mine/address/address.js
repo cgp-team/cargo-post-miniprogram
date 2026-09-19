@@ -4,6 +4,7 @@
  */
 const api = require('../../../utils/api')
 const appearance = require('../../../utils/appearance')
+const feedback = require('../../../utils/feedback')
 
 Page({
   data: {
@@ -13,6 +14,7 @@ Page({
     from: '', // from=send 时为选择模式
     list: [],
     loading: false,
+    saving: false, // 保存地址防重入（按钮 disabled 同步绑定）
     // 编辑弹层
     showForm: false,
     formId: null, // null=新增
@@ -182,6 +184,7 @@ Page({
 
   /** 保存地址 */
   async saveAddress() {
+    if (this.data.saving) return // 防重复点击（连点不重复提交）
     const { formId, formName, formMobile, formDetail, formDefault } = this.data
     if (!formName.trim()) return wx.showToast({ title: '请输入收件人姓名', icon: 'none' })
     if (!/^1\d{10}$/.test(formMobile.trim())) return wx.showToast({ title: '请输入正确的手机号', icon: 'none' })
@@ -194,16 +197,20 @@ Page({
       detailAddress: formDetail.trim(),
       defaultStatus: formDefault
     }
+    this.setData({ saving: true })
     wx.showLoading({ title: '保存中…', mask: true })
     try {
       if (formId) await api.updateAddress({ id: formId, ...payload })
       else await api.createAddress(payload)
       wx.hideLoading()
+      feedback.tap()
       wx.showToast({ title: '已保存', icon: 'success' })
       this.setData({ showForm: false })
       this.loadList()
     } catch (e) {
       wx.hideLoading()
+    } finally {
+      this.setData({ saving: false })
     }
   },
 
@@ -213,10 +220,13 @@ Page({
     wx.showModal({
       title: '删除地址',
       content: '确定删除该收货地址吗？',
+      confirmText: '确认删除',
+      confirmColor: '#C75B2A',
       success: async (res) => {
         if (!res.confirm) return
         try {
           await api.deleteAddress(id)
+          feedback.tap()
           wx.showToast({ title: '已删除', icon: 'success' })
           this.loadList()
         } catch (err) { /* api 已 toast */ }

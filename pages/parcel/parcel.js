@@ -3,6 +3,7 @@
  * tab0 我的寄货（pageMySendOrders），tab1 单号查询（trackParcel）
  */
 const api = require('../../utils/api')
+const feedback = require('../../utils/feedback')
 const qrcodeRender = require('../../utils/qrcode-render')
 const reviewUtils = require('../../utils/review')
 const productImg = require('../../utils/product-img')
@@ -487,6 +488,23 @@ Page({
     })
   },
 
+  /** 长按票面「单号: xxx」复制（寄货/购物/乘车安排/查询结果共用） */
+  copySerialNo(e) {
+    const no = e.currentTarget.dataset.no
+    if (!no) return
+    wx.setClipboardData({
+      data: String(no),
+      success: () => wx.showToast({ title: '已复制', icon: 'success' })
+    })
+  },
+
+  /** 长按预览商品图（点按仍进订单详情，不冲突） */
+  previewProductImg(e) {
+    const url = e.currentTarget.dataset.url
+    if (!url) return
+    wx.previewImage({ urls: [url], current: url })
+  },
+
   /** 列表项取件码：点击明文复制（司机核销凭码） */
   copyPickupCode(e) {
     const code = e.currentTarget.dataset.code
@@ -518,7 +536,8 @@ Page({
     this._confirming = true
     try {
       await api.confirmStationAction(orderId)
-      wx.showToast({ title: '已确认，等待归集', icon: 'success' })
+      feedback.tap()
+      wx.showToast({ title: '已确认待入池', icon: 'success' })
       if (this.data.activeTab === 0) {
         this.reloadSendList()
       } else {

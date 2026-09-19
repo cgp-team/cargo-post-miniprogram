@@ -7,6 +7,7 @@
  */
 const api = require('../../../utils/api')
 const appearance = require('../../../utils/appearance')
+const feedback = require('../../../utils/feedback')
 const { formatBackendTime } = require('../../../utils/util')
 
 Page({
@@ -110,6 +111,7 @@ Page({
     try {
       await api.driverLegAction(action, { driverId: this.data.driverId, legId: leg.id, photoUrl: photoUrl || undefined })
       wx.hideLoading()
+      feedback.tap()
       wx.showToast({ title: '操作成功', icon: 'success' })
       await this.loadAll()
     } catch (err) {
@@ -158,6 +160,8 @@ Page({
         wx.showModal({
           title: '未上传照片',
           content: '未拍照也可确认交接，是否继续？',
+          confirmText: '继续确认',
+          confirmColor: '#C75B2A',
           success: (r) => resolve(r.confirm)
         })
       })
@@ -172,12 +176,24 @@ Page({
         photoUrl: photoUrl || undefined
       })
       wx.hideLoading()
+      feedback.tap()
       wx.showToast({ title: '交接完成', icon: 'success' })
       await this.loadAll()
     } catch (err) {
       wx.hideLoading()
     } finally {
       this.setData({ submitting: false })
+    }
+  },
+
+  /** 长按复制订单号（与对方司机/调度电话核对时报单号）；系统自带「已复制」提示 */
+  copyOrderNo(e) {
+    const no = e.currentTarget.dataset.no
+    if (!no) return
+    try {
+      wx.setClipboardData({ data: String(no) })
+    } catch (err) {
+      // 桩环境/低版本静默降级
     }
   },
 

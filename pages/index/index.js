@@ -255,7 +255,12 @@ Page({
       if (loc && loc.success) {
         this._applyUserLocation(loc)
         this.loadNearbyBusData()
-        wx.showToast({ title: loc.level === 'PRECISE' ? '定位已更新' : '已更新（精度一般）', icon: 'none' })
+        // 精确定位给成功图标（短文案）；精度一般文案较长用 none 避免折行
+        if (loc.level === 'PRECISE') {
+          wx.showToast({ title: '定位已更新', icon: 'success' })
+        } else {
+          wx.showToast({ title: '已更新（精度一般）', icon: 'none' })
+        }
       } else {
         wx.showToast({ title: '定位失败，请检查定位权限', icon: 'none' })
       }
@@ -369,7 +374,8 @@ Page({
       title: item.title,
       content: item.content || '暂无详细内容',
       showCancel: false,
-      confirmText: '知道了'
+      confirmText: '知道了',
+      confirmColor: '#C75B2A'
     })
   },
 

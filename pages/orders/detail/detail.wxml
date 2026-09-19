@@ -6,7 +6,7 @@
     <view class="detail-status signpost anim-rise">
       <text class="signpost-badge">商城订单</text>
       <text class="detail-status-name">{{statusText}}</text>
-      <text class="detail-status-no">订单号 {{order.orderNo}}</text>
+      <text class="detail-status-no" bindlongpress="copyOrderNo">订单号 {{order.orderNo}}</text>
     </view>
 
     <!-- 当前配送状态一句话 -->
@@ -110,14 +110,14 @@
         <text class="detail-card-title">司机核验凭证</text>
       </view>
       <view wx:if="{{order.loadPhotoUrl}}" class="proof-row">
-        <image class="proof-img" src="{{order.loadPhotoUrl}}" mode="aspectFill" data-url="{{order.loadPhotoUrl}}" bindtap="previewProof" />
+        <image class="proof-img" src="{{order.loadPhotoUrl}}" mode="aspectFill" data-url="{{order.loadPhotoUrl}}" bindtap="previewProof" hover-class="hover" />
         <view class="proof-meta">
           <text class="proof-label">装车核验</text>
           <text class="proof-time">{{loadTimeText || '—'}}</text>
         </view>
       </view>
       <view wx:if="{{order.deliverPhotoUrl}}" class="proof-row">
-        <image class="proof-img" src="{{order.deliverPhotoUrl}}" mode="aspectFill" data-url="{{order.deliverPhotoUrl}}" bindtap="previewProof" />
+        <image class="proof-img" src="{{order.deliverPhotoUrl}}" mode="aspectFill" data-url="{{order.deliverPhotoUrl}}" bindtap="previewProof" hover-class="hover" />
         <view class="proof-meta">
           <text class="proof-label">妥投凭证</text>
           <text class="proof-time">{{deliverTimeText || '—'}}</text>

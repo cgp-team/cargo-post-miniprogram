@@ -12,7 +12,7 @@
     <!-- 主图区 -->
     <view class="detail-hero anim-rise">
       <view class="hero-img">
-        <image wx:if="{{product.imageUrl}}" src="{{product.imageUrl}}" class="hero-img-real" mode="aspectFill" />
+        <image wx:if="{{product.imageUrl}}" src="{{product.imageUrl}}" class="hero-img-real" mode="aspectFill" bindtap="previewImage" hover-class="hover" />
         <icon wx:else name="leaf" size="180" color="#D9A441" />
         <view wx:if="{{product.badge}}" class="hero-badge"><icon name="bus" size="24" color="#FFFFFF" /> {{product.badge}}</view>
       </view>
@@ -117,7 +117,7 @@
           <text>合计</text>
           <text class="popup-total-amount">¥{{totalAmount}}</text>
         </view>
-        <view class="popup-submit" bindtap="submitOrder" hover-class="hover">提交订单</view>
+        <view class="popup-submit" style="{{submitting ? 'opacity: .6;' : ''}}" bindtap="submitOrder" hover-class="hover">{{submitting ? '提交中…' : '提交订单'}}</view>
       </block>
     </view>
   </view>
