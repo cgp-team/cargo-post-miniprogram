@@ -1,7 +1,7 @@
 <!-- 登录页面 - 农村客货邮小程序 -->
 <view class="login-page {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
   <!-- 品牌站牌头：深绿渐变实板，与默认导航栏同色系衔接 -->
-  <view class="login-hero">
+  <view class="login-hero anim-fade">
     <view class="hero-badge">
       <icon name="bus" size="64" color="#FFFFFF" />
     </view>
@@ -14,8 +14,8 @@
     </view>
   </view>
 
-  <!-- 登录表单卡：上浮叠进站牌下缘 -->
-  <view class="form-section card">
+  <!-- 登录表单卡：上浮叠进站牌下缘，入场较品牌头延迟 100ms 分层浮现 -->
+  <view class="form-section card anim-rise" style="animation-delay: 100ms">
     <!-- 手机号 -->
     <view class="input-group">
       <view class="input-label-row">

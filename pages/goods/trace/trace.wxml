@@ -3,7 +3,7 @@
 
   <block wx:if="{{trace}}">
     <!-- 承运信息卡：金绿渐变票头 + 状态胶囊 -->
-    <view class="carrier-card">
+    <view class="carrier-card anim-rise">
       <view class="carrier-head">
         <view class="carrier-title-wrap">
           <icon name="leaf" size="30" color="#D9A441" />
@@ -38,7 +38,7 @@
     </view>
 
     <!-- 司机到站/交付提醒（司机端"确认到达/装车/妥投"后由后端回写） -->
-    <view wx:if="{{arrivedText}}" class="arrival-banner {{trace.deliverTime ? 'done' : ''}}">
+    <view wx:if="{{arrivedText}}" class="arrival-banner {{trace.deliverTime ? 'done' : ''}} anim-rise" style="animation-delay: 80ms">
       <view class="arrival-icon">
         <icon wx:if="{{trace.deliverTime}}" name="check" size="32" color="#FFFFFF" />
         <icon wx:else name="notice" size="32" color="#FFFFFF" />
@@ -102,7 +102,8 @@
         <text>途经站点</text>
       </view>
       <view
-        class="stop-item {{item.isPassed ? 'passed' : ''}} {{item.isCurrent ? 'current' : ''}}"
+        class="stop-item {{item.isPassed ? 'passed' : ''}} {{item.isCurrent ? 'current' : ''}} anim-rise"
+        style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms"
         wx:for="{{stops}}"
         wx:key="sequenceNo"
       >
@@ -128,8 +129,21 @@
     </view>
   </block>
 
-  <!-- 加载态 -->
-  <view wx:elif="{{loading}}" class="loading-state">加载中…</view>
+  <!-- 加载态：骨架屏（承运卡 + 地图 + 时间线轮廓） -->
+  <view wx:elif="{{loading}}">
+    <view class="skeleton-card trace-sk-card">
+      <view class="skeleton sk-title"></view>
+      <view class="skeleton sk-line"></view>
+      <view class="skeleton sk-line sk-line-mid"></view>
+    </view>
+    <view class="skeleton trace-sk-map"></view>
+    <view class="skeleton-card trace-sk-card">
+      <view class="skeleton sk-title"></view>
+      <view class="skeleton sk-line"></view>
+      <view class="skeleton sk-line"></view>
+      <view class="skeleton sk-line sk-line-mid"></view>
+    </view>
+  </view>
 
   <!-- 空态：未发货或无轨迹 -->
   <empty-state wx:elif="{{!loading}}" emoji="🗺️" text="商品还未发车，暂无运输轨迹" subText="发货后这里会展示大巴的实时轨迹" />

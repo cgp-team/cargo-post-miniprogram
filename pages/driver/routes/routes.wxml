@@ -12,7 +12,7 @@
   </view>
 
   <!-- 班次卡：线路 chip + 竖向山路时间线 -->
-  <view class="route-card {{item.status}}" wx:for="{{todayRoutes}}" wx:key="id">
+  <view class="route-card {{item.status}} anim-rise" wx:for="{{todayRoutes}}" wx:key="id" style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms">
     <!-- 路线头部 -->
     <view class="route-card-header">
       <view class="route-card-left">
@@ -25,6 +25,7 @@
         </view>
       </view>
       <view class="route-card-status {{item.status}}">
+        <view wx:if="{{item.status === 'running'}}" class="dot-live"></view>
         {{item.statusText}}
       </view>
     </view>
@@ -81,8 +82,22 @@
     </view>
   </view>
 
-  <!-- 加载态 / 空态 -->
-  <view class="loading-state" wx:if="{{loading}}">加载中…</view>
+  <!-- 加载骨架（仿班次卡轮廓）/ 空态 -->
+  <view wx:if="{{loading}}">
+    <view class="skeleton-card" wx:for="{{[1, 2]}}" wx:key="*this">
+      <view class="sk-head">
+        <view class="skeleton sk-chip"></view>
+        <view class="sk-head-mid">
+          <view class="skeleton sk-title"></view>
+          <view class="skeleton sk-sub"></view>
+        </view>
+        <view class="skeleton sk-pill"></view>
+      </view>
+      <view class="skeleton sk-line w90"></view>
+      <view class="skeleton sk-line w70"></view>
+      <view class="skeleton sk-line w55"></view>
+    </view>
+  </view>
   <empty-state wx:elif="{{loaded && !todayRoutes.length}}" icon="bus" text="今日暂无班次" subText="新的排班会显示在这里" />
 
   <!-- 底部TabBar -->

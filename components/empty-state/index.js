@@ -1,6 +1,6 @@
 /**
- * 公共空态组件 —— 统一 4 种并存的空态范式
- * （.empty-state / .goods-state / .empty-page / .order-empty）
+ * 公共空态组件 —— 统一并存的空态范式
+ * （.empty-state / .empty-page / .order-empty）
  *
  * 用法：
  *   <empty-state icon="box" text="还没有订单" />

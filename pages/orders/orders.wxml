@@ -29,7 +29,8 @@
   <!-- 订单列表：一张订单 = 一张车票，主券放信息、副券放金额/件数 -->
   <view class="order-list" wx:if="{{list.length}}">
     <view
-      class="ticket-card"
+      class="ticket-card anim-rise"
+      style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms"
       wx:for="{{list}}"
       wx:key="id"
       data-source="{{item.source}}"
@@ -41,7 +42,7 @@
       <view class="ticket-card__main">
         <view class="order-head">
           <text class="order-serial">单号 {{item.orderNo}}</text>
-          <text class="order-status {{item.statusClass}}">{{item.statusName}}</text>
+          <text class="order-status {{item.statusClass}}"><text wx:if="{{item.statusClass === 'status-shipping'}}" class="dot-live order-status-dot"></text>{{item.statusName}}</text>
         </view>
         <!-- 寄货订单：一张卡片=一个包裹（物品名/重量/件数）；点卡片进「快递」页看物流详情 -->
         <block wx:if="{{item.source === 'SEND'}}">
@@ -96,8 +97,51 @@
     <view wx:if="{{!hasMore}}" class="order-nomore">没有更多了</view>
   </view>
 
-  <!-- 加载态 -->
-  <view class="loading-state" wx:if="{{loading && !list.length}}">加载中…</view>
+  <!-- 加载态：骨架订单卡（主券条块 + 副券块，仿真实车票卡轮廓，三张叠放） -->
+  <view class="loading-state order-skeletons" wx:if="{{loading && !list.length}}">
+    <view class="skeleton-card sk-order">
+      <view class="sk-order-main">
+        <view class="skeleton sk-order-serial"></view>
+        <view class="sk-order-goods">
+          <view class="skeleton sk-order-img"></view>
+          <view class="sk-order-info">
+            <view class="skeleton sk-order-name"></view>
+            <view class="skeleton sk-order-sub"></view>
+          </view>
+        </view>
+        <view class="skeleton sk-order-foot"></view>
+      </view>
+      <view class="skeleton sk-order-stub"></view>
+    </view>
+    <view class="skeleton-card sk-order">
+      <view class="sk-order-main">
+        <view class="skeleton sk-order-serial sk-serial-w2"></view>
+        <view class="sk-order-goods">
+          <view class="skeleton sk-order-img"></view>
+          <view class="sk-order-info">
+            <view class="skeleton sk-order-name sk-name-w2"></view>
+            <view class="skeleton sk-order-sub"></view>
+          </view>
+        </view>
+        <view class="skeleton sk-order-foot"></view>
+      </view>
+      <view class="skeleton sk-order-stub"></view>
+    </view>
+    <view class="skeleton-card sk-order">
+      <view class="sk-order-main">
+        <view class="skeleton sk-order-serial"></view>
+        <view class="sk-order-goods">
+          <view class="skeleton sk-order-img"></view>
+          <view class="sk-order-info">
+            <view class="skeleton sk-order-name"></view>
+            <view class="skeleton sk-order-sub"></view>
+          </view>
+        </view>
+        <view class="skeleton sk-order-foot"></view>
+      </view>
+      <view class="skeleton sk-order-stub"></view>
+    </view>
+  </view>
 
   <!-- 空状态 -->
   <empty-state wx:if="{{!list.length && !loading}}" icon="box" text="还没有订单" btnText="去逛逛" bind:tapbtn="goHome" />

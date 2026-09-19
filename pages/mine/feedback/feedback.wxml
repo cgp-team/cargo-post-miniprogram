@@ -6,7 +6,7 @@
     <icon name="edit" size="30" color="{{iconDeep}}" />
     <text class="section-title">我要反馈</text>
   </view>
-  <view class="card form-card">
+  <view class="card form-card anim-rise">
     <textarea
       class="content-input"
       value="{{content}}"
@@ -32,7 +32,7 @@
     <text class="section-title">我的反馈</text>
   </view>
   <view class="fb-list">
-    <view class="fb-card" wx:for="{{list}}" wx:key="id">
+    <view class="fb-card anim-rise" style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms" wx:for="{{list}}" wx:key="id">
       <view class="fb-head">
         <text class="fb-status {{item.status === 1 ? 'replied' : ''}}">{{item.status === 1 ? '已回复' : '待处理'}}</text>
         <text class="fb-time">{{item.createTimeText}}</text>
@@ -46,7 +46,19 @@
         <text class="fb-reply-text">{{item.reply}}</text>
       </view>
     </view>
-    <view class="loading-state" wx:if="{{loading && !list.length}}">加载中…</view>
+    <!-- 加载态：骨架屏（状态胶囊 + 内容条，仿反馈卡轮廓） -->
+    <view wx:if="{{loading && !list.length}}">
+      <view class="skeleton-card">
+        <view class="skeleton sk-pill"></view>
+        <view class="skeleton sk-line"></view>
+        <view class="skeleton sk-line sk-line-mid"></view>
+      </view>
+      <view class="skeleton-card">
+        <view class="skeleton sk-pill"></view>
+        <view class="skeleton sk-line"></view>
+        <view class="skeleton sk-line sk-line-mid"></view>
+      </view>
+    </view>
     <empty-state wx:if="{{!list.length && !loading}}" emoji="📭" text="还没有反馈记录" />
   </view>
 

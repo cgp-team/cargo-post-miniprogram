@@ -284,6 +284,17 @@
   height: env(safe-area-inset-bottom);
 }
 
+/* 骨架屏：站牌头 + 分组卡轮廓 */
+.sk-head {
+  height: 150rpx;
+  border-radius: 20rpx;
+  margin-bottom: 20rpx;
+}
+.sk-title { width: 55%; height: 32rpx; margin-bottom: 20rpx; }
+.sk-line { width: 90%; height: 24rpx; margin-bottom: 16rpx; }
+.sk-line-mid { width: 70%; }
+.skeleton-card .skeleton:last-child { margin-bottom: 0; }
+
 /* 老年人模式 */
 .elderly-mode .detail-status-name { font-size: 46rpx; }
 .elderly-mode .detail-status-no { font-size: 28rpx; }

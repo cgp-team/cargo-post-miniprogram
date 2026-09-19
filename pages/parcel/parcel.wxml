@@ -92,10 +92,11 @@
   <!-- Tab0: 我的寄货列表（车票卡：主券信息 + 副券状态） -->
   <view wx:if="{{activeTab === 0}}" class="parcel-list">
     <view
-      class="parcel-card ticket-card"
+      class="parcel-card ticket-card anim-rise"
       wx:for="{{sendList}}"
       wx:key="id"
       data-no="{{item.orderNo}}"
+      style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms"
       bindtap="openSendDetail"
       hover-class="hover"
     >
@@ -159,7 +160,33 @@
       </view>
     </view>
 
-    <view class="loading-state" wx:if="{{loading && sendList.length}}">加载中…</view>
+    <!-- 骨架车票卡：首屏加载 3 张叠放；分页加载在列表末尾补 1 张 -->
+    <block wx:if="{{loading && !sendList.length}}">
+      <view class="skeleton-card sk-ticket" wx:for="{{3}}" wx:key="*this">
+        <view class="sk-main">
+          <view class="skeleton sk-serial"></view>
+          <view class="skeleton sk-title"></view>
+          <view class="skeleton sk-line"></view>
+          <view class="skeleton sk-line sk-line-short"></view>
+        </view>
+        <view class="sk-stub">
+          <view class="skeleton sk-stub-value"></view>
+          <view class="skeleton sk-stub-label"></view>
+        </view>
+      </view>
+    </block>
+    <view class="skeleton-card sk-ticket" wx:if="{{loading && sendList.length}}">
+      <view class="sk-main">
+        <view class="skeleton sk-serial"></view>
+        <view class="skeleton sk-title"></view>
+        <view class="skeleton sk-line"></view>
+        <view class="skeleton sk-line sk-line-short"></view>
+      </view>
+      <view class="sk-stub">
+        <view class="skeleton sk-stub-value"></view>
+        <view class="skeleton sk-stub-label"></view>
+      </view>
+    </view>
     <view class="loading-state" wx:elif="{{!hasMore && sendList.length}}">没有更多了</view>
 
     <empty-state wx:if="{{!sendList.length && !loading}}" icon="box" text="还没有寄货记录" />
@@ -168,10 +195,11 @@
   <!-- Tab1: 我的购物（商城订单：与寄货同一票面条目，进度在这里看） -->
   <view wx:if="{{activeTab === 1}}" class="parcel-list">
     <view
-      class="parcel-card ticket-card"
+      class="parcel-card ticket-card anim-rise"
       wx:for="{{productOrders}}"
       wx:key="id"
       data-id="{{item.id}}"
+      style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms"
       bindtap="goToProductOrderDetail"
       hover-class="hover"
     >
@@ -212,7 +240,33 @@
       </view>
     </view>
 
-    <view class="loading-state" wx:if="{{productLoading && productOrders.length}}">加载中…</view>
+    <!-- 骨架车票卡：首屏加载 3 张叠放；分页加载在列表末尾补 1 张 -->
+    <block wx:if="{{productLoading && !productOrders.length}}">
+      <view class="skeleton-card sk-ticket" wx:for="{{3}}" wx:key="*this">
+        <view class="sk-main">
+          <view class="skeleton sk-serial"></view>
+          <view class="skeleton sk-title"></view>
+          <view class="skeleton sk-line"></view>
+          <view class="skeleton sk-line sk-line-short"></view>
+        </view>
+        <view class="sk-stub">
+          <view class="skeleton sk-stub-value"></view>
+          <view class="skeleton sk-stub-label"></view>
+        </view>
+      </view>
+    </block>
+    <view class="skeleton-card sk-ticket" wx:if="{{productLoading && productOrders.length}}">
+      <view class="sk-main">
+        <view class="skeleton sk-serial"></view>
+        <view class="skeleton sk-title"></view>
+        <view class="skeleton sk-line"></view>
+        <view class="skeleton sk-line sk-line-short"></view>
+      </view>
+      <view class="sk-stub">
+        <view class="skeleton sk-stub-value"></view>
+        <view class="skeleton sk-stub-label"></view>
+      </view>
+    </view>
     <view class="loading-state" wx:elif="{{!productHasMore && productOrders.length}}">没有更多了</view>
 
     <empty-state wx:if="{{!productOrders.length && !productLoading}}" icon="box" text="还没有购物订单" btnText="去逛逛" bind:tapbtn="goShopping" />
@@ -220,7 +274,7 @@
 
   <!-- Tab2: 单号查询结果（车票式物流详情：副券放运输进度） -->
   <view wx:if="{{activeTab === 2}}" class="parcel-list">
-    <view wx:if="{{trackResult}}" class="parcel-card ticket-card track-card">
+    <view wx:if="{{trackResult}}" class="parcel-card ticket-card track-card anim-pop">
       <view class="ticket-card__main">
         <view class="ticket-card__serial">单号: {{trackResult.orderNo}}</view>
         <view class="parcel-head">
@@ -315,10 +369,12 @@
           <view class="progress-road-fill" style="width: {{trackResult.progress}}%"></view>
         </view>
 
-        <!-- 时间轴：虚线山路串联站点圆点 -->
+        <!-- 时间轴：虚线山路串联站点圆点；当前站（最后一个已完成节点）内嵌呼吸点 -->
         <view class="timeline">
           <view class="timeline-item" wx:for="{{trackResult.timeline}}" wx:key="label">
-            <view class="timeline-dot {{item.done ? 'done' : ''}}"></view>
+            <view class="timeline-dot {{item.done ? 'done' : ''}} {{item.done && !trackResult.timeline[index + 1].done ? 'current' : ''}}">
+              <view wx:if="{{item.done && !trackResult.timeline[index + 1].done}}" class="dot-live"></view>
+            </view>
             <view class="timeline-content">
               <text class="timeline-time">{{item.label}}</text>
               <text class="timeline-desc">{{item.desc}}</text>
@@ -340,6 +396,20 @@
       <view class="ticket-card__stub">
         <text class="ticket-card__stub-value">{{trackResult.progress}}<text class="stub-unit">%</text></text>
         <text class="ticket-card__stub-label">运输进度</text>
+      </view>
+    </view>
+
+    <!-- 查询中：骨架车票卡（trackLoading 由 searchParcel 置位，原全屏 loading 已下沉为票面占位） -->
+    <view class="skeleton-card sk-ticket" wx:elif="{{trackLoading}}">
+      <view class="sk-main">
+        <view class="skeleton sk-serial"></view>
+        <view class="skeleton sk-title"></view>
+        <view class="skeleton sk-line"></view>
+        <view class="skeleton sk-line sk-line-short"></view>
+      </view>
+      <view class="sk-stub">
+        <view class="skeleton sk-stub-value"></view>
+        <view class="skeleton sk-stub-label"></view>
       </view>
     </view>
 

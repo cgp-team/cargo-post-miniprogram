@@ -37,13 +37,20 @@
   transition: all 0.3s;
 }
 
-/* 激活：图标变主题主色块白字 */
+/* 激活：图标变主题主色块白字，弹跳落定 */
+@keyframes tab-pop {
+  0%   { transform: scale(0.72); }
+  60%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
 .tab-item.active .tab-icon {
   background: var(--color-primary);
   border-radius: 22rpx;
   padding: 8rpx 26rpx;
   box-sizing: content-box;
   box-shadow: inset 0 4rpx 0 rgba(255, 255, 255, 0.16), 0 4rpx 12rpx rgba(0, 0, 0, 0.4);
+  animation: tab-pop 0.3s cubic-bezier(0.34, 1.45, 0.64, 1);
 }
 
 .tab-label {

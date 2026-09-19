@@ -143,6 +143,9 @@
 
 /* 状态胶囊：待发车/行驶中=白瓷，停靠中=陶土橙（行动提示） */
 .status-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 10rpx;
   font-size: 24rpx;
   padding: 8rpx 22rpx;
   border-radius: var(--radius-pill);
@@ -155,28 +158,11 @@
 }
 
 .status-tag.driving {
-  display: inline-flex;
-  align-items: center;
   background: rgba(255, 255, 255, 0.2);
-}
-
-.status-tag.driving::before {
-  content: '';
-  width: 10rpx;
-  height: 10rpx;
-  background: #ffffff;
-  border-radius: 50%;
-  margin-right: 10rpx;
-  animation: pulse 1.5s ease-in-out infinite;
 }
 
 .status-tag.stopped {
   background: var(--color-clay);
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.3); }
 }
 
 /* 山路进度：虚线道路 + 已走白实段 + 陶土橙描边圆点 */
@@ -683,6 +669,19 @@
   letter-spacing: 8rpx;
 }
 
+/* 按压微交互：大按钮在全局 .hover 基础上补过渡 + 略深缩放，起落更顺 */
+.start-btn,
+.scan-btn,
+.arrive-btn {
+  transition: transform 0.16s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.16s ease-out;
+}
+
+.start-btn.hover,
+.scan-btn.hover,
+.arrive-btn.hover {
+  transform: scale(0.96);
+}
+
 /* ========== 行驶中面板 ========== */
 .driving-panel {
   display: flex;
@@ -1057,6 +1056,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  transition: background-color 0.2s ease-out, border-color 0.2s ease-out;
 }
 
 .pickup-check.checked {

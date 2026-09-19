@@ -133,6 +133,12 @@
   line-height: 1.5;
 }
 
+/* 骨架屏：反馈卡轮廓（状态胶囊 + 内容条） */
+.sk-pill { width: 140rpx; height: 28rpx; border-radius: 999rpx; margin-bottom: 18rpx; }
+.sk-line { width: 90%; height: 24rpx; margin-bottom: 14rpx; }
+.sk-line-mid { width: 70%; }
+.skeleton-card .skeleton:last-child { margin-bottom: 0; }
+
 /* 老年人模式 */
 .elderly-mode .section-title { font-size: 36rpx; }
 .elderly-mode .content-input { font-size: 32rpx; height: 260rpx; }

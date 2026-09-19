@@ -267,12 +267,7 @@
   background: #FFFDF8;
   border-radius: 28rpx 28rpx 0 0;
   padding: 30rpx 32rpx calc(30rpx + env(safe-area-inset-bottom));
-  animation: popup-slide-up 0.25s ease;
-}
-
-@keyframes popup-slide-up {
-  from { transform: translateY(40%); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  /* 入场动画：全局 .anim-sheet（底部上滑） */
 }
 
 .popup-header {
@@ -426,6 +421,20 @@
   justify-content: center;
   box-shadow: 0 8rpx 20rpx rgba(199, 91, 42, 0.28);
 }
+
+/* 骨架屏：主图占位块 + 信息卡轮廓条（尺寸仿真实卡片） */
+.sk-hero {
+  height: 460rpx;
+  border-radius: 24rpx;
+  margin: 24rpx 28rpx;
+}
+.detail-sk-card {
+  margin: 0 28rpx 24rpx;
+}
+.sk-title { width: 55%; height: 32rpx; margin-bottom: 20rpx; }
+.sk-line { width: 90%; height: 24rpx; margin-bottom: 16rpx; }
+.sk-line-mid { width: 70%; }
+.detail-sk-card .skeleton:last-child { margin-bottom: 0; }
 
 /* ============ 老年人模式：详情页字体放大 ============ */
 .elderly-mode .detail-price { font-size: 60rpx; }

@@ -6,7 +6,7 @@
     <icon name="user" size="30" color="{{iconDeep}}" />
     <text class="section-title">基本资料</text>
   </view>
-  <view class="card form-card">
+  <view class="card form-card anim-rise">
     <view class="form-item" bindtap="chooseAvatar" hover-class="hover">
       <text class="form-label">头像</text>
       <view class="form-right">
@@ -45,7 +45,7 @@
     <icon name="gear" size="30" color="{{iconDeep}}" />
     <text class="section-title">修改密码</text>
   </view>
-  <view class="card form-card">
+  <view class="card form-card anim-rise" style="animation-delay: 120ms">
     <view class="form-item">
       <text class="form-label">验证码</text>
       <input class="form-input" type="number" maxlength="6" value="{{smsCode}}" placeholder="短信验证码" placeholder-class="form-ph" bindinput="onSmsCodeInput" />

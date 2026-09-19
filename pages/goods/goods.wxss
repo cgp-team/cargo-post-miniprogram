@@ -237,33 +237,22 @@
   color: var(--color-text-tertiary);
 }
 
-/* 加载/空状态 */
-.goods-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 120rpx 0;
+/* ============ 动效：骨架双列卡 / 按压保底 ============ */
+/* 骨架网格：与 .product-grid 同版式（双列、同间距同内边距） */
+.sk-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20rpx;
+  padding: 4rpx 24rpx 0;
 }
 
-.loading-spinner {
-  width: 56rpx;
-  height: 56rpx;
-  border: 6rpx solid var(--color-primary-light);
-  border-top-color: var(--color-primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  margin-bottom: 20rpx;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-.state-text {
-  font-size: 26rpx;
-  color: var(--color-text-secondary);
-}
+/* 骨架商品卡：图片位通栏 + 标题/产地/价格条块，轮廓对齐 .product-card */
+.sk-goods { padding: 0; margin-bottom: 0; overflow: hidden; }
+.sk-goods-img { width: 100%; height: 300rpx; border-radius: 0; }
+.sk-goods-body { padding: 18rpx 20rpx 22rpx; }
+.sk-goods-title { width: 72%; height: 28rpx; margin-bottom: 14rpx; }
+.sk-goods-sub { width: 48%; height: 20rpx; margin-bottom: 18rpx; }
+.sk-goods-price { width: 40%; height: 32rpx; }
 
 /* ============ 老年人模式：商城页字体放大 ============ */
 .elderly-mode .village-name { font-size: 44rpx; }
@@ -276,4 +265,3 @@
 .elderly-mode .product-price { font-size: 42rpx; }
 .elderly-mode .product-unit { font-size: 26rpx; }
 .elderly-mode .product-badge { font-size: 24rpx; }
-.elderly-mode .state-text { font-size: 30rpx; }

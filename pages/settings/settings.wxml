@@ -36,12 +36,15 @@
     <view
       wx:for="{{themeList}}"
       wx:key="key"
-      class="group-row theme-row {{themeColor === item.key ? 'active' : ''}}"
+      class="group-row theme-row anim-rise {{themeColor === item.key ? 'active' : ''}}"
+      style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms"
       data-key="{{item.key}}"
       bindtap="switchTheme" hover-class="hover"
     >
       <view class="theme-dot" style="background: {{item.color}}">
-        <icon wx:if="{{themeColor === item.key}}" name="check" size="34" color="#FFFFFF" />
+        <view wx:if="{{themeColor === item.key}}" class="anim-pop">
+          <icon name="check" size="34" color="#FFFFFF" />
+        </view>
       </view>
       <view class="row-info">
         <text class="row-name">{{item.name}}</text>

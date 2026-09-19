@@ -18,9 +18,10 @@
     </view>
     <view class="route-label">
       <text class="route-badge">{{routeName || '今日班次'}}</text>
-      <text class="status-tag {{status}}">
-        {{status === 'idle' ? '待发车' : (status === 'driving' ? '行驶中' : '停靠中')}}
-      </text>
+      <view class="status-tag {{status}}">
+        <view wx:if="{{status === 'driving'}}" class="dot-live"></view>
+        <text>{{status === 'idle' ? '待发车' : (status === 'driving' ? '行驶中' : '停靠中')}}</text>
+      </view>
     </view>
 
     <!-- 山路进度：虚线道路 + 白色车票圆点 -->
@@ -41,7 +42,7 @@
   </view>
 
   <!-- 偏航告警（Phase 9：>100m 只报警，不自动改方案） -->
-  <view class="deviation-banner" wx:if="{{deviated}}">
+  <view class="deviation-banner anim-rise" wx:if="{{deviated}}">
     <icon name="info" size="30" color="#C0392B" />
     <text class="deviation-text">偏航提醒：距规划路线约 {{deviationMeters}} 米，请回到计划道路</text>
   </view>
@@ -54,7 +55,7 @@
         <text class="task-segment-title">今日运营任务</text>
       </view>
     </view>
-    <view class="task-segment ticket-card" wx:for="{{taskSegment}}" wx:key="planId" wx:for-item="seg">
+    <view class="task-segment ticket-card anim-rise" wx:for="{{taskSegment}}" wx:key="planId" wx:for-item="seg" style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms">
       <view class="ticket-card__main">
         <view class="ticket-card__serial">任务窗口 {{seg.taskWindowStart || ''}} ~ {{seg.taskWindowEnd || ''}}</view>
         <view class="task-stop" wx:for="{{seg.stops}}" wx:key="index" wx:for-item="stop">
@@ -77,7 +78,7 @@
   </view>
 
   <!-- ========== 多段联运：换乘交接待确认入口（有才显示） ========== -->
-  <view class="handover-entry" wx:if="{{pendingHandoverCount > 0}}" bindtap="goHandover" hover-class="hover">
+  <view class="handover-entry anim-rise" wx:if="{{pendingHandoverCount > 0}}" bindtap="goHandover" hover-class="hover">
     <view class="handover-entry-iconbox">
       <icon name="send" size="40" color="#FFFFFF" />
     </view>
@@ -136,7 +137,7 @@
   </view>
 
   <!-- ========== 状态一：待发车 - 行李舱可视化 ========== -->
-  <view class="idle-panel" wx:if="{{status === 'idle'}}">
+  <view class="idle-panel anim-rise" wx:if="{{status === 'idle'}}">
     <!-- 大巴车行李舱图形 -->
     <view class="cargo-visual">
       <view class="bus-graphic">
@@ -224,7 +225,7 @@
       </view>
 
       <!-- 前方到站提示 -->
-      <view class="next-stop-card" wx:if="{{nextStationDistance < 1000}}">
+      <view class="next-stop-card anim-rise" wx:if="{{nextStationDistance < 1000}}">
         <view class="stop-alert-iconbox">
           <icon name="pin" size="40" color="{{iconClay}}" />
         </view>
@@ -280,7 +281,7 @@
 
     <!-- 待装货物列表（货运 + 邮快件） -->
     <view class="pickup-list" wx:if="{{pendingPickups.length > 0}}">
-      <view class="pickup-item" wx:for="{{pendingPickups}}" wx:key="orderId">
+      <view class="pickup-item anim-rise" wx:for="{{pendingPickups}}" wx:key="orderId" style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms">
         <view class="pickup-type {{item.bizType === 'PRODUCT' ? 'is-product' : (item.orderType === 3 ? 'is-mail' : 'is-cargo')}}">
           <icon name="{{item.bizType === 'PRODUCT' ? 'shop' : (item.orderType === 3 ? 'box' : 'send')}}" size="34" color="{{item.bizType === 'PRODUCT' ? iconClay : (item.orderType === 3 ? '#B27A12' : iconColor)}}" />
         </view>
@@ -291,7 +292,9 @@
           <text class="pickup-detail">{{item.orderNo}}</text>
         </view>
         <view class="pickup-check {{item.checked ? 'checked' : ''}}">
-          <icon wx:if="{{item.checked}}" name="check" size="28" color="#FFFFFF" />
+          <view wx:if="{{item.checked}}" class="anim-pop">
+            <icon name="check" size="28" color="#FFFFFF" />
+          </view>
         </view>
       </view>
     </view>
@@ -302,7 +305,7 @@
         <icon name="list" size="30" color="{{iconColor}}" />
         <text class="task-title">调度任务（算法规划）</text>
       </view>
-      <view class="task-item" wx:for="{{tasks}}" wx:key="id">
+      <view class="task-item anim-rise" wx:for="{{tasks}}" wx:key="id" style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms">
         <text class="task-station">{{item.stationName || '—'}}</text>
         <text class="task-action">{{item.actionName}}</text>
         <text class="task-order" wx:if="{{item.orderNo}}">{{item.orderNo}}</text>

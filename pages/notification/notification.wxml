@@ -12,8 +12,37 @@
     <text class="head-sub">{{unreadCount > 0 ? '有 ' + unreadCount + ' 条未读消息，点一下即标为已读' : '订单与物流的新动态会在这里推送'}}</text>
   </view>
 
+  <!-- 加载中：骨架通知卡（图标块 + 标题/正文条，仿真实卡片轮廓） -->
+  <view class="list" wx:if="{{loading && list.length === 0}}">
+    <view class="skeleton-card sk-n-card">
+      <view class="skeleton sk-n-icon"></view>
+      <view class="sk-n-body">
+        <view class="skeleton sk-n-title"></view>
+        <view class="skeleton sk-n-line"></view>
+        <view class="skeleton sk-n-line sk-n-short"></view>
+      </view>
+    </view>
+    <view class="skeleton-card sk-n-card">
+      <view class="skeleton sk-n-icon"></view>
+      <view class="sk-n-body">
+        <view class="skeleton sk-n-title sk-w-60"></view>
+        <view class="skeleton sk-n-line"></view>
+        <view class="skeleton sk-n-line sk-n-short"></view>
+      </view>
+    </view>
+    <view class="skeleton-card sk-n-card">
+      <view class="skeleton sk-n-icon"></view>
+      <view class="sk-n-body">
+        <view class="skeleton sk-n-title sk-w-75"></view>
+        <view class="skeleton sk-n-line"></view>
+        <view class="skeleton sk-n-line sk-n-short"></view>
+      </view>
+    </view>
+  </view>
+
   <view class="list" wx:if="{{list.length > 0}}">
-    <view class="n-card {{item.readStatus === 0 ? 'unread' : 'read'}} level-{{item.level || 'INFO'}}"
+    <view class="n-card anim-rise {{item.readStatus === 0 ? 'unread' : 'read'}} level-{{item.level || 'INFO'}}"
+          style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms"
           wx:for="{{list}}" wx:key="id"
           bindtap="onTapItem" data-id="{{item.id}}" data-order-id="{{item.orderId}}" hover-class="hover">
       <view class="n-icon"><text class="n-icon-emoji">{{item.icon}}</text></view>

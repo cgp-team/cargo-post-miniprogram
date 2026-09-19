@@ -228,6 +228,55 @@
   padding: 20rpx 0;
 }
 
+/* 加载骨架：三张订单卡叠放（.loading-state 原为居中文案，骨架时改纵向铺满） */
+.loading-state.order-skeletons {
+  display: block;
+  padding: 20rpx 24rpx 8rpx;
+}
+/* 仿真实订单卡：左主券（单号条 + 商品行 + 票脚条）+ 右副券块 */
+.sk-order {
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+}
+.sk-order-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+.sk-order-serial { width: 40%; height: 20rpx; }
+.sk-serial-w2 { width: 52%; }
+.sk-order-goods {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+.sk-order-img {
+  flex: none;
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: var(--radius-s);
+}
+.sk-order-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+.sk-order-name { width: 55%; height: 32rpx; }
+.sk-name-w2 { width: 42%; }
+.sk-order-sub { width: 70%; height: 24rpx; }
+.sk-order-foot { width: 90%; height: 24rpx; }
+.sk-order-stub { flex: none; width: 120rpx; height: 72rpx; }
+
+/* 配送中（status-shipping）状态胶囊：呼吸点（全局 .dot-live，取 currentColor） */
+.order-status-dot {
+  margin-right: 8rpx;
+}
+
 /* 老年人模式 */
 .elderly-mode .order-source-tab { font-size: 32rpx; }
 .elderly-mode .order-tab { font-size: 32rpx; }

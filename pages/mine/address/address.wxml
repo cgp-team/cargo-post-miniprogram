@@ -8,7 +8,7 @@
 
   <!-- 地址列表 -->
   <view class="addr-list">
-    <view class="addr-card" wx:for="{{list}}" wx:key="id" data-item="{{item}}" bindtap="selectAddress" hover-class="hover">
+    <view class="addr-card anim-rise" style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms" wx:for="{{list}}" wx:key="id" data-item="{{item}}" bindtap="selectAddress" hover-class="hover">
       <view class="addr-top">
         <view class="addr-pin">
           <icon name="pin" size="36" color="{{iconColor}}" />
@@ -35,9 +35,9 @@
   <!-- 新增按钮 -->
   <view class="btn-primary add-btn" bindtap="openForm" hover-class="hover">＋ 新增收货地址</view>
 
-  <!-- 编辑弹层 -->
-  <view class="form-mask" wx:if="{{showForm}}" bindtap="closeForm">
-    <view class="form-panel" catchtap="noop">
+  <!-- 编辑弹层：遮罩淡入 + 面板底部上滑（全局原语 .anim-fade / .anim-sheet） -->
+  <view class="form-mask anim-fade" wx:if="{{showForm}}" bindtap="closeForm">
+    <view class="form-panel anim-sheet" catchtap="noop">
       <view class="form-title">{{formId ? '编辑地址' : '新增地址'}}</view>
       <view class="form-item">
         <text class="form-label">收件人</text>

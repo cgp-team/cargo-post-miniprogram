@@ -31,10 +31,16 @@
     </view>
   </scroll-view>
 
-  <!-- 加载中（首次加载） -->
-  <view wx:if="{{loading && !allProducts.length}}" class="goods-state">
-    <view class="loading-spinner"></view>
-    <text class="state-text">商品加载中…</text>
+  <!-- 加载中（首次加载）：骨架双列卡，轮廓对齐商品卡 -->
+  <view wx:if="{{loading && !allProducts.length}}" class="sk-grid">
+    <view class="skeleton-card sk-goods" wx:for="{{4}}" wx:key="*this">
+      <view class="skeleton sk-goods-img"></view>
+      <view class="sk-goods-body">
+        <view class="skeleton sk-goods-title"></view>
+        <view class="skeleton sk-goods-sub"></view>
+        <view class="skeleton sk-goods-price"></view>
+      </view>
+    </view>
   </view>
 
   <!-- 空列表 -->
@@ -43,9 +49,10 @@
   <!-- 商品网格 -->
   <view wx:else class="product-grid">
     <view
-      class="product-card"
+      class="product-card anim-rise"
       wx:for="{{products}}"
       wx:key="id"
+      style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms"
       bindtap="goToDetail" hover-class="hover"
       data-id="{{item.id}}"
     >
@@ -71,8 +78,17 @@
     </view>
   </view>
 
-  <!-- 分页加载状态 -->
-  <view class="loading-state" wx:if="{{loading && allProducts.length}}">加载中…</view>
+  <!-- 分页加载状态：列表末尾补一排骨架双列卡 -->
+  <view class="sk-grid" wx:if="{{loading && allProducts.length}}">
+    <view class="skeleton-card sk-goods" wx:for="{{2}}" wx:key="*this">
+      <view class="skeleton sk-goods-img"></view>
+      <view class="sk-goods-body">
+        <view class="skeleton sk-goods-title"></view>
+        <view class="skeleton sk-goods-sub"></view>
+        <view class="skeleton sk-goods-price"></view>
+      </view>
+    </view>
+  </view>
   <view class="loading-state" wx:elif="{{!hasMore && allProducts.length}}">没有更多了</view>
 
   <!-- 底部安全区 -->
