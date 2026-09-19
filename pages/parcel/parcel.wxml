@@ -10,7 +10,8 @@
       </view>
       <text class="header-title">包裹</text>
       <view class="user-avatar">
-        <text>{{userInfo.nickname || '👤'}}</text>
+        <text wx:if="{{userInfo.nickname}}">{{userInfo.nickname}}</text>
+        <icon wx:else name="user" size="32" color="#FFFFFF" />
       </view>
     </view>
   </view>
@@ -330,11 +331,11 @@
           ></map>
           <view class="parcel-map-current" wx:if="{{trackResult.activeLegText}}"><icon name="bus" size="26" color="{{iconColor}}" /><text>{{trackResult.activeLegText}}</text></view>
           <view class="parcel-map-legend">
-            <text class="lg lg-done">━ 已完成段</text>
-            <text class="lg lg-doing">━ 当前段（加粗高亮）</text>
-            <text class="lg lg-todo">━ 未开始段</text>
-            <text class="lg lg-est">┅ 虚线＝估算段</text>
-            <text class="lg lg-hub">◆ 换乘站</text>
+            <view class="lg lg-done"><text class="lg-line"></text><text>已完成段</text></view>
+            <view class="lg lg-doing"><text class="lg-line lg-line-thick"></text><text>当前段（加粗高亮）</text></view>
+            <view class="lg lg-todo"><text class="lg-line"></text><text>未开始段</text></view>
+            <view class="lg lg-est"><text class="lg-line lg-line-dash"></text><text>虚线＝估算段</text></view>
+            <view class="lg lg-hub"><text class="lg-hub-mark"></text><text>换乘站</text></view>
           </view>
         </view>
 

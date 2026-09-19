@@ -61,7 +61,8 @@ Page({
           hasMap: hasMap,
           mapCenter: mapData ? mapData.center : null,
           mapMarkers: mapData ? mapData.markers : [],
-          mapPolyline: mapData ? mapData.polyline : []
+          mapPolyline: mapData ? mapData.polyline : [],
+          mapPoints: mapData ? mapData.includePoints : []
         }
       })
       this.setData({ todayRoutes, loaded: true })
@@ -123,7 +124,10 @@ Page({
       arrowLine: true
     }]
 
-    return { center, markers, polyline }
+    // include-points 坐标集合：视口自适应包含全部站点，长线路端点不出视野
+    const includePoints = validStops.map((s) => ({ latitude: s.latitude, longitude: s.longitude }))
+
+    return { center, markers, polyline, includePoints }
   },
 
   /** 切换路线地图显示 */

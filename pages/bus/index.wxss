@@ -99,6 +99,9 @@
 
 .loc-action {
   flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
   color: #ffffff;
   opacity: 0.92;
   font-size: 24rpx;

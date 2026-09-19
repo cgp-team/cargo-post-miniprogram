@@ -154,7 +154,7 @@
   />
 
   <!-- 空态：未发货或无轨迹 -->
-  <empty-state wx:elif="{{!loading}}" emoji="🗺️" text="商品还未发车，暂无运输轨迹" subText="发货后这里会展示大巴的实时轨迹" />
+  <empty-state wx:elif="{{!loading}}" icon="road" text="商品还未发车，暂无运输轨迹" subText="发货后这里会展示大巴的实时轨迹" />
 
   <view class="safe-area-bottom"></view>
 </view>

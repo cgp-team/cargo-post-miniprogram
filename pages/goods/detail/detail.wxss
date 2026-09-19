@@ -286,8 +286,9 @@
 }
 
 .popup-close {
-  font-size: 32rpx;
-  color: var(--color-text-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 18rpx;
 }
 
@@ -452,7 +453,7 @@
 .elderly-mode .nav-back { width: 96rpx; height: 96rpx; }
 .elderly-mode .nav-title { font-size: 36rpx; }
 .elderly-mode .popup-title { font-size: 38rpx; }
-.elderly-mode .popup-close { font-size: 36rpx; padding: 24rpx; }
+.elderly-mode .popup-close { padding: 24rpx; }
 .elderly-mode .popup-label { font-size: 32rpx; }
 .elderly-mode .popup-input { font-size: 32rpx; min-height: 96rpx; }
 .elderly-mode .popup-submit { font-size: 36rpx; height: 100rpx; }

@@ -52,6 +52,8 @@ const ICONS = {
   list: '<g fill="none" stroke="%C%" stroke-width="1.8" stroke-linecap="round"><path d="M8.5 6h12M8.5 12h12M8.5 18h12"/><circle cx="4" cy="6" r="1.1" fill="%C%" stroke="none"/><circle cx="4" cy="12" r="1.1" fill="%C%" stroke="none"/><circle cx="4" cy="18" r="1.1" fill="%C%" stroke="none"/></g>',
   camera: '<g fill="none" stroke="%C%" stroke-width="1.8" stroke-linejoin="round"><path d="M4 8a1.5 1.5 0 0 1 1.5-1.5h2L9 4h6l1.5 2.5h2A1.5 1.5 0 0 1 20 8v10a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18V8z"/><circle cx="12" cy="13" r="3.5"/></g>',
   check: '<path d="M4.5 12.5 10 18 19.5 6.5" fill="none" stroke="%C%" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>',
+  close: '<path d="M6 6l12 12M18 6 6 18" fill="none" stroke="%C%" stroke-width="2" stroke-linecap="round"/>',
+  refresh: '<g fill="none" stroke="%C%" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 3.6V8h-4.4"/></g>',
   road: '<g fill="none" stroke="%C%" stroke-width="1.8" stroke-linecap="round"><path d="M5.5 20 9.5 4h5l4 16"/><path d="M12 7v2.5M12 12v2.5M12 17v1.8"/></g>',
   font: '<g fill="none" stroke="%C%" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 19 8.5 5h1L14.5 19M5.4 14h7.2"/><path d="M15.8 19l2.4-6.8h.6L21.2 19M16.8 16.5h3.4"/></g>'
 }

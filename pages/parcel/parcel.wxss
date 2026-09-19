@@ -629,12 +629,17 @@
 }
 
 /* 图例色与地图折线同色（见 parcel.js loadTopology）：完成=站牌绿 / 当前=新芽绿 / 未开始=暖灰 */
-.lg { font-weight: 600; }
+.lg { display: flex; align-items: center; gap: 6rpx; font-weight: 600; }
 .lg-done { color: var(--color-primary); }
 .lg-doing { color: var(--color-accent); }
 .lg-todo { color: #B9B4A6; }
 .lg-est { color: var(--color-text-tertiary); }
 .lg-hub { color: var(--color-primary-dark); }
+/* 图例小样用 CSS 画（线 / 虚线 / 菱形换乘站），色取 currentColor 与文字一致 */
+.lg-line { width: 28rpx; height: 4rpx; border-radius: 2rpx; background: currentColor; }
+.lg-line-thick { height: 6rpx; }
+.lg-line-dash { background: none; height: 0; border-top: 4rpx dashed currentColor; }
+.lg-hub-mark { width: 12rpx; height: 12rpx; border-radius: 2rpx; background: currentColor; transform: rotate(45deg); }
 
 /* 分段进度 / 换乘交接 */
 .parcel-legs {

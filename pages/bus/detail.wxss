@@ -305,9 +305,12 @@
 .stop-state {
   flex: none;
   align-self: flex-start;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4rpx;
   width: 96rpx;
   margin-top: 24rpx;
-  text-align: right;
   font-size: 20rpx;
   color: var(--color-text-tertiary);
 }
@@ -316,14 +319,21 @@
   color: var(--color-status-done);
 }
 
-/* 当前站：浅绿胶囊深绿字 */
+/* 当前站：浅绿胶囊深绿字 + 静态圆点（非呼吸点，用 CSS 画） */
 .stop-state.current {
   color: var(--color-primary-dark);
   background: var(--color-primary-light);
   border-radius: var(--radius-pill);
   padding: 4rpx 0;
-  text-align: center;
+  justify-content: center;
   font-weight: 600;
+}
+
+.stop-state-dot {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  background: var(--color-primary);
 }
 
 /* ---------- 空态/加载 ---------- */

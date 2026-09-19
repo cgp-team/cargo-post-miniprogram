@@ -11,7 +11,7 @@
     <view class="sp-head">
       <text class="sp-title">{{title}}</text>
       <view class="sp-close" bindtap="close" hover-class="hover">
-        <text class="sp-close-x">✕</text>
+        <icon name="close" size="32" color="{{iconColor}}" />
       </view>
     </view>
 
@@ -47,7 +47,7 @@
             <text class="sp-item-name">{{item.stationName}}</text>
             <text class="sp-item-addr">{{item.address || '暂无详细地址'}}</text>
           </view>
-          <text wx:if="{{item.id === value}}" class="sp-check">✓</text>
+          <icon wx:if="{{item.id === value}}" class="sp-check" name="check" size="36" color="{{iconColor}}" />
         </view>
       </block>
     </scroll-view>

@@ -55,11 +55,12 @@
             <text class="weather-condition">{{weather.condition}}</text>
           </view>
           <view class="weather-detail">
-            <text>💧 {{weather.humidity}}%  🌬 {{weather.wind}}</text>
+            <text class="weather-tag">湿度 {{weather.humidity}}%</text>
+            <text class="weather-tag">风 {{weather.wind}}</text>
           </view>
           <view class="weather-meta">
-            <text wx:if="{{weatherLoading}}" class="weather-refresh">🔄 更新中…</text>
-            <text wx:elif="{{weather.mock}}" class="weather-refresh warn">⚠ 网络异常，展示本地天气</text>
+            <view wx:if="{{weatherLoading}}" class="weather-refresh"><icon name="refresh" size="20" color="#8A8778" /><text>更新中…</text></view>
+            <view wx:elif="{{weather.mock}}" class="weather-refresh warn"><icon name="info" size="20" color="#C75B2A" /><text>网络异常，展示本地天气</text></view>
             <text wx:elif="{{weatherUpdateTime}}" class="weather-refresh">{{weatherUpdateTime}}</text>
           </view>
         </view>

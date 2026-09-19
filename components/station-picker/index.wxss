@@ -62,10 +62,6 @@
   border-radius: 50%;
   background: var(--color-primary-light);
 }
-.sp-close-x {
-  font-size: 32rpx;
-  color: var(--color-primary);
-}
 
 /* 搜索框 */
 .sp-search {
@@ -122,10 +118,8 @@
   color: var(--color-text-secondary);
 }
 .sp-check {
-  font-size: 36rpx;
-  color: var(--color-primary);
-  font-weight: 700;
   margin-left: 20rpx;
+  flex: none;
 }
 
 /* 空 / 加载 / 错误态 */
@@ -171,13 +165,11 @@
 .elderly-mode .sp-arrow { font-size: 30rpx; }
 .elderly-mode .sp-title { font-size: 38rpx; }
 .elderly-mode .sp-close { width: 80rpx; height: 80rpx; }
-.elderly-mode .sp-close-x { font-size: 38rpx; }
 .elderly-mode .sp-search { height: 92rpx; }
 .elderly-mode .sp-search-input { font-size: 32rpx; }
 .elderly-mode .sp-item { padding: 34rpx 18rpx; }
 .elderly-mode .sp-item-name { font-size: 34rpx; }
 .elderly-mode .sp-item-addr { font-size: 28rpx; }
-.elderly-mode .sp-check { font-size: 42rpx; }
 .elderly-mode .sp-cancel { font-size: 34rpx; padding: 30rpx 0; }
 .elderly-mode .sp-empty-text { font-size: 30rpx; }
 .elderly-mode .sp-retry-btn { font-size: 30rpx; min-height: 96rpx; }

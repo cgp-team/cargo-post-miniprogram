@@ -83,7 +83,7 @@
     <view class="popup-body anim-sheet" catchtap="noop">
       <view class="popup-header">
         <text class="popup-title">确认下单</text>
-        <text class="popup-close" bindtap="closeOrderPop" hover-class="hover">✕</text>
+        <view class="popup-close" bindtap="closeOrderPop" hover-class="hover"><icon name="close" size="32" color="#8A8778" /></view>
       </view>
       <block wx:if="{{product}}">
         <view class="popup-product">

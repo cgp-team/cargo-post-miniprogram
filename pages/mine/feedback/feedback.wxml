@@ -62,13 +62,13 @@
     <!-- 错误态：不甩技术名词，给重试入口 -->
     <empty-state
       wx:if="{{loadError && !list.length && !loading}}"
-      emoji="📡"
+      icon="notice"
       text="反馈列表没加载出来"
       subText="网络不太好，稍后再试一次"
       btnText="重新加载"
       bind:tapbtn="reloadList"
     />
-    <empty-state wx:if="{{!list.length && !loading && !loadError}}" emoji="📭" text="还没有反馈记录，有问题欢迎随时告诉我们" />
+    <empty-state wx:if="{{!list.length && !loading && !loadError}}" icon="edit" text="还没有反馈记录，有问题欢迎随时告诉我们" />
     <!-- 分页 footer：加载中 / 没有更多了 -->
     <view wx:if="{{list.length && loading}}" class="fb-foot">正在加载…</view>
     <view wx:elif="{{list.length && !hasMore}}" class="fb-foot">没有更多了</view>

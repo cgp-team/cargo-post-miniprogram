@@ -68,8 +68,9 @@
           longitude="{{item.mapCenter.longitude}}"
           markers="{{item.mapMarkers}}"
           polyline="{{item.mapPolyline}}"
+          include-points="{{item.mapPoints}}"
+          padding="{{[60, 40, 50, 40]}}"
           show-location="{{false}}"
-          scale="13"
           enable-zoom="{{true}}"
           enable-scroll="{{true}}"
         ></map>

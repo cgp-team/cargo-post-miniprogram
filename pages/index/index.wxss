@@ -266,8 +266,19 @@
 }
 
 .weather-detail {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
   font-size: 22rpx;
   color: var(--color-text-secondary);
+}
+
+.weather-tag {
+  font-size: 20rpx;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  border-radius: 999rpx;
+  padding: 2rpx 14rpx;
 }
 
 .weather-meta {
@@ -275,6 +286,9 @@
 }
 
 .weather-refresh {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
   font-size: 22rpx;
   color: var(--color-text-tertiary);
 }
@@ -698,6 +712,7 @@
 .elderly-mode .weather-temp { font-size: 60rpx; }
 .elderly-mode .weather-condition { font-size: 32rpx; }
 .elderly-mode .weather-detail { font-size: 26rpx; }
+.elderly-mode .weather-tag { font-size: 24rpx; }
 .elderly-mode .weather-tips { font-size: 26rpx; max-width: 260rpx; }
 .elderly-mode .weather-refresh { font-size: 24rpx; }
 .elderly-mode .forecast-day { font-size: 26rpx; }

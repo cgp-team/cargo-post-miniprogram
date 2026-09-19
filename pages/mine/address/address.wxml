@@ -44,14 +44,14 @@
     <!-- 错误态：不甩技术名词，给重试入口 -->
     <empty-state
       wx:if="{{loadError && !list.length && !loading}}"
-      emoji="📡"
+      icon="notice"
       text="地址列表没加载出来"
       subText="网络不太好，稍后再试一次"
       btnText="重新加载"
       bind:tapbtn="loadList"
     />
 
-    <empty-state wx:if="{{!list.length && !loading && !loadError}}" emoji="📍" text="还没有收货地址，点击下方新增" />
+    <empty-state wx:if="{{!list.length && !loading && !loadError}}" icon="pin" text="还没有收货地址，点击下方新增" />
   </view>
 
   <!-- 新增按钮 -->
