@@ -195,3 +195,8 @@
 .elderly-mode .form-label { width: 170rpx; }
 .elderly-mode .form-input { font-size: 32rpx; }
 .elderly-mode .picker-text { font-size: 32rpx; }
+
+/* 骨架屏：地址卡轮廓（姓名条 + 地址条） */
+.sk-name { width: 45%; height: 32rpx; margin-bottom: 18rpx; }
+.sk-line { width: 85%; height: 24rpx; margin-bottom: 14rpx; }
+.skeleton-card .skeleton:last-child { margin-bottom: 0; }

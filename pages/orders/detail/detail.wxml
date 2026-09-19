@@ -142,7 +142,7 @@
       <view class="skeleton sk-line sk-line-mid"></view>
     </view>
   </view>
-  <empty-state wx:if="{{!loading && !order}}" icon="box" text="订单不存在或无权查看" />
+  <empty-state wx:if="{{!loading && !order}}" icon="box" text="没能打开这个订单" subText="可能是网络不太好，也可能订单不存在" btnText="重新加载" bind:tapbtn="loadDetail" />
 
   <view class="safe-area-bottom"></view>
 </view>

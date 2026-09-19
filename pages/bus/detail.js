@@ -202,6 +202,16 @@ Page({
     }))
   },
 
+  /** 分享这辆车：带回班次参数，点开即看到哪儿了 */
+  onShareAppMessage() {
+    const bus = this.data.bus
+    const name = bus && (bus.routeName || bus.plateNo)
+    return {
+      title: name ? `「${name}」班车到哪儿了？点开看实时位置` : '咱村的班车到哪儿了？点开看实时位置',
+      path: `/pages/bus/detail?id=${this.data.busId || ''}`
+    }
+  },
+
   onPullDownRefresh() {
     this.loadDetail().finally(() => wx.stopPullDownRefresh())
   }

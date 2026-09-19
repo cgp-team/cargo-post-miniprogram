@@ -11,6 +11,7 @@ Page({
     todayRoutes: [],
     loading: false,
     loaded: false,
+    hasError: false,
     elderlyMode: false,
     themeColor: 'green',
     themeStyle: ''
@@ -28,7 +29,7 @@ Page({
   },
 
   async loadRoutes() {
-    this.setData({ loading: true })
+    this.setData({ loading: true, hasError: false })
     try {
       const shifts = await api.getDriverShifts()
       const todayRoutes = (shifts || []).map((s) => {
@@ -62,7 +63,8 @@ Page({
       })
       this.setData({ todayRoutes, loaded: true })
     } catch (e) {
-      this.setData({ loaded: true })
+      // 网络失败不能冒充"今日暂无班次"，亮错误态给重新加载入口
+      this.setData({ loaded: true, hasError: true })
     } finally {
       this.setData({ loading: false })
     }

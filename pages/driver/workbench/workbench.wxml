@@ -47,6 +47,13 @@
     <text class="deviation-text">偏航提醒：距规划路线约 {{deviationMeters}} 米，请回到计划道路</text>
   </view>
 
+  <!-- 加载失败横幅：网络差时班次/任务拉不下来，给重新加载入口（别让司机对着空页面点不动发车） -->
+  <view class="load-error-banner anim-rise" wx:if="{{loadError}}" bindtap="loadAll" hover-class="hover">
+    <icon name="info" size="30" color="#C0392B" />
+    <text class="load-error-text">网络不太好，班次任务没加载出来</text>
+    <text class="load-error-retry">重新加载</text>
+  </view>
+
   <!-- ========== 完整任务段（Phase 8）：今日运营任务路单，车票卡呈现（副券=站点数） ========== -->
   <view class="task-segment-panel" wx:if="{{taskSegment && taskSegment.length}}">
     <view class="panel-header">

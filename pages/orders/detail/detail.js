@@ -48,7 +48,10 @@ Page({
   },
 
   onPullDownRefresh() {
-    this.loadDetail().finally(() => wx.stopPullDownRefresh())
+    this.loadDetail().then((ok) => {
+      wx.stopPullDownRefresh()
+      if (ok !== false) wx.showToast({ title: '已刷新', icon: 'success', duration: 1000 })
+    })
   },
 
   async loadDetail() {
@@ -56,9 +59,11 @@ Page({
     try {
       const order = await api.getProductOrderTrace(this.data.orderId)
       this.renderOrder(order || {})
+      return true
     } catch (e) {
-      // 错误提示已由 api.js 统一处理；订单不存在/不属于自己时保持空态
+      // 错误提示已由 api.js 统一处理；订单不存在/网络失败时展示可重试的错误态
       this.setData({ order: null, items: [] })
+      return false
     } finally {
       this.setData({ loading: false })
     }

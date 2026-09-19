@@ -44,6 +44,7 @@ Page({
     total: 0,
     hasMore: true,
     loading: false,
+    loadError: false,
     unreadCount: 0,
     driverMode: false
   },
@@ -64,7 +65,10 @@ Page({
   },
 
   onPullDownRefresh() {
-    this.reload().finally(() => wx.stopPullDownRefresh())
+    this.reload().then((rs) => {
+      wx.stopPullDownRefresh()
+      if (rs && rs[0] !== false) wx.showToast({ title: '已刷新', icon: 'success', duration: 1000 })
+    })
   },
 
   reload() {
@@ -99,9 +103,15 @@ Page({
       this.setData({
         list: merged,
         total: res.total || 0,
-        hasMore: merged.length < (res.total || 0)
+        hasMore: merged.length < (res.total || 0),
+        loadError: false
       })
-    } catch (e) { /* api 容错toast */ } finally {
+      return true
+    } catch (e) {
+      // 错误提示已由 api.js 统一处理；标记错误态（列表为空时给"重新加载"入口），并避免下拉误弹"已刷新"
+      this.setData({ loadError: true })
+      return false
+    } finally {
       this.setData({ loading: false })
     }
   },

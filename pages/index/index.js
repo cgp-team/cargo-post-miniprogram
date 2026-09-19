@@ -631,5 +631,13 @@ Page({
     this.loadWeather({ force: true })
     Promise.all([this.loadHomeData(), this.loadUserLocation({ force: true }).then(() => this.loadNearbyBusData())])
       .finally(() => wx.stopPullDownRefresh())
+  },
+
+  /** 分享小程序本身（tab 页，path 不带参数） */
+  onShareAppMessage() {
+    return {
+      title: '咱村的客货邮——公交带货、快递进村、农产品出山',
+      path: '/pages/index/index'
+    }
   }
 })

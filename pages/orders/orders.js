@@ -38,6 +38,7 @@ Page({
     pageSize: 10,
     total: 0,
     loading: false,
+    loadError: false,
     hasMore: true,
     elderlyMode: false,
     themeColor: 'green',
@@ -54,7 +55,10 @@ Page({
   },
 
   onPullDownRefresh() {
-    this.reload().finally(() => wx.stopPullDownRefresh())
+    this.reload().then((ok) => {
+      wx.stopPullDownRefresh()
+      if (ok !== false) wx.showToast({ title: '已刷新', icon: 'success', duration: 1000 })
+    })
   },
 
   onReachBottom() {
@@ -84,7 +88,7 @@ Page({
     try {
       if (source === 'SEND') {
         await this.loadSendOrders()
-        return
+        return true
       }
       // 不传 status: undefined —— wx.request 会把它序列化成字符串 "undefined"，
       // 后端 ProductOrderPageReqVO.status(Integer) 绑定失败报
@@ -111,10 +115,14 @@ Page({
       this.setData({
         list: merged,
         total,
-        hasMore: merged.length < total
+        hasMore: merged.length < total,
+        loadError: false
       })
+      return true
     } catch (e) {
-      // 错误提示已由 api.js 统一处理
+      // 错误提示已由 api.js 统一处理；标记错误态（列表为空时给"重新加载"入口），并避免下拉误弹"已刷新"
+      this.setData({ loadError: true })
+      return false
     } finally {
       this.setData({ loading: false })
     }
@@ -155,7 +163,7 @@ Page({
     }))
     const total = res.total || 0
     const merged = pageNo === 1 ? list : this.data.list.concat(list)
-    this.setData({ list: merged, total, hasMore: merged.length < total })
+    this.setData({ list: merged, total, hasMore: merged.length < total, loadError: false })
   },
 
   /**
@@ -224,7 +232,8 @@ Page({
     wx.navigateTo({ url: `/pages/goods/trace/trace?id=${id}` })
   },
 
-  goHome() {
-    wx.switchTab({ url: '/pages/index/index' })
+  /** 空态引导：去山货集市逛逛（商城 tab） */
+  goShopping() {
+    wx.switchTab({ url: '/pages/goods/goods' })
   }
 })

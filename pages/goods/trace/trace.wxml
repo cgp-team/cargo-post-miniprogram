@@ -145,6 +145,13 @@
     </view>
   </view>
 
+  <!-- 加载失败：弱网常见，给重新加载入口 -->
+  <empty-state
+    wx:elif="{{!loading && loadError}}"
+    icon="notice" text="包裹轨迹暂时打不开" subText="网络不太好，请稍后再试"
+    btnText="重新加载" bind:tapbtn="loadTrace"
+  />
+
   <!-- 空态：未发货或无轨迹 -->
   <empty-state wx:elif="{{!loading}}" emoji="🗺️" text="商品还未发车，暂无运输轨迹" subText="发货后这里会展示大巴的实时轨迹" />
 

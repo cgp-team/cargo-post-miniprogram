@@ -344,3 +344,25 @@
 .elderly-mode .leg-progress { font-size: 36rpx; }
 .elderly-mode .leg-meta { font-size: 28rpx; }
 .elderly-mode .leg-status { font-size: 26rpx; }
+
+/* 待交接清单骨架：仿交接卡轮廓（宽高按真实卡片的标题/信息行比例） */
+.ho-skeletons {
+  margin: 0 24rpx;
+}
+
+.sk-ho-title {
+  width: 55%;
+  height: 32rpx;
+  margin-bottom: 20rpx;
+}
+
+.sk-ho-line {
+  width: 90%;
+  height: 24rpx;
+  margin-bottom: 16rpx;
+}
+
+.sk-ho-short {
+  width: 60%;
+  margin-bottom: 0;
+}

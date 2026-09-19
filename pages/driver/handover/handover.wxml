@@ -77,7 +77,16 @@
       </view>
     </view>
   </view>
-  <empty-state wx:elif="{{!loading}}" icon="box" text="暂无待交接任务" subText="多段联运到达换乘站后会在这里提醒" />
+  <!-- 加载骨架（仿交接卡轮廓）/ 错误态 / 空态 -->
+  <view wx:elif="{{loading}}" class="ho-skeletons">
+    <view class="skeleton-card" wx:for="{{[1, 2]}}" wx:key="*this">
+      <view class="skeleton sk-ho-title"></view>
+      <view class="skeleton sk-ho-line"></view>
+      <view class="skeleton sk-ho-line sk-ho-short"></view>
+    </view>
+  </view>
+  <empty-state wx:elif="{{loadError}}" icon="box" text="网络不太好，交接清单没加载出来" btnText="重新加载" bind:tapbtn="initDriver" />
+  <empty-state wx:else icon="box" text="暂无待交接任务" subText="多段联运到达换乘站后会在这里提醒" />
 
   <!-- 我的运输段 -->
   <view class="section-title-wrap" wx:if="{{legs.length > 0}}">

@@ -45,7 +45,14 @@
       <text class="desc-text">{{product.description}}</text>
     </view>
   </block>
-  <!-- 加载态：product 未返回时展示骨架屏（加载失败会 navigateBack，无误导） -->
+  <!-- 加载失败：弱网常见，留在本页给重试入口 -->
+  <empty-state
+    wx:elif="{{loadError}}"
+    icon="notice" text="商品详情暂时打不开" subText="网络不太好，请稍后再试"
+    btnText="重新加载" bind:tapbtn="retryLoad"
+  />
+
+  <!-- 加载态：product 未返回时展示骨架屏 -->
   <block wx:elif="{{!product}}">
     <view class="skeleton sk-hero"></view>
     <view class="skeleton-card detail-sk-card">
