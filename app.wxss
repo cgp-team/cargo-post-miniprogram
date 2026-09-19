@@ -30,6 +30,19 @@ page {
   --color-status-shipping: #2E7D32;/* 运输中/进行中（跟随主题主色） */
   --color-status-done: #8A8778;    /* 已完成/已结束 */
   --color-status-warn: #B27A12;    /* 提醒/临近 */
+
+  /* 表面色（换肤跟随主题；各主题值见 utils/appearance.js THEMES） */
+  --color-card: #FFFDF8;        /* 卡片表面：暖白 */
+  --color-card-warm: #FCF8EC;   /* 车票副券/票根：略泛黄 */
+  --color-field: #FBF8F1;       /* 输入框底 */
+  --color-line: #E4DECD;        /* 描边/分隔线 */
+  --color-line-deep: #D8D2C4;   /* 撕票虚线/开关灭 */
+  --color-track: #EDE7D9;       /* 分段控件轨道/浅暖填充 */
+  --color-gold-light: #FBF3DF;  /* 稻谷金浅底 */
+  --color-gold-deep: #8A6A1F;   /* 稻谷金深字 */
+  --color-clay-light: #F8ECE3;  /* 陶土橙浅底 */
+  --color-clay-deep: #A64A1F;   /* 陶土橙深字 */
+
   --radius-s: 8rpx;
   --radius-m: 16rpx;
   --radius-l: 24rpx;
@@ -134,11 +147,11 @@ page {
 .input-field {
   width: 100%;
   height: 88rpx;
-  border: 2rpx solid #E4DECD;
+  border: 2rpx solid var(--color-line);
   border-radius: 12rpx;
   padding: 0 24rpx;
   font-size: 30rpx;
-  background-color: #FBF8F1;
+  background-color: var(--color-field);
   box-sizing: border-box;
   transition: all 0.15s ease;
 }
@@ -155,7 +168,7 @@ page {
 
 /* 卡片 — 暖白 + 柔和阴影，悬浮感 */
 .card {
-  background-color: #FFFDF8;
+  background-color: var(--color-card);
   border-radius: 18rpx;
   padding: 30rpx;
   margin-bottom: 24rpx;
@@ -240,7 +253,7 @@ page {
 .ticket-card {
   position: relative;
   display: flex;
-  background: #FFFDF8;
+  background: var(--color-card);
   border-radius: var(--radius-m);
   box-shadow: var(--shadow-card);
   overflow: hidden; /* 配合打孔圆：探出卡片边缘的半圆被裁掉，留下缺口 */
@@ -278,8 +291,8 @@ page {
   justify-content: center;
   gap: 4rpx;
   padding: 20rpx 12rpx;
-  background: #FCF8EC; /* 副券略泛黄，与主券区分 */
-  border-left: 2rpx dashed #D8D2C4; /* 撕票线 */
+  background: var(--color-card-warm); /* 副券略泛黄，与主券区分 */
+  border-left: 2rpx dashed var(--color-line-deep); /* 撕票线 */
 }
 
 /* 撕票线两端的打孔缺口（车票的标志性特征） */
@@ -444,7 +457,7 @@ page {
 
 /* 骨架卡：仿卡片轮廓的占位容器（内部放 .skeleton 条块） */
 .skeleton-card {
-  background: #FFFDF8;
+  background: var(--color-card);
   border-radius: var(--radius-m);
   box-shadow: var(--shadow-card);
   padding: 24rpx 28rpx;

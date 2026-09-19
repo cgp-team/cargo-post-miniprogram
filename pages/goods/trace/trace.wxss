@@ -10,7 +10,7 @@
   position: relative;
   margin: 24rpx 24rpx 0;
   padding: 40rpx 28rpx 16rpx;
-  background: #FFFDF8;
+  background: var(--color-card);
   border-radius: 20rpx;
   box-shadow: var(--shadow-card);
   overflow: hidden;
@@ -33,7 +33,7 @@
   gap: 16rpx;
   padding-bottom: 18rpx;
   margin-bottom: 8rpx;
-  border-bottom: 1rpx solid #F0E8D5;
+  border-bottom: 1rpx solid var(--color-track);
 }
 
 .carrier-title-wrap {
@@ -91,7 +91,7 @@
   align-items: center;
   gap: 14rpx;
   border-radius: 16rpx;
-  background: linear-gradient(135deg, var(--color-clay), #A64A1F);
+  background: linear-gradient(135deg, var(--color-clay), var(--color-clay-deep));
   box-shadow: 0 6rpx 18rpx rgba(199, 91, 42, 0.24);
   color: #ffffff;
   font-size: 27rpx;
@@ -120,7 +120,7 @@
   margin: 24rpx 24rpx 0;
   padding: 24rpx 28rpx;
   border-radius: 20rpx;
-  background: #FFFDF8;
+  background: var(--color-card);
   box-shadow: var(--shadow-card);
 }
 
@@ -142,7 +142,7 @@
 }
 
 .proof-row + .proof-row {
-  border-top: 1rpx solid #F0E8D5;
+  border-top: 1rpx solid var(--color-track);
 }
 
 .proof-img {
@@ -174,7 +174,7 @@
   margin: 24rpx 24rpx 0;
   padding: 28rpx;
   border-radius: 20rpx;
-  background: #FFFDF8;
+  background: var(--color-card);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -199,7 +199,7 @@
 .order-qr-divider {
   position: relative;
   width: 100%;
-  border-top: 2rpx dashed #D8D2C4;
+  border-top: 2rpx dashed var(--color-line-deep);
   margin: 8rpx 0;
 }
 
@@ -269,7 +269,7 @@
 .stops-card {
   margin: 24rpx 24rpx;
   padding: 24rpx 28rpx 28rpx;
-  background: #FFFDF8;
+  background: var(--color-card);
   border-radius: 20rpx;
   box-shadow: var(--shadow-card);
 }
@@ -302,8 +302,8 @@
   width: 40rpx;
   height: 40rpx;
   border-radius: 50%;
-  background: #FFFDF8;
-  border: 2rpx solid #D8D2C4;
+  background: var(--color-card);
+  border: 2rpx solid var(--color-line-deep);
   color: var(--color-text-tertiary);
   font-size: 20rpx;
   font-weight: 700;
@@ -340,7 +340,7 @@
 
 /* 当前所在站：陶土橙高亮 + 光晕 */
 .stop-item.current .stop-dot {
-  background: linear-gradient(135deg, var(--color-clay), #A64A1F);
+  background: linear-gradient(135deg, var(--color-clay), var(--color-clay-deep));
   border-color: var(--color-clay);
   color: #ffffff;
   box-shadow: 0 0 0 8rpx rgba(199, 91, 42, 0.16);
@@ -390,7 +390,7 @@
 .stop-side {
   font-size: 20rpx;
   color: var(--color-text-secondary);
-  background: #EFEAE0;
+  background: var(--color-track);
   padding: 4rpx 14rpx;
   border-radius: 999rpx;
 }
@@ -399,8 +399,8 @@
 .stop-tag-current {
   font-size: 20rpx;
   font-weight: 600;
-  color: #8A6A1F;
-  background: #FBF3DF;
+  color: var(--color-gold-deep);
+  background: var(--color-gold-light);
   border: 1rpx solid rgba(217, 164, 65, 0.30);
   padding: 4rpx 14rpx;
   border-radius: 999rpx;

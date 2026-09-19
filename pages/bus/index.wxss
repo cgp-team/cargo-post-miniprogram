@@ -260,7 +260,7 @@
   margin-right: 16rpx;
   padding: 18rpx 24rpx;
   border-radius: 18rpx;
-  background: #FFFDF8;
+  background: var(--color-card);
   border: 2rpx solid rgba(60, 50, 30, 0.06);
   box-shadow: var(--shadow-card);
   transition: all 0.18s ease;
@@ -288,7 +288,7 @@
 }
 
 .tag-real {
-  background: #F8ECE3;
+  background: var(--color-clay-light);
   color: var(--color-clay);
 }
 
@@ -327,7 +327,7 @@
   font-size: 22rpx;
   color: var(--color-text-secondary);
   padding: 6rpx 18rpx;
-  background: #EFEAE0;
+  background: var(--color-track);
   border-radius: var(--radius-pill);
   font-weight: 500;
 }
@@ -377,7 +377,7 @@
 }
 
 .src-real { background: var(--color-primary-light); color: var(--color-primary-dark); }
-.src-sim { background: #F8ECE3; color: var(--color-clay); }
+.src-sim { background: var(--color-clay-light); color: var(--color-clay); }
 
 /* 山路线收紧：车牌行与下一站行之间的衔接 */
 .vehicle-road {

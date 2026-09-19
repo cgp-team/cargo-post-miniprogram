@@ -327,7 +327,7 @@
 /* 站点状态：稻谷金浅底深字胶囊 */
 .task-stop-status {
   font-size: 22rpx;
-  color: #8a6a1f;
+  color: var(--color-gold-deep);
   background: rgba(217, 164, 65, 0.16);
   padding: 4rpx 16rpx;
   border-radius: var(--radius-pill);
@@ -364,7 +364,7 @@
   width: 80rpx;
   height: 80rpx;
   border-radius: 22rpx;
-  background: linear-gradient(135deg, var(--color-clay), #a64a1f);
+  background: linear-gradient(135deg, var(--color-clay), var(--color-clay-deep));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -393,7 +393,7 @@
 /* ========== 路线概览地图（行驶状态就近显示） ========== */
 .route-overview-map {
   margin: 24rpx 24rpx 0;
-  background: #fffdf8;
+  background: var(--color-card);
   border-radius: 24rpx;
   padding: 24rpx;
   box-shadow: var(--shadow-card);
@@ -435,7 +435,7 @@
   gap: 24rpx;
   margin-top: 16rpx;
   padding-top: 16rpx;
-  border-top: 1rpx solid #f0e8d5;
+  border-top: 1rpx solid var(--color-track);
 }
 
 .legend-item {
@@ -489,7 +489,7 @@
 /* ========== 待发车面板：米白大卡 + 行李舱可视化 ========== */
 .idle-panel {
   margin: 24rpx 24rpx 0;
-  background: #fffdf8;
+  background: var(--color-card);
   border-radius: 24rpx;
   box-shadow: var(--shadow-card);
   padding: 44rpx 32rpx;
@@ -641,7 +641,7 @@
   border-radius: 16rpx;
   font-size: 26rpx;
   font-weight: 500;
-  color: #8a6a1f;
+  color: var(--color-gold-deep);
   border: 1rpx dashed rgba(217, 164, 65, 0.55);
   background: rgba(217, 164, 65, 0.08);
 }
@@ -650,7 +650,7 @@
 .start-btn {
   width: 360rpx;
   height: 120rpx;
-  background: linear-gradient(135deg, var(--color-clay), #a64a1f);
+  background: linear-gradient(135deg, var(--color-clay), var(--color-clay-deep));
   border-radius: 60rpx;
   display: flex;
   align-items: center;
@@ -817,7 +817,7 @@
   bottom: 24rpx;
   left: 24rpx;
   right: 24rpx;
-  background: #fffdf8;
+  background: var(--color-card);
   border-radius: 20rpx;
   padding: 22rpx 24rpx;
   display: flex;
@@ -869,7 +869,7 @@
 .stop-alert-actions .nav-chip.pickup { background: var(--color-primary-light); color: var(--color-primary); }
 .stop-alert-actions .nav-chip.deliver { background: rgba(199, 91, 42, 0.12); color: var(--color-clay); }
 .stop-alert-actions .nav-chip.board,
-.stop-alert-actions .nav-chip.alight { background: rgba(217, 164, 65, 0.16); color: #8a6a1f; }
+.stop-alert-actions .nav-chip.alight { background: rgba(217, 164, 65, 0.16); color: var(--color-gold-deep); }
 
 .stop-alert-task {
   font-size: 26rpx;
@@ -882,7 +882,7 @@
 /* ETA信息栏：三联卡 + 细分隔线 */
 .eta-bar {
   display: flex;
-  background: #fffdf8;
+  background: var(--color-card);
   margin: 24rpx 24rpx 0;
   border-radius: 20rpx;
   padding: 26rpx 0;
@@ -928,7 +928,7 @@
   width: calc(100% - 48rpx);
   margin: 24rpx 24rpx 0;
   height: 120rpx;
-  background: linear-gradient(135deg, var(--color-clay), #a64a1f);
+  background: linear-gradient(135deg, var(--color-clay), var(--color-clay-deep));
   border-radius: 24rpx;
   display: flex;
   flex-direction: row;
@@ -998,7 +998,7 @@
   width: 100%;
   box-sizing: border-box;
   margin-bottom: 32rpx;
-  background: #fffdf8;
+  background: var(--color-card);
   border-radius: 20rpx;
   padding: 8rpx 0;
   box-shadow: var(--shadow-card);
@@ -1074,7 +1074,7 @@
   width: 100%;
   box-sizing: border-box;
   margin-bottom: 32rpx;
-  background: #fffdf8;
+  background: var(--color-card);
   border-radius: 20rpx;
   padding: 24rpx;
   box-shadow: var(--shadow-card);
@@ -1123,7 +1123,7 @@
 .scan-btn {
   width: 100%;
   height: 260rpx;
-  background: linear-gradient(160deg, var(--color-clay), #a64a1f);
+  background: linear-gradient(160deg, var(--color-clay), var(--color-clay-deep));
   border-radius: 28rpx;
   display: flex;
   flex-direction: column;
@@ -1156,7 +1156,7 @@
 /* 取件核销按钮（三级行动：米白描边卡） */
 .verify-btn {
   height: 190rpx;
-  background: #fffdf8;
+  background: var(--color-card);
   border: 2rpx solid var(--color-primary);
   box-shadow: var(--shadow-card);
 }

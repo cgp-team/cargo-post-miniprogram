@@ -77,7 +77,7 @@
 /* 分组卡片：圆角卡片 + 行间 1rpx 分隔线 */
 .group-card {
   margin: 0 24rpx;
-  background: #FFFDF8;
+  background: var(--color-card);
   border-radius: 20rpx;
   box-shadow: var(--shadow-card);
   overflow: hidden;
@@ -91,7 +91,7 @@
 }
 
 .group-row + .group-row {
-  border-top: 1rpx solid #F0EADB;
+  border-top: 1rpx solid var(--color-track);
 }
 
 /* 行首图标 chip */
@@ -134,7 +134,7 @@
   transition: background-color 0.22s ease-out;
   position: relative;
 }
-.toggle-switch.off { background: #D8D2C4; }
+.toggle-switch.off { background: var(--color-line-deep); }
 .toggle-switch.on { background: var(--color-primary); }
 .toggle-knob {
   width: 46rpx;

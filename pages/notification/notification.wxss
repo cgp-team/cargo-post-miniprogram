@@ -107,7 +107,7 @@
   overflow: hidden;
   display: flex;
   flex-direction: row;
-  background: #FFFDF8;
+  background: var(--color-card);
   border-radius: 20rpx;
   padding: 24rpx 24rpx 24rpx 28rpx;
   box-shadow: var(--shadow-card);
@@ -149,7 +149,7 @@
 
 .n-card.level-WARNING .n-icon { background: #F7EFD8; }
 .n-card.level-EXCEPTION .n-icon { background: #F9E5E2; }
-.n-card.level-ACTION_REQUIRED .n-icon { background: #F9E9E0; }
+.n-card.level-ACTION_REQUIRED .n-icon { background: var(--color-clay-light); }
 
 .n-icon-emoji {
   font-size: 40rpx;
@@ -233,7 +233,7 @@
 
 .n-pill--order {
   color: var(--color-clay);
-  background: #F9E9E0;
+  background: var(--color-clay-light);
   max-width: 320rpx;
 }
 
@@ -293,7 +293,7 @@
   text-align: center;
   font-size: 26rpx;
   color: var(--color-primary);
-  background: #FFFDF8;
+  background: var(--color-card);
   border: 2rpx solid var(--color-primary);
   border-radius: var(--radius-pill);
 }

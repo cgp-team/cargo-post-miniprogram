@@ -86,7 +86,7 @@
 /* 班次卡：暖白票面 + 柔和阴影 */
 .route-card {
   margin: 24rpx;
-  background: #FFFDF8;
+  background: var(--color-card);
   border-radius: 22rpx;
   padding: 28rpx;
   box-shadow: var(--shadow-card);
@@ -180,7 +180,7 @@
   gap: 10rpx;
   margin-bottom: 26rpx;
   padding-bottom: 22rpx;
-  border-bottom: 1rpx solid #F0E8D5;
+  border-bottom: 1rpx solid var(--color-track);
 }
 
 /* 时间线 —— 山路线：竖向虚线山路 + 站点圆点（路过=站牌绿，当前=陶土橙脉冲） */
@@ -206,7 +206,7 @@
   top: 48rpx;
   bottom: -18rpx;
   width: 3rpx;
-  background: repeating-linear-gradient(180deg, #D8D2C4 0, #D8D2C4 8rpx, transparent 8rpx, transparent 14rpx);
+  background: repeating-linear-gradient(180deg, var(--color-line-deep) 0, var(--color-line-deep) 8rpx, transparent 8rpx, transparent 14rpx);
 }
 
 .timeline-item:last-child::before {
@@ -295,7 +295,7 @@
 /* ========== 路线地图 ========== */
 .route-map-section {
   margin-top: 24rpx;
-  border-top: 1rpx solid #F0E8D5;
+  border-top: 1rpx solid var(--color-track);
   padding-top: 20rpx;
 }
 
@@ -343,7 +343,7 @@
   padding: 20rpx 24rpx;
   min-height: 80rpx;
   box-sizing: border-box;
-  background: linear-gradient(135deg, var(--color-clay), #A64A1F);
+  background: linear-gradient(135deg, var(--color-clay), var(--color-clay-deep));
   border-radius: 14rpx;
   box-shadow: 0 6rpx 16rpx rgba(199, 91, 42, 0.24);
 }

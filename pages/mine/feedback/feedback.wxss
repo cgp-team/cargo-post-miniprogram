@@ -31,8 +31,8 @@
   height: 220rpx;
   box-sizing: border-box;
   padding: 22rpx 24rpx;
-  background: #FBF8F1;
-  border: 2rpx solid #E4DECD;
+  background: var(--color-field);
+  border: 2rpx solid var(--color-line);
   border-radius: 14rpx;
   font-size: 28rpx;
   color: var(--color-ink);
@@ -73,7 +73,7 @@
   padding: 0 24rpx;
 }
 .fb-card {
-  background: #FFFDF8;
+  background: var(--color-card);
   border-radius: 20rpx;
   padding: 26rpx 28rpx;
   margin-bottom: 24rpx;
