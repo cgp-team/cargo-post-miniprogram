@@ -340,6 +340,8 @@
 .elderly-mode .order-no,
 .elderly-mode .goods,
 .elderly-mode .row { font-size: 34rpx; }
+/* 放大后单号允许换行展示完整，不再省略号截断 */
+.elderly-mode .order-no { white-space: normal; }
 .elderly-mode .status { font-size: 26rpx; }
 .elderly-mode .leg-progress { font-size: 36rpx; }
 .elderly-mode .leg-meta { font-size: 28rpx; }

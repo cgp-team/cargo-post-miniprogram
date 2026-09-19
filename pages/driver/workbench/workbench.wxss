@@ -105,7 +105,7 @@
   position: relative;
   display: flex;
   align-items: center;
-  padding: 8rpx;
+  padding: 14rpx;
 }
 
 .notif-badge {
@@ -468,6 +468,8 @@
   gap: 12rpx;
   margin-top: 16rpx;
   padding: 20rpx 24rpx;
+  min-height: 80rpx;
+  box-sizing: border-box;
   background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
   border-radius: 16rpx;
   box-shadow: 0 8rpx 20rpx var(--color-primary-shadow);
@@ -635,6 +637,7 @@
   box-sizing: border-box;
   margin-bottom: 36rpx;
   padding: 18rpx;
+  min-height: 80rpx;
   border-radius: 16rpx;
   font-size: 26rpx;
   font-weight: 500;
@@ -757,6 +760,8 @@
   font-size: 26rpx;
   font-weight: 600;
   padding: 10rpx 28rpx;
+  min-height: 80rpx;
+  box-sizing: border-box;
   border-radius: var(--radius-pill);
   color: #fff;
   background: var(--color-clay);
@@ -1176,6 +1181,7 @@
 .elderly-mode .driver-capacity { font-size: 28rpx; }
 .elderly-mode .location-source { font-size: 26rpx; }
 .elderly-mode .notif-badge { font-size: 24rpx; min-width: 36rpx; height: 36rpx; line-height: 36rpx; }
+.elderly-mode .notif-bell { padding: 20rpx; }
 .elderly-mode .route-badge { font-size: 52rpx; }
 .elderly-mode .status-tag { font-size: 28rpx; }
 .elderly-mode .stop-label { font-size: 26rpx; }
@@ -1192,16 +1198,17 @@
 .elderly-mode .map-section-subtitle { font-size: 28rpx; }
 .elderly-mode .overview-map { height: 420rpx; }
 .elderly-mode .legend-text { font-size: 26rpx; }
+.elderly-mode .map-nav-bar { min-height: 96rpx; }
 .elderly-mode .map-nav-text { font-size: 34rpx; }
 .elderly-mode .map-nav-dist { font-size: 28rpx; }
 .elderly-mode .cargo-labels { font-size: 24rpx; }
 .elderly-mode .cargo-title { font-size: 32rpx; }
-.elderly-mode .subscribe-entry { font-size: 30rpx; }
+.elderly-mode .subscribe-entry { font-size: 30rpx; min-height: 96rpx; }
 .elderly-mode .start-text { font-size: 52rpx; }
 .elderly-mode .nav-seq { font-size: 28rpx; }
 .elderly-mode .nav-station-name { font-size: 54rpx; }
 .elderly-mode .nav-chip { font-size: 28rpx; }
-.elderly-mode .nav-amap { font-size: 30rpx; }
+.elderly-mode .nav-amap { font-size: 30rpx; min-height: 96rpx; }
 .elderly-mode .speed-num { font-size: 68rpx; }
 .elderly-mode .speed-unit { font-size: 28rpx; }
 .elderly-mode .stop-alert-name { font-size: 42rpx; }
@@ -1220,7 +1227,7 @@
 .elderly-mode .task-order { font-size: 26rpx; }
 .elderly-mode .scan-text { font-size: 52rpx; }
 .elderly-mode .scan-hint { font-size: 28rpx; }
-.elderly-mode .skip-btn { font-size: 34rpx; }
+.elderly-mode .skip-btn { font-size: 34rpx; padding: 16rpx 40rpx 36rpx; }
 
 /* ========== 加载失败横幅（与偏航告警同族，右侧带重试入口） ========== */
 .load-error-banner {
@@ -1229,6 +1236,8 @@
   gap: 12rpx;
   margin: 24rpx 24rpx 0;
   padding: 18rpx 24rpx;
+  min-height: 80rpx;
+  box-sizing: border-box;
   border-radius: 16rpx;
   background: rgba(192, 57, 43, 0.08);
   border: 1rpx solid rgba(192, 57, 43, 0.35);
@@ -1248,5 +1257,6 @@
   padding: 8rpx 20rpx;
 }
 
+.elderly-mode .load-error-banner { min-height: 96rpx; }
 .elderly-mode .load-error-text { font-size: 30rpx; }
 .elderly-mode .load-error-retry { font-size: 30rpx; }

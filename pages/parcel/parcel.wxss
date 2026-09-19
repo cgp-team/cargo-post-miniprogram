@@ -46,7 +46,16 @@
   z-index: 1;
 }
 
-.location-info { display: flex; align-items: center; gap: 8rpx; }
+.location-info { display: flex; align-items: center; gap: 8rpx; position: relative; }
+/* 扩热区：定位行内容只有约 48rpx 高，伪元素把点击面扩到 80rpx（老人模式再加大） */
+.location-info::after {
+  content: '';
+  position: absolute;
+  top: -16rpx;
+  right: -12rpx;
+  bottom: -16rpx;
+  left: -12rpx;
+}
 .village-name { font-size: 34rpx; font-weight: 800; color: #fff; letter-spacing: 1rpx; }
 .arrow-down { font-size: 24rpx; color: rgba(255,255,255,0.8); }
 
@@ -111,12 +120,17 @@
 
 .search-input {
   flex: 1;
-  height: 72rpx;
+  height: 80rpx;
   font-size: 28rpx;
   color: var(--color-ink);
 }
 
 .search-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 80rpx;
   background: var(--color-primary);
   color: var(--color-on-primary);
   font-size: 26rpx;
@@ -153,12 +167,23 @@
 }
 
 .section-more {
+  position: relative;
   font-size: 26rpx;
   color: var(--color-primary);
   font-weight: 500;
   padding: 8rpx 16rpx;
   background: var(--color-primary-light);
   border-radius: 24rpx;
+}
+
+/* 扩热区：胶囊本体约 52rpx 高，伪元素把点击面扩到 80rpx */
+.section-more::after {
+  content: '';
+  position: absolute;
+  top: -14rpx;
+  right: -10rpx;
+  bottom: -14rpx;
+  left: -10rpx;
 }
 
 /* 状态切换：分段控件（米纸轨道 + 白底激活） */
@@ -172,6 +197,11 @@
 
 .tab-row .tab-item {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 80rpx;
   text-align: center;
   padding: 16rpx 0;
   font-size: 28rpx;
@@ -373,7 +403,7 @@
 /* 车来取货/送货提醒：绿色高亮条（点击进实时公交） */
 .parcel-approach {
   margin-top: 14rpx;
-  padding: 16rpx 20rpx;
+  padding: 22rpx 20rpx;
   display: flex;
   align-items: center;
   gap: 12rpx;
@@ -402,6 +432,8 @@
   display: flex;
   align-items: center;
   gap: 10rpx;
+  box-sizing: border-box;
+  min-height: 80rpx;
   padding: 14rpx 18rpx;
   border-radius: 12rpx;
   background: var(--color-primary-light);
@@ -427,6 +459,9 @@
 
 .parcel-code-value {
   flex: 1;
+  /* 上下 padding + 负 margin：布局高度不变，点击面扩到 80rpx */
+  padding: 18rpx 0;
+  margin: -18rpx 0;
   font-size: 32rpx;
   font-weight: 700;
   color: var(--color-primary);
@@ -444,7 +479,9 @@
   color: var(--color-primary);
   font-size: 24rpx;
   flex-shrink: 0;
-  padding-left: 16rpx;
+  /* 同上行：视觉不变，热区 80rpx */
+  padding: 24rpx 0 24rpx 20rpx;
+  margin: -24rpx 0;
 }
 
 /* 待客户操作：就近交接站点提示（陶土橙=行动） */
@@ -467,6 +504,7 @@
 }
 
 .service-point-nav {
+  position: relative;
   padding: 8rpx 20rpx;
   border-radius: var(--radius-pill);
   background: var(--color-clay);
@@ -474,6 +512,16 @@
   font-size: 23rpx;
   font-weight: 600;
   flex-shrink: 0;
+}
+
+/* 扩热区：胶囊本体约 48rpx 高，伪元素把点击面扩到 80rpx */
+.service-point-nav::after {
+  content: '';
+  position: absolute;
+  top: -16rpx;
+  right: -12rpx;
+  bottom: -16rpx;
+  left: -12rpx;
 }
 
 /* 确认送站按钮：主色站牌式 */
@@ -540,7 +588,8 @@
 
 .parcel-carrier-eta { font-weight: 600; }
 .parcel-carrier-arrived { color: var(--color-danger); font-weight: 600; }
-.carrier-link { color: var(--color-primary); font-weight: 600; }
+/* 上下 padding + 负 margin：布局高度不变，「查看车辆实时位置」点击面 80rpx */
+.carrier-link { color: var(--color-primary); font-weight: 600; padding: 22rpx 0; margin: -22rpx 0; }
 
 /* 多段联运地图卡：圆角 + 阴影，与下方图例/分段自然衔接 */
 .parcel-map-wrap {
@@ -793,6 +842,11 @@
 
 .parcel-qr-copy {
   margin-top: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 84rpx;
   padding: 12rpx 40rpx;
   font-size: 28rpx;
   line-height: 1.4;
@@ -888,6 +942,9 @@
   display: flex;
   align-items: center;
   gap: 6rpx;
+  /* 上下 padding + 负 margin：布局高度不变，点击面扩到 82rpx */
+  padding: 24rpx 0;
+  margin: -24rpx 0;
   font-size: 24rpx;
   font-weight: 600;
   color: var(--color-primary);
@@ -924,37 +981,44 @@
 
 /* ============ 老年人模式：快递页字体放大 ============ */
 .elderly-mode .village-name { font-size: 38rpx; }
+.elderly-mode .arrow-down { font-size: 28rpx; }
 .elderly-mode .header-title { font-size: 42rpx; }
 .elderly-mode .user-avatar text { font-size: 32rpx; }
-.elderly-mode .search-input { font-size: 32rpx; }
-.elderly-mode .search-btn { font-size: 30rpx; padding: 20rpx 38rpx; }
+.elderly-mode .location-info::after { top: -22rpx; right: -16rpx; bottom: -22rpx; left: -16rpx; }
+.elderly-mode .search-input { font-size: 32rpx; height: 96rpx; }
+.elderly-mode .search-btn { font-size: 30rpx; padding: 20rpx 38rpx; min-height: 96rpx; }
 .elderly-mode .section-title { font-size: 38rpx; }
 .elderly-mode .section-more { font-size: 30rpx; }
-.elderly-mode .tab-row .tab-item { font-size: 32rpx; padding: 22rpx 0; }
-.elderly-mode .ticket-card__stub { width: 200rpx; }
+.elderly-mode .section-more::after { top: -19rpx; right: -12rpx; bottom: -19rpx; left: -12rpx; }
+.elderly-mode .tab-row .tab-item { font-size: 32rpx; padding: 22rpx 0; min-height: 96rpx; }
+.elderly-mode .ticket-card__stub,
+.elderly-mode .sk-stub { width: 200rpx; }
 .elderly-mode .stub-status { font-size: 34rpx; }
 .elderly-mode .stub-unit { font-size: 26rpx; }
-.elderly-mode .parcel-name { font-size: 34rpx; }
+/* 34rpx 下单行省略丢信息，允许折行 */
+.elderly-mode .parcel-name { font-size: 34rpx; white-space: normal; }
 .elderly-mode .parcel-status { font-size: 26rpx; }
 .elderly-mode .parcel-meta { font-size: 28rpx; }
 .elderly-mode .cargo-chip { font-size: 26rpx; }
-.elderly-mode .mall-goods-name { font-size: 32rpx; }
+.elderly-mode .mall-goods-name { font-size: 32rpx; white-space: normal; }
 .elderly-mode .mall-goods-sub { font-size: 28rpx; }
 .elderly-mode .mall-goods-amount { font-size: 34rpx; }
 .elderly-mode .mall-goods-more { font-size: 26rpx; }
 .elderly-mode .parcel-tap-hint { font-size: 28rpx; }
-.elderly-mode .parcel-approach { font-size: 30rpx; }
-.elderly-mode .parcel-carrier-list { font-size: 30rpx; }
+.elderly-mode .parcel-approach { font-size: 30rpx; padding: 27rpx 22rpx; }
+.elderly-mode .parcel-carrier-list { font-size: 30rpx; min-height: 96rpx; }
+.elderly-mode .carrier-link { padding: 27rpx 0; margin: -27rpx 0; }
 .elderly-mode .parcel-code-row { font-size: 28rpx; }
-.elderly-mode .parcel-code-value { font-size: 38rpx; }
-.elderly-mode .parcel-code-toggle { font-size: 28rpx; }
+.elderly-mode .parcel-code-value { font-size: 38rpx; padding: 22rpx 0; margin: -22rpx 0; }
+.elderly-mode .parcel-code-toggle { font-size: 28rpx; padding: 30rpx 0 30rpx 20rpx; margin: -30rpx 0; }
 .elderly-mode .service-point-text { font-size: 28rpx; }
-.elderly-mode .service-point-nav { font-size: 26rpx; }
-.elderly-mode .btn-station-confirm { font-size: 32rpx; height: 88rpx; }
+.elderly-mode .service-point-nav { font-size: 26rpx; padding: 12rpx 24rpx; }
+.elderly-mode .service-point-nav::after { top: -18rpx; right: -14rpx; bottom: -18rpx; left: -14rpx; }
+.elderly-mode .btn-station-confirm { font-size: 32rpx; height: 96rpx; }
 .elderly-mode .parcel-audit { font-size: 28rpx; padding: 20rpx 24rpx; }
 .elderly-mode .carrier-row { font-size: 30rpx; }
 .elderly-mode .parcel-map-current { font-size: 28rpx; }
-.elderly-mode .parcel-map-legend { font-size: 24rpx; }
+.elderly-mode .parcel-map-legend { font-size: 26rpx; }
 .elderly-mode .parcel-legs-title,
 .elderly-mode .leg-route { font-size: 34rpx; }
 .elderly-mode .leg-sub,
@@ -966,9 +1030,9 @@
 .elderly-mode .parcel-qr-tip { font-size: 28rpx; }
 .elderly-mode .parcel-qr-receiver { font-size: 30rpx; }
 .elderly-mode .parcel-qr-canvas { width: 360rpx; height: 360rpx; }
-.elderly-mode .parcel-qr-copy { font-size: 32rpx; padding: 16rpx 48rpx; }
-.elderly-mode .station-name { font-size: 32rpx; }
+.elderly-mode .parcel-qr-copy { font-size: 32rpx; padding: 16rpx 48rpx; min-height: 96rpx; }
+.elderly-mode .station-name { font-size: 32rpx; white-space: normal; text-align: center; }
 .elderly-mode .station-label { font-size: 26rpx; }
 .elderly-mode .arrange-plate { font-size: 28rpx; }
 .elderly-mode .pill-gold { font-size: 26rpx; }
-.elderly-mode .arrange-cta { font-size: 28rpx; }
+.elderly-mode .arrange-cta { font-size: 28rpx; padding: 30rpx 0; margin: -30rpx 0; }

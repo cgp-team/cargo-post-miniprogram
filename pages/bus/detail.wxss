@@ -359,6 +359,8 @@
 .elderly-mode .head-plate { font-size: 50rpx; }
 .elderly-mode .head-status { font-size: 26rpx; }
 .elderly-mode .head-route { font-size: 30rpx; }
+/* 放大后起讫站名允许换行，不再单行省略 */
+.elderly-mode .head-station { white-space: normal; }
 .elderly-mode .tag { font-size: 26rpx; }
 .elderly-mode .head-state { font-size: 30rpx; }
 .elderly-mode .head-meta-line { font-size: 28rpx; }
@@ -366,5 +368,7 @@
 .elderly-mode .section-sub { font-size: 26rpx; }
 .elderly-mode .progress-label { font-size: 26rpx; }
 .elderly-mode .stop-name { font-size: 32rpx; }
+/* 当前站名选择器优先级更高（.stop-item.current .stop-name），老年模式需单独覆盖 */
+.elderly-mode .stop-item.current .stop-name { font-size: 36rpx; }
 .elderly-mode .stop-min { font-size: 24rpx; }
 .elderly-mode .stop-state { font-size: 24rpx; width: 112rpx; }

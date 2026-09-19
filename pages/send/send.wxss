@@ -377,7 +377,7 @@
 
 .reach-btn {
   margin-top: 14rpx;
-  height: 72rpx;
+  height: 84rpx;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -404,6 +404,9 @@
 }
 .station-suggest-btn {
   display: inline-flex;
+  align-items: center;
+  min-height: 80rpx;
+  box-sizing: border-box;
   margin-top: 12rpx;
   padding: 12rpx 28rpx;
   border-radius: 999rpx;
@@ -532,6 +535,8 @@
   display: flex;
   align-items: center;
   gap: 6rpx;
+  min-height: 80rpx;
+  box-sizing: border-box;
   padding: 8rpx 18rpx;
   background: var(--color-primary-light);
   border-radius: 999rpx;
@@ -584,6 +589,10 @@
   font-weight: 600;
 }
 .review-station-btn {
+  display: flex;
+  align-items: center;
+  min-height: 80rpx;
+  box-sizing: border-box;
   padding: 12rpx 26rpx;
   border-radius: 999rpx;
   background: var(--color-clay);
@@ -643,7 +652,7 @@
   flex: 0 0 auto;
   min-width: 180rpx;
   margin: 0;
-  padding: 16rpx 0;
+  padding: 24rpx 0;
   font-size: 28rpx;
   line-height: 1.2;
   border-radius: 999rpx;
@@ -757,6 +766,10 @@
   margin-top: 8rpx;
 }
 .rp-retry {
+  display: inline-flex;
+  align-items: center;
+  min-height: 80rpx;
+  box-sizing: border-box;
   padding: 14rpx 44rpx;
   border: 2rpx solid var(--color-primary);
   color: var(--color-primary);
@@ -784,14 +797,14 @@
 .elderly-mode .quote-hint { font-size: 29rpx; }
 .elderly-mode .reach-title { font-size: 32rpx; }
 .elderly-mode .reach-line { font-size: 29rpx; }
-.elderly-mode .reach-btn { font-size: 30rpx; height: 84rpx; }
+.elderly-mode .reach-btn { font-size: 30rpx; height: 96rpx; }
 .elderly-mode .station-suggest-text { font-size: 28rpx; }
-.elderly-mode .station-suggest-btn { font-size: 28rpx; padding: 14rpx 28rpx; }
+.elderly-mode .station-suggest-btn { font-size: 28rpx; padding: 14rpx 28rpx; min-height: 96rpx; }
 .elderly-mode .rp-label { font-size: 32rpx; }
 .elderly-mode .rp-value { font-size: 34rpx; }
 .elderly-mode .rp-text { font-size: 30rpx; }
 .elderly-mode .rp-warn { font-size: 26rpx; }
-.elderly-mode .rp-retry { font-size: 30rpx; padding: 18rpx 52rpx; }
+.elderly-mode .rp-retry { font-size: 30rpx; padding: 18rpx 52rpx; min-height: 96rpx; }
 .elderly-mode .form-foot-price-label { font-size: 24rpx; }
 .elderly-mode .form-foot-price-value { font-size: 48rpx; }
 .elderly-mode .form-foot-price-hint { font-size: 28rpx; }
@@ -801,11 +814,11 @@
 .elderly-mode .photo-sub { font-size: 28rpx; }
 .elderly-mode .info-label { font-size: 32rpx; }
 .elderly-mode .info-value { font-size: 32rpx; }
-.elderly-mode .receiver-addr-book { font-size: 30rpx; }
+.elderly-mode .receiver-addr-book { font-size: 30rpx; min-height: 96rpx; }
 .elderly-mode .review-title { font-size: 34rpx; }
 .elderly-mode .review-reason, .elderly-mode .review-hint { font-size: 30rpx; }
 .elderly-mode .review-station-name { font-size: 30rpx; }
-.elderly-mode .review-station-btn { font-size: 28rpx; }
+.elderly-mode .review-station-btn { font-size: 28rpx; min-height: 96rpx; }
 .elderly-mode .order-no-display { font-size: 36rpx; }
 .elderly-mode .bus-detail { font-size: 30rpx; }
 .elderly-mode .reminder-text { font-size: 28rpx; }
@@ -813,4 +826,16 @@
 .elderly-mode .stub-price { font-size: 38rpx; }
 .elderly-mode .pickup-summary-tip { font-size: 27rpx; }
 .elderly-mode .qr-canvas { width: 400rpx; height: 400rpx; }
-.elderly-mode .qr-btn { font-size: 32rpx; padding: 20rpx 0; min-width: 220rpx; }
+.elderly-mode .qr-btn { font-size: 32rpx; padding: 28rpx 0; min-width: 220rpx; }
+
+/* 触控与容器补遗：小字角标 / 分隔符放大，副券放宽防金额顶破，底栏加高后内容预留同步加高 */
+.elderly-mode .signpost-title { font-size: 46rpx; }
+.elderly-mode .signpost-sub { font-size: 28rpx; }
+.elderly-mode .signpost-badge { font-size: 24rpx; }
+.elderly-mode .size-x { font-size: 32rpx; }
+.elderly-mode .picker-arrow { font-size: 30rpx; }
+.elderly-mode .match-bus-card .ticket-card__stub { width: 188rpx; }
+.elderly-mode .stub-price { white-space: normal; word-break: break-all; text-align: center; }
+.elderly-mode .form-foot-bar { padding: 20rpx 28rpx calc(20rpx + env(safe-area-inset-bottom)); }
+.elderly-mode .step-body { padding-bottom: calc(280rpx + env(safe-area-inset-bottom)); }
+.elderly-mode .step-body.match-success { padding-bottom: 24rpx; }

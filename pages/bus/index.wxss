@@ -71,6 +71,8 @@
   align-items: center;
   gap: 12rpx;
   padding: 16rpx 22rpx;
+  min-height: 80rpx;
+  box-sizing: border-box;
   border-radius: var(--radius-pill);
   background: rgba(255, 255, 255, 0.14);
   border: 1rpx solid rgba(255, 255, 255, 0.28);
@@ -103,6 +105,11 @@
 }
 
 .loc-action-pick {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  min-height: 64rpx;
+  box-sizing: border-box;
   margin-left: 12rpx;
   padding: 4rpx 16rpx;
   border-radius: var(--radius-pill);
@@ -167,6 +174,8 @@
   align-items: center;
   gap: 6rpx;
   padding: 10rpx 20rpx;
+  min-height: 80rpx;
+  box-sizing: border-box;
   background: #ffffff;
   border-radius: var(--radius-pill);
   font-size: 22rpx;
@@ -211,6 +220,10 @@
 }
 
 .section-more {
+  display: inline-flex;
+  align-items: center;
+  min-height: 80rpx;
+  box-sizing: border-box;
   font-size: 24rpx;
   color: var(--color-primary);
   font-weight: 500;
@@ -447,17 +460,18 @@
 /* ---------- 老年模式与安全区 ---------- */
 .elderly-mode .summary-main { font-size: 36rpx; }
 .elderly-mode .summary-sub { font-size: 28rpx; }
-.elderly-mode .loc-bar { font-size: 30rpx; }
+.elderly-mode .loc-bar { font-size: 30rpx; min-height: 96rpx; }
 .elderly-mode .loc-text { font-size: 30rpx; }
 .elderly-mode .loc-action { font-size: 28rpx; }
 .elderly-mode .map-legend { font-size: 24rpx; }
-.elderly-mode .map-btn { font-size: 26rpx; }
+.elderly-mode .map-btn { font-size: 26rpx; min-height: 96rpx; }
 .elderly-mode .section-title { font-size: 38rpx; }
 .elderly-mode .section-sub { font-size: 26rpx; }
-.elderly-mode .section-more { font-size: 30rpx; }
+.elderly-mode .section-more { font-size: 30rpx; min-height: 96rpx; }
 .elderly-mode .line-name { font-size: 32rpx; }
 .elderly-mode .line-tag { font-size: 24rpx; }
-.elderly-mode .vehicle-route { font-size: 40rpx; }
+/* 放大后线路名允许换行，不再单行省略 */
+.elderly-mode .vehicle-route { font-size: 40rpx; white-space: normal; }
 .elderly-mode .vehicle-status { font-size: 26rpx; }
 .elderly-mode .vehicle-nearest { font-size: 24rpx; }
 .elderly-mode .vehicle-plate { font-size: 32rpx; }

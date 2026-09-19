@@ -26,6 +26,10 @@
 
 .es-btn {
   margin-top: 32rpx;
+  display: inline-flex;
+  align-items: center;
+  min-height: 80rpx;
+  box-sizing: border-box;
   font-size: 28rpx;
   color: #fff;
   background: var(--color-primary);
@@ -37,4 +41,4 @@
 /* 老年模式：页面根节点带 .elderly-mode，靠 apply-shared 命中 */
 .elderly-mode .es-text { font-size: 32rpx; }
 .elderly-mode .es-sub { font-size: 30rpx; }
-.elderly-mode .es-btn { font-size: 30rpx; padding: 20rpx 56rpx; }
+.elderly-mode .es-btn { font-size: 30rpx; padding: 20rpx 56rpx; min-height: 96rpx; }

@@ -16,6 +16,11 @@
 }
 .order-source-tab {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 80rpx;
   text-align: center;
   font-size: 28rpx;
   color: var(--color-text-secondary);
@@ -48,6 +53,11 @@
 }
 .order-tab {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 80rpx;
   text-align: center;
   font-size: 28rpx;
   color: var(--color-text-secondary);
@@ -208,6 +218,7 @@
   color: var(--color-primary);
 }
 .order-cancel {
+  position: relative;
   font-size: 26rpx;
   color: var(--color-text-secondary);
   border: 1rpx solid #D8D2C4;
@@ -215,11 +226,22 @@
   padding: 8rpx 24rpx;
 }
 .order-trace {
+  position: relative;
   font-size: 26rpx;
   color: var(--color-primary);
   border: 1rpx solid var(--color-primary);
   border-radius: var(--radius-pill);
   padding: 8rpx 24rpx;
+}
+/* 扩热区：描边胶囊本体约 52rpx 高，伪元素把点击面扩到 80rpx */
+.order-cancel::after,
+.order-trace::after {
+  content: '';
+  position: absolute;
+  top: -14rpx;
+  right: -10rpx;
+  bottom: -14rpx;
+  left: -10rpx;
 }
 .order-nomore {
   text-align: center;
@@ -278,11 +300,11 @@
 }
 
 /* 老年人模式 */
-.elderly-mode .order-source-tab { font-size: 32rpx; }
-.elderly-mode .order-tab { font-size: 32rpx; }
+.elderly-mode .order-source-tab { font-size: 32rpx; min-height: 96rpx; }
+.elderly-mode .order-tab { font-size: 32rpx; min-height: 96rpx; }
 .elderly-mode .order-serial { font-size: 26rpx; }
 .elderly-mode .order-status { font-size: 28rpx; }
-.elderly-mode .order-goods-name { font-size: 32rpx; }
+.elderly-mode .order-goods-name { font-size: 32rpx; white-space: normal; }
 .elderly-mode .order-goods-sub { font-size: 28rpx; }
 .elderly-mode .order-goods-amount { font-size: 32rpx; }
 .elderly-mode .order-delivery-hint { font-size: 28rpx; }
@@ -290,5 +312,10 @@
 .elderly-mode .order-hint-link { font-size: 28rpx; }
 .elderly-mode .order-cancel { font-size: 30rpx; padding: 12rpx 28rpx; }
 .elderly-mode .order-trace { font-size: 30rpx; padding: 12rpx 28rpx; }
+/* 老人模式胶囊本体约 66rpx，热区扩到 96rpx */
+.elderly-mode .order-cancel::after,
+.elderly-mode .order-trace::after { top: -15rpx; right: -12rpx; bottom: -15rpx; left: -12rpx; }
 .elderly-mode .order-nomore { font-size: 28rpx; }
+/* 金额 40rpx 时本页 164rpx 副券偏紧，与快递页同档放宽 */
+.elderly-mode .ticket-card__stub { width: 200rpx; }
 .elderly-mode .ticket-card__stub-value.stub-price { font-size: 40rpx; }
