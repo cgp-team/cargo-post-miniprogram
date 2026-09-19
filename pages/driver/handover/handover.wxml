@@ -10,7 +10,7 @@
   </view>
 
   <!-- 当前运输段任务（司机只能看到自己的段，需求 §55~§58） -->
-  <view class="current-leg" wx:if="{{currentLeg}}">
+  <view class="current-leg anim-rise" wx:if="{{currentLeg}}">
     <view class="cl-head">
       <text class="cl-title">当前任务 · 第{{currentLeg.legSequence}}段</text>
       <text class="cl-status">{{currentLeg.statusName}}</text>
@@ -41,10 +41,10 @@
     <text class="section-title">待交接（{{handovers.length}}）</text>
   </view>
   <view class="list" wx:if="{{handovers.length > 0}}">
-    <view class="ho-card" wx:for="{{handovers}}" wx:key="id">
+    <view class="ho-card anim-rise" wx:for="{{handovers}}" wx:key="id" style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms">
       <view class="ho-main">
-        <!-- 勾选圈：拍照确认后勾掉这一单 -->
-        <view class="ho-check">
+        <!-- 勾选圈：拍照确认后勾掉这一单（卡片入场后回弹打勾，delay 跟随行阶梯 +120ms） -->
+        <view class="ho-check anim-pop" style="animation-delay: {{(index > 7 ? 7 : index) * 45 + 120}}ms">
           <icon name="check" size="30" color="{{iconClay}}" />
         </view>
         <view class="ho-body">
@@ -85,7 +85,7 @@
     <text class="section-title">我的运输段</text>
   </view>
   <view class="leg-list" wx:if="{{legs.length > 0}}">
-    <view class="leg" wx:for="{{legs}}" wx:key="id">
+    <view class="leg anim-rise" wx:for="{{legs}}" wx:key="id" style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms">
       <view class="leg-progress">{{item.progressText}}</view>
       <view class="leg-meta">
         <text class="leg-status">{{item.statusName}}</text>

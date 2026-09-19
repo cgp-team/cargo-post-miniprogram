@@ -125,13 +125,13 @@
   color: var(--color-text-secondary);
 }
 
-/* 自定义开关：右对齐，开=主题绿 */
+/* 自定义开关：右对齐，开=主题绿（track 底色 / thumb 位移均走过渡，thumb 用 transform 不动布局） */
 .toggle-switch {
   flex-shrink: 0;
   width: 96rpx;
   height: 54rpx;
   border-radius: 27rpx;
-  transition: background 0.25s;
+  transition: background-color 0.22s ease-out;
   position: relative;
 }
 .toggle-switch.off { background: #D8D2C4; }
@@ -143,13 +143,17 @@
   background: #ffffff;
   position: absolute;
   top: 4rpx;
+  left: 4rpx;
   box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.15);
-  transition: left 0.25s;
+  transition: transform 0.22s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
-.toggle-switch.off .toggle-knob { left: 4rpx; }
-.toggle-switch.on .toggle-knob { left: 46rpx; }
+.toggle-switch.on .toggle-knob { transform: translateX(42rpx); }
 
-/* 主题行：选中行浅绿底 + 色点打勾 */
+/* 主题行：选中行浅绿底 + 色点打勾（选中底色过渡 200ms 内） */
+.theme-row {
+  transition: background-color 0.2s ease-out;
+}
+
 .theme-row.active {
   background: var(--color-primary-light);
 }
@@ -186,4 +190,4 @@
 .elderly-mode .row-icon { width: 88rpx; height: 88rpx; }
 .elderly-mode .toggle-switch { width: 108rpx; height: 60rpx; border-radius: 30rpx; }
 .elderly-mode .toggle-knob { width: 52rpx; height: 52rpx; }
-.elderly-mode .toggle-switch.on .toggle-knob { left: 52rpx; }
+.elderly-mode .toggle-switch.on .toggle-knob { transform: translateX(48rpx); }

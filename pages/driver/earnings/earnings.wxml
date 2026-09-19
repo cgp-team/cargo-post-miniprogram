@@ -18,9 +18,9 @@
         <icon name="wallet" size="52" color="#FFFFFF" />
       </view>
       <text class="overview-label">累计货运订单总额（元）</text>
-      <text class="overview-amount">{{totalEarnings}}</text>
+      <text class="overview-amount anim-rise">{{totalEarnings}}</text>
     </view>
-    <view class="overview-row">
+    <view class="overview-row anim-rise" style="animation-delay: 120ms">
       <view class="overview-item">
         <text class="ov-num orange">{{todayEarnings}}</text>
         <text class="ov-label">今日</text>
@@ -41,7 +41,7 @@
         <text class="ov-label">待装车</text>
       </view>
     </view>
-    <view class="overview-sub">今日计划班次 {{shiftCount}} 班 · 数据来自运输平台</view>
+    <view class="overview-sub anim-rise" style="animation-delay: 200ms">今日计划班次 {{shiftCount}} 班 · 数据来自运输平台</view>
   </view>
 
   <!-- 收益明细：统一卡片行 -->
@@ -51,7 +51,7 @@
       <text>收益明细</text>
     </view>
 
-    <view class="record-item" wx:for="{{records}}" wx:key="id">
+    <view class="record-item anim-rise" wx:for="{{records}}" wx:key="id" style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms">
       <view class="record-left">
         <view class="record-type-icon {{item.type === '货运订单' ? 'green-bg' : 'gold-bg'}}">
           <icon name="{{item.type === '货运订单' ? 'leaf' : 'box'}}" size="36" color="#FFFFFF" />
@@ -67,8 +67,18 @@
       </view>
     </view>
 
-    <!-- 加载态 / 空态 -->
-    <view class="loading-state" wx:if="{{loading}}">加载中…</view>
+    <!-- 加载骨架（仿明细行轮廓）/ 空态 -->
+    <view wx:if="{{loading}}">
+      <view class="skeleton-card sk-record" wx:for="{{[1, 2, 3]}}" wx:key="*this">
+        <view class="skeleton sk-icon"></view>
+        <view class="sk-mid">
+          <view class="skeleton sk-title"></view>
+          <view class="skeleton sk-line"></view>
+          <view class="skeleton sk-line w70"></view>
+        </view>
+        <view class="skeleton sk-amount"></view>
+      </view>
+    </view>
     <empty-state wx:elif="{{loaded && !records.length}}" icon="wallet" text="暂无收益记录" subText="订单完成后自动记录在这里" />
   </view>
 

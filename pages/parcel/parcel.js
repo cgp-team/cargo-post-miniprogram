@@ -44,6 +44,7 @@ Page({
     // 单号查询结果
     trackResult: null,
     noResult: false,
+    trackLoading: false,
     // 我的购物（商城订单）：我买的东西同样由大巴司机送到交付站点，进度也在这里看
     productOrders: [],
     productPageNo: 1,
@@ -422,10 +423,11 @@ Page({
       wx.showToast({ title: '请输入运单号', icon: 'none' })
       return
     }
-    wx.showLoading({ title: '查询中…', mask: true })
+    // 查询中改票面内骨架车票卡（trackLoading 期间禁止重入，替代原全屏 loading 弹窗）
+    if (this.data.trackLoading) return
+    this.setData({ trackLoading: true, trackResult: null, noResult: false })
     try {
       const res = await api.trackParcel(no)
-      wx.hideLoading()
       res.timeline = this.buildTimeline(res.status)
       // WXML 不支持调用 Page 方法，进度/时间/颜色在此预计算后绑定
       res.progress = this.trackProgress(res.status)
@@ -453,14 +455,13 @@ Page({
       res.activeLegText = topology.activeLegText || ''
       res.mapCenter = topology.mapCenter
       res.showMap = !!topology.showMap
-      this.setData({ trackResult: res, noResult: false }, () => {
+      this.setData({ trackResult: res, noResult: false, trackLoading: false }, () => {
         this.notifyApproaching([res])
         this.notifyArrived([res])
         this.drawParcelQr()
       })
     } catch (e) {
-      wx.hideLoading()
-      this.setData({ trackResult: null, noResult: true })
+      this.setData({ trackResult: null, noResult: true, trackLoading: false })
     }
   },
 

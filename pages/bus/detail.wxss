@@ -41,6 +41,11 @@
   font-weight: 600;
 }
 
+/* 行驶中呼吸点：统一用全局 .dot-live（色取 currentColor，白点落在金色胶囊上） */
+.head-status-dot {
+  margin-right: 8rpx;
+}
+
 .head-route {
   position: relative;
   z-index: 1;
@@ -257,12 +262,11 @@
   height: 24rpx;
   background: var(--color-primary);
   border-color: #ffffff;
-  animation: stop-pulse 1.8s ease-in-out infinite;
-}
-
-@keyframes stop-pulse {
-  0%, 100% { box-shadow: 0 0 0 6rpx var(--color-primary-light); }
-  50% { box-shadow: 0 0 0 12rpx var(--color-primary-light); }
+  /* 当前站：绿环内嵌白色呼吸点（全局 .dot-live，取 currentColor） */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
 }
 
 .stop-body {
@@ -326,6 +330,30 @@
 .detail-state {
   padding: 20rpx 0;
 }
+
+/* ---------- 骨架时间线（加载态，仿经停站点卡轮廓） ---------- */
+.sk-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 30rpx;
+  padding-top: 36rpx;
+  padding-bottom: 36rpx;
+}
+.sk-stop {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+.sk-stop-dot {
+  flex: none;
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+}
+.sk-stop-bar { height: 28rpx; }
+.sk-w-lg { width: 62%; }
+.sk-w-md { width: 48%; }
+.sk-w-sm { width: 34%; }
 
 /* ---------- 老年模式 ---------- */
 .elderly-mode .head-plate { font-size: 50rpx; }

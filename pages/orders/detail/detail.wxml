@@ -3,26 +3,26 @@
 
   <block wx:if="{{order}}">
     <!-- 状态头：深绿站牌（与主题导航栏顺色衔接），角标注明订单类型 -->
-    <view class="detail-status signpost">
+    <view class="detail-status signpost anim-rise">
       <text class="signpost-badge">商城订单</text>
       <text class="detail-status-name">{{statusText}}</text>
       <text class="detail-status-no">订单号 {{order.orderNo}}</text>
     </view>
 
     <!-- 当前配送状态一句话 -->
-    <view wx:if="{{arrivedText}}" class="detail-arrival {{order.deliverTime ? 'done' : ''}}">
+    <view wx:if="{{arrivedText}}" class="detail-arrival {{order.deliverTime ? 'done' : ''}} anim-rise" style="animation-delay: 80ms">
       <icon wx:if="{{order.deliverTime}}" name="check" size="28" color="{{iconColor}}" />
       <icon wx:else name="road" size="28" color="{{iconClay}}" />
       <text class="detail-arrival-text">{{arrivedText}}</text>
     </view>
 
     <!-- 配送进度：竖向山路时间线（站点圆点 + 虚线山路相连） -->
-    <view class="detail-card">
+    <view class="detail-card anim-rise" style="animation-delay: 160ms">
       <view class="detail-card-head">
         <icon name="road" size="30" color="{{iconDeep}}" />
         <text class="detail-card-title">配送进度</text>
       </view>
-      <view class="step-row {{item.done ? 'done' : ''}}" wx:for="{{steps}}" wx:key="name">
+      <view class="step-row {{item.done ? 'done' : ''}} anim-rise" style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms" wx:for="{{steps}}" wx:key="name">
         <view class="step-dot {{item.done ? 'done' : ''}}"></view>
         <text class="step-name {{item.done ? 'done' : ''}}">{{item.name}}</text>
         <text class="step-time">{{item.time}}</text>
@@ -30,7 +30,7 @@
     </view>
 
     <!-- 商品清单 -->
-    <view class="detail-card">
+    <view class="detail-card anim-rise" style="animation-delay: 240ms">
       <view class="detail-card-head">
         <icon name="shop" size="30" color="{{iconDeep}}" />
         <text class="detail-card-title">商品清单</text>
@@ -52,7 +52,7 @@
     </view>
 
     <!-- 收货信息 -->
-    <view class="detail-card">
+    <view class="detail-card anim-rise" style="animation-delay: 320ms">
       <view class="detail-card-head">
         <icon name="pin" size="30" color="{{iconDeep}}" />
         <text class="detail-card-title">收货信息</text>
@@ -76,7 +76,7 @@
     </view>
 
     <!-- 承运信息 -->
-    <view class="detail-card">
+    <view class="detail-card anim-rise" style="animation-delay: 400ms">
       <view class="detail-card-head">
         <icon name="bus" size="30" color="{{iconDeep}}" />
         <text class="detail-card-title">承运信息</text>
@@ -104,7 +104,7 @@
     </view>
 
     <!-- 司机核验凭证（装车拍照 / 妥投拍照） -->
-    <view wx:if="{{order.loadPhotoUrl || order.deliverPhotoUrl}}" class="detail-card">
+    <view wx:if="{{order.loadPhotoUrl || order.deliverPhotoUrl}}" class="detail-card anim-rise" style="animation-delay: 480ms">
       <view class="detail-card-head">
         <icon name="camera" size="30" color="{{iconDeep}}" />
         <text class="detail-card-title">司机核验凭证</text>
@@ -128,7 +128,20 @@
     <view class="detail-foot">下单时间：{{createTimeText || '—'}}</view>
   </block>
 
-  <view class="loading-state" wx:if="{{loading && !order}}">加载中…</view>
+  <!-- 加载态：骨架屏（站牌头 + 分组卡轮廓） -->
+  <view wx:if="{{loading && !order}}">
+    <view class="skeleton sk-head"></view>
+    <view class="skeleton-card">
+      <view class="skeleton sk-title"></view>
+      <view class="skeleton sk-line"></view>
+      <view class="skeleton sk-line sk-line-mid"></view>
+    </view>
+    <view class="skeleton-card">
+      <view class="skeleton sk-title"></view>
+      <view class="skeleton sk-line"></view>
+      <view class="skeleton sk-line sk-line-mid"></view>
+    </view>
+  </view>
   <empty-state wx:if="{{!loading && !order}}" icon="box" text="订单不存在或无权查看" />
 
   <view class="safe-area-bottom"></view>

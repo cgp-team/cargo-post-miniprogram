@@ -10,7 +10,7 @@
 
   <block wx:if="{{product}}">
     <!-- 主图区 -->
-    <view class="detail-hero">
+    <view class="detail-hero anim-rise">
       <view class="hero-img">
         <image wx:if="{{product.imageUrl}}" src="{{product.imageUrl}}" class="hero-img-real" mode="aspectFill" />
         <icon wx:else name="leaf" size="180" color="#D9A441" />
@@ -19,7 +19,7 @@
     </view>
 
     <!-- 信息卡：价格焦点 + 产地/库存胶囊 -->
-    <view class="info-card">
+    <view class="info-card anim-rise" style="animation-delay: 80ms">
       <view class="price-row">
         <text class="detail-price">¥{{product.price}}</text>
         <text class="detail-unit">/{{product.unit}}</text>
@@ -37,7 +37,7 @@
     </view>
 
     <!-- 商品介绍 -->
-    <view class="desc-card">
+    <view class="desc-card anim-rise" style="animation-delay: 160ms">
       <view class="desc-title-wrap">
         <icon name="leaf" size="30" color="{{iconDeep}}" />
         <text class="desc-title">商品介绍</text>
@@ -45,13 +45,24 @@
       <text class="desc-text">{{product.description}}</text>
     </view>
   </block>
-  <!-- 加载态：product 未返回时展示（加载失败会 navigateBack，无误导） -->
+  <!-- 加载态：product 未返回时展示骨架屏（加载失败会 navigateBack，无误导） -->
   <block wx:elif="{{!product}}">
-    <view class="loading-state">加载中…</view>
+    <view class="skeleton sk-hero"></view>
+    <view class="skeleton-card detail-sk-card">
+      <view class="skeleton sk-title"></view>
+      <view class="skeleton sk-line"></view>
+      <view class="skeleton sk-line sk-line-mid"></view>
+    </view>
+    <view class="skeleton-card detail-sk-card">
+      <view class="skeleton sk-title"></view>
+      <view class="skeleton sk-line"></view>
+      <view class="skeleton sk-line"></view>
+      <view class="skeleton sk-line sk-line-mid"></view>
+    </view>
   </block>
 
   <!-- 底部操作栏（含安全区） -->
-  <view class="detail-footer">
+  <view class="detail-footer anim-rise">
     <view
       class="footer-btn buy-btn"
       style="{{product && product.stock === 0 ? 'background: #C9C2B0;' : ''}}"
@@ -60,9 +71,9 @@
   </view>
   <view class="safe-area-bottom"></view>
 
-  <!-- 下单弹窗 -->
-  <view wx:if="{{showOrderPop}}" class="popup-mask" bindtap="closeOrderPop">
-    <view class="popup-body" catchtap="noop">
+  <!-- 下单弹窗：遮罩淡入 + 弹层底部上滑（全局原语 .anim-fade / .anim-sheet） -->
+  <view wx:if="{{showOrderPop}}" class="popup-mask anim-fade" bindtap="closeOrderPop">
+    <view class="popup-body anim-sheet" catchtap="noop">
       <view class="popup-header">
         <text class="popup-title">确认下单</text>
         <text class="popup-close" bindtap="closeOrderPop" hover-class="hover">✕</text>

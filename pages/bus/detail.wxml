@@ -2,10 +2,10 @@
 <view class="detail-page {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
   <block wx:if="{{bus}}">
     <!-- 站牌头：车牌 + 起讫站 + 班次/数据源标签（底板/落款横档由全局 .signpost 提供） -->
-    <view class="signpost">
+    <view class="signpost anim-rise">
       <view class="head-top">
         <view class="head-plate">{{bus.plateNo}}</view>
-        <text class="head-status {{bus.status === 1 ? 'running' : ''}}">{{bus.status === 1 ? '行驶中' : '待发车'}}</text>
+        <text class="head-status {{bus.status === 1 ? 'running' : ''}}"><text wx:if="{{bus.status === 1}}" class="dot-live head-status-dot"></text>{{bus.status === 1 ? '行驶中' : '待发车'}}</text>
       </view>
       <view class="head-route">
         <text class="head-station">{{bus.startStation}}</text>
@@ -48,7 +48,7 @@
         <text class="section-title">行程进度</text>
       </view>
     </view>
-    <view class="progress-card">
+    <view class="progress-card anim-rise" style="animation-delay: 80ms">
       <view class="progress-track">
         <view class="progress-fill" style="width: {{progress}}%"></view>
         <view class="progress-thumb" style="left: {{progress}}%">
@@ -73,9 +73,9 @@
       <text class="section-sub">{{stops.length}} 站</text>
     </view>
     <view class="stops">
-      <view class="stop-item {{item.state}}" wx:for="{{stops}}" wx:key="sequenceNo">
+      <view class="stop-item {{item.state}} anim-rise" style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms" wx:for="{{stops}}" wx:key="sequenceNo">
         <view class="stop-rail">
-          <view class="stop-dot"></view>
+          <view class="stop-dot"><view wx:if="{{item.state === 'current'}}" class="dot-live"></view></view>
         </view>
         <view class="stop-body">
           <text class="stop-name">{{item.stationName}}</text>
@@ -90,6 +90,12 @@
     <empty-state icon="bus" text="{{loadError === 'notfound' ? '该车辆暂未上线' : '网络异常，加载失败，点击重试'}}" />
   </view>
   <view wx:else class="detail-state">
-    <empty-state icon="bus" text="加载中…" />
+    <!-- 骨架时间线：仿经停站点卡轮廓（圆点 + 站名条，宽度错开） -->
+    <view class="skeleton-card sk-timeline">
+      <view class="sk-stop"><view class="skeleton sk-stop-dot"></view><view class="skeleton sk-stop-bar sk-w-lg"></view></view>
+      <view class="sk-stop"><view class="skeleton sk-stop-dot"></view><view class="skeleton sk-stop-bar sk-w-md"></view></view>
+      <view class="sk-stop"><view class="skeleton sk-stop-dot"></view><view class="skeleton sk-stop-bar sk-w-sm"></view></view>
+      <view class="sk-stop"><view class="skeleton sk-stop-dot"></view><view class="skeleton sk-stop-bar sk-w-md"></view></view>
+    </view>
   </view>
 </view>

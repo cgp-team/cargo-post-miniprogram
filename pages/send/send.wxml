@@ -4,14 +4,14 @@
   <!-- Step 1: 填写货物信息 -->
   <view wx:if="{{step === 1}}" class="step-body">
     <!-- 站牌头：页内锚点，与导航栏同色系衔接 -->
-    <view class="signpost send-signpost">
+    <view class="signpost send-signpost anim-rise">
       <view class="signpost-badge">第 1 步 · 共 3 步</view>
       <view class="signpost-title">填写货物信息</view>
       <view class="signpost-sub">写清货物与收发站点，费用提前算给你看</view>
     </view>
 
     <!-- 物品信息 -->
-    <view class="card form-card">
+    <view class="card form-card anim-rise" style="animation-delay: 80ms">
       <view class="form-sec-title">
         <icon name="box" size="32" color="{{iconDeep}}" />
         <text>物品信息</text>
@@ -121,7 +121,7 @@
     </view>
 
     <!-- 寄件：取货站点 -->
-    <view class="card form-card">
+    <view class="card form-card anim-rise" style="animation-delay: 160ms">
       <view class="form-sec-title">
         <icon name="pin" size="32" color="{{iconColor}}" />
         <text>寄件 · 怎么取货</text>
@@ -170,13 +170,13 @@
           </view>
         </view>
 
-        <view wx:if="{{locCoarse}}" class="reach-card warn">
+        <view wx:if="{{locCoarse}}" class="reach-card warn anim-rise">
           <text class="reach-title">当前定位精度较低（约 {{locAccuracyText}}）</text>
           <text class="reach-line">位置可能偏差几百米到几公里，建议点「手动选位置」在地图上点准，或开启手机「精确位置」</text>
         </view>
 
-        <view wx:if="{{reachLoading}}" class="reach-card">正在判断当前位置能否安排取货…</view>
-        <view wx:elif="{{reachability}}" class="reach-card {{reachability.reachable ? 'ok' : 'warn'}}">
+        <view wx:if="{{reachLoading}}" class="reach-card anim-rise">正在判断当前位置能否安排取货…</view>
+        <view wx:elif="{{reachability}}" class="reach-card {{reachability.reachable ? 'ok' : 'warn'}} anim-rise">
           <text class="reach-title">{{reachability.reachable ? '当前位置可由车辆就近服务' : '当前位置车辆无法直接进入'}}</text>
           <text wx:if="{{reachability.recommendedStation}}" class="reach-line">推荐服务站点：{{reachability.recommendedStation.name}}</text>
           <text wx:if="{{reachability.distanceKm != null}}" class="reach-line">距离约 {{reachability.distanceKm}} km · 步行约 {{reachability.walkMinutes}} 分钟{{reachability.distanceProvider === 'HAVERSINE' ? '（路线估算）' : ''}}</text>
@@ -206,7 +206,7 @@
           />
         </view>
         <!-- 该站点车辆进不去时：提示并就就近更换（不可达场景的首要操作） -->
-        <view wx:if="{{stationSuggestion}}" class="station-suggest">
+        <view wx:if="{{stationSuggestion}}" class="station-suggest anim-rise">
           <text class="station-suggest-text">
             {{stationSuggestion.message}}{{stationSuggestion.distanceKm ? '（距所选站点约 ' + stationSuggestion.distanceKm + ' km）' : ''}}
           </text>
@@ -218,7 +218,7 @@
     </view>
 
     <!-- 收件：送达站点 -->
-    <view class="card form-card">
+    <view class="card form-card anim-rise" style="animation-delay: 240ms">
       <view class="form-sec-title">
         <icon name="pin" size="32" color="{{iconClay}}" />
         <text>收件 · 送到哪里</text>
@@ -274,7 +274,7 @@
     </view>
 
     <!-- 费用试算：填完取货/送达地址即出金额（件单价×件数 + 里程费），不用等提交后才看得到 -->
-    <view class="quote-card">
+    <view class="quote-card anim-rise" style="animation-delay: 320ms">
       <view wx:if="{{quoteLoading}}" class="quote-hint">正在试算费用…</view>
       <block wx:elif="{{quote}}">
         <view class="quote-head">
@@ -291,10 +291,10 @@
     </view>
 
     <!-- 路线预估：点击"下一步"后展示（loading / 成功 / 失败重试） -->
-    <view wx:if="{{routeStatus === 'loading'}}" class="route-preview">
+    <view wx:if="{{routeStatus === 'loading'}}" class="route-preview anim-rise">
       <text class="rp-text">正在计算路线…</text>
     </view>
-    <view wx:elif="{{routeStatus === 'success' && routePreview}}" class="route-preview">
+    <view wx:elif="{{routeStatus === 'success' && routePreview}}" class="route-preview anim-rise">
       <view class="rp-row">
         <text class="rp-label">真实道路距离</text>
         <text class="rp-value">{{routePreview.distanceKm}} km</text>
@@ -305,7 +305,7 @@
       </view>
       <text wx:if="{{routePreview.provider && routePreview.provider !== 'amap'}}" class="rp-warn">路网暂不可用，当前为直线估算</text>
     </view>
-    <view wx:elif="{{routeStatus === 'error'}}" class="route-preview route-preview-error">
+    <view wx:elif="{{routeStatus === 'error'}}" class="route-preview route-preview-error anim-rise">
       <text class="rp-text">暂时无法获取路线</text>
       <view class="rp-retry" bindtap="retryRoutePreview" hover-class="hover">重新查询</view>
     </view>
@@ -325,14 +325,14 @@
 
   <!-- Step 2: 拍照确认 -->
   <view wx:if="{{step === 2}}" class="step-body">
-    <view class="signpost send-signpost">
+    <view class="signpost send-signpost anim-rise">
       <view class="signpost-badge">第 2 步 · 共 3 步</view>
       <view class="signpost-title">拍照确认货物</view>
       <view class="signpost-sub">拍张货物照片，司机取货更好认</view>
     </view>
 
     <!-- 货物照片 -->
-    <view class="card form-card">
+    <view class="card form-card anim-rise" style="animation-delay: 80ms">
       <view class="form-sec-title">
         <icon name="camera" size="32" color="{{iconDeep}}" />
         <text>货物照片</text>
@@ -348,7 +348,7 @@
     </view>
 
     <!-- 信息核对 -->
-    <view class="card form-card">
+    <view class="card form-card anim-rise" style="animation-delay: 160ms">
       <view class="form-sec-title">
         <icon name="list" size="32" color="{{iconDeep}}" />
         <text>信息核对</text>
@@ -394,7 +394,7 @@
     </view>
 
     <!-- 收货信息 -->
-    <view class="card form-card">
+    <view class="card form-card anim-rise" style="animation-delay: 240ms">
       <view class="receiver-head">
         <view class="form-sec-title">
           <icon name="user" size="32" color="{{iconDeep}}" />
@@ -444,14 +444,14 @@
 
   <!-- Step 3: 提交成功 -->
   <view wx:if="{{step === 3}}" class="step-body match-success">
-    <view class="signpost send-signpost">
+    <view class="signpost send-signpost anim-rise">
       <view class="signpost-badge">寄货单已受理</view>
       <view class="signpost-title">寄货已提交！</view>
       <view class="signpost-sub">保存好单号，可在「我的寄货」查看进度</view>
     </view>
 
     <!-- 承运审核结果：可运/不可运/需操作 实时反馈 -->
-    <view wx:if="{{reviewMode}}" class="review-card review-{{reviewMode}}">
+    <view wx:if="{{reviewMode}}" class="review-card review-{{reviewMode}} anim-rise" style="animation-delay: 80ms">
       <view class="review-title-row">
         <icon name="notice" size="28" color="{{reviewMode === 'passed' ? '#2E7D32' : (reviewMode === 'rejected' ? '#C0392B' : '#C75B2A')}}" />
         <text class="review-title">{{reviewTitle}}</text>
@@ -466,7 +466,7 @@
     </view>
 
     <!-- 订单车票：主券放二维码与单号，副券放金额 -->
-    <view class="match-bus-card ticket-card">
+    <view class="match-bus-card ticket-card anim-pop" style="animation-delay: 120ms">
       <view class="ticket-card__main qr-main">
         <canvas type="2d" id="qrCanvas" class="qr-canvas"></canvas>
         <text class="order-no-display">{{orderNo}}</text>
@@ -488,18 +488,18 @@
       </view>
     </view>
 
-    <view class="match-reminder">
+    <view class="match-reminder anim-rise" style="animation-delay: 240ms">
       <view class="reminder-title"><icon name="notice" size="30" color="{{iconClay}}" /><text>温馨提示</text></view>
       <text class="reminder-text">订单已提交，调度员将尽快为您安排班次，</text>
       <text class="reminder-text">可在「我的」→「我的寄货」查看进度。</text>
     </view>
 
-    <view class="step-actions">
+    <view class="step-actions anim-rise" style="animation-delay: 320ms">
       <button class="btn-primary" bindtap="goHome">我知道了，返回首页</button>
     </view>
 
     <!-- 取货方式与原始地址（答辩演示重点：位置 ≠ 车辆能到的地方） -->
-    <view wx:if="{{pickupMode === 'location' || originalAddress}}" class="pickup-summary">
+    <view wx:if="{{pickupMode === 'location' || originalAddress}}" class="pickup-summary anim-rise" style="animation-delay: 400ms">
       <view class="info-row">
         <text class="info-label">取货方式</text>
         <text class="info-value">{{pickupServiceMode === 'DOOR_PICKUP' ? '车辆上门交接' : (pickupMode === 'location' ? '就近站点交接' : '自选取货站点')}}</text>

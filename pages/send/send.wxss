@@ -237,6 +237,7 @@
 .tip-item {
   padding: 20rpx 22rpx;
   border-bottom: 1rpx solid #F0EADC;
+  transition: background-color 0.15s ease;
 }
 
 .tip-item:last-child {

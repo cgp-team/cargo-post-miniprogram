@@ -54,7 +54,8 @@
     </view>
     <scroll-view class="line-scroll" scroll-x enable-flex wx:if="{{visibleLines.length}}">
       <view
-        class="line-chip {{activeLineKey === item.key ? 'active' : ''}}"
+        class="line-chip anim-rise {{activeLineKey === item.key ? 'active' : ''}}"
+        style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms"
         wx:for="{{visibleLines}}"
         wx:key="key"
         data-key="{{item.key}}"
@@ -68,7 +69,12 @@
       </view>
     </scroll-view>
     <view wx:elif="{{loading}}" class="lines-state">
-      <empty-state icon="bus" text="正在加载附近线路…" />
+      <!-- 骨架线路 chip：仿真实 chip 轮廓（宽高三档） -->
+      <view class="sk-chips">
+        <view class="skeleton sk-chip"></view>
+        <view class="skeleton sk-chip sk-chip-w2"></view>
+        <view class="skeleton sk-chip sk-chip-w3"></view>
+      </view>
     </view>
     <view wx:elif="{{hasError}}" class="lines-state" bindtap="loadNearby" hover-class="hover">
       <empty-state icon="bus" text="加载失败" subText="点击重试" />
@@ -88,6 +94,28 @@
       <text class="section-sub">{{vehicles.length}} 辆</text>
     </view>
 
+    <!-- 加载中：骨架车票卡（主券条块 + 副券块，仿真实车辆卡轮廓） -->
+    <view wx:if="{{loading && !vehicles.length}}" class="vehicle-skeletons">
+      <view class="skeleton-card sk-ticket">
+        <view class="sk-ticket-main">
+          <view class="skeleton sk-serial"></view>
+          <view class="skeleton sk-title"></view>
+          <view class="skeleton sk-line"></view>
+          <view class="skeleton sk-line sk-line-short"></view>
+        </view>
+        <view class="skeleton sk-stub"></view>
+      </view>
+      <view class="skeleton-card sk-ticket">
+        <view class="sk-ticket-main">
+          <view class="skeleton sk-serial sk-serial-w2"></view>
+          <view class="skeleton sk-title sk-title-w2"></view>
+          <view class="skeleton sk-line"></view>
+          <view class="skeleton sk-line sk-line-short"></view>
+        </view>
+        <view class="skeleton sk-stub"></view>
+      </view>
+    </view>
+
     <view wx:if="{{!vehicles.length && !loading}}" class="running-empty">
       <empty-state wx:if="{{runningEmptyText}}" icon="bus" text="{{runningEmptyText}}" />
       <empty-state wx:elif="{{nearbyLineCount}}" icon="bus" text="附近有 {{nearbyLineCount}} 条线路，当前暂无车辆经过" />
@@ -95,7 +123,8 @@
     </view>
 
     <view
-      class="vehicle-card ticket-card"
+      class="vehicle-card ticket-card anim-rise"
+      style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms"
       wx:for="{{vehicles}}"
       wx:key="busId"
       data-bus="{{item.busId}}"
@@ -108,7 +137,7 @@
         <view class="vehicle-head">
           <text class="vehicle-route">{{item.routeName}}</text>
           <text wx:if="{{item.isNearest}}" class="vehicle-nearest">离你最近</text>
-          <text class="vehicle-status {{item.statusText === '行驶中' ? 'running' : ''}}">{{item.statusText}}</text>
+          <text class="vehicle-status {{item.statusText === '行驶中' ? 'running' : ''}}"><text wx:if="{{item.statusText === '行驶中'}}" class="dot-live status-dot"></text>{{item.statusText}}</text>
         </view>
         <view class="vehicle-plate-row">
           <image class="vehicle-icon" src="{{item.simulated ? '/images/marker-bus-sim.png' : '/images/marker-bus-real.png'}}" mode="aspectFit" />

@@ -894,6 +894,34 @@
   flex-shrink: 0;
 }
 
+/* ============ 动效：骨架车票卡 / 当前站呼吸点 / 按压保底 ============ */
+/* 骨架车票卡：主券条块 + 副券块，轮廓对齐 .ticket-card（副券同宽 168rpx） */
+.sk-ticket { display: flex; align-items: flex-start; }
+.sk-main { flex: 1; min-width: 0; }
+.sk-serial { width: 42%; height: 20rpx; margin-bottom: 18rpx; }
+.sk-title { width: 55%; height: 32rpx; margin-bottom: 18rpx; }
+.sk-line { width: 90%; height: 24rpx; margin-bottom: 14rpx; }
+.sk-line-short { width: 70%; margin-bottom: 0; }
+.sk-stub {
+  flex: none;
+  width: 168rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+  padding-top: 6rpx;
+}
+.sk-stub-value { width: 120rpx; height: 72rpx; }
+.sk-stub-label { width: 88rpx; height: 20rpx; }
+
+/* 当前站：已完成绿点内嵌白色呼吸点（.dot-live 色取 currentColor） */
+.timeline-dot.current {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+}
+
 /* ============ 老年人模式：快递页字体放大 ============ */
 .elderly-mode .village-name { font-size: 38rpx; }
 .elderly-mode .header-title { font-size: 42rpx; }

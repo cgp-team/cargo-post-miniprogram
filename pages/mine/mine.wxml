@@ -39,7 +39,7 @@
     </view>
 
     <!-- 农户服务（悬浮卡 + 陶土橙大按钮，质感对齐 btn 体系） -->
-    <view class="farmer-section">
+    <view class="farmer-section anim-rise" style="animation-delay: 80ms">
       <view class="farmer-title-wrap">
         <icon name="leaf" size="30" color="{{iconDeep}}" />
         <text class="farmer-title">农户服务</text>
@@ -55,7 +55,7 @@
 
     <!-- 功能菜单 -->
     <view class="menu-caption">我的服务</view>
-    <view class="menu-section">
+    <view class="menu-section anim-rise" style="animation-delay: 160ms">
       <view class="menu-item" bindtap="goToOrders" hover-class="hover">
         <view class="menu-icon-box">
           <icon name="list" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
@@ -88,7 +88,7 @@
 
     <!-- 设置区 -->
     <view class="menu-caption">服务与设置</view>
-    <view class="menu-section">
+    <view class="menu-section anim-rise" style="animation-delay: 240ms">
       <view class="menu-item" bindtap="goToAddress" hover-class="hover">
         <view class="menu-icon-box">
           <icon name="pin" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
@@ -126,7 +126,7 @@
       </view>
     </view>
 
-    <view class="menu-section">
+    <view class="menu-section anim-rise" style="animation-delay: 320ms">
       <view class="menu-item logout" bindtap="handleLogout" hover-class="hover">
         <view class="menu-icon-box danger-box">
           <icon name="logout" size="{{elderlyMode ? 48 : 40}}" color="#C0392B" />

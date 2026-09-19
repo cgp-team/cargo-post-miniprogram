@@ -6,8 +6,8 @@
   </view>
 
   <!-- 半屏弹窗遮罩 -->
-  <view wx:if="{{sheetVisible}}" class="sp-mask" bindtap="close"></view>
-  <view wx:if="{{sheetVisible}}" class="sp-sheet">
+  <view wx:if="{{sheetVisible}}" class="sp-mask anim-fade" bindtap="close"></view>
+  <view wx:if="{{sheetVisible}}" class="sp-sheet anim-sheet">
     <view class="sp-head">
       <text class="sp-title">{{title}}</text>
       <view class="sp-close" bindtap="close" hover-class="hover">

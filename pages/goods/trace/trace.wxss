@@ -405,6 +405,18 @@
   border-radius: 999rpx;
 }
 
+/* 骨架屏：承运卡 + 地图 + 时间线轮廓 */
+.trace-sk-card { margin: 24rpx 24rpx 0; }
+.trace-sk-map {
+  height: 560rpx;
+  border-radius: 20rpx;
+  margin: 24rpx 24rpx 0;
+}
+.sk-title { width: 55%; height: 32rpx; margin-bottom: 20rpx; }
+.sk-line { width: 90%; height: 24rpx; margin-bottom: 16rpx; }
+.sk-line-mid { width: 70%; }
+.trace-sk-card .skeleton:last-child { margin-bottom: 0; }
+
 /* ============ 老年人模式：溯源页字体放大 ============ */
 .elderly-mode .carrier-title { font-size: 36rpx; }
 .elderly-mode .carrier-status { font-size: 26rpx; }
