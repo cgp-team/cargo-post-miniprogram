@@ -229,6 +229,11 @@
 }
 .detail-btn {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 84rpx;
   text-align: center;
   padding: 18rpx 0;
   border-radius: var(--radius-pill);
@@ -298,16 +303,19 @@
 /* 老年人模式 */
 .elderly-mode .detail-status-name { font-size: 46rpx; }
 .elderly-mode .detail-status-no { font-size: 28rpx; }
+.elderly-mode .signpost-badge { font-size: 24rpx; }
 .elderly-mode .detail-arrival { font-size: 32rpx; }
 .elderly-mode .detail-card-title { font-size: 36rpx; }
 .elderly-mode .step-name { font-size: 32rpx; }
 .elderly-mode .step-time { font-size: 26rpx; }
-.elderly-mode .goods-name { font-size: 32rpx; }
+.elderly-mode .goods-name { font-size: 32rpx; white-space: normal; }
 .elderly-mode .goods-sub { font-size: 28rpx; }
 .elderly-mode .goods-amount { font-size: 32rpx; }
 .elderly-mode .detail-total-label { font-size: 30rpx; }
 .elderly-mode .detail-total-value { font-size: 48rpx; }
-.elderly-mode .detail-btn { font-size: 32rpx; padding: 22rpx 0; }
+/* 34rpx 下「联系电话」等四字标签约 136rpx，放宽避免贴住数值列 */
+.elderly-mode .info-label { width: 160rpx; }
+.elderly-mode .detail-btn { font-size: 32rpx; padding: 22rpx 0; min-height: 96rpx; }
 .elderly-mode .proof-label { font-size: 32rpx; }
 .elderly-mode .proof-time { font-size: 28rpx; }
 .elderly-mode .detail-foot { font-size: 28rpx; }

@@ -55,6 +55,7 @@
   display: flex;
   align-items: center;
   gap: 8rpx;
+  min-height: 80rpx;
 }
 
 .arrow-down {
@@ -97,6 +98,15 @@
   border-radius: 20rpx;
   background: rgba(255, 255, 255, 0.14);
   border: 1rpx solid rgba(255, 255, 255, 0.4);
+  min-height: 80rpx;
+  box-sizing: border-box;
+}
+/* 文字撑满胶囊高度：bindtap 挂在 text 上，点击热区跟齐整条胶囊 */
+.loc-hint-text,
+.loc-hint-action {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
 }
 .loc-hint-text {
   font-size: 22rpx;
@@ -133,8 +143,8 @@
 }
 
 .user-avatar image {
-  width: 76rpx;
-  height: 76rpx;
+  width: 100%;
+  height: 100%;
 }
 
 /* 天气胶囊：头部内一行浓缩天气，点击展开详情卡 */
@@ -149,6 +159,8 @@
   border: 1rpx solid rgba(255, 255, 255, 0.22);
   border-radius: var(--radius-pill);
   padding: 12rpx 24rpx;
+  min-height: 80rpx;
+  box-sizing: border-box;
 }
 
 .weather-pill-text {
@@ -314,7 +326,7 @@
 /* 公告横幅 —— 稻谷金公告条 */
 .notice-swiper {
   margin: 24rpx 28rpx;
-  height: 78rpx;
+  height: 80rpx;
   background: linear-gradient(135deg, #FBF3DF, #F6E8C4);
   border-radius: 12rpx;
   border: 1rpx solid rgba(217, 164, 65, 0.28);
@@ -346,7 +358,7 @@
 
 .notice-text {
   font-size: 26rpx;
-  color: #666;
+  color: var(--color-text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -431,6 +443,10 @@
   background: var(--color-primary-light);
   border-radius: 24rpx;
   transition: all 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  min-height: 80rpx;
+  box-sizing: border-box;
 }
 
 /* 公交列表（卡片本体样式由全局 .ticket-card 提供：主券+副券+打孔撕票线） */
@@ -550,6 +566,10 @@
   color: var(--color-primary);
   border-radius: 999rpx;
   font-size: 26rpx;
+  display: inline-flex;
+  align-items: center;
+  min-height: 80rpx;
+  box-sizing: border-box;
 }
 
 /* 公交标签（数据来源/班次） */
@@ -655,37 +675,46 @@
 }
 
 /* ============ 老年人模式：首页字体放大 ============ */
-.elderly-mode .village-name { font-size: 38rpx; }
-.elderly-mode .loc-hint { padding: 10rpx 22rpx; }
+.elderly-mode .village-name { font-size: 46rpx; }
+.elderly-mode .arrow-down { font-size: 28rpx; }
+.elderly-mode .location-info { min-height: 96rpx; }
+.elderly-mode .user-avatar { width: 96rpx; height: 96rpx; }
+.elderly-mode .loc-hint { padding: 10rpx 22rpx; min-height: 96rpx; }
 .elderly-mode .loc-hint-text { font-size: 28rpx; }
+.elderly-mode .loc-hint-action { font-size: 28rpx; }
 .elderly-mode .bus-meta-text { font-size: 26rpx; }
 .elderly-mode .bus-empty-text { font-size: 30rpx; }
 .elderly-mode .bus-empty-title { font-size: 32rpx; }
 .elderly-mode .bus-line-chip { font-size: 26rpx; padding: 10rpx 24rpx; }
-.elderly-mode .bus-retry { font-size: 30rpx; padding: 16rpx 48rpx; }
+.elderly-mode .bus-retry { font-size: 30rpx; padding: 16rpx 48rpx; min-height: 96rpx; }
 .elderly-mode .bus-tag { font-size: 24rpx; }
 .elderly-mode .bus-next { font-size: 28rpx; }
 .elderly-mode .bus-dist { font-size: 26rpx; }
 .elderly-mode .search-input { font-size: 32rpx; }
+.elderly-mode .weather-pill { min-height: 96rpx; }
 .elderly-mode .weather-pill-text { font-size: 30rpx; }
 .elderly-mode .weather-pill-more { font-size: 26rpx; }
+.elderly-mode .weather-icon { font-size: 64rpx; }
 .elderly-mode .weather-temp { font-size: 60rpx; }
 .elderly-mode .weather-condition { font-size: 32rpx; }
 .elderly-mode .weather-detail { font-size: 26rpx; }
 .elderly-mode .weather-tips { font-size: 26rpx; max-width: 260rpx; }
 .elderly-mode .weather-refresh { font-size: 24rpx; }
 .elderly-mode .forecast-day { font-size: 26rpx; }
+.elderly-mode .forecast-icon { font-size: 42rpx; }
 .elderly-mode .forecast-temp { font-size: 26rpx; }
+.elderly-mode .notice-swiper { height: 96rpx; }
 .elderly-mode .notice-text { font-size: 30rpx; }
 .elderly-mode .feature-name { font-size: 28rpx; }
 .elderly-mode .feature-icon-box { width: 112rpx; height: 112rpx; }
 .elderly-mode .section-title { font-size: 38rpx; }
-.elderly-mode .section-more { font-size: 30rpx; }
+.elderly-mode .section-more { font-size: 30rpx; min-height: 96rpx; }
 .elderly-mode .bus-number { font-size: 44rpx; }
 .elderly-mode .bus-status { font-size: 26rpx; }
 .elderly-mode .bus-route { font-size: 30rpx; }
 .elderly-mode .bus-info { font-size: 28rpx; }
-.elderly-mode .product-name { font-size: 32rpx; }
+.elderly-mode .ticket-card__stub-value.stub-eta { font-size: 34rpx; }
+.elderly-mode .product-name { font-size: 32rpx; white-space: normal; }
 .elderly-mode .product-from { font-size: 26rpx; }
 .elderly-mode .product-price { font-size: 40rpx; }
 .elderly-mode .product-unit { font-size: 26rpx; }

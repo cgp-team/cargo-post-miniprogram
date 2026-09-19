@@ -55,6 +55,7 @@
   display: flex;
   align-items: center;
   gap: 8rpx;
+  min-height: 80rpx;
 }
 
 .village-name {
@@ -124,7 +125,8 @@
 }
 
 .category-tag {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   padding: 12rpx 30rpx;
   font-size: 26rpx;
   color: var(--color-text-secondary);
@@ -133,6 +135,8 @@
   border-radius: 999rpx;
   box-shadow: 0 2rpx 8rpx rgba(60, 50, 30, 0.04);
   transition: all 0.15s ease;
+  min-height: 80rpx;
+  box-sizing: border-box;
 }
 
 .category-tag.active {
@@ -256,11 +260,14 @@
 
 /* ============ 老年人模式：商城页字体放大 ============ */
 .elderly-mode .village-name { font-size: 44rpx; }
+.elderly-mode .arrow-down { font-size: 28rpx; }
+.elderly-mode .location-info { min-height: 96rpx; }
 .elderly-mode .top-badge { font-size: 24rpx; }
 .elderly-mode .top-sub { font-size: 26rpx; }
-.elderly-mode .user-avatar text { font-size: 30rpx; }
-.elderly-mode .category-tag { font-size: 30rpx; padding: 16rpx 34rpx; }
-.elderly-mode .product-name { font-size: 32rpx; }
+.elderly-mode .user-avatar { width: 96rpx; height: 96rpx; }
+.elderly-mode .user-avatar text { font-size: 30rpx; max-width: 84rpx; }
+.elderly-mode .category-tag { font-size: 30rpx; padding: 16rpx 34rpx; min-height: 96rpx; }
+.elderly-mode .product-name { font-size: 32rpx; white-space: normal; }
 .elderly-mode .product-from { font-size: 26rpx; }
 .elderly-mode .product-price { font-size: 42rpx; }
 .elderly-mode .product-unit { font-size: 26rpx; }

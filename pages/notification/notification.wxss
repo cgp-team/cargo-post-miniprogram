@@ -55,6 +55,10 @@
 }
 
 .tab {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 80rpx;
   padding: 12rpx 36rpx;
   border-radius: var(--radius-pill);
   font-size: 28rpx;
@@ -69,6 +73,10 @@
 }
 
 .read-all {
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 80rpx;
   font-size: 26rpx;
   color: #ffffff;
   padding: 10rpx 24rpx;
@@ -274,6 +282,11 @@
 .sk-n-short { width: 65%; }
 
 .more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 80rpx;
   max-width: 320rpx;
   margin: 24rpx auto 0;
   padding: 14rpx 40rpx;
@@ -283,7 +296,6 @@
   background: #FFFDF8;
   border: 2rpx solid var(--color-primary);
   border-radius: var(--radius-pill);
-  box-sizing: border-box;
 }
 
 .more-nomore {
@@ -294,11 +306,14 @@
 }
 
 /* ============ 老年人模式：通知页字体放大 ============ */
-.elderly-mode .tab { font-size: 32rpx; padding: 14rpx 40rpx; }
-.elderly-mode .read-all { font-size: 30rpx; }
+.elderly-mode .tab { font-size: 32rpx; padding: 14rpx 40rpx; min-height: 96rpx; }
+.elderly-mode .read-all { font-size: 30rpx; min-height: 96rpx; }
 .elderly-mode .head-sub { font-size: 28rpx; }
-.elderly-mode .n-title { font-size: 38rpx; }
+/* 38rpx 下单行省略会丢信息，允许标题折行 */
+.elderly-mode .n-title { font-size: 38rpx; white-space: normal; }
 .elderly-mode .n-content { font-size: 32rpx; }
 .elderly-mode .n-pill { font-size: 26rpx; padding: 8rpx 20rpx; }
-.elderly-mode .more { font-size: 30rpx; }
+/* 26rpx 下单号更宽，放宽胶囊上限减少截断 */
+.elderly-mode .n-pill--order { max-width: 420rpx; }
+.elderly-mode .more { font-size: 30rpx; min-height: 96rpx; }
 .elderly-mode .more-nomore { font-size: 28rpx; }

@@ -88,6 +88,10 @@
   gap: 20rpx;
 }
 .sex-chip {
+  display: flex;
+  align-items: center;
+  min-height: 80rpx;
+  box-sizing: border-box;
   padding: 12rpx 38rpx;
   border-radius: 999rpx;
   background: var(--color-primary-light);
@@ -104,6 +108,10 @@
 
 .code-btn {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  min-height: 80rpx;
+  box-sizing: border-box;
   margin-left: 20rpx;
   padding: 12rpx 28rpx;
   border-radius: 999rpx;
@@ -131,5 +139,6 @@
 .elderly-mode .form-label { width: 170rpx; }
 .elderly-mode .form-input { font-size: 32rpx; }
 .elderly-mode .form-static { font-size: 32rpx; }
-.elderly-mode .sex-chip { font-size: 30rpx; padding: 14rpx 42rpx; }
-.elderly-mode .code-btn { font-size: 28rpx; }
+.elderly-mode .sex-chip { font-size: 30rpx; padding: 14rpx 42rpx; min-height: 96rpx; }
+.elderly-mode .code-btn { font-size: 28rpx; min-height: 96rpx; }
+.elderly-mode .form-arrow { font-size: 42rpx; }

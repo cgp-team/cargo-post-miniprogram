@@ -192,6 +192,7 @@
   color: var(--color-ink);
   font-weight: 700;
   letter-spacing: 3rpx;
+  padding: 22rpx 24rpx;
 }
 
 /* 撕票线：两端打孔，透出页底色形成缺口 */
@@ -418,16 +419,17 @@
 .trace-sk-card .skeleton:last-child { margin-bottom: 0; }
 
 /* ============ 老年人模式：溯源页字体放大 ============ */
-.elderly-mode .carrier-title { font-size: 36rpx; }
+.elderly-mode .carrier-title { font-size: 36rpx; white-space: normal; }
 .elderly-mode .carrier-status { font-size: 26rpx; }
 .elderly-mode .carrier-row { font-size: 30rpx; }
 .elderly-mode .arrival-text { font-size: 30rpx; }
 .elderly-mode .proof-title { font-size: 32rpx; }
 .elderly-mode .proof-label { font-size: 30rpx; }
 .elderly-mode .proof-time { font-size: 26rpx; }
-.elderly-mode .order-qr-no { font-size: 32rpx; }
+.elderly-mode .proof-img { width: 168rpx; height: 168rpx; }
+.elderly-mode .order-qr-no { font-size: 32rpx; padding: 26rpx 28rpx; }
 .elderly-mode .order-qr-tip { font-size: 26rpx; }
-.elderly-mode .legend-text { font-size: 24rpx; }
+.elderly-mode .legend-text { font-size: 26rpx; }
 .elderly-mode .stops-title { font-size: 34rpx; }
 .elderly-mode .stop-name { font-size: 32rpx; }
 .elderly-mode .stop-min { font-size: 26rpx; }

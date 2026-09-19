@@ -94,6 +94,10 @@
 .addr-action {
   font-size: 26rpx;
   color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  min-height: 80rpx;
+  box-sizing: border-box;
   padding: 8rpx 20rpx;
   border-radius: 999rpx;
 }
@@ -189,7 +193,7 @@
 .elderly-mode .addr-mobile { font-size: 30rpx; }
 .elderly-mode .addr-default { font-size: 24rpx; }
 .elderly-mode .addr-detail { font-size: 30rpx; }
-.elderly-mode .addr-action { font-size: 30rpx; padding: 10rpx 24rpx; }
+.elderly-mode .addr-action { font-size: 30rpx; padding: 10rpx 24rpx; min-height: 96rpx; }
 .elderly-mode .form-title { font-size: 36rpx; }
 .elderly-mode .form-item { font-size: 32rpx; padding: 32rpx 0; }
 .elderly-mode .form-label { width: 170rpx; }

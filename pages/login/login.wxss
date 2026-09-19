@@ -218,7 +218,7 @@
   justify-content: center;
   gap: 6rpx;
   margin-top: 28rpx;
-  padding: 12rpx 0;
+  padding: 22rpx 0;
   font-size: 28rpx;
   font-weight: 500;
   color: var(--color-primary);
@@ -276,7 +276,7 @@
   align-items: center;
   justify-content: center;
   gap: 8rpx;
-  padding: 28rpx 0 8rpx;
+  padding: 26rpx 0 18rpx;
   font-size: 26rpx;
   color: var(--color-text-tertiary);
 }
@@ -299,7 +299,7 @@
 .elderly-mode .wechat-login-btn { font-size: 34rpx; }
 .elderly-mode .sms-btn { font-size: 30rpx; width: 220rpx; }
 .elderly-mode .sms-tip { font-size: 28rpx; }
-.elderly-mode .switch-mode { font-size: 32rpx; }
+.elderly-mode .switch-mode { font-size: 32rpx; padding: 26rpx 0; }
 .elderly-mode .divider-text { font-size: 26rpx; }
-.elderly-mode .elderly-entry { font-size: 32rpx; }
+.elderly-mode .elderly-entry { font-size: 32rpx; padding: 32rpx 0 26rpx; }
 .elderly-mode .agreement { font-size: 26rpx; }
