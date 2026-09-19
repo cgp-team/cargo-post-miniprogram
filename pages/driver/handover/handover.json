@@ -4,6 +4,7 @@
   "enablePullDownRefresh": true,
   "usingComponents": {
     "empty-state": "/components/empty-state/index",
-    "driver-tab-bar": "../../../components/driver-tab-bar/index"
+    "driver-tab-bar": "../../../components/driver-tab-bar/index",
+    "icon": "/components/icon/index"
   }
 }

@@ -1,23 +1,31 @@
 <!-- 收货地址管理页 -->
 <view class="page-address {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
 
-  <view wx:if="{{from === 'send'}}" class="select-tip">点击地址即可填入寄件单</view>
+  <view wx:if="{{from === 'send'}}" class="select-tip">
+    <icon name="pin" size="26" color="#8A6A1F" />
+    <text>点击地址即可填入寄件单</text>
+  </view>
 
   <!-- 地址列表 -->
   <view class="addr-list">
     <view class="addr-card" wx:for="{{list}}" wx:key="id" data-item="{{item}}" bindtap="selectAddress" hover-class="hover">
-      <view class="addr-main">
-        <view class="addr-head">
-          <text class="addr-name">{{item.name}}</text>
-          <text class="addr-mobile">{{item.mobile}}</text>
-          <text wx:if="{{item.defaultStatus}}" class="addr-default">默认</text>
+      <view class="addr-top">
+        <view class="addr-pin">
+          <icon name="pin" size="36" color="{{iconColor}}" />
         </view>
-        <text class="addr-detail">{{item.regionText}} {{item.detailAddress}}</text>
+        <view class="addr-main">
+          <view class="addr-head">
+            <text class="addr-name">{{item.name}}</text>
+            <text class="addr-mobile">{{item.mobile}}</text>
+            <text wx:if="{{item.defaultStatus}}" class="addr-default">默认</text>
+          </view>
+          <text class="addr-detail">{{item.regionText}} {{item.detailAddress}}</text>
+        </view>
       </view>
       <view class="addr-actions">
-        <text wx:if="{{!item.defaultStatus}}" class="addr-action" catchtap="setDefault" data-item="{{item}}">设为默认</text>
-        <text class="addr-action" catchtap="openForm" data-item="{{item}}">编辑</text>
-        <text class="addr-action danger" catchtap="removeAddress" data-id="{{item.id}}">删除</text>
+        <text wx:if="{{!item.defaultStatus}}" class="addr-action primary" catchtap="setDefault" data-item="{{item}}" hover-class="hover">设为默认</text>
+        <text class="addr-action" catchtap="openForm" data-item="{{item}}" hover-class="hover">编辑</text>
+        <text class="addr-action danger" catchtap="removeAddress" data-id="{{item.id}}" hover-class="hover">删除</text>
       </view>
     </view>
 
@@ -25,7 +33,7 @@
   </view>
 
   <!-- 新增按钮 -->
-  <view class="add-btn" bindtap="openForm" hover-class="hover">＋ 新增收货地址</view>
+  <view class="btn-primary add-btn" bindtap="openForm" hover-class="hover">＋ 新增收货地址</view>
 
   <!-- 编辑弹层 -->
   <view class="form-mask" wx:if="{{showForm}}" bindtap="closeForm">
@@ -33,11 +41,11 @@
       <view class="form-title">{{formId ? '编辑地址' : '新增地址'}}</view>
       <view class="form-item">
         <text class="form-label">收件人</text>
-        <input class="form-input" value="{{formName}}" placeholder="姓名" bindinput="onFormNameInput" />
+        <input class="form-input" value="{{formName}}" placeholder="姓名" placeholder-class="form-ph" bindinput="onFormNameInput" />
       </view>
       <view class="form-item">
         <text class="form-label">手机号</text>
-        <input class="form-input" type="number" maxlength="11" value="{{formMobile}}" placeholder="11 位手机号" bindinput="onFormMobileInput" />
+        <input class="form-input" type="number" maxlength="11" value="{{formMobile}}" placeholder="11 位手机号" placeholder-class="form-ph" bindinput="onFormMobileInput" />
       </view>
       <view class="form-item">
         <text class="form-label">地区</text>
@@ -54,13 +62,13 @@
       </view>
       <view class="form-item">
         <text class="form-label">详细地址</text>
-        <input class="form-input" value="{{formDetail}}" placeholder="村组、门牌号等" bindinput="onFormDetailInput" />
+        <input class="form-input" value="{{formDetail}}" placeholder="村组、门牌号等" placeholder-class="form-ph" bindinput="onFormDetailInput" />
       </view>
       <view class="form-item">
         <text class="form-label">默认地址</text>
         <switch checked="{{formDefault}}" bindchange="onFormDefaultChange" color="{{iconColor}}" />
       </view>
-      <button class="primary-btn" bindtap="saveAddress">保存</button>
+      <button class="btn-primary save-btn" bindtap="saveAddress">保存</button>
     </view>
   </view>
 

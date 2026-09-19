@@ -1,14 +1,41 @@
-/* 快递页样式 */
+/* 快递页样式 —— 山乡巴士 · 站牌与车票 */
 .page-parcel {
   background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-primary-light) 8%, var(--color-paper) 25%);
   min-height: 100vh;
-  padding-bottom: calc(100rpx + env(safe-area-inset-bottom));
+  padding-bottom: calc(110rpx + env(safe-area-inset-bottom));
 }
 
-/* 顶部栏 */
+/* 顶部栏 —— 站牌式：深绿实板 + 落款横档 + 装饰光晕（与首页同语言） */
 .top-bar {
-  background: linear-gradient(160deg, var(--color-primary-dark) 0%, var(--color-primary) 40%, var(--color-accent) 100%);
-  padding: 20rpx 30rpx 28rpx;
+  background: linear-gradient(160deg, var(--color-primary-dark) 0%, var(--color-primary) 60%, var(--color-primary-dark) 100%);
+  padding: 20rpx 30rpx 56rpx;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 顶部落款横档（站牌金属边） */
+.top-bar::before {
+  content: '';
+  position: absolute;
+  top: 14rpx;
+  left: 30rpx;
+  right: 30rpx;
+  height: 5rpx;
+  background: rgba(255, 255, 255, 0.26);
+  border-radius: 3rpx;
+}
+
+/* 顶部装饰光晕 */
+.top-bar::after {
+  content: '';
+  position: absolute;
+  top: -40rpx;
+  right: -20rpx;
+  width: 200rpx;
+  height: 200rpx;
+  background: radial-gradient(circle, rgba(255,255,255,0.10) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
 .top-bar-main {
@@ -20,179 +47,184 @@
 }
 
 .location-info { display: flex; align-items: center; gap: 8rpx; }
-.village-name { font-size: 32rpx; font-weight: 700; color: #fff; }
+.village-name { font-size: 34rpx; font-weight: 800; color: #fff; letter-spacing: 1rpx; }
 .arrow-down { font-size: 24rpx; color: rgba(255,255,255,0.8); }
-.header-title { font-size: 34rpx; font-weight: 700; color: #fff; }
-.user-avatar text { font-size: 40rpx; }
 
-/* 查询栏 */
-.search-bar {
-  margin-top: 20rpx;
+.header-title {
+  position: relative;
+  font-size: 36rpx;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 6rpx;
+  padding-bottom: 10rpx;
+}
+
+/* 站名落款：标题下一小段稻谷金 */
+.header-title::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  width: 44rpx;
+  height: 4rpx;
+  border-radius: 2rpx;
+  background: var(--color-gold);
+}
+
+.user-avatar {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.16);
+  border: 2rpx solid rgba(255,255,255,0.6);
   display: flex;
   align-items: center;
-  padding: 16rpx 20rpx;
-  background: #fff;
-  border-radius: 20rpx;
-  box-shadow: 0 8rpx 28rpx rgba(0,0,0,0.10);
+  justify-content: center;
+  overflow: hidden;
+}
+
+.user-avatar text {
+  font-size: 28rpx;
+  color: #fff;
+  max-width: 56rpx;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* 查询条：悬浮卡片压住站牌下缘 */
+.search-bar {
+  margin: -32rpx 28rpx 0;
   position: relative;
   z-index: 3;
+  display: flex;
+  align-items: center;
+  padding: 10rpx 10rpx 10rpx 24rpx;
+  background: #FFFDF8;
+  border: 1rpx solid rgba(60, 50, 30, 0.06);
+  border-radius: 16rpx;
+  box-shadow: var(--shadow-float);
 }
 
 .search-icon { margin-right: 12rpx; }
 
 .search-input {
   flex: 1;
+  height: 72rpx;
   font-size: 28rpx;
-  color: #333;
+  color: var(--color-ink);
 }
 
 .search-btn {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  background: var(--color-primary);
   color: var(--color-on-primary);
   font-size: 26rpx;
   font-weight: 600;
-  padding: 14rpx 32rpx;
-  border-radius: 14rpx;
+  letter-spacing: 2rpx;
+  padding: 18rpx 34rpx;
+  border-radius: 12rpx;
   margin-left: 16rpx;
   flex-shrink: 0;
+  box-shadow: inset 0 4rpx 0 rgba(255,255,255,0.14);
 }
 
 .search-btn:active { opacity: 0.85; }
 
-/* 状态切换 */
+/* 分区标题（与首页同一式） */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8rpx 4rpx 16rpx;
+}
+
+.section-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  letter-spacing: 0.5rpx;
+}
+
+.section-more {
+  font-size: 26rpx;
+  color: var(--color-primary);
+  font-weight: 500;
+  padding: 8rpx 16rpx;
+  background: var(--color-primary-light);
+  border-radius: 24rpx;
+}
+
+/* 状态切换：分段控件（米纸轨道 + 白底激活） */
 .tab-row {
   display: flex;
   margin: 24rpx 28rpx;
-  background: #fff;
+  background: #ECE6D6;
   border-radius: 16rpx;
   padding: 6rpx;
-  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.04);
 }
 
 .tab-row .tab-item {
   flex: 1;
   text-align: center;
-  padding: 18rpx;
+  padding: 16rpx 0;
   font-size: 28rpx;
-  color: #666;
+  color: var(--color-text-secondary);
   border-radius: 12rpx;
   transition: all 0.15s ease;
 }
 
 .tab-row .tab-item.active {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-  color: var(--color-on-primary);
-  font-weight: 600;
+  background: #FFFDF8;
+  color: var(--color-primary-dark);
+  font-weight: 700;
+  box-shadow: var(--shadow-card);
 }
 
-/* 快递卡片 */
+/* 列表 */
 .parcel-list {
   padding: 0 28rpx;
 }
 
-/* 我的购物：商品明细 + 点击看详情提示 */
-.mall-goods-row {
+/* 车票卡：主券/副券/打孔撕票线由全局 .ticket-card 提供；本页副券放宽以容下状态全称 */
+.ticket-card__stub { width: 168rpx; }
+
+.parcel-card { margin-bottom: 20rpx; }
+
+/* 票面头部：图标 + 名称（详情卡的状态胶囊右对齐） */
+.parcel-head {
   display: flex;
   align-items: center;
-  gap: 18rpx;
-  padding: 6rpx 0 12rpx;
-}
-.mall-goods-img,
-.mall-goods-img-ph {
-  width: 108rpx;
-  height: 108rpx;
-  border-radius: 14rpx;
-  flex-shrink: 0;
-  background: var(--color-primary-light, #EAF0F7);
-}
-.mall-goods-img-ph {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.mall-goods-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 8rpx;
-  min-width: 0;
-}
-.mall-goods-name {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: var(--color-ink, #2B2B28);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.mall-goods-sub {
-  font-size: 24rpx;
-  color: var(--color-text-secondary, #6B675C);
-}
-.mall-goods-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6rpx;
-  flex-shrink: 0;
-}
-.mall-goods-amount {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: var(--color-price, #C75B2A);
-}
-.mall-goods-more {
-  font-size: 22rpx;
-  color: var(--color-text-tertiary, #8A8778);
-}
-.parcel-tap-hint {
-  font-size: 24rpx;
-  color: var(--color-primary, #1F5E9E);
+  gap: 12rpx;
+  margin-bottom: 14rpx;
 }
 
-.parcel-card {
-  background: #fff;
-  border-radius: 20rpx;
-  padding: 30rpx;
-  margin-bottom: 20rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04), 0 6rpx 20rpx rgba(0,0,0,0.06);
-  transition: transform 0.15s ease;
-}
-
-.parcel-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 18rpx;
-}
-
-.parcel-title-row {
-  display: flex;
-  align-items: center;
-  gap: 14rpx;
-}
-
-.parcel-info { display: flex; flex-direction: column; gap: 6rpx; }
+.parcel-head .parcel-status { margin-left: auto; flex-shrink: 0; }
 
 .parcel-name {
   font-size: 30rpx;
   font-weight: 700;
-  color: #333;
+  color: var(--color-ink);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.parcel-no {
-  font-size: 22rpx;
-  color: var(--color-text-secondary);
-}
-
+/* 状态胶囊：浅底深字 */
 .parcel-status {
   font-size: 22rpx;
-  padding: 8rpx 18rpx;
+  padding: 6rpx 18rpx;
   border-radius: var(--radius-pill);
   font-weight: 600;
 }
 
-/* 状态 chip：浅底深字 */
 .parcel-status.status-pending {
   color: var(--color-status-pending);
   background: #F9E9E0;
@@ -208,17 +240,28 @@
   background: #F2F0EA;
 }
 
-/* 承运信息 */
-.parcel-route {
+/* 副券状态大字：按语义着色（待=陶土 / 运=站牌绿 / 完=暖灰） */
+.stub-status {
+  font-size: 28rpx;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.stub-status.status-pending { color: var(--color-status-pending); }
+.stub-status.status-shipping { color: var(--color-status-shipping); }
+.stub-status.status-done { color: var(--color-status-done); }
+.stub-status.on-trip { color: var(--color-primary); }
+
+.stub-unit { font-size: 22rpx; }
+
+/* 重量/时间等次要信息行 */
+.parcel-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18rpx 20rpx;
-  background: #F8FAF8;
-  border-radius: 14rpx;
-  margin-bottom: 18rpx;
   font-size: 24rpx;
-  color: #666;
+  color: var(--color-text-secondary);
 }
 
 .route-weight {
@@ -227,22 +270,32 @@
   gap: 8rpx;
 }
 
-.parcel-eta {
-  color: var(--color-clay);
+.parcel-eta { color: var(--color-text-tertiary); }
+
+/* 购物条目底部：虚线分隔 + 看详情引导 */
+.parcel-meta-foot {
+  margin-top: 14rpx;
+  padding-top: 14rpx;
+  border-top: 1rpx dashed #E4DECD;
+}
+
+.parcel-tap-hint {
+  font-size: 24rpx;
+  color: var(--color-primary);
   font-weight: 600;
 }
 
-/* 物体信息标签（类型/件数/体积/生鲜），寄货页填写后在此回显 */
+/* 货物信息标签（类型/件数/体积/生鲜），寄货页填写后在此回显 */
 .parcel-cargo-row {
   display: flex;
   flex-wrap: wrap;
   gap: 12rpx;
-  margin-bottom: 14rpx;
+  margin-top: 14rpx;
 }
 
 .cargo-chip {
   padding: 6rpx 16rpx;
-  border-radius: 999rpx;
+  border-radius: var(--radius-pill);
   background: var(--color-primary-light);
   color: var(--color-primary-dark);
   font-size: 22rpx;
@@ -253,19 +306,125 @@
   color: var(--color-clay);
 }
 
+/* 我的购物：商品明细（第一个商品 + 其余件数） */
+.mall-goods-row {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  padding: 4rpx 0 2rpx;
+}
+
+.mall-goods-img,
+.mall-goods-img-ph {
+  width: 108rpx;
+  height: 108rpx;
+  border-radius: 14rpx;
+  flex-shrink: 0;
+  background: var(--color-primary-light);
+}
+
+.mall-goods-img-ph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mall-goods-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  min-width: 0;
+}
+
+.mall-goods-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--color-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mall-goods-sub {
+  font-size: 24rpx;
+  color: var(--color-text-secondary);
+}
+
+.mall-goods-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6rpx;
+  flex-shrink: 0;
+}
+
+.mall-goods-amount {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-price);
+}
+
+.mall-goods-more {
+  font-size: 22rpx;
+  color: var(--color-text-tertiary);
+}
+
+/* 车来取货/送货提醒：绿色高亮条（点击进实时公交） */
+.parcel-approach {
+  margin-top: 14rpx;
+  padding: 16rpx 20rpx;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  border-radius: 14rpx;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  color: #fff;
+  font-size: 26rpx;
+  font-weight: 600;
+  box-shadow: 0 4rpx 12rpx var(--color-primary-shadow);
+}
+
+.parcel-approach-text {
+  color: #fff;
+  flex: 1;
+}
+
+/* 司机已到达：醒目的到达提醒（红色，区别于"车快到了"的绿色） */
+.parcel-approach.parcel-arrived {
+  background: linear-gradient(135deg, #C0392B, #A93226);
+  box-shadow: 0 4rpx 12rpx rgba(192, 57, 43, 0.28);
+}
+
+/* 承运进度提示：浅绿胶囊行 */
+.parcel-carrier-list {
+  margin-top: 14rpx;
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 14rpx 18rpx;
+  border-radius: 12rpx;
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  font-size: 24rpx;
+}
+
 /* 列表项取件码：默认打码降层级，点「查看」展开明文 */
 .parcel-code-row {
+  margin-top: 14rpx;
   display: flex;
   align-items: center;
   padding: 14rpx 20rpx;
-  background: #F0F7F0;
-  border-radius: 14rpx;
+  background: var(--color-primary-light);
+  border-radius: 12rpx;
   font-size: 24rpx;
 }
+
 .parcel-code-label {
-  color: #666;
+  color: var(--color-text-secondary);
   margin-right: 16rpx;
 }
+
 .parcel-code-value {
   flex: 1;
   font-size: 32rpx;
@@ -273,12 +432,14 @@
   color: var(--color-primary);
   letter-spacing: 4rpx;
 }
+
 .parcel-code-value.masked {
   font-size: 26rpx;
   font-weight: 400;
   color: var(--color-text-secondary);
   letter-spacing: 2rpx;
 }
+
 .parcel-code-toggle {
   color: var(--color-primary);
   font-size: 24rpx;
@@ -286,169 +447,9 @@
   padding-left: 16rpx;
 }
 
-/* 进度条 */
-.progress-bar {
-  height: 8rpx;
-  background: #E8ECEE;
-  border-radius: 4rpx;
-  margin-bottom: 24rpx;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--color-accent), var(--color-primary));
-  border-radius: 4rpx;
-  transition: width 0.5s;
-}
-
-/* 时间轴 */
-.timeline {
-  padding-left: 8rpx;
-}
-
-.timeline-item {
-  display: flex;
-  gap: 18rpx;
-  padding-bottom: 18rpx;
-  position: relative;
-}
-
-.timeline-item:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  left: 11rpx;
-  top: 28rpx;
-  bottom: 0;
-  width: 2rpx;
-  background: #E0E0E0;
-}
-
-.timeline-dot {
-  width: 24rpx;
-  height: 24rpx;
-  border-radius: 50%;
-  background: #E0E0E0;
-  flex-shrink: 0;
-  margin-top: 4rpx;
-  transition: all 0.15s ease;
-}
-
-.timeline-dot.done {
-  background: var(--color-accent);
-  box-shadow: 0 0 0 6rpx var(--color-primary-shadow);
-}
-
-.timeline-content {
-  display: flex;
-  flex-direction: column;
-  gap: 4rpx;
-}
-
-.timeline-time {
-  font-size: 22rpx;
-  color: var(--color-text-secondary);
-}
-
-.timeline-desc {
-  font-size: 26rpx;
-  color: #555;
-}
-
-/* ============ 老年人模式：快递页字体放大 ============ */
-.elderly-mode .village-name { font-size: 38rpx; }
-.elderly-mode .header-title { font-size: 40rpx; }
-.elderly-mode .search-input { font-size: 32rpx; }
-.elderly-mode .search-btn { font-size: 30rpx; padding: 18rpx 36rpx; }
-.elderly-mode .tab-row .tab-item { font-size: 32rpx; padding: 22rpx; }
-.elderly-mode .parcel-name { font-size: 34rpx; }
-.elderly-mode .parcel-no { font-size: 26rpx; }
-.elderly-mode .parcel-status { font-size: 26rpx; }
-.elderly-mode .parcel-route { font-size: 28rpx; }
-.elderly-mode .parcel-code-row { font-size: 28rpx; }
-.elderly-mode .parcel-code-value { font-size: 38rpx; }
-.elderly-mode .parcel-code-toggle { font-size: 28rpx; }
-.elderly-mode .timeline-desc { font-size: 30rpx; }
-.elderly-mode .timeline-time { font-size: 26rpx; }
-
-/* 查件二维码 */
-.parcel-qr-block {
-  margin-top: 28rpx;
-  padding-top: 28rpx;
-  border-top: 2rpx dashed rgba(0, 0, 0, 0.08);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.parcel-qr-canvas {
-  width: 300rpx;
-  height: 300rpx;
-  background: #fff;
-  border-radius: 16rpx;
-}
-.parcel-pickup-code {
-  margin-bottom: 16rpx;
-  font-size: 40rpx;
-  font-weight: 700;
-  color: var(--color-primary);
-  letter-spacing: 6rpx;
-}
-.parcel-qr-tip {
-  margin-top: 16rpx;
-  font-size: 24rpx;
-  color: var(--color-text-tertiary);
-}
-.parcel-qr-receiver {
-  margin-top: 10rpx;
-  font-size: 26rpx;
-  color: #666;
-}
-
-/* 货运审核状态提示 */
-.parcel-audit {
-  margin-top: 16rpx;
-  padding: 16rpx 20rpx;
-  border-radius: 12rpx;
-  font-size: 26rpx;
-  display: flex;
-  align-items: center;
-  gap: 10rpx;
-}
-.parcel-audit.warn { background: #FFF8E1; color: var(--color-status-warn); }
-.parcel-audit.fail { background: #FDECEA; color: var(--color-danger); }
-/* 承运班次与到达预估 */
-.parcel-carrier {
-  margin-top: 16rpx;
-  padding: 16rpx 20rpx;
-  border-radius: 12rpx;
-  background: #E8F5E9;
-  color: var(--color-primary);
-  font-size: 26rpx;
-  display: flex;
-  flex-direction: column;
-  gap: 6rpx;
-}
-.carrier-row {
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-}
-.parcel-carrier-eta {
-  font-weight: 600;
-}
-/* 车来取货/送货提醒：我的寄货列表行（横向图标+文案，点击进实时公交） */
-.parcel-carrier-list {
-  margin-top: 12rpx;
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-  color: var(--color-primary);
-  font-size: 26rpx;
-}
-
-/* 车快到了：高亮提醒条（≤10 分钟），演示时一眼可见 */
+/* 待客户操作：就近交接站点提示（陶土橙=行动） */
 .parcel-service-point {
-  margin-top: 12rpx;
+  margin-top: 14rpx;
   padding: 14rpx 20rpx;
   display: flex;
   align-items: center;
@@ -467,215 +468,139 @@
 
 .service-point-nav {
   padding: 8rpx 20rpx;
-  border-radius: 999rpx;
+  border-radius: var(--radius-pill);
   background: var(--color-clay);
   color: #fff;
   font-size: 23rpx;
   font-weight: 600;
+  flex-shrink: 0;
 }
 
-.parcel-approach {
-  margin-top: 12rpx;
-  padding: 16rpx 20rpx;
+/* 确认送站按钮：主色站牌式 */
+.btn-station-confirm {
+  margin-top: 18rpx;
+  width: 100%;
+  height: 80rpx;
   display: flex;
   align-items: center;
-  gap: 12rpx;
-  border-radius: 14rpx;
+  justify-content: center;
+  box-sizing: border-box;
+  border-radius: 40rpx;
   background: var(--color-primary);
-  color: #fff;
-  font-size: 26rpx;
-  font-weight: 600;
-  box-shadow: 0 4rpx 12rpx var(--color-primary-shadow);
-}
-
-.parcel-approach-text {
-  color: #fff;
-  flex: 1;
-}
-/* 司机已到达：醒目的到达提醒（红色，区别于"车快到了"的绿色） */
-.parcel-approach.parcel-arrived {
-  background: #C0392B;
-  box-shadow: 0 4rpx 12rpx rgba(192, 57, 43, 0.28);
-}
-.parcel-carrier-arrived {
-  color: #C0392B;
-  font-weight: 600;
-}
-.carrier-link {
-  color: var(--color-primary);
-  font-weight: 600;
-}
-.parcel-qr-copy {
-  margin-top: 16rpx;
-  padding: 12rpx 40rpx;
+  color: #FFFFFF;
   font-size: 28rpx;
-  line-height: 1.4;
-  border-radius: 999rpx;
-  border: 2rpx solid var(--color-primary);
-  color: var(--color-primary);
-  background: #fff;
+  font-weight: 600;
+  letter-spacing: 1rpx;
+  text-align: center;
+  border: none;
+  padding: 0;
+  box-shadow: inset 0 6rpx 0 rgba(255,255,255,0.12), 0 6rpx 16rpx rgba(0,0,0,0.10);
 }
-.parcel-qr-copy::after { border: none; }
-.elderly-mode .parcel-qr-canvas { width: 360rpx; height: 360rpx; }
-.elderly-mode .parcel-qr-copy { font-size: 32rpx; padding: 16rpx 48rpx; }
 
-/* 乘车安排（村民到站通知） */
-.arrange-section {
-  margin: 20rpx 24rpx 0;
+.btn-station-confirm::after { border: none; }
+
+/* ============ 单号查询详情卡：副券只贴顶部，不随长卡居中 ============ */
+.track-card .ticket-card__stub {
+  justify-content: flex-start;
+  padding-top: 44rpx;
 }
-.arrange-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12rpx;
-}
-.arrange-title {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: var(--color-ink);
+
+/* 货运审核提示：温和金色胶囊（fail 才用危险红） */
+.parcel-audit {
+  margin-top: 14rpx;
+  padding: 16rpx 20rpx;
+  border-radius: 12rpx;
+  font-size: 26rpx;
   display: flex;
   align-items: center;
   gap: 10rpx;
 }
-.arrange-sub {
-  font-size: 24rpx;
-  color: var(--color-primary);
-}
-.arrange-card {
-  background: #fff;
-  border-radius: 20rpx;
-  padding: 24rpx;
-  margin-bottom: 16rpx;
-  box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.04);
-}
-/* 上下车站路线（虚线连接 + 大巴） */
-.arrange-route {
-  display: flex;
-  align-items: center;
-  padding: 4rpx 0 20rpx;
-}
-.arrange-station {
+
+.parcel-audit.warn { background: #FBF3DF; color: #8A6A1F; }
+.parcel-audit.fail { background: #FDECEA; color: var(--color-danger); }
+
+/* 承运班次与到达预估 */
+.parcel-carrier {
+  margin-top: 14rpx;
+  padding: 16rpx 20rpx;
+  border-radius: 12rpx;
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+  font-size: 26rpx;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  flex: 1;
-  min-width: 0;
-}
-.station-name {
-  font-size: 28rpx;
-  font-weight: 700;
-  color: var(--color-ink);
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.station-label {
-  font-size: 22rpx;
-  color: var(--color-text-tertiary);
-  margin-top: 4rpx;
-}
-.arrange-mid {
-  display: flex;
-  align-items: center;
-  flex: 1.2;
-  padding: 0 12rpx;
-}
-.mid-line {
-  flex: 1;
-  height: 2rpx;
-  background: repeating-linear-gradient(90deg, var(--color-primary-light) 0 8rpx, transparent 8rpx 14rpx);
-}
-.mid-bus {
-  margin-left: 10rpx;
-}
-.arrange-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-top: 16rpx;
-  border-top: 1rpx dashed #e8e4da;
-}
-.arrange-no {
-  font-size: 22rpx;
-  color: var(--color-text-tertiary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  margin-right: 12rpx;
-}
-.arrange-status {
-  font-size: 22rpx;
-  color: var(--color-text-tertiary);
-  flex-shrink: 0;
-}
-.arrange-status.live {
-  color: var(--color-primary);
-  font-weight: 600;
-}
-/* 查看车辆位置 CTA */
-.arrange-cta {
-  margin-top: 16rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 8rpx;
+}
+
+.carrier-row {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.parcel-carrier-eta { font-weight: 600; }
+.parcel-carrier-arrived { color: var(--color-danger); font-weight: 600; }
+.carrier-link { color: var(--color-primary); font-weight: 600; }
+
+/* 多段联运地图卡：圆角 + 阴影，与下方图例/分段自然衔接 */
+.parcel-map-wrap {
+  margin: 20rpx 0 8rpx;
+  border-radius: 20rpx;
+  overflow: hidden;
+  background: #FFFDF8;
+  box-shadow: var(--shadow-card);
+}
+
+.parcel-map {
+  width: 100%;
+  height: 420rpx;
+  display: block;
+}
+
+.parcel-map-current {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 14rpx 20rpx;
   background: var(--color-primary-light);
-  color: var(--color-primary);
+  color: var(--color-primary-dark);
   font-size: 24rpx;
   font-weight: 600;
-  border-radius: 999rpx;
-  padding: 14rpx 0;
+  word-break: break-word;
 }
-.elderly-mode .arrange-title { font-size: 34rpx; }
-.elderly-mode .station-name { font-size: 32rpx; }
-.elderly-mode .arrange-cta { font-size: 28rpx; padding: 16rpx 0; }
-/* 补充：乘车安排/承运信息/审核提示等小字号同步放大 */
-.elderly-mode .arrange-sub { font-size: 28rpx; }
-.elderly-mode .station-label { font-size: 26rpx; }
-.elderly-mode .arrange-no { font-size: 26rpx; }
-.elderly-mode .arrange-status { font-size: 26rpx; }
-.elderly-mode .carrier-row { font-size: 30rpx; }
-.elderly-mode .parcel-carrier-list { font-size: 30rpx; }
-.elderly-mode .parcel-audit { font-size: 28rpx; padding: 20rpx 24rpx; }
 
-/* ============ 待客户操作：确认已送站按钮 ============ */
-.btn-station-confirm {
-  margin-top: 20rpx;
-  width: 100%;
-  height: 76rpx;
+.parcel-map-legend {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 16rpx;
-  box-sizing: border-box;
-  line-height: 1.2;
-  border-radius: 38rpx;
-  background: #1F5E9E;
-  color: #FFFFFF;
-  font-size: 28rpx;
-  font-weight: 600;
-  text-align: center;
-  border: none;
-  padding: 0;
+  gap: 20rpx;
+  flex-wrap: wrap;
+  padding: 14rpx 20rpx 16rpx;
+  background: #FFFDF8;
+  border-top: 1rpx solid #F0EADC;
+  font-size: 22rpx;
 }
-.btn-station-confirm::after { border: none; }
-.elderly-mode .btn-station-confirm { font-size: 32rpx; height: 88rpx; line-height: 88rpx; }
 
-/* ==================== 多段联运 · 分段进度 ==================== */
+/* 图例色与地图折线同色（见 parcel.js loadTopology）：完成=站牌绿 / 当前=新芽绿 / 未开始=暖灰 */
+.lg { font-weight: 600; }
+.lg-done { color: var(--color-primary); }
+.lg-doing { color: var(--color-accent); }
+.lg-todo { color: #B9B4A6; }
+.lg-est { color: var(--color-text-tertiary); }
+.lg-hub { color: var(--color-primary-dark); }
+
+/* 分段进度 / 换乘交接 */
 .parcel-legs {
   margin: 20rpx 0 8rpx;
   padding: 24rpx;
-  background: #FFFFFF;
+  background: #FFFDF8;
   border-radius: 16rpx;
-  box-shadow: 0 4rpx 14rpx rgba(60, 50, 30, 0.06);
+  box-shadow: var(--shadow-card);
 }
 
 .parcel-legs-title {
   display: block;
   font-size: 28rpx;
-  font-weight: 600;
-  color: #2B2B28;
+  font-weight: 700;
+  color: var(--color-primary-dark);
   margin-bottom: 16rpx;
   white-space: nowrap;
   overflow: hidden;
@@ -685,53 +610,32 @@
 .parcel-plan-reason {
   display: block;
   margin: -6rpx 0 16rpx;
+  padding: 12rpx 16rpx;
+  border-radius: 10rpx;
+  background: #FBF3DF;
   font-size: 24rpx;
   line-height: 1.5;
-  color: #6B6355;
+  color: #8A6A1F;
   word-break: break-word;
 }
-
-.parcel-map-wrap {
-  margin: 20rpx 0 8rpx;
-  border-radius: 16rpx;
-  overflow: hidden;
-  box-shadow: 0 4rpx 14rpx rgba(60, 50, 30, 0.08);
-}
-
-.parcel-map {
-  width: 100%;
-  height: 420rpx;
-}
-
-.parcel-map-legend {
-  display: flex;
-  gap: 24rpx;
-  flex-wrap: wrap;
-  padding: 12rpx 20rpx;
-  background: #FFFFFF;
-  font-size: 22rpx;
-}
-
-.parcel-map-current {
-  padding: 10rpx 20rpx;
-  background: #E6EFF5;
-  color: #1F5E9E;
-  font-size: 24rpx;
-  word-break: break-word;
-}
-
-/* 白色 + 蓝色主题：完成/当前统一蓝色系，未开始灰色，仅异常用暖色 */
-.lg-done { color: #1F5E9E; }
-.lg-doing { color: #2E7BBF; }
-.lg-todo { color: #9AA5B1; }
-.lg-hub { color: #123F6E; }
-.lg-est { color: #8A93A0; }
 
 .parcel-leg {
   display: flex;
   align-items: flex-start;
   gap: 18rpx;
   padding: 12rpx 0;
+  position: relative;
+}
+
+/* 段与段之间的虚线山路连接 */
+.parcel-leg:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 20rpx;
+  top: 66rpx;
+  bottom: 0;
+  width: 4rpx;
+  background: repeating-linear-gradient(180deg, #D8D2C4 0 8rpx, transparent 8rpx 14rpx);
 }
 
 .leg-index {
@@ -739,37 +643,304 @@
   width: 44rpx;
   height: 44rpx;
   border-radius: 50%;
-  background: #1F5E9E;
+  background: var(--color-primary);
   color: #FFFFFF;
   font-size: 26rpx;
   text-align: center;
   line-height: 44rpx;
 }
 
+.leg-index-transfer {
+  background: var(--color-clay);
+  font-size: 22rpx;
+}
+
 .leg-body {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .leg-route {
   font-size: 30rpx;
-  color: #2B2B28;
+  font-weight: 600;
+  color: var(--color-ink);
 }
 
 .leg-sub {
   margin-top: 6rpx;
   font-size: 26rpx;
-  color: #6B6355;
+  color: var(--color-text-secondary);
 }
 
 .leg-eta {
   margin-top: 4rpx;
   font-size: 24rpx;
-  color: #A79E8C;
+  color: var(--color-status-warn);
 }
 
+/* 运输进度：虚线山路，绿色为已走段 */
+.progress-road {
+  height: 8rpx;
+  margin: 24rpx 0;
+  border-radius: 4rpx;
+  overflow: hidden;
+  background: repeating-linear-gradient(90deg, #D8D2C4 0 12rpx, transparent 12rpx 20rpx);
+}
+
+.progress-road-fill {
+  height: 100%;
+  border-radius: 4rpx;
+  background: repeating-linear-gradient(90deg, var(--color-accent) 0 12rpx, transparent 12rpx 20rpx);
+  transition: width 0.5s;
+}
+
+/* 时间轴：虚线山路串联站点圆点 */
+.timeline {
+  padding: 4rpx 0 0 4rpx;
+}
+
+.timeline-item {
+  display: flex;
+  gap: 18rpx;
+  padding-bottom: 22rpx;
+  position: relative;
+}
+
+.timeline-item:last-child { padding-bottom: 0; }
+
+.timeline-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 10rpx;
+  top: 32rpx;
+  bottom: 0;
+  width: 4rpx;
+  background: repeating-linear-gradient(180deg, #D8D2C4 0 8rpx, transparent 8rpx 14rpx);
+}
+
+.timeline-dot {
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 50%;
+  background: #FFFDF8;
+  border: 2rpx dashed #C9C3B4;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  margin-top: 4rpx;
+}
+
+.timeline-dot.done {
+  background: var(--color-accent);
+  border: none;
+  box-shadow: 0 0 0 6rpx var(--color-primary-light);
+}
+
+.timeline-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+}
+
+.timeline-time {
+  font-size: 22rpx;
+  color: var(--color-text-tertiary);
+}
+
+.timeline-desc {
+  font-size: 26rpx;
+  color: var(--color-text-secondary);
+}
+
+/* 查件二维码：票面末联（撕票线之上） */
+.parcel-qr-block {
+  margin-top: 28rpx;
+  padding-top: 28rpx;
+  border-top: 2rpx dashed #D8D2C4;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.parcel-pickup-code {
+  margin-bottom: 16rpx;
+  font-size: 40rpx;
+  font-weight: 800;
+  color: var(--color-primary);
+  letter-spacing: 6rpx;
+}
+
+.parcel-qr-canvas {
+  width: 300rpx;
+  height: 300rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  box-shadow: var(--shadow-card);
+}
+
+.parcel-qr-tip {
+  margin-top: 16rpx;
+  font-size: 24rpx;
+  color: var(--color-text-tertiary);
+}
+
+.parcel-qr-receiver {
+  margin-top: 10rpx;
+  font-size: 26rpx;
+  color: var(--color-text-secondary);
+}
+
+.parcel-qr-copy {
+  margin-top: 16rpx;
+  padding: 12rpx 40rpx;
+  font-size: 28rpx;
+  line-height: 1.4;
+  border-radius: var(--radius-pill);
+  border: 2rpx solid var(--color-primary);
+  color: var(--color-primary);
+  background: #fff;
+}
+
+.parcel-qr-copy::after { border: none; }
+
+/* 乘车安排（村民到站通知） */
+.arrange-section {
+  margin: 24rpx 28rpx 0;
+}
+
+.arrange-card { margin-bottom: 20rpx; }
+
+/* 上下车站路线（虚线山路 + 大巴） */
+.arrange-route {
+  display: flex;
+  align-items: center;
+  padding: 2rpx 0 18rpx;
+}
+
+.arrange-station {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.station-name {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--color-ink);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.station-label {
+  font-size: 22rpx;
+  color: var(--color-text-tertiary);
+  margin-top: 4rpx;
+}
+
+.arrange-mid {
+  display: flex;
+  align-items: center;
+  flex: 1.2;
+  padding: 0 14rpx;
+}
+
+.mid-line {
+  flex: 1;
+  height: 6rpx;
+  border-radius: 3rpx;
+  opacity: 0.7;
+  background: repeating-linear-gradient(90deg, var(--color-accent) 0 10rpx, transparent 10rpx 18rpx);
+}
+
+.mid-bus { margin-left: 10rpx; }
+
+.arrange-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16rpx;
+  border-top: 1rpx dashed #E4DECD;
+}
+
+.arrange-plate {
+  font-size: 24rpx;
+  font-weight: 600;
+  color: var(--color-ink);
+  letter-spacing: 1rpx;
+}
+
+/* 待派车：温和金色胶囊，不用警告色 */
+.pill-gold {
+  font-size: 22rpx;
+  color: #8A6A1F;
+  background: #FBF3DF;
+  border: 1rpx solid rgba(217, 164, 65, 0.35);
+  padding: 4rpx 16rpx;
+  border-radius: var(--radius-pill);
+}
+
+.arrange-cta {
+  display: flex;
+  align-items: center;
+  gap: 6rpx;
+  font-size: 24rpx;
+  font-weight: 600;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+/* ============ 老年人模式：快递页字体放大 ============ */
+.elderly-mode .village-name { font-size: 38rpx; }
+.elderly-mode .header-title { font-size: 42rpx; }
+.elderly-mode .user-avatar text { font-size: 32rpx; }
+.elderly-mode .search-input { font-size: 32rpx; }
+.elderly-mode .search-btn { font-size: 30rpx; padding: 20rpx 38rpx; }
+.elderly-mode .section-title { font-size: 38rpx; }
+.elderly-mode .section-more { font-size: 30rpx; }
+.elderly-mode .tab-row .tab-item { font-size: 32rpx; padding: 22rpx 0; }
+.elderly-mode .ticket-card__stub { width: 200rpx; }
+.elderly-mode .stub-status { font-size: 34rpx; }
+.elderly-mode .stub-unit { font-size: 26rpx; }
+.elderly-mode .parcel-name { font-size: 34rpx; }
+.elderly-mode .parcel-status { font-size: 26rpx; }
+.elderly-mode .parcel-meta { font-size: 28rpx; }
+.elderly-mode .cargo-chip { font-size: 26rpx; }
+.elderly-mode .mall-goods-name { font-size: 32rpx; }
+.elderly-mode .mall-goods-sub { font-size: 28rpx; }
+.elderly-mode .mall-goods-amount { font-size: 34rpx; }
+.elderly-mode .mall-goods-more { font-size: 26rpx; }
+.elderly-mode .parcel-tap-hint { font-size: 28rpx; }
+.elderly-mode .parcel-approach { font-size: 30rpx; }
+.elderly-mode .parcel-carrier-list { font-size: 30rpx; }
+.elderly-mode .parcel-code-row { font-size: 28rpx; }
+.elderly-mode .parcel-code-value { font-size: 38rpx; }
+.elderly-mode .parcel-code-toggle { font-size: 28rpx; }
+.elderly-mode .service-point-text { font-size: 28rpx; }
+.elderly-mode .service-point-nav { font-size: 26rpx; }
+.elderly-mode .btn-station-confirm { font-size: 32rpx; height: 88rpx; }
+.elderly-mode .parcel-audit { font-size: 28rpx; padding: 20rpx 24rpx; }
+.elderly-mode .carrier-row { font-size: 30rpx; }
+.elderly-mode .parcel-map-current { font-size: 28rpx; }
+.elderly-mode .parcel-map-legend { font-size: 24rpx; }
 .elderly-mode .parcel-legs-title,
 .elderly-mode .leg-route { font-size: 34rpx; }
 .elderly-mode .leg-sub,
 .elderly-mode .leg-eta { font-size: 30rpx; }
+.elderly-mode .parcel-plan-reason { font-size: 28rpx; }
+.elderly-mode .timeline-desc { font-size: 30rpx; }
+.elderly-mode .timeline-time { font-size: 26rpx; }
+.elderly-mode .parcel-pickup-code { font-size: 46rpx; }
+.elderly-mode .parcel-qr-tip { font-size: 28rpx; }
+.elderly-mode .parcel-qr-receiver { font-size: 30rpx; }
+.elderly-mode .parcel-qr-canvas { width: 360rpx; height: 360rpx; }
+.elderly-mode .parcel-qr-copy { font-size: 32rpx; padding: 16rpx 48rpx; }
+.elderly-mode .station-name { font-size: 32rpx; }
+.elderly-mode .station-label { font-size: 26rpx; }
+.elderly-mode .arrange-plate { font-size: 28rpx; }
+.elderly-mode .pill-gold { font-size: 26rpx; }
+.elderly-mode .arrange-cta { font-size: 28rpx; }

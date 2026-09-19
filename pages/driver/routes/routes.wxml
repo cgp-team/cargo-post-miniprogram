@@ -1,28 +1,37 @@
 <!-- 司机路线页 -->
 <view class="routes-page {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
-  <!-- 顶部 -->
+  <!-- 顶部站牌头（深绿实板 + 落款横档，与工作台一致） -->
   <view class="page-header">
     <view class="header-safe" style="height: {{statusBarHeight}}px;"></view>
-    <text class="page-title">🛣️ 我的路线</text>
+    <view class="page-title-row">
+      <icon name="road" size="40" color="#FFFFFF" />
+      <text class="page-title">我的路线</text>
+    </view>
     <text class="page-date">今日排班</text>
+    <text class="header-badge">司机端</text>
   </view>
 
-  <!-- 路线卡片 -->
+  <!-- 班次卡：线路 chip + 竖向山路时间线 -->
   <view class="route-card {{item.status}}" wx:for="{{todayRoutes}}" wx:key="id">
     <!-- 路线头部 -->
     <view class="route-card-header">
       <view class="route-card-left">
-        <text class="route-card-number">{{item.routeNumber}}</text>
-        <text class="route-card-direction">{{item.direction}}</text>
+        <view class="route-line-chip">
+          <icon name="bus" size="34" color="#FFFFFF" />
+        </view>
+        <view class="route-card-title">
+          <text class="route-card-number">{{item.routeNumber}}</text>
+          <text class="route-card-direction">{{item.direction}}</text>
+        </view>
       </view>
       <view class="route-card-status {{item.status}}">
         {{item.statusText}}
       </view>
     </view>
 
-    <!-- 时间 -->
+    <!-- 发车时间 -->
     <view class="route-time">
-      <text class="time-icon">🕐</text>
+      <icon name="clock" size="28" color="#8A8778" />
       <text>{{item.time}}</text>
     </view>
 
@@ -63,9 +72,9 @@
           enable-zoom="{{true}}"
           enable-scroll="{{true}}"
         ></map>
-        <!-- 导航按钮 -->
+        <!-- 导航按钮（陶土橙行动按钮） -->
         <view class="route-map-nav" wx:if="{{item.status === 'running'}}" bindtap="navigateRoute" data-id="{{item.id}}" hover-class="hover">
-          <text class="route-map-nav-icon">🚗</text>
+          <icon name="send" size="30" color="#FFFFFF" />
           <text class="route-map-nav-text">导航到下一站</text>
         </view>
       </view>
@@ -74,7 +83,7 @@
 
   <!-- 加载态 / 空态 -->
   <view class="loading-state" wx:if="{{loading}}">加载中…</view>
-  <view class="loading-state" wx:elif="{{loaded && !todayRoutes.length}}">今日暂无班次</view>
+  <empty-state wx:elif="{{loaded && !todayRoutes.length}}" icon="bus" text="今日暂无班次" subText="新的排班会显示在这里" />
 
   <!-- 底部TabBar -->
   <driver-tab-bar current="routes" elderly="{{elderlyMode}}"></driver-tab-bar>

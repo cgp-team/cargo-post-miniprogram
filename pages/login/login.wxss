@@ -1,106 +1,108 @@
 /* 登录页面样式 - 农村客货邮小程序 */
 .login-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-primary-light) 35%, var(--color-paper) 70%);
-  padding: 0 40rpx;
-  padding-bottom: 80rpx;
+  background: var(--color-paper);
   box-sizing: border-box;
+}
+
+/* 品牌站牌头：深绿渐变实板，与默认导航栏同色系衔接 */
+.login-hero {
   position: relative;
   overflow: hidden;
+  background: linear-gradient(160deg, var(--color-primary-dark) 0%, var(--color-primary) 65%, var(--color-primary-dark) 100%);
+  padding: 56rpx 40rpx 150rpx;
+  border-radius: 0 0 36rpx 36rpx;
+  text-align: center;
 }
 
-/* 背景装饰 */
-.login-page::before {
+/* 站牌顶部落款横档 */
+.login-hero::before {
   content: '';
   position: absolute;
-  top: -120rpx;
-  right: -80rpx;
-  width: 360rpx;
-  height: 360rpx;
-  background: radial-gradient(circle, var(--color-primary-shadow) 0%, transparent 70%);
+  top: 12rpx;
+  left: 32rpx;
+  right: 32rpx;
+  height: 5rpx;
+  background: rgba(255, 255, 255, 0.26);
+  border-radius: 3rpx;
+}
+
+/* 角落装饰光晕 */
+.login-hero::after {
+  content: '';
+  position: absolute;
+  top: -60rpx;
+  right: -40rpx;
+  width: 260rpx;
+  height: 260rpx;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.10) 0%, transparent 70%);
   border-radius: 50%;
   pointer-events: none;
 }
 
-.login-page::after {
-  content: '';
-  position: absolute;
-  bottom: 200rpx;
-  left: -100rpx;
-  width: 280rpx;
-  height: 280rpx;
-  background: radial-gradient(circle, var(--color-primary-shadow) 0%, transparent 70%);
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-/* Logo区域 */
-.logo-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 50rpx;
-  padding-top: 100rpx;
+/* 站牌徽章：磨砂白圆角板 + 白色巴士图标 */
+.hero-badge {
   position: relative;
   z-index: 1;
-}
-
-.logo-img-wrap {
-  position: relative;
-  margin-bottom: 24rpx;
-}
-
-.logo-placeholder {
-  width: 150rpx;
-  height: 150rpx;
-  border-radius: 32rpx;
-  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary), var(--color-accent));
-  font-size: 72rpx;
+  width: 116rpx;
+  height: 116rpx;
+  margin: 0 auto 24rpx;
+  border-radius: 30rpx;
+  background: rgba(255, 255, 255, 0.14);
+  border: 2rpx solid rgba(255, 255, 255, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 12rpx 32rpx var(--color-primary-shadow);
+  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.16);
+}
+
+.hero-title {
   position: relative;
   z-index: 1;
+  font-size: 46rpx;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 4rpx;
 }
 
-.logo-ring {
-  position: absolute;
-  top: -8rpx;
-  left: -8rpx;
-  width: 166rpx;
-  height: 166rpx;
-  border-radius: 36rpx;
-  border: 3rpx dashed var(--color-primary-shadow);
-  animation: ringRotate 20s linear infinite;
+.hero-sub {
+  position: relative;
+  z-index: 1;
+  display: block;
+  margin-top: 12rpx;
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 3rpx;
 }
 
-@keyframes ringRotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+/* 业务胶囊：公交带货 / 快递进村 / 农产品出山 */
+.hero-pills {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  gap: 16rpx;
+  margin-top: 30rpx;
 }
 
-.logo-title {
-  font-size: 48rpx;
-  font-weight: 700;
-  color: var(--color-primary-dark);
-  margin-bottom: 10rpx;
-  letter-spacing: 2rpx;
-}
-
-.logo-desc {
-  font-size: 26rpx;
-  color: var(--color-primary);
+.hero-pill {
+  font-size: 20rpx;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1rpx solid rgba(255, 255, 255, 0.4);
+  padding: 6rpx 18rpx;
+  border-radius: var(--radius-pill);
   letter-spacing: 1rpx;
 }
 
-/* 表单卡片 */
+/* 表单卡：上浮叠进站牌下缘 */
 .form-section {
-  padding: 48rpx 36rpx;
   position: relative;
-  z-index: 1;
-  border-radius: 24rpx;
-  box-shadow: 0 8rpx 32rpx rgba(0,0,0,0.07);
+  z-index: 2;
+  margin: -110rpx 30rpx 0;
+  padding: 44rpx 36rpx 40rpx;
+  border-radius: var(--radius-l);
+  box-shadow: var(--shadow-float);
 }
 
 /* 输入组 */
@@ -108,22 +110,38 @@
   margin-bottom: 32rpx;
 }
 
-.login-page .input-label {
-  font-size: 28rpx;
-  color: #555;
+/* 标签行：小绿柱 + 墨字标签 */
+.input-label-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
   margin-bottom: 14rpx;
-  display: block;
-  font-weight: 500;
+}
+
+.input-label-row::before {
+  content: '';
+  width: 8rpx;
+  height: 28rpx;
+  border-radius: 4rpx;
+  background: linear-gradient(180deg, var(--color-primary), var(--color-accent));
+}
+
+.login-page .input-label {
+  margin: 0;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--color-ink);
 }
 
 .login-page .input-field {
   width: 100%;
   height: 96rpx;
-  border: 2rpx solid #E8ECEE;
-  border-radius: 16rpx;
+  border: 2rpx solid #E4DECD;
+  border-radius: 14rpx;
   padding: 0 28rpx;
   font-size: 30rpx;
-  background-color: #F8FAF8;
+  color: var(--color-ink);
+  background-color: #FBF8F1;
   box-sizing: border-box;
   transition: all 0.15s ease;
 }
@@ -135,95 +153,10 @@
 }
 
 .login-page .input-field::placeholder {
-  color: #A6A6A6;
-}
-
-/* 登录按钮 */
-.login-btn {
-  margin-top: 44rpx;
-  height: 100rpx;
-  line-height: 100rpx;
-  font-size: 34rpx;
-  font-weight: 600;
-  border-radius: 50rpx;
-  border: none;
-  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
-  color: var(--color-on-primary);
-  letter-spacing: 2rpx;
-  box-shadow: 0 8rpx 24rpx rgba(0, 0, 0, 0.18);
-  transition: all 0.15s ease;
-}
-
-.login-btn:active {
-  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.14);
-  transform: scale(0.98);
-}
-
-.login-btn[loading] {
-  opacity: 0.8;
-}
-
-/* 微信登录按钮 */
-.wechat-login-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 24rpx;
-  height: 100rpx;
-  background: #ffffff;
-  border: 2rpx solid #E8ECEE;
-  border-radius: 50rpx;
-  font-size: 30rpx;
-  color: #333;
-  letter-spacing: 1rpx;
-  transition: all 0.15s ease;
-  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
-}
-
-.wechat-login-btn:active {
-  background: var(--color-paper);
-  border-color: var(--color-accent);
-}
-
-/* 图标行 */
-.input-label-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 14rpx;
-  gap: 8rpx;
-}
-
-.input-icon {
-  font-size: 30rpx;
-}
-
-.wechat-emoji {
-  font-size: 36rpx;
-  margin-right: 12rpx;
-}
-
-/* 注册入口 */
-.register-link {
-  display: flex;
-  justify-content: center;
-  margin-top: 40rpx;
-  font-size: 28rpx;
-  gap: 8rpx;
-  padding-bottom: 10rpx;
-}
-
-.register-link .text-green {
-  font-weight: 600;
+  color: var(--color-text-tertiary);
 }
 
 /* 短信验证码行 */
-.sms-row {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-}
-
 .sms-input-wrap {
   display: flex;
   align-items: center;
@@ -234,65 +167,139 @@
   flex: 1;
 }
 
+/* 发送验证码：主题浅绿胶囊 */
 .sms-btn {
+  flex: none;
   width: 200rpx;
-  height: 72rpx;
-  line-height: 72rpx;
-  font-size: 26rpx;
-  background: #fff;
-  border: 2rpx solid var(--color-accent);
-  color: var(--color-primary);
-  border-radius: 36rpx;
+  height: 96rpx;
+  line-height: 96rpx;
   padding: 0;
+  font-size: 26rpx;
+  font-weight: 600;
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  border: none;
+  border-radius: var(--radius-pill);
   text-align: center;
 }
 
 .sms-btn.disabled {
-  border-color: #BDBDBD;
-  color: #BDBDBD;
+  background: #EFEAE0;
+  color: var(--color-text-tertiary);
 }
 
+/* 测试验证码提示：稻谷金告示条 */
 .sms-tip {
-  text-align: center;
+  margin: -12rpx 0 4rpx;
+  padding: 12rpx 20rpx;
+  background: #FBF3DF;
+  border-radius: 12rpx;
   font-size: 24rpx;
-  color: #757575;
-  margin-top: 8rpx;
-  margin-bottom: 16rpx;
+  color: #8A6A1F;
+  text-align: center;
+}
+
+/* 主登录按钮：站牌式实板放大 */
+.login-btn {
+  margin-top: 40rpx;
+  height: 104rpx;
+  line-height: 104rpx;
+  font-size: 36rpx;
+}
+
+.login-btn[loading] {
+  opacity: 0.8;
 }
 
 /* 切换登录方式 */
 .switch-mode {
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+  margin-top: 28rpx;
+  padding: 12rpx 0;
   font-size: 28rpx;
+  font-weight: 500;
   color: var(--color-primary);
-  margin-top: 24rpx;
-  text-decoration: underline;
 }
 
-/* 卡片通用样式 */
-.card {
-  background: #fff;
-  border-radius: 24rpx;
-  padding: 48rpx 36rpx;
-  box-shadow: 0 8rpx 32rpx rgba(0,0,0,0.07);
+/* 分隔：其他登录方式 */
+.login-divider {
+  display: flex;
+  align-items: center;
+  margin-top: 32rpx;
+}
+
+.divider-line {
+  flex: 1;
+  height: 1rpx;
+  background: #E4DECD;
+}
+
+.divider-text {
+  margin: 0 20rpx;
+  font-size: 22rpx;
+  color: var(--color-text-tertiary);
+}
+
+/* 微信一键登录：白底绿边次级按钮 */
+.wechat-login-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 28rpx;
+  height: 96rpx;
+  background: #FFFDF8;
+  border: 2rpx solid var(--color-accent);
+  border-radius: 10rpx;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--color-primary);
+  letter-spacing: 2rpx;
+}
+
+.wechat-login-btn:active {
+  background: var(--color-primary-light);
+}
+
+/* 去掉微信 button 默认描边 */
+.login-btn::after,
+.sms-btn::after,
+.wechat-login-btn::after {
+  border: none;
+}
+
+/* 大字模式入口 */
+.elderly-entry {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 28rpx 0 8rpx;
+  font-size: 26rpx;
+  color: var(--color-text-tertiary);
+}
+
+/* 协议说明 */
+.agreement {
+  padding: 12rpx 60rpx calc(48rpx + env(safe-area-inset-bottom));
+  text-align: center;
+  font-size: 22rpx;
+  color: var(--color-text-tertiary);
 }
 
 /* ============ 老年人模式：登录页字体放大 ============ */
-.elderly-mode .logo-title { font-size: 56rpx; }
-.elderly-mode .logo-desc { font-size: 30rpx; }
+.elderly-mode .hero-title { font-size: 54rpx; }
+.elderly-mode .hero-sub { font-size: 28rpx; }
+.elderly-mode .hero-pill { font-size: 24rpx; padding: 8rpx 22rpx; }
 .elderly-mode .login-page .input-label { font-size: 32rpx; }
 .elderly-mode .login-page .input-field { font-size: 34rpx; height: 104rpx; }
 .elderly-mode .login-btn { font-size: 40rpx; }
 .elderly-mode .wechat-login-btn { font-size: 34rpx; }
 .elderly-mode .sms-btn { font-size: 30rpx; width: 220rpx; }
+.elderly-mode .sms-tip { font-size: 28rpx; }
 .elderly-mode .switch-mode { font-size: 32rpx; }
-.elderly-mode .register-link { font-size: 32rpx; }
-
-/* 大字模式入口 */
-.elderly-entry {
-  text-align: center;
-  font-size: 28rpx;
-  color: var(--color-text-secondary);
-  padding: 32rpx 0;
-}
+.elderly-mode .divider-text { font-size: 26rpx; }
 .elderly-mode .elderly-entry { font-size: 32rpx; }
+.elderly-mode .agreement { font-size: 26rpx; }

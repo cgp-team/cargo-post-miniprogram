@@ -1,201 +1,424 @@
-/* 商品溯源页 */
+/* 商品溯源页 —— 承运票头 + 竖向站点时间线（山路线） */
 .page-trace {
   min-height: 100vh;
-  background: var(--color-paper);
+  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-primary-light) 10%, var(--color-paper) 30%);
   padding-bottom: 40rpx;
 }
 
+/* 承运信息卡：金绿渐变票头（稻谷金=农产品，站牌绿=大巴承运） */
 .carrier-card {
-  margin: 24rpx;
-  padding: 28rpx;
-  background: #fff;
+  position: relative;
+  margin: 24rpx 24rpx 0;
+  padding: 40rpx 28rpx 16rpx;
+  background: #FFFDF8;
   border-radius: 20rpx;
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
 }
+
+.carrier-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 8rpx;
+  background: linear-gradient(90deg, var(--color-gold), var(--color-primary));
+}
+
+.carrier-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16rpx;
+  padding-bottom: 18rpx;
+  margin-bottom: 8rpx;
+  border-bottom: 1rpx solid #F0E8D5;
+}
+
+.carrier-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  min-width: 0;
+}
+
 .carrier-title {
   font-size: 32rpx;
-  font-weight: 700;
-  color: #333;
-  margin-bottom: 20rpx;
+  font-weight: 800;
+  color: var(--color-primary-dark);
+  letter-spacing: 1rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
+
+/* 订单状态：浅绿底深绿字胶囊 */
+.carrier-status {
+  flex-shrink: 0;
+  font-size: 22rpx;
+  font-weight: 600;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  padding: 6rpx 18rpx;
+  border-radius: 999rpx;
+}
+
 .carrier-row {
   display: flex;
-  padding: 8rpx 0;
+  align-items: baseline;
+  padding: 12rpx 0;
   font-size: 26rpx;
 }
+
 .carrier-label {
   width: 140rpx;
-  color: #999;
+  color: var(--color-text-tertiary);
   flex-shrink: 0;
 }
+
 .carrier-value {
   flex: 1;
-  color: #333;
+  color: var(--color-ink);
   font-weight: 500;
 }
 
+/* 司机到站/交付提醒：到达陶土橙、已送达站牌绿 */
+.arrival-banner {
+  margin: 24rpx 24rpx 0;
+  padding: 20rpx 24rpx;
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  border-radius: 16rpx;
+  background: linear-gradient(135deg, var(--color-clay), #A64A1F);
+  box-shadow: 0 6rpx 18rpx rgba(199, 91, 42, 0.24);
+  color: #ffffff;
+  font-size: 27rpx;
+  font-weight: 600;
+}
+
+.arrival-banner.done {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  box-shadow: 0 6rpx 18rpx var(--color-primary-shadow);
+}
+
+.arrival-icon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.arrival-text {
+  flex: 1;
+  color: #ffffff;
+  line-height: 1.5;
+}
+
+/* 司机核验凭证（装车/妥投照片） */
+.proof-card {
+  margin: 24rpx 24rpx 0;
+  padding: 24rpx 28rpx;
+  border-radius: 20rpx;
+  background: #FFFDF8;
+  box-shadow: var(--shadow-card);
+}
+
+.proof-title {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  margin-bottom: 18rpx;
+}
+
+.proof-row {
+  display: flex;
+  align-items: center;
+  gap: 18rpx;
+  padding: 14rpx 0;
+}
+
+.proof-row + .proof-row {
+  border-top: 1rpx solid #F0E8D5;
+}
+
+.proof-img {
+  width: 150rpx;
+  height: 150rpx;
+  border-radius: 14rpx;
+  background: var(--color-primary-light);
+}
+
+.proof-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.proof-label {
+  font-size: 27rpx;
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+.proof-time {
+  font-size: 24rpx;
+  color: var(--color-text-tertiary);
+}
+
+/* 订单二维码票根：票号 + 打孔撕票线 + 扫码提示 */
+.order-qr-card {
+  margin: 24rpx 24rpx 0;
+  padding: 28rpx;
+  border-radius: 20rpx;
+  background: #FFFDF8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+  box-shadow: var(--shadow-card);
+}
+
+.order-qr-canvas {
+  width: 320rpx;
+  height: 320rpx;
+}
+
+.order-qr-no {
+  font-size: 28rpx;
+  color: var(--color-ink);
+  font-weight: 700;
+  letter-spacing: 3rpx;
+}
+
+/* 撕票线：两端打孔，透出页底色形成缺口 */
+.order-qr-divider {
+  position: relative;
+  width: 100%;
+  border-top: 2rpx dashed #D8D2C4;
+  margin: 8rpx 0;
+}
+
+.order-qr-divider::before,
+.order-qr-divider::after {
+  content: '';
+  position: absolute;
+  top: -12rpx;
+  width: 24rpx;
+  height: 24rpx;
+  border-radius: 50%;
+  background: var(--color-paper);
+  box-shadow: inset 0 1rpx 3rpx rgba(60, 50, 30, 0.10);
+}
+
+.order-qr-divider::before { left: -40rpx; }
+.order-qr-divider::after { right: -40rpx; }
+
+.order-qr-tip {
+  font-size: 24rpx;
+  color: var(--color-text-tertiary);
+}
+
+/* 轨迹地图 */
 .map-wrap {
-  margin: 0 24rpx;
+  margin: 24rpx 24rpx 0;
   border-radius: 20rpx;
   overflow: hidden;
   position: relative;
+  box-shadow: var(--shadow-card);
 }
+
 .trace-map {
   width: 100%;
   height: 560rpx;
 }
+
 .map-legend {
   position: absolute;
   left: 20rpx;
   bottom: 20rpx;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 253, 248, 0.94);
   border-radius: 12rpx;
   padding: 10rpx 18rpx;
   display: flex;
   align-items: center;
   font-size: 22rpx;
-  color: #666;
+  color: var(--color-text-secondary);
+  box-shadow: 0 2rpx 8rpx rgba(60, 50, 30, 0.10);
 }
+
 .legend-line {
   display: inline-block;
   width: 40rpx;
   height: 6rpx;
   margin-right: 10rpx;
   vertical-align: middle;
+  border-radius: 3rpx;
 }
-.legend-line.solid { background: #2E7D32; }
+
+.legend-line.solid { background: var(--color-primary); }
 .legend-line.dotted { background: repeating-linear-gradient(90deg, #9E9E9E 0, #9E9E9E 8rpx, transparent 8rpx, transparent 16rpx); }
 .legend-text { margin-right: 20rpx; }
 .legend-text:last-child { margin-right: 0; }
 
+/* 途经站点：竖向时间线 */
 .stops-card {
-  margin: 24rpx;
-  padding: 28rpx;
-  background: #fff;
+  margin: 24rpx 24rpx;
+  padding: 24rpx 28rpx 28rpx;
+  background: #FFFDF8;
   border-radius: 20rpx;
+  box-shadow: var(--shadow-card);
 }
+
 .stops-title {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: #333;
-  margin-bottom: 20rpx;
-}
-.stop-item {
   display: flex;
-  align-items: center;
-  padding: 14rpx 0;
-}
-.stop-dot {
-  width: 16rpx;
-  height: 16rpx;
-  border-radius: 50%;
-  background: var(--color-primary);
-  margin-right: 20rpx;
-  flex-shrink: 0;
-}
-.stop-name {
-  flex: 1;
-  font-size: 28rpx;
-  color: #333;
-}
-.stop-min {
-  font-size: 24rpx;
-  color: #999;
-}
-
-/* 司机到站/交付提醒：到达橙红、已送达绿 */
-.arrival-banner {
-  margin: 0 24rpx 20rpx;
-  padding: 18rpx 22rpx;
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-  border-radius: 16rpx;
-  background: #C0392B;
-  color: #fff;
-  font-size: 27rpx;
-  font-weight: 600;
-}
-.arrival-banner.done {
-  background: var(--color-primary);
-}
-.arrival-icon {
-  font-size: 32rpx;
-}
-.arrival-text {
-  flex: 1;
-  color: #fff;
-}
-
-/* 司机核验凭证（装车/妥投照片） */
-.proof-card {
-  margin: 0 24rpx 20rpx;
-  padding: 20rpx 22rpx;
-  border-radius: 16rpx;
-  background: #fff;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
-}
-.proof-title {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #333;
-  margin-bottom: 16rpx;
-}
-.proof-row {
-  display: flex;
-  align-items: center;
-  gap: 16rpx;
-  margin-bottom: 12rpx;
-}
-.proof-img {
-  width: 150rpx;
-  height: 150rpx;
-  border-radius: 12rpx;
-  background: #F2F2F2;
-}
-.proof-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 8rpx;
-}
-.proof-label {
-  font-size: 27rpx;
-  color: #333;
-  font-weight: 600;
-}
-.proof-time {
-  font-size: 24rpx;
-  color: #999;
-}
-
-/* 订单二维码：司机扫码装车/妥投 */
-.order-qr-card {
-  margin: 0 24rpx 24rpx;
-  padding: 24rpx;
-  border-radius: 16rpx;
-  background: #fff;
-  display: flex;
-  flex-direction: column;
   align-items: center;
   gap: 10rpx;
-  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
-}
-.order-qr-canvas {
-  width: 320rpx;
-  height: 320rpx;
-}
-.order-qr-no {
-  font-size: 28rpx;
-  color: #333;
-  font-weight: 600;
-  letter-spacing: 2rpx;
-}
-.order-qr-tip {
-  font-size: 24rpx;
-  color: #999;
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  margin-bottom: 24rpx;
 }
 
-/* 老年人模式 */
+.stop-item {
+  display: flex;
+  gap: 20rpx;
+}
+
+/* 时间线轨道：圆点 + 向下延伸的虚线山路 */
+.stop-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 44rpx;
+}
+
+.stop-dot {
+  width: 40rpx;
+  height: 40rpx;
+  border-radius: 50%;
+  background: #FFFDF8;
+  border: 2rpx solid #D8D2C4;
+  color: var(--color-text-tertiary);
+  font-size: 20rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stop-line {
+  width: 4rpx;
+  flex: 1;
+  min-height: 36rpx;
+  margin: 6rpx 0;
+  border-radius: 2rpx;
+  background: repeating-linear-gradient(180deg, var(--color-accent) 0, var(--color-accent) 8rpx, transparent 8rpx, transparent 16rpx);
+  opacity: 0.6;
+}
+
+/* 已途经：绿点白勾，连线落为实色 */
+.stop-item.passed .stop-dot {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.stop-item.passed .stop-line {
+  background: var(--color-primary);
+  opacity: 0.35;
+}
+
+.stop-item.passed .stop-name {
+  color: var(--color-text-secondary);
+}
+
+/* 当前所在站：陶土橙高亮 + 光晕 */
+.stop-item.current .stop-dot {
+  background: linear-gradient(135deg, var(--color-clay), #A64A1F);
+  border-color: var(--color-clay);
+  color: #ffffff;
+  box-shadow: 0 0 0 8rpx rgba(199, 91, 42, 0.16);
+}
+
+.stop-item.current .stop-name {
+  color: var(--color-ink);
+  font-weight: 700;
+}
+
+.stop-body {
+  flex: 1;
+  min-width: 0;
+  padding-bottom: 28rpx;
+}
+
+.stop-item:last-child .stop-body {
+  padding-bottom: 0;
+}
+
+.stop-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12rpx;
+}
+
+.stop-name {
+  font-size: 28rpx;
+  color: var(--color-ink);
+  font-weight: 500;
+}
+
+.stop-min {
+  font-size: 22rpx;
+  color: var(--color-text-tertiary);
+  flex-shrink: 0;
+}
+
+.stop-tags {
+  display: flex;
+  gap: 10rpx;
+  margin-top: 10rpx;
+}
+
+/* 起点/终点小标签 */
+.stop-side {
+  font-size: 20rpx;
+  color: var(--color-text-secondary);
+  background: #EFEAE0;
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+}
+
+/* 当前位置：稻谷金胶囊 */
+.stop-tag-current {
+  font-size: 20rpx;
+  font-weight: 600;
+  color: #8A6A1F;
+  background: #FBF3DF;
+  border: 1rpx solid rgba(217, 164, 65, 0.30);
+  padding: 4rpx 14rpx;
+  border-radius: 999rpx;
+}
+
+/* ============ 老年人模式：溯源页字体放大 ============ */
 .elderly-mode .carrier-title { font-size: 36rpx; }
+.elderly-mode .carrier-status { font-size: 26rpx; }
 .elderly-mode .carrier-row { font-size: 30rpx; }
+.elderly-mode .arrival-text { font-size: 30rpx; }
+.elderly-mode .proof-title { font-size: 32rpx; }
+.elderly-mode .proof-label { font-size: 30rpx; }
+.elderly-mode .proof-time { font-size: 26rpx; }
+.elderly-mode .order-qr-no { font-size: 32rpx; }
+.elderly-mode .order-qr-tip { font-size: 26rpx; }
+.elderly-mode .legend-text { font-size: 24rpx; }
+.elderly-mode .stops-title { font-size: 34rpx; }
 .elderly-mode .stop-name { font-size: 32rpx; }
-.elderly-mode .stop-min { font-size: 28rpx; }
+.elderly-mode .stop-min { font-size: 26rpx; }
+.elderly-mode .stop-dot { width: 44rpx; height: 44rpx; font-size: 24rpx; }
+.elderly-mode .stop-side { font-size: 24rpx; }
+.elderly-mode .stop-tag-current { font-size: 24rpx; }

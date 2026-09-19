@@ -1,27 +1,137 @@
-/* 司机工作台 - 对齐用户端「山乡巴士·站牌与车票」米纸暖色主题 */
+/* 司机工作台 - 山乡巴士 · 站牌与车票（司机=行动：陶土橙行动色 + 深绿站牌头） */
 .workbench {
   min-height: 100vh;
-  background: var(--color-paper, #F6F2E9);
-  color: var(--color-ink, #2B2B28);
-  padding-bottom: 140rpx;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
   font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
-/* ========== 顶部进度条（深站牌绿头部，与用户端导航一致） ========== */
+/* ========== 顶部站牌头：深绿实板 + 落款横档 + 角落光晕 ========== */
 .progress-header {
-  background: linear-gradient(180deg, var(--color-primary-dark, #1C4B2E) 0%, var(--color-primary, #2E7D32) 100%);
-  padding: 0 32rpx 28rpx;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(160deg, var(--color-primary-dark) 0%, var(--color-primary) 70%, var(--color-primary-dark) 100%);
+  padding: 0 32rpx 36rpx;
 }
 
+/* 落款横档：钉在安全区下沿，作站牌的金属顶边 */
 .header-safe {
+  position: relative;
   width: 100%;
 }
 
+.header-safe::after {
+  content: '';
+  position: absolute;
+  left: 2rpx;
+  right: 2rpx;
+  bottom: 8rpx;
+  height: 5rpx;
+  background: rgba(255, 255, 255, 0.26);
+  border-radius: 3rpx;
+}
+
+/* 角落装饰光晕 */
+.progress-header::after {
+  content: '';
+  position: absolute;
+  top: -40rpx;
+  right: -20rpx;
+  width: 200rpx;
+  height: 200rpx;
+  background: radial-gradient(circle, rgba(255,255,255,0.10) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* 司机信息栏（站牌头第一行：司机胶囊 + 车牌 + 模拟标识 + 货仓 + 铃铛） */
+.driver-bar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding-top: 24rpx;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.driver-chip {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-pill);
+  padding: 8rpx 20rpx 8rpx 16rpx;
+}
+
+.driver-text {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.driver-plate {
+  font-size: 22rpx;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 8rpx;
+  padding: 6rpx 14rpx;
+  letter-spacing: 1rpx;
+}
+
+/* 位置来源状态标签（只读展示，非控制开关） */
+.location-source {
+  font-size: 22rpx;
+  padding: 4rpx 16rpx;
+  border-radius: var(--radius-pill);
+  color: var(--color-gold);
+  border: 1rpx solid rgba(217, 164, 65, 0.7);
+  background: rgba(217, 164, 65, 0.22);
+}
+
+.location-source.sim {
+  font-weight: 600;
+}
+
+.driver-capacity {
+  margin-left: auto;
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* 通知铃铛（徽章用陶土橙：司机端行动色） */
+.notif-bell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 8rpx;
+}
+
+.notif-badge {
+  position: absolute;
+  top: -2rpx;
+  right: -6rpx;
+  min-width: 32rpx;
+  height: 32rpx;
+  line-height: 32rpx;
+  text-align: center;
+  font-size: 20rpx;
+  color: #fff;
+  background: var(--color-clay);
+  border: 2rpx solid rgba(255, 255, 255, 0.55);
+  border-radius: 32rpx;
+  padding: 0 6rpx;
+  box-sizing: content-box;
+}
+
 .route-label {
+  position: relative;
+  z-index: 1;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24rpx;
+  margin-top: 22rpx;
 }
 
 .route-badge {
@@ -31,10 +141,11 @@
   letter-spacing: 2rpx;
 }
 
+/* 状态胶囊：待发车/行驶中=白瓷，停靠中=陶土橙（行动提示） */
 .status-tag {
   font-size: 24rpx;
-  padding: 8rpx 20rpx;
-  border-radius: 20rpx;
+  padding: 8rpx 22rpx;
+  border-radius: var(--radius-pill);
   font-weight: 600;
   color: #ffffff;
 }
@@ -44,57 +155,79 @@
 }
 
 .status-tag.driving {
-  background: rgba(255, 255, 255, 0.22);
+  display: inline-flex;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.status-tag.driving::before {
+  content: '';
+  width: 10rpx;
+  height: 10rpx;
+  background: #ffffff;
+  border-radius: 50%;
+  margin-right: 10rpx;
+  animation: pulse 1.5s ease-in-out infinite;
 }
 
 .status-tag.stopped {
-  background: rgba(199, 91, 42, 0.85);
+  background: var(--color-clay);
 }
 
-/* 进度条 */
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
+}
+
+/* 山路进度：虚线道路 + 已走白实段 + 陶土橙描边圆点 */
 .progress-bar-wrap {
-  margin-top: 8rpx;
+  position: relative;
+  z-index: 1;
+  margin-top: 26rpx;
 }
 
 .progress-stops {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 14rpx;
+  margin-bottom: 16rpx;
 }
 
 .stop-label {
   font-size: 22rpx;
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(255, 255, 255, 0.72);
 }
 
-.stop-label.start { color: #ffffff; }
-.stop-label.end { color: #FFE0B2; }
+.stop-label.start { color: #ffffff; font-weight: 600; }
+.stop-label.end { color: #ffe0b2; font-weight: 600; }
 
 .progress-track {
   position: relative;
-  height: 10rpx;
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 5rpx;
-  overflow: visible;
+  height: 8rpx;
+  border-radius: 4rpx;
+  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.32) 0, rgba(255, 255, 255, 0.32) 10rpx, transparent 10rpx, transparent 18rpx);
 }
 
 .progress-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
   height: 100%;
   background: #ffffff;
-  border-radius: 5rpx;
+  border-radius: 4rpx;
+  box-shadow: 0 0 12rpx rgba(255, 255, 255, 0.45);
   transition: width 0.5s ease;
 }
 
 .progress-dot {
   position: absolute;
   top: 50%;
-  width: 28rpx;
-  height: 28rpx;
+  width: 26rpx;
+  height: 26rpx;
   background: #ffffff;
-  border: 4rpx solid var(--color-clay, #C75B2A);
+  border: 5rpx solid var(--color-clay);
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  box-shadow: 0 0 16rpx rgba(255, 255, 255, 0.5);
+  box-shadow: 0 0 0 4rpx rgba(255, 255, 255, 0.25), 0 2rpx 8rpx rgba(0, 0, 0, 0.2);
   transition: left 0.5s ease;
 }
 
@@ -106,18 +239,272 @@
 
 .next-stop-name {
   font-size: 28rpx;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.92);
 }
 
 .next-stop-dist {
   font-size: 28rpx;
   color: #ffffff;
-  font-weight: 600;
+  font-weight: 700;
 }
 
-/* ========== 待发车面板 ========== */
+/* ========== 偏航告警（Phase 9） ========== */
+.deviation-banner {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin: 24rpx 24rpx 0;
+  padding: 18rpx 24rpx;
+  border-radius: 16rpx;
+  background: rgba(192, 57, 43, 0.08);
+  border: 1rpx solid rgba(192, 57, 43, 0.35);
+}
+
+.deviation-text {
+  flex: 1;
+  font-size: 26rpx;
+  color: var(--color-danger);
+  font-weight: 500;
+}
+
+/* 面板内小标题：图标 + 文字（与首页分区头同手法） */
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18rpx;
+}
+
+.panel-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+/* ============ 今日运营任务：车票卡路单（主券=站点动作，副券=站点数） ============ */
+.task-segment-panel {
+  margin: 24rpx 24rpx 0;
+}
+
+.task-segment-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  letter-spacing: 1rpx;
+}
+
+.task-segment {
+  margin-bottom: 16rpx;
+}
+
+.task-segment:last-child {
+  margin-bottom: 0;
+}
+
+.task-stop {
+  padding: 14rpx 0;
+  border-bottom: 1rpx dashed rgba(43, 43, 40, 0.12);
+}
+
+.task-stop:last-child {
+  border-bottom: none;
+  padding-bottom: 4rpx;
+}
+
+.task-stop-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* 站点名前的小站牌圆点 */
+.task-stop-name {
+  position: relative;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--color-ink);
+  padding-left: 22rpx;
+}
+
+.task-stop-name::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: var(--color-accent);
+}
+
+/* 站点状态：稻谷金浅底深字胶囊 */
+.task-stop-status {
+  font-size: 22rpx;
+  color: #8a6a1f;
+  background: rgba(217, 164, 65, 0.16);
+  padding: 4rpx 16rpx;
+  border-radius: var(--radius-pill);
+}
+
+.task-stop .task-action {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: var(--color-text-secondary);
+}
+
+.task-action-name { color: var(--color-primary); font-weight: 500; }
+.task-action-order { color: var(--color-text-tertiary); }
+.task-action-qty { color: var(--color-clay); font-weight: 600; }
+
+/* ==================== 多段联运：换乘交接入口（陶土橙提示条） ==================== */
+.handover-entry {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  margin: 24rpx 24rpx 0;
+  padding: 24rpx;
+  border-radius: 18rpx;
+  background: rgba(199, 91, 42, 0.07);
+  border: 1rpx solid rgba(199, 91, 42, 0.32);
+  box-shadow: var(--shadow-card);
+}
+
+.handover-entry-iconbox {
+  flex: none;
+  width: 80rpx;
+  height: 80rpx;
+  border-radius: 22rpx;
+  background: linear-gradient(135deg, var(--color-clay), #a64a1f);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6rpx 16rpx rgba(199, 91, 42, 0.28);
+}
+
+.handover-entry-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.handover-entry-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.handover-entry-sub {
+  margin-top: 6rpx;
+  font-size: 24rpx;
+  color: var(--color-text-secondary);
+}
+
+/* ========== 路线概览地图（行驶状态就近显示） ========== */
+.route-overview-map {
+  margin: 24rpx 24rpx 0;
+  background: #fffdf8;
+  border-radius: 24rpx;
+  padding: 24rpx;
+  box-shadow: var(--shadow-card);
+}
+
+.map-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.map-section-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+/* 站数：浅绿胶囊 */
+.map-section-subtitle {
+  font-size: 24rpx;
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  padding: 6rpx 18rpx;
+  border-radius: var(--radius-pill);
+}
+
+.overview-map {
+  width: 100%;
+  height: 360rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+/* 图例（圆点颜色与 js 地图标注色一一对应，勿换成主题变量） */
+.map-legend {
+  display: flex;
+  justify-content: center;
+  gap: 24rpx;
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f0e8d5;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.legend-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+}
+
+.legend-dot.passed { background: #9e9e9e; }
+.legend-dot.current { background: #ff9800; }
+.legend-dot.next { background: #1976d2; }
+.legend-dot.future { background: #42a5f5; }
+
+.legend-text {
+  font-size: 22rpx;
+  color: var(--color-text-secondary);
+}
+
+/* 地图卡内导航按钮 */
+.map-nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  margin-top: 16rpx;
+  padding: 20rpx 24rpx;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  border-radius: 16rpx;
+  box-shadow: 0 8rpx 20rpx var(--color-primary-shadow);
+}
+
+.map-nav-text {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.map-nav-dist {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* ========== 待发车面板：米白大卡 + 行李舱可视化 ========== */
 .idle-panel {
-  padding: 40rpx 32rpx;
+  margin: 24rpx 24rpx 0;
+  background: #fffdf8;
+  border-radius: 24rpx;
+  box-shadow: var(--shadow-card);
+  padding: 44rpx 32rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -127,8 +514,8 @@
 .cargo-visual {
   display: flex;
   align-items: center;
-  gap: 40rpx;
-  margin-bottom: 50rpx;
+  gap: 44rpx;
+  margin-bottom: 44rpx;
   width: 100%;
   justify-content: center;
 }
@@ -147,8 +534,8 @@
   display: flex;
   flex-direction: column;
   gap: 16rpx;
-  border: 2rpx solid rgba(43, 43, 40, 0.1);
-  box-shadow: 0 8rpx 24rpx rgba(43, 43, 40, 0.06);
+  border: 2rpx solid rgba(43, 43, 40, 0.08);
+  box-shadow: var(--shadow-card);
 }
 
 .bus-windows {
@@ -160,19 +547,18 @@
 .window {
   width: 40rpx;
   height: 28rpx;
-  background: var(--color-primary-light, #EAF3EA);
+  background: var(--color-primary-light);
   border-radius: 6rpx;
-  border: 1rpx solid rgba(43, 43, 40, 0.08);
+  border: 1rpx solid rgba(43, 43, 40, 0.06);
 }
 
-/* 进度条 */
 .bus-cargo-area {
   flex: 1;
-  background: var(--color-paper, #F6F2E9);
+  background: var(--color-paper);
   border-radius: 14rpx;
   position: relative;
   overflow: hidden;
-  border: 2rpx dashed rgba(43, 43, 40, 0.18);
+  border: 2rpx dashed rgba(43, 43, 40, 0.16);
   min-height: 200rpx;
 }
 
@@ -181,7 +567,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: linear-gradient(180deg, var(--color-accent, #4CAF50), var(--color-primary, #2E7D32));
+  background: linear-gradient(180deg, var(--color-accent), var(--color-primary));
   transition: height 0.3s ease;
   border-radius: 0 0 12rpx 12rpx;
 }
@@ -201,7 +587,7 @@
   left: 0;
   right: 0;
   height: 3rpx;
-  background: var(--color-clay, #C75B2A);
+  background: var(--color-clay);
   z-index: 2;
 }
 
@@ -214,25 +600,23 @@
 .wheel {
   width: 32rpx;
   height: 32rpx;
-  background: var(--color-ink, #2B2B28);
+  background: var(--color-ink);
   border-radius: 50%;
-  border: 3rpx solid rgba(43, 43, 40, 0.3);
+  border: 3rpx solid rgba(43, 43, 40, 0.25);
 }
 
-/* 仓位标签 */
+/* 仓位刻度标签 */
 .cargo-labels {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: 0 0;
   font-size: 20rpx;
-  color: var(--color-text-tertiary, #8A8778);
 }
 
 .cargo-label-max,
 .cargo-label-half,
 .cargo-label-empty {
-  color: var(--color-text-tertiary, #8A8778);
+  color: var(--color-text-tertiary);
 }
 
 /* 仓位数据 */
@@ -243,84 +627,53 @@
 }
 
 .cargo-percent {
-  font-size: 100rpx;
-  font-weight: 900;
-  color: var(--color-primary, #2E7D32);
+  font-size: 96rpx;
+  font-weight: 800;
+  color: var(--color-primary);
   line-height: 1;
 }
 
 .cargo-title {
   font-size: 28rpx;
-  color: var(--color-text-secondary, #6B675C);
-  margin-top: 8rpx;
+  color: var(--color-text-secondary);
+  margin-top: 10rpx;
 }
 
-/* 进度条 */
-.slider-section {
-  width: 100%;
-  margin-bottom: 50rpx;
-}
-
-.slider-ticks {
+/* 订阅派单通知入口：稻谷金虚线条 */
+.subscribe-entry {
   display: flex;
-  justify-content: space-between;
-  padding: 0 8rpx;
-  margin-bottom: 12rpx;
-  font-size: 22rpx;
-  color: var(--color-text-tertiary, #8A8778);
-}
-
-.cargo-slider {
+  align-items: center;
+  justify-content: center;
+  gap: 10rpx;
   width: 100%;
-  margin: 16rpx 0;
-}
-
-.slider-buttons {
-  display: flex;
-  gap: 16rpx;
-  margin-top: 24rpx;
-}
-
-.quick-btn {
-  flex: 1;
-  text-align: center;
-  padding: 20rpx 0;
-  background: #ffffff;
+  box-sizing: border-box;
+  margin-bottom: 36rpx;
+  padding: 18rpx;
   border-radius: 16rpx;
-  font-size: 30rpx;
-  font-weight: 700;
-  color: var(--color-ink, #2B2B28);
-  border: 2rpx solid rgba(43, 43, 40, 0.1);
-  transition: all 0.2s;
+  font-size: 26rpx;
+  font-weight: 500;
+  color: #8a6a1f;
+  border: 1rpx dashed rgba(217, 164, 65, 0.55);
+  background: rgba(217, 164, 65, 0.08);
 }
 
-.quick-btn:active {
-  background: var(--color-primary, #2E7D32);
-  color: #fff;
-  border-color: var(--color-primary, #2E7D32);
-}
-
-/* 发车按钮 */
+/* 发车按钮（陶土橙大胶囊：司机=行动） */
 .start-btn {
-  width: 320rpx;
+  width: 360rpx;
   height: 120rpx;
-  background: linear-gradient(135deg, var(--color-clay, #C75B2A), var(--color-primary, #2E7D32));
+  background: linear-gradient(135deg, var(--color-clay), #a64a1f);
   border-radius: 60rpx;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 16rpx;
+  box-shadow: 0 12rpx 36rpx rgba(199, 91, 42, 0.32);
+}
+
+.start-btn::after,
+.scan-btn::after,
+.arrive-btn::after {
   border: none;
-  box-shadow: 0 12rpx 40rpx var(--color-primary-shadow, rgba(46, 125, 50, 0.2));
-}
-
-.start-btn:active {
-  transform: scale(0.95);
-  box-shadow: 0 6rpx 20rpx var(--color-primary-shadow, rgba(46, 125, 50, 0.2));
-}
-
-.start-icon {
-  font-size: 52rpx;
 }
 
 .start-text {
@@ -332,15 +685,94 @@
 
 /* ========== 行驶中面板 ========== */
 .driving-panel {
-  flex: 1;
   display: flex;
   flex-direction: column;
 }
 
+/* 连续任务导航横幅：迷你站牌（深绿渐变 + 落款横档） */
+.nav-banner {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+  margin: 24rpx 24rpx 0;
+  padding: 28rpx 26rpx 26rpx;
+  border-radius: 20rpx;
+  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
+  box-shadow: 0 8rpx 24rpx var(--color-primary-shadow);
+}
+
+.nav-banner::before {
+  content: '';
+  position: absolute;
+  top: 10rpx;
+  left: 22rpx;
+  right: 22rpx;
+  height: 4rpx;
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 2rpx;
+}
+
+.nav-seq {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.78);
+  letter-spacing: 1rpx;
+}
+
+.nav-station-name {
+  font-size: 46rpx;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 1rpx;
+}
+
+.nav-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+  margin-top: 6rpx;
+}
+
+/* 动作胶囊（深绿横幅上：白瓷/陶土橙/稻谷金） */
+.nav-chip {
+  font-size: 24rpx;
+  padding: 6rpx 18rpx;
+  border-radius: var(--radius-pill);
+  color: #fff;
+}
+
+.nav-chip.pickup { background: rgba(255, 255, 255, 0.22); }
+.nav-chip.deliver { background: var(--color-clay); }
+.nav-chip.board,
+.nav-chip.alight { background: rgba(255, 255, 255, 0.16); }
+.nav-chip.return { background: var(--color-gold); }
+.nav-chip.none { background: rgba(255, 255, 255, 0.12); }
+
+.nav-amap {
+  align-self: flex-end;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  margin-top: 10rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+  padding: 10rpx 28rpx;
+  border-radius: var(--radius-pill);
+  color: #fff;
+  background: var(--color-clay);
+  box-shadow: 0 4rpx 12rpx rgba(199, 91, 42, 0.35);
+}
+
+/* 地图区域：圆角卡片 */
 .map-area {
   height: 600rpx;
   position: relative;
-  background: var(--color-primary-light, #EAF3EA);
+  margin: 24rpx 24rpx 0;
+  border-radius: 24rpx;
+  overflow: hidden;
+  background: var(--color-primary-light);
+  box-shadow: var(--shadow-card);
 }
 
 .nav-map {
@@ -353,113 +785,125 @@
   position: absolute;
   top: 24rpx;
   right: 24rpx;
-  background: rgba(28, 75, 46, 0.85);
+  background: var(--color-primary-dark);
+  opacity: 0.92;
   border-radius: 20rpx;
-  padding: 16rpx 24rpx;
+  padding: 14rpx 24rpx;
   display: flex;
   align-items: baseline;
-  gap: 4rpx;
-  backdrop-filter: blur(10rpx);
+  gap: 6rpx;
+  box-shadow: var(--shadow-float);
 }
 
 .speed-num {
   font-size: 56rpx;
-  font-weight: 900;
+  font-weight: 800;
   color: #ffffff;
   line-height: 1;
 }
 
 .speed-unit {
   font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.75);
 }
 
-/* 前方到站卡片（站牌式） */
+/* 前方到站卡片：白卡 + 陶土橙左侧行动条 */
 .next-stop-card {
-  position: absolute;
-  bottom: 120rpx;
-  left: 24rpx;
-  right: 24rpx;
-  background: #ffffff;
-  border-radius: 20rpx;
-  padding: 24rpx;
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-  border: 2rpx solid var(--color-clay, #C75B2A);
-  box-shadow: 0 8rpx 24rpx rgba(43, 43, 40, 0.12);
-}
-
-.stop-alert-icon {
-  font-size: 48rpx;
-}
-
-.stop-alert-info {
-  flex: 1;
-}
-
-.stop-alert-name {
-  font-size: 38rpx;
-  font-weight: 800;
-  color: var(--color-ink, #2B2B28);
-  display: block;
-}
-
-.stop-alert-dist {
-  font-size: 28rpx;
-  color: var(--color-clay, #C75B2A);
-  display: block;
-  margin-top: 4rpx;
-}
-
-.stop-alert-task {
-  font-size: 26rpx;
-  color: var(--color-danger, #C0392B);
-  display: block;
-  margin-top: 6rpx;
-}
-
-/* 进度条 */
-.voice-bar {
   position: absolute;
   bottom: 24rpx;
   left: 24rpx;
   right: 24rpx;
-  background: var(--color-primary-dark, #1C4B2E);
-  border-radius: 14rpx;
-  padding: 16rpx 24rpx;
+  background: #fffdf8;
+  border-radius: 20rpx;
+  padding: 22rpx 24rpx;
+  display: flex;
+  align-items: flex-start;
+  gap: 18rpx;
+  border-left: 8rpx solid var(--color-clay);
+  box-shadow: var(--shadow-float);
+}
+
+.stop-alert-iconbox {
+  flex: none;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  background: rgba(199, 91, 42, 0.1);
   display: flex;
   align-items: center;
-  gap: 12rpx;
+  justify-content: center;
 }
 
-.voice-icon {
-  font-size: 32rpx;
-}
-
-.voice-content {
-  font-size: 26rpx;
-  color: #ffffff;
+.stop-alert-info {
   flex: 1;
+  min-width: 0;
 }
 
-/* ETA信息栏 */
+.stop-alert-name {
+  font-size: 36rpx;
+  font-weight: 800;
+  color: var(--color-ink);
+  display: block;
+}
+
+.stop-alert-dist {
+  font-size: 26rpx;
+  color: var(--color-clay);
+  font-weight: 600;
+  display: block;
+  margin-top: 4rpx;
+}
+
+.stop-alert-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10rpx;
+  margin-top: 10rpx;
+}
+
+/* 白卡上的动作胶囊：浅底深字 */
+.stop-alert-actions .nav-chip.pickup { background: var(--color-primary-light); color: var(--color-primary); }
+.stop-alert-actions .nav-chip.deliver { background: rgba(199, 91, 42, 0.12); color: var(--color-clay); }
+.stop-alert-actions .nav-chip.board,
+.stop-alert-actions .nav-chip.alight { background: rgba(217, 164, 65, 0.16); color: #8a6a1f; }
+
+.stop-alert-task {
+  font-size: 26rpx;
+  color: var(--color-status-warn);
+  font-weight: 500;
+  display: block;
+  margin-top: 10rpx;
+}
+
+/* ETA信息栏：三联卡 + 细分隔线 */
 .eta-bar {
   display: flex;
-  background: #ffffff;
-  padding: 28rpx 32rpx;
-  gap: 0;
-  border-bottom: 1rpx solid rgba(43, 43, 40, 0.08);
+  background: #fffdf8;
+  margin: 24rpx 24rpx 0;
+  border-radius: 20rpx;
+  padding: 26rpx 0;
+  box-shadow: var(--shadow-card);
 }
 
 .eta-item {
   flex: 1;
   text-align: center;
+  position: relative;
+}
+
+.eta-item + .eta-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 1rpx;
+  background: rgba(43, 43, 40, 0.08);
 }
 
 .eta-label {
   font-size: 22rpx;
-  color: var(--color-text-tertiary, #8A8778);
+  color: var(--color-text-tertiary);
   display: block;
   margin-bottom: 8rpx;
 }
@@ -467,44 +911,80 @@
 .eta-value {
   font-size: 40rpx;
   font-weight: 800;
-  color: var(--color-ink, #2B2B28);
+  color: var(--color-ink);
   display: block;
 }
 
 .eta-value.orange {
-  color: var(--color-clay, #C75B2A);
+  color: var(--color-clay);
+}
+
+/* 到站确认按钮（陶土橙：司机=行动） */
+.arrive-btn {
+  width: calc(100% - 48rpx);
+  margin: 24rpx 24rpx 0;
+  height: 120rpx;
+  background: linear-gradient(135deg, var(--color-clay), #a64a1f);
+  border-radius: 24rpx;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 14rpx;
+  box-shadow: 0 12rpx 32rpx rgba(199, 91, 42, 0.3);
+}
+
+.arrive-btn.ready {
+  box-shadow: 0 0 0 6rpx var(--color-gold), 0 12rpx 32rpx rgba(199, 91, 42, 0.3);
+}
+
+.arrive-text {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 2rpx;
 }
 
 /* ========== 停靠面板 ========== */
 .stopped-panel {
-  padding: 40rpx 32rpx;
+  padding: 32rpx 24rpx 0;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-/* 站点横幅 */
+/* 站点横幅：站牌绿圆徽 + 到达文案 */
 .stop-banner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
-  margin-bottom: 40rpx;
+  margin-bottom: 32rpx;
 }
 
-.stop-icon {
-  font-size: 72rpx;
-  display: block;
-  margin-bottom: 16rpx;
+.stop-iconbox {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+  border: 4rpx solid rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20rpx;
+  box-shadow: 0 10rpx 28rpx var(--color-primary-shadow);
 }
 
 .stop-title {
   font-size: 44rpx;
   font-weight: 800;
-  color: var(--color-ink, #2B2B28);
+  color: var(--color-ink);
   display: block;
 }
 
 .stop-subtitle {
   font-size: 28rpx;
-  color: var(--color-text-secondary, #6B675C);
+  color: var(--color-text-secondary);
   display: block;
   margin-top: 8rpx;
 }
@@ -512,52 +992,65 @@
 /* 待装货物 */
 .pickup-list {
   width: 100%;
-  margin-bottom: 40rpx;
-  background: #ffffff;
+  box-sizing: border-box;
+  margin-bottom: 32rpx;
+  background: #fffdf8;
   border-radius: 20rpx;
   padding: 8rpx 0;
-  box-shadow: 0 8rpx 24rpx rgba(43, 43, 40, 0.06);
+  box-shadow: var(--shadow-card);
 }
 
 .pickup-item {
   display: flex;
   align-items: center;
   padding: 24rpx 28rpx;
-  gap: 20rpx;
-  border-bottom: 1rpx solid rgba(43, 43, 40, 0.08);
+  gap: 18rpx;
+  border-bottom: 1rpx solid rgba(43, 43, 40, 0.06);
 }
 
 .pickup-item:last-child {
   border-bottom: none;
 }
 
-.pickup-emoji {
-  font-size: 44rpx;
+/* 货物类型图标座：按业务类型着色（商城=陶土橙/邮快=稻谷金/寄货=站牌绿） */
+.pickup-type {
+  flex: none;
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+.pickup-type.is-product { background: rgba(199, 91, 42, 0.1); }
+.pickup-type.is-mail { background: rgba(217, 164, 65, 0.16); }
+.pickup-type.is-cargo { background: var(--color-primary-light); }
 
 .pickup-info {
   flex: 1;
+  min-width: 0;
 }
 
 .pickup-name {
   font-size: 32rpx;
   font-weight: 700;
-  color: var(--color-ink, #2B2B28);
+  color: var(--color-ink);
   display: block;
 }
 
 .pickup-detail {
   font-size: 24rpx;
-  color: var(--color-text-secondary, #6B675C);
+  color: var(--color-text-secondary);
   display: block;
   margin-top: 4rpx;
 }
 
 .pickup-check {
-  width: 40rpx;
-  height: 40rpx;
-  border-radius: 8rpx;
-  border: 2rpx solid rgba(43, 43, 40, 0.25);
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  border: 2rpx solid rgba(43, 43, 40, 0.22);
   background: transparent;
   box-sizing: border-box;
   display: flex;
@@ -567,117 +1060,49 @@
 }
 
 .pickup-check.checked {
-  background: var(--color-primary, #2E7D32);
-  border-color: var(--color-primary, #2E7D32);
+  background: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
-/* 巨大扫码按钮 */
-.scan-btn {
-  width: 100%;
-  height: 280rpx;
-  background: linear-gradient(180deg, var(--color-primary, #2E7D32), var(--color-primary-dark, #1C4B2E));
-  border-radius: 32rpx;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 12rpx;
-  border: none;
-  box-shadow: 0 16rpx 48rpx var(--color-primary-shadow, rgba(46, 125, 50, 0.2));
-  margin-bottom: 32rpx;
-}
-
-.scan-btn:active {
-  transform: scale(0.96);
-  box-shadow: 0 8rpx 24rpx var(--color-primary-shadow, rgba(46, 125, 50, 0.2));
-}
-
-.scan-icon {
-  font-size: 64rpx;
-}
-
-.scan-text {
-  font-size: 48rpx;
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: 4rpx;
-}
-
-.scan-hint {
-  font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.75);
-}
-
-.skip-btn {
-  font-size: 32rpx;
-  color: var(--color-text-secondary, #6B675C);
-  padding: 24rpx 40rpx;
-}
-
-/* 司机信息栏 */
-.driver-bar {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-  padding: 12rpx 30rpx 0;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.driver-emoji {
-  font-size: 30rpx;
-}
-
-.driver-text {
-  font-size: 26rpx;
-  font-weight: 600;
-}
-
-.driver-plate {
-  font-size: 24rpx;
-  background: rgba(255, 255, 255, 0.25);
-  border-radius: 8rpx;
-  padding: 4rpx 14rpx;
-}
-
-.driver-capacity {
-  margin-left: auto;
-  font-size: 24rpx;
-}
-
-/* 进度条 */
+/* 算法调度任务卡 */
 .task-list {
-  margin: 20rpx 28rpx;
-  background: #ffffff;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 32rpx;
+  background: #fffdf8;
   border-radius: 20rpx;
   padding: 24rpx;
-  box-shadow: 0 8rpx 24rpx rgba(43, 43, 40, 0.06);
+  box-shadow: var(--shadow-card);
+}
+
+.task-list-head {
+  margin-bottom: 14rpx;
 }
 
 .task-title {
-  font-size: 26rpx;
-  font-weight: 600;
-  color: var(--color-primary, #2E7D32);
-  display: block;
-  margin-bottom: 16rpx;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--color-primary);
 }
 
 .task-item {
   display: flex;
   align-items: center;
   gap: 16rpx;
-  padding: 12rpx 0;
-  border-top: 1rpx solid rgba(43, 43, 40, 0.08);
+  padding: 14rpx 0;
+  border-top: 1rpx solid rgba(43, 43, 40, 0.06);
 }
 
 .task-station {
   font-size: 28rpx;
-  color: var(--color-ink, #2B2B28);
+  color: var(--color-ink);
   font-weight: 600;
 }
 
-.task-action {
+/* 调度动作小胶囊（与任务段的 .task-action 容器区分作用域） */
+.task-item .task-action {
   font-size: 24rpx;
-  color: var(--color-clay, #C75B2A);
+  color: var(--color-clay);
   background: rgba(199, 91, 42, 0.1);
   border-radius: 8rpx;
   padding: 4rpx 14rpx;
@@ -685,396 +1110,114 @@
 
 .task-order {
   font-size: 22rpx;
-  color: var(--color-text-tertiary, #8A8778);
+  color: var(--color-text-tertiary);
   margin-left: auto;
 }
 
-/* 到站确认按钮（行驶中） */
-.arrive-btn {
-  width: calc(100% - 64rpx);
-  margin: 32rpx;
-  height: 120rpx;
-  background: linear-gradient(180deg, var(--color-clay, #C75B2A), var(--color-primary, #2E7D32));
-  border-radius: 24rpx;
+/* 巨大扫码按钮（主行动：陶土橙） */
+.scan-btn {
+  width: 100%;
+  height: 260rpx;
+  background: linear-gradient(160deg, var(--color-clay), #a64a1f);
+  border-radius: 28rpx;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16rpx;
-  border: none;
-  box-shadow: 0 12rpx 36rpx var(--color-primary-shadow, rgba(46, 125, 50, 0.2));
+  gap: 12rpx;
+  box-shadow: 0 14rpx 40rpx rgba(199, 91, 42, 0.3);
+  margin-bottom: 28rpx;
 }
 
-.arrive-btn:active {
-  transform: scale(0.97);
-  box-shadow: 0 6rpx 18rpx var(--color-primary-shadow, rgba(46, 125, 50, 0.2));
-}
-
-.arrive-icon {
-  font-size: 40rpx;
-}
-
-.arrive-text {
-  font-size: 36rpx;
-  font-weight: bold;
+.scan-text {
+  font-size: 46rpx;
+  font-weight: 800;
   color: #fff;
+  letter-spacing: 4rpx;
 }
 
-/* 妥投扫码按钮（停靠中，次按钮） */
+.scan-hint {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+/* 妥投扫码按钮（次行动：站牌绿） */
 .deliver-btn {
-  height: 200rpx;
-  background: var(--color-gold, #D9A441);
-  box-shadow: 0 16rpx 48rpx rgba(217, 164, 65, 0.35);
+  height: 190rpx;
+  background: linear-gradient(160deg, var(--color-primary), var(--color-primary-dark));
+  box-shadow: 0 12rpx 36rpx var(--color-primary-shadow);
 }
 
-.deliver-btn:active {
-  box-shadow: 0 8rpx 24rpx rgba(217, 164, 65, 0.3);
-}
-
-/* 取件核销按钮（邮快件，次按钮） */
+/* 取件核销按钮（三级行动：米白描边卡） */
 .verify-btn {
-  height: 200rpx;
-  background: linear-gradient(180deg, var(--color-primary, #2E7D32), var(--color-primary-dark, #1C4B2E));
-  box-shadow: 0 16rpx 48rpx var(--color-primary-shadow, rgba(46, 125, 50, 0.2));
+  height: 190rpx;
+  background: #fffdf8;
+  border: 2rpx solid var(--color-primary);
+  box-shadow: var(--shadow-card);
 }
 
-.verify-btn:active {
-  box-shadow: 0 8rpx 24rpx var(--color-primary-shadow, rgba(46, 125, 50, 0.2));
+.verify-btn .scan-text {
+  color: var(--color-primary);
+}
+
+.verify-btn .scan-hint {
+  color: var(--color-text-secondary);
+}
+
+.skip-btn {
+  font-size: 30rpx;
+  color: var(--color-text-secondary);
+  padding: 12rpx 40rpx 32rpx;
 }
 
 /* ============ 老年人模式：司机端工作台字号放大 ============ */
+.elderly-mode .driver-text { font-size: 30rpx; }
+.elderly-mode .driver-plate { font-size: 26rpx; }
+.elderly-mode .driver-capacity { font-size: 28rpx; }
+.elderly-mode .location-source { font-size: 26rpx; }
+.elderly-mode .notif-badge { font-size: 24rpx; min-width: 36rpx; height: 36rpx; line-height: 36rpx; }
 .elderly-mode .route-badge { font-size: 52rpx; }
 .elderly-mode .status-tag { font-size: 28rpx; }
 .elderly-mode .stop-label { font-size: 26rpx; }
 .elderly-mode .next-stop-name { font-size: 34rpx; }
 .elderly-mode .next-stop-dist { font-size: 32rpx; }
-.elderly-mode .cargo-title { font-size: 32rpx; }
-.elderly-mode .start-text { font-size: 52rpx; }
-.elderly-mode .speed-num { font-size: 68rpx; }
-.elderly-mode .speed-unit { font-size: 28rpx; }
-
-/* ============ 运营路单（signature：司机视角的任务段清单） ============ */
-.task-segment-panel {
-  margin: 16rpx 24rpx;
-  padding: 24rpx 24rpx 16rpx;
-  border-radius: 12rpx;
-  background: #ffffff;
-  border: 1rpx solid rgba(43, 43, 40, 0.08);
-  box-shadow: 0 8rpx 24rpx rgba(43, 43, 40, 0.08);
-  /* 左侧打孔：路单装订孔 */
-  background-image: radial-gradient(circle, var(--color-paper, #F6F2E9) 0 6rpx, transparent 6rpx);
-  background-size: 32rpx 32rpx;
-  background-position: -8rpx 12rpx;
-}
-.task-segment-title {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: var(--color-primary-dark, #1C4B2E);
-  margin-bottom: 12rpx;
-  letter-spacing: 2rpx;
-}
-.task-window {
-  font-size: 22rpx;
-  color: var(--color-text-tertiary, #8A8778);
-  margin-bottom: 12rpx;
-}
-.task-stop {
-  padding: 16rpx 0;
-  border-bottom: 1rpx dashed rgba(43, 43, 40, 0.12);
-}
-.task-stop:last-child { border-bottom: none; }
-.task-stop-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.task-stop-name { font-size: 28rpx; font-weight: 600; color: var(--color-ink, #2B2B28); }
-.task-stop-status { font-size: 22rpx; color: var(--color-gold, #D9A441); }
-.task-action {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-  margin-top: 6rpx;
-  font-size: 24rpx;
-  color: var(--color-text-secondary, #6B675C);
-}
-.task-action-name { color: var(--color-primary, #2E7D32); }
-.task-action-order { color: var(--color-text-tertiary, #8A8778); }
-.task-action-qty { color: var(--color-clay, #C75B2A); }
-.elderly-mode .task-segment-title { font-size: 34rpx; }
+.elderly-mode .deviation-text { font-size: 30rpx; }
+.elderly-mode .task-segment-title { font-size: 38rpx; }
 .elderly-mode .task-stop-name { font-size: 32rpx; }
+.elderly-mode .task-stop-status { font-size: 26rpx; }
 .elderly-mode .task-action { font-size: 28rpx; }
-
-/* ============ 偏航告警（Phase 9） ============ */
-.deviation-banner {
-  margin: 16rpx 24rpx;
-  padding: 16rpx 24rpx;
-  border-radius: 16rpx;
-  background: rgba(192, 57, 43, 0.1);
-  border: 2rpx solid rgba(192, 57, 43, 0.4);
-  font-size: 26rpx;
-  color: #C0392B;
-}
-
-/* ============ 连续任务导航（导航横幅 + 取/派 chip） ============ */
-.nav-banner {
-  display: flex;
-  flex-direction: column;
-  gap: 8rpx;
-  margin: 16rpx 24rpx 0;
-  padding: 24rpx;
-  border-radius: 20rpx;
-  background: linear-gradient(135deg, var(--color-primary-dark, #1C4B2E), var(--color-primary, #2E7D32));
-  box-shadow: 0 8rpx 24rpx var(--color-primary-shadow, rgba(46, 125, 50, 0.2));
-}
-.nav-seq {
-  font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.75);
-}
-.nav-station-name {
-  font-size: 44rpx;
-  font-weight: 800;
-  color: #fff;
-}
-.nav-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12rpx;
-  margin-top: 4rpx;
-}
-.nav-chip {
-  font-size: 24rpx;
-  padding: 6rpx 16rpx;
-  border-radius: 999rpx;
-  color: #fff;
-}
-.nav-chip.pickup { background: rgba(255, 255, 255, 0.22); }
-.nav-chip.deliver { background: var(--color-clay, #C75B2A); }
-.nav-chip.board, .nav-chip.alight { background: rgba(255, 255, 255, 0.18); }
-.nav-chip.none { background: rgba(255, 255, 255, 0.14); }
-.nav-amap {
-  align-self: flex-end;
-  margin-top: 8rpx;
-  font-size: 26rpx;
-  padding: 10rpx 24rpx;
-  border-radius: 999rpx;
-  color: #fff;
-  background: var(--color-clay, #C75B2A);
-}
-.stop-alert-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8rpx;
-  margin-top: 6rpx;
-}
-.stop-alert-actions .nav-chip.pickup { background: rgba(46, 125, 50, 0.12); color: var(--color-primary, #2E7D32); }
-.stop-alert-actions .nav-chip.deliver { background: rgba(199, 91, 42, 0.12); color: var(--color-clay, #C75B2A); }
-.stop-alert-actions .nav-chip.board, .stop-alert-actions .nav-chip.alight { background: rgba(31, 94, 158, 0.1); color: #1F5E9E; }
-.arrive-btn.ready {
-  box-shadow: 0 0 0 6rpx var(--color-gold, #D9A441), 0 12rpx 36rpx var(--color-primary-shadow, rgba(46, 125, 50, 0.2));
-}
-
-/* ============ 位置来源状态标签（只读展示，非控制开关） ============ */
-.location-source {
-  margin-left: auto;
-  font-size: 22rpx;
-  padding: 6rpx 18rpx;
-  border-radius: 999rpx;
-  color: var(--color-gold, #D9A441);
-  border: 2rpx solid var(--color-gold, #D9A441);
-  background: rgba(217, 164, 65, 0.18);
-}
-
-/* ============ 订阅派单通知入口 ============ */
-.subscribe-entry {
-  margin: 16rpx 24rpx 0;
-  padding: 20rpx;
-  text-align: center;
-  border-radius: 16rpx;
-  font-size: 26rpx;
-  color: var(--color-gold, #D9A441);
-  border: 2rpx dashed rgba(217, 164, 65, 0.5);
-  background: rgba(217, 164, 65, 0.08);
-}
-
-/* ==================== 多段联运：换乘交接入口 ==================== */
-.handover-entry {
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-  margin: 20rpx 24rpx;
-  padding: 26rpx 28rpx;
-  border-radius: 18rpx;
-  background: rgba(46, 125, 50, 0.16);
-  border: 2rpx solid rgba(46, 125, 50, 0.5);
-}
-
-.handover-entry-icon {
-  font-size: 44rpx;
-}
-
-.handover-entry-info {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.handover-entry-title {
-  font-size: 30rpx;
-  font-weight: 600;
-  color: #E8EDF2;
-}
-
-.handover-entry-sub {
-  margin-top: 6rpx;
-  font-size: 24rpx;
-  color: #9DB0C0;
-}
-
-.handover-entry-arrow {
-  font-size: 40rpx;
-  color: #9DB0C0;
-}
-
-
-/* ========== 路线概览地图（行驶状态就近显示） ========== */
-.route-overview-map {
-  margin: 24rpx;
-  background: #ffffff;
-  border-radius: 24rpx;
-  padding: 24rpx;
-  border: 1rpx solid rgba(43, 43, 40, 0.08);
-  box-shadow: 0 8rpx 24rpx rgba(43, 43, 40, 0.06);
-}
-
-.map-section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16rpx;
-}
-
-.map-section-title {
-  font-size: 30rpx;
-  font-weight: 700;
-  color: var(--color-ink, #2B2B28);
-}
-
-.map-section-subtitle {
-  font-size: 24rpx;
-  color: var(--color-text-secondary, #6B675C);
-}
-
-.overview-map {
-  width: 100%;
-  height: 360rpx;
-  border-radius: 16rpx;
-  overflow: hidden;
-}
-
-/* 图例 */
-.map-legend {
-  display: flex;
-  justify-content: center;
-  gap: 24rpx;
-  margin-top: 16rpx;
-  padding: 12rpx 0;
-}
-
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 8rpx;
-}
-
-.legend-dot {
-  width: 16rpx;
-  height: 16rpx;
-  border-radius: 50%;
-}
-
-.legend-dot.passed {
-  background: #9E9E9E;
-}
-
-.legend-dot.current {
-  background: #FF9800;
-}
-
-.legend-dot.next {
-  background: #1976D2;
-}
-
-.legend-dot.future {
-  background: #42A5F5;
-}
-
-.legend-text {
-  font-size: 22rpx;
-  color: var(--color-text-secondary, #6B675C);
-}
-
-/* 发车按钮 */
-.map-nav-bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12rpx;
-  margin-top: 16rpx;
-  padding: 20rpx 24rpx;
-  background: linear-gradient(135deg, #2E7D32 0%, #43A047 100%);
-  border-radius: 16rpx;
-}
-
-.map-nav-bar.hover {
-  opacity: 0.85;
-}
-
-.map-nav-icon {
-  font-size: 32rpx;
-}
-
-.map-nav-text {
-  font-size: 28rpx;
-  font-weight: 600;
-  color: #ffffff;
-}
-
-.map-nav-dist {
-  font-size: 24rpx;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-/* 老年模式 */
+.elderly-mode .handover-entry-title { font-size: 34rpx; }
+.elderly-mode .handover-entry-sub { font-size: 28rpx; }
 .elderly-mode .map-section-title { font-size: 36rpx; }
 .elderly-mode .map-section-subtitle { font-size: 28rpx; }
 .elderly-mode .overview-map { height: 420rpx; }
+.elderly-mode .legend-text { font-size: 26rpx; }
 .elderly-mode .map-nav-text { font-size: 34rpx; }
 .elderly-mode .map-nav-dist { font-size: 28rpx; }
-
-
-/* 通知铃铛 */
-.notif-bell {
-  position: relative;
-  margin-left: auto;
-  padding: 8rpx;
-}
-.notif-icon {
-  font-size: 36rpx;
-}
-.notif-badge {
-  position: absolute;
-  top: -4rpx;
-  right: -4rpx;
-  min-width: 32rpx;
-  height: 32rpx;
-  line-height: 32rpx;
-  text-align: center;
-  font-size: 20rpx;
-  color: #fff;
-  background: #E5573F;
-  border-radius: 32rpx;
-  padding: 0 6rpx;
-}
-.elderly-mode .notif-icon { font-size: 44rpx; }
-.elderly-mode .notif-badge { font-size: 24rpx; min-width: 36rpx; height: 36rpx; line-height: 36rpx; }
+.elderly-mode .cargo-labels { font-size: 24rpx; }
+.elderly-mode .cargo-title { font-size: 32rpx; }
+.elderly-mode .subscribe-entry { font-size: 30rpx; }
+.elderly-mode .start-text { font-size: 52rpx; }
+.elderly-mode .nav-seq { font-size: 28rpx; }
+.elderly-mode .nav-station-name { font-size: 54rpx; }
+.elderly-mode .nav-chip { font-size: 28rpx; }
+.elderly-mode .nav-amap { font-size: 30rpx; }
+.elderly-mode .speed-num { font-size: 68rpx; }
+.elderly-mode .speed-unit { font-size: 28rpx; }
+.elderly-mode .stop-alert-name { font-size: 42rpx; }
+.elderly-mode .stop-alert-dist { font-size: 30rpx; }
+.elderly-mode .stop-alert-task { font-size: 30rpx; }
+.elderly-mode .eta-label { font-size: 26rpx; }
+.elderly-mode .eta-value { font-size: 46rpx; }
+.elderly-mode .arrive-text { font-size: 42rpx; }
+.elderly-mode .stop-title { font-size: 52rpx; }
+.elderly-mode .stop-subtitle { font-size: 32rpx; }
+.elderly-mode .pickup-name { font-size: 36rpx; }
+.elderly-mode .pickup-detail { font-size: 28rpx; }
+.elderly-mode .task-title { font-size: 32rpx; }
+.elderly-mode .task-station { font-size: 32rpx; }
+.elderly-mode .task-item .task-action { font-size: 28rpx; }
+.elderly-mode .task-order { font-size: 26rpx; }
+.elderly-mode .scan-text { font-size: 52rpx; }
+.elderly-mode .scan-hint { font-size: 28rpx; }
+.elderly-mode .skip-btn { font-size: 34rpx; }

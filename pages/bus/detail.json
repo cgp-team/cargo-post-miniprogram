@@ -2,5 +2,8 @@
   "enablePullDownRefresh": true,
   "backgroundColor": "#F6F2E9",
   "navigationBarTitleText": "车辆详情",
-  "usingComponents": {}
+  "usingComponents": {
+    "icon": "/components/icon/index",
+    "empty-state": "/components/empty-state/index"
+  }
 }

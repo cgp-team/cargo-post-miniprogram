@@ -2,12 +2,14 @@
 <view class="page-trace {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
 
   <block wx:if="{{trace}}">
-    <!-- 承运信息卡 -->
+    <!-- 承运信息卡：金绿渐变票头 + 状态胶囊 -->
     <view class="carrier-card">
-      <view class="carrier-title">🌾 {{trace.productName || '商品'}}溯源</view>
-      <view class="carrier-row">
-        <text class="carrier-label">订单状态</text>
-        <text class="carrier-value">{{statusText || '—'}}</text>
+      <view class="carrier-head">
+        <view class="carrier-title-wrap">
+          <icon name="leaf" size="30" color="#D9A441" />
+          <text class="carrier-title">{{trace.productName || '商品'}}溯源</text>
+        </view>
+        <text class="carrier-status">{{statusText || '—'}}</text>
       </view>
       <view class="carrier-row">
         <text class="carrier-label">承运车辆</text>
@@ -37,22 +39,28 @@
 
     <!-- 司机到站/交付提醒（司机端"确认到达/装车/妥投"后由后端回写） -->
     <view wx:if="{{arrivedText}}" class="arrival-banner {{trace.deliverTime ? 'done' : ''}}">
-      <text class="arrival-icon">{{trace.deliverTime ? '✅' : '📣'}}</text>
+      <view class="arrival-icon">
+        <icon wx:if="{{trace.deliverTime}}" name="check" size="32" color="#FFFFFF" />
+        <icon wx:else name="notice" size="32" color="#FFFFFF" />
+      </view>
       <text class="arrival-text">{{arrivedText}}</text>
     </view>
 
     <!-- 司机核验凭证（装车拍照 / 妥投拍照）：后台与用户端看同一份 -->
     <view wx:if="{{trace.loadPhotoUrl || trace.deliverPhotoUrl}}" class="proof-card">
-      <view class="proof-title">📷 司机核验凭证</view>
+      <view class="proof-title">
+        <icon name="camera" size="28" color="{{iconDeep}}" />
+        <text>司机核验凭证</text>
+      </view>
       <view class="proof-row" wx:if="{{trace.loadPhotoUrl}}">
-        <image class="proof-img" src="{{trace.loadPhotoUrl}}" mode="aspectFill" bindtap="previewProof" data-url="{{trace.loadPhotoUrl}}" />
+        <image class="proof-img" src="{{trace.loadPhotoUrl}}" mode="aspectFill" bindtap="previewProof" data-url="{{trace.loadPhotoUrl}}" hover-class="hover" />
         <view class="proof-meta">
           <text class="proof-label">装车核验</text>
           <text class="proof-time">{{loadTimeText || '—'}}</text>
         </view>
       </view>
       <view class="proof-row" wx:if="{{trace.deliverPhotoUrl}}">
-        <image class="proof-img" src="{{trace.deliverPhotoUrl}}" mode="aspectFill" bindtap="previewProof" data-url="{{trace.deliverPhotoUrl}}" />
+        <image class="proof-img" src="{{trace.deliverPhotoUrl}}" mode="aspectFill" bindtap="previewProof" data-url="{{trace.deliverPhotoUrl}}" hover-class="hover" />
         <view class="proof-meta">
           <text class="proof-label">妥投凭证</text>
           <text class="proof-time">{{deliverTimeText || '—'}}</text>
@@ -60,10 +68,11 @@
       </view>
     </view>
 
-    <!-- 订单二维码：司机扫码装车 / 妥投 -->
+    <!-- 订单二维码：司机扫码装车 / 妥投（票根式，带撕票线） -->
     <view class="order-qr-card" wx:if="{{trace.orderNo}}">
       <canvas type="2d" id="mallOrderQr" class="order-qr-canvas"></canvas>
       <text class="order-qr-no">{{trace.orderNo}}</text>
+      <view class="order-qr-divider"></view>
       <text class="order-qr-tip">司机扫码装车 / 妥投核验</text>
     </view>
 
@@ -86,13 +95,35 @@
       </view>
     </view>
 
-    <!-- 途经站点 -->
+    <!-- 途经站点：竖向时间线（圆点 + 虚线山路 + 当前站高亮） -->
     <view class="stops-card" wx:if="{{stops.length}}">
-      <view class="stops-title">🚏 途经站点</view>
-      <view class="stop-item" wx:for="{{stops}}" wx:key="sequenceNo">
-        <view class="stop-dot"></view>
-        <text class="stop-name">{{item.stationName}}</text>
-        <text class="stop-min">+{{item.plannedMinutes}}分钟</text>
+      <view class="stops-title">
+        <icon name="road" size="30" color="{{iconDeep}}" />
+        <text>途经站点</text>
+      </view>
+      <view
+        class="stop-item {{item.isPassed ? 'passed' : ''}} {{item.isCurrent ? 'current' : ''}}"
+        wx:for="{{stops}}"
+        wx:key="sequenceNo"
+      >
+        <view class="stop-rail">
+          <view class="stop-dot">
+            <icon wx:if="{{item.isPassed}}" name="check" size="20" color="#FFFFFF" />
+            <text wx:else>{{item.sequenceNo}}</text>
+          </view>
+          <view wx:if="{{index < stops.length - 1}}" class="stop-line"></view>
+        </view>
+        <view class="stop-body">
+          <view class="stop-head">
+            <text class="stop-name">{{item.stationName}}</text>
+            <text class="stop-min">+{{item.plannedMinutes}}分钟</text>
+          </view>
+          <view class="stop-tags" wx:if="{{item.isCurrent || index === 0 || index === stops.length - 1}}">
+            <text wx:if="{{item.isCurrent}}" class="stop-tag-current">当前位置</text>
+            <text wx:if="{{index === 0}}" class="stop-side">起点站</text>
+            <text wx:elif="{{index === stops.length - 1}}" class="stop-side">终点站</text>
+          </view>
+        </view>
       </view>
     </view>
   </block>

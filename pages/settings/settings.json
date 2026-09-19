@@ -1,5 +1,7 @@
 {
   "navigationBarTitleText": "设置",
   "navigationBarTextStyle": "white",
-  "usingComponents": {}
+  "usingComponents": {
+    "icon": "/components/icon/index"
+  }
 }

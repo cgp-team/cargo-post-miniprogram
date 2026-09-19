@@ -1,6 +1,11 @@
-<view class="page {{elderlyMode ? 'elderly-mode' : ''}}">
+<!-- 司机端 - 多段联运货物交接 -->
+<view class="handover-page {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
+  <!-- 站牌式页头：与深绿导航栏同色衔接 -->
   <view class="hero">
-    <text class="hero-title">货物交接</text>
+    <view class="hero-title-row">
+      <icon name="box" size="40" color="#FFFFFF" />
+      <text class="hero-title">货物交接</text>
+    </view>
     <text class="hero-sub">换乘站把货交给下一段司机，拍照确认后自动推进订单</text>
   </view>
 
@@ -10,7 +15,12 @@
       <text class="cl-title">当前任务 · 第{{currentLeg.legSequence}}段</text>
       <text class="cl-status">{{currentLeg.statusName}}</text>
     </view>
-    <text class="cl-route">{{currentLeg.routeText}}</text>
+    <view class="cl-route-row">
+      <icon name="pin" size="28" color="{{iconClay}}" />
+      <text class="cl-route">{{currentLeg.routeText}}</text>
+    </view>
+    <!-- 山路线：起讫站之间的路 -->
+    <view class="road-line"></view>
     <text class="cl-meta">
       订单 {{currentLeg.orderNo || currentLeg.orderId}}
       <block wx:if="{{currentLeg.distanceKm}}"> · {{currentLeg.distanceKm}}km</block>
@@ -20,43 +30,60 @@
     <text class="cl-eta" wx:if="{{currentLeg.etaText}}">预计到达：{{currentLeg.etaText}}</text>
     <text class="cl-est" wx:if="{{currentLeg.navigationSource === 'ESTIMATED'}}">距离/时间为估算值（非实时道路导航）</text>
     <view class="cl-actions">
-      <view class="cl-btn" wx:for="{{legActions}}" wx:key="action" hover-class="confirm-hover"
+      <view class="cl-btn" wx:for="{{legActions}}" wx:key="action" hover-class="hover"
             bindtap="onLegAction" data-action="{{item.action}}">{{item.label}}</view>
     </view>
   </view>
 
-  <view class="section-title">待交接（{{handovers.length}}）</view>
+  <!-- 待交接清单：可勾选感卡片行 -->
+  <view class="section-title-wrap">
+    <icon name="box" size="32" color="{{iconDeep}}" />
+    <text class="section-title">待交接（{{handovers.length}}）</text>
+  </view>
   <view class="list" wx:if="{{handovers.length > 0}}">
-    <view class="card" wx:for="{{handovers}}" wx:key="id">
-      <view class="card-head">
-        <text class="order-no">{{item.orderNo || ('订单 ' + item.orderId)}}</text>
-        <text class="status">{{item.statusName}}</text>
+    <view class="ho-card" wx:for="{{handovers}}" wx:key="id">
+      <view class="ho-main">
+        <!-- 勾选圈：拍照确认后勾掉这一单 -->
+        <view class="ho-check">
+          <icon name="check" size="30" color="{{iconClay}}" />
+        </view>
+        <view class="ho-body">
+          <view class="card-head">
+            <text class="order-no">{{item.orderNo || ('订单 ' + item.orderId)}}</text>
+            <text class="status">{{item.statusName}}</text>
+          </view>
+          <text class="goods">{{item.goodsName || '货物'}} · {{item.itemCount}} 件<block wx:if="{{item.weightKg}}"> · {{item.weightKg}}kg</block></text>
+          <view class="row">
+            <text class="label">换乘站</text>
+            <text class="value">{{item.stationName || '—'}}</text>
+          </view>
+          <view class="row">
+            <text class="label">交出司机</text>
+            <text class="value">{{item.fromDriverName || '—'}}</text>
+          </view>
+          <view class="row">
+            <text class="label">接收司机</text>
+            <text class="value">{{item.toDriverName || '待认领'}}</text>
+          </view>
+          <view class="row" wx:if="{{item.handoverTimeText}}">
+            <text class="label">交接时间</text>
+            <text class="value">{{item.handoverTimeText}}</text>
+          </view>
+        </view>
       </view>
-      <text class="goods">{{item.goodsName || '货物'}} · {{item.itemCount}} 件<block wx:if="{{item.weightKg}}"> · {{item.weightKg}}kg</block></text>
-      <view class="row">
-        <text class="label">换乘站</text>
-        <text class="value">{{item.stationName || '—'}}</text>
-      </view>
-      <view class="row">
-        <text class="label">交出司机</text>
-        <text class="value">{{item.fromDriverName || '—'}}</text>
-      </view>
-      <view class="row">
-        <text class="label">接收司机</text>
-        <text class="value">{{item.toDriverName || '待认领'}}</text>
-      </view>
-      <view class="row" wx:if="{{item.handoverTimeText}}">
-        <text class="label">交接时间</text>
-        <text class="value">{{item.handoverTimeText}}</text>
-      </view>
-      <view class="confirm-btn" hover-class="confirm-hover" bindtap="onConfirm" data-id="{{item.id}}">
-        拍照确认交接
+      <view class="btn-orange ho-confirm" hover-class="hover" bindtap="onConfirm" data-id="{{item.id}}">
+        <icon name="camera" size="34" color="#FFFFFF" />
+        <text>拍照确认交接</text>
       </view>
     </view>
   </view>
-  <empty-state wx:elif="{{!loading}}" emoji="📦" text="暂无待交接任务" subText="多段联运到达换乘站后会在这里提醒" />
+  <empty-state wx:elif="{{!loading}}" icon="box" text="暂无待交接任务" subText="多段联运到达换乘站后会在这里提醒" />
 
-  <view class="section-title" wx:if="{{legs.length > 0}}">我的运输段</view>
+  <!-- 我的运输段 -->
+  <view class="section-title-wrap" wx:if="{{legs.length > 0}}">
+    <icon name="road" size="32" color="{{iconDeep}}" />
+    <text class="section-title">我的运输段</text>
+  </view>
   <view class="leg-list" wx:if="{{legs.length > 0}}">
     <view class="leg" wx:for="{{legs}}" wx:key="id">
       <view class="leg-progress">{{item.progressText}}</view>

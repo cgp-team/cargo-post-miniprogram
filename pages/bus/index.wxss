@@ -1,77 +1,125 @@
-/* 实时公交页 · 地图优先（车来了式），保持项目"山乡巴士"绿色主题 */
+/* 实时公交页 · 地图优先（车来了式），设计语言：山乡巴士 · 站牌与车票 */
 
 .bus-page {
   min-height: 100vh;
-  background: var(--color-paper);
+  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-paper) 420rpx);
   padding-bottom: 24rpx;
 }
 
-/* ---------- 定位状态条 ---------- */
-.loc-bar {
-  display: flex;
-  align-items: center;
-  gap: 12rpx;
-  padding: 18rpx 24rpx;
-  background: var(--color-primary);
-  color: #fff;
-  font-size: 26rpx;
+/* ---------- 站牌头：深绿实板承接导航栏 ---------- */
+.bus-head {
+  position: relative;
+  overflow: hidden;
+  padding: 24rpx 28rpx 28rpx;
+  background: linear-gradient(160deg, var(--color-primary-dark) 0%, var(--color-primary) 70%, var(--color-primary-dark) 100%);
+  border-radius: 0 0 28rpx 28rpx;
+  box-shadow: 0 8rpx 24rpx var(--color-primary-shadow);
 }
 
-.loc-bar.warn {
-  background: var(--color-clay);
+/* 顶部落款横档（站牌金属边） */
+.bus-head::before {
+  content: '';
+  position: absolute;
+  top: 12rpx;
+  left: 28rpx;
+  right: 28rpx;
+  height: 5rpx;
+  background: rgba(255, 255, 255, 0.26);
+  border-radius: 3rpx;
 }
 
-.loc-bar.fail {
-  background: #8A8778;
+/* 角落装饰光晕 */
+.bus-head::after {
+  content: '';
+  position: absolute;
+  top: -40rpx;
+  right: -20rpx;
+  width: 200rpx;
+  height: 200rpx;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.10) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
 }
 
-.loc-text {
-  flex: 1;
-  color: #fff;
-  font-weight: 600;
-}
-
-.loc-action {
-  color: #fff;
-  opacity: 0.92;
-  font-size: 24rpx;
-}
-.loc-action-pick {
-  margin-left: 12rpx;
-  padding: 4rpx 16rpx;
-  border-radius: 999rpx;
-  background: rgba(255, 255, 255, 0.22);
-  font-weight: 600;
-  opacity: 1;
-}
-
-/* ---------- 概览 ---------- */
+/* 概览：根据当前位置 · 附近 N 站 · M 条线路 */
 .summary {
-  padding: 16rpx 24rpx 8rpx;
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
 }
 
 .summary-main {
-  font-size: 28rpx;
-  color: var(--color-ink);
-  font-weight: 600;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 1rpx;
 }
 
 .summary-sub {
-  margin-top: 6rpx;
+  margin-top: 8rpx;
   font-size: 24rpx;
-  color: var(--color-text-secondary);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* 定位状态胶囊：精度低告警陶土橙、定位失败置灰 */
+.loc-bar {
+  position: relative;
+  z-index: 1;
+  margin-top: 20rpx;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 16rpx 22rpx;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.14);
+  border: 1rpx solid rgba(255, 255, 255, 0.28);
+  font-size: 26rpx;
+  color: #ffffff;
+}
+
+.loc-bar.warn {
+  background: var(--color-clay);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.loc-bar.fail {
+  background: var(--color-status-done);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.loc-text {
+  flex: 1;
+  min-width: 0;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.loc-action {
+  flex: none;
+  color: #ffffff;
+  opacity: 0.92;
+  font-size: 24rpx;
+}
+
+.loc-action-pick {
+  margin-left: 12rpx;
+  padding: 4rpx 16rpx;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.22);
+  font-weight: 600;
+  opacity: 1;
 }
 
 /* ---------- 地图（第一视觉焦点） ---------- */
 .map-wrap {
   position: relative;
-  margin: 12rpx 20rpx 0;
+  margin: 24rpx 24rpx 0;
   height: 45vh;
-  border-radius: 20rpx;
+  border-radius: 24rpx;
   overflow: hidden;
-  box-shadow: 0 6rpx 20rpx var(--color-primary-shadow);
+  border: 1rpx solid rgba(60, 50, 30, 0.05);
+  box-shadow: var(--shadow-card);
 }
 
 .bus-map {
@@ -85,9 +133,10 @@
   bottom: 16rpx;
   display: flex;
   gap: 14rpx;
-  padding: 8rpx 14rpx;
-  background: rgba(255, 255, 255, 0.92);
-  border-radius: 999rpx;
+  padding: 8rpx 16rpx;
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: var(--radius-pill);
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.08);
   font-size: 20rpx;
   color: var(--color-ink);
 }
@@ -105,10 +154,10 @@
   display: inline-block;
 }
 
-.dot-me { background: #1F5E9E; }
-.dot-stop { background: #8A8778; }
-.dot-real { background: #2E7D32; }
-.dot-sim { background: #C75B2A; }
+.dot-me { background: #1F5E9E; } /* 与 marker-me.png 图标同色 */
+.dot-stop { background: var(--color-text-tertiary); }
+.dot-real { background: var(--color-primary); }
+.dot-sim { background: var(--color-clay); }
 
 .map-btn {
   position: absolute;
@@ -117,71 +166,87 @@
   display: flex;
   align-items: center;
   gap: 6rpx;
-  padding: 10rpx 18rpx;
-  background: #fff;
-  border-radius: 999rpx;
+  padding: 10rpx 20rpx;
+  background: #ffffff;
+  border-radius: var(--radius-pill);
   font-size: 22rpx;
   color: var(--color-primary-dark);
   font-weight: 600;
-  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-float);
 }
 
-/* ---------- 区块 ---------- */
+/* ---------- 区块（对齐首页分区节奏） ---------- */
 .section {
-  margin-top: 22rpx;
-  padding: 0 24rpx;
+  margin: 0 24rpx;
 }
 
 .section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12rpx;
+  padding: 28rpx 4rpx 18rpx;
 }
 
 .section-title-wrap {
   display: flex;
   align-items: center;
-  gap: 8rpx;
+  gap: 10rpx;
 }
 
 .section-title {
-  font-size: 30rpx;
+  font-size: 32rpx;
   font-weight: 700;
   color: var(--color-primary-dark);
+  letter-spacing: 0.5rpx;
 }
 
+/* 右侧计数/更多：浅绿胶囊 */
 .section-sub {
-  font-size: 24rpx;
-  color: var(--color-text-secondary);
+  font-size: 22rpx;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  background: var(--color-primary-light);
+  padding: 4rpx 18rpx;
+  border-radius: var(--radius-pill);
 }
 
 .section-more {
   font-size: 24rpx;
   color: var(--color-primary);
+  font-weight: 500;
+  padding: 8rpx 18rpx;
+  background: var(--color-primary-light);
+  border-radius: var(--radius-pill);
 }
 
-.empty {
-  display: block;
-  padding: 20rpx 0;
-  font-size: 26rpx;
-  color: var(--color-text-secondary);
+.lines-state,
+.running-empty {
+  padding-bottom: 12rpx;
+}
+
+/* 空态组件内边距收紧（apply-shared 可命中组件内部） */
+.lines-state .es,
+.running-empty .es {
+  padding: 48rpx 0;
 }
 
 /* ---------- 附近线路 ---------- */
 .line-scroll {
   white-space: nowrap;
+  padding: 4rpx 2rpx 14rpx;
 }
 
 .line-chip {
   display: inline-flex;
   flex-direction: column;
-  gap: 6rpx;
+  align-items: flex-start;
+  gap: 8rpx;
   margin-right: 16rpx;
-  padding: 16rpx 22rpx;
-  border-radius: 16rpx;
-  background: #fff;
-  border: 2rpx solid #E8ECEE;
+  padding: 18rpx 24rpx;
+  border-radius: 18rpx;
+  background: #FFFDF8;
+  border: 2rpx solid rgba(60, 50, 30, 0.06);
+  box-shadow: var(--shadow-card);
 }
 
 .line-chip.active {
@@ -195,10 +260,14 @@
   color: var(--color-ink);
 }
 
+.line-chip.active .line-name {
+  color: var(--color-primary-dark);
+}
+
 .line-tag {
   font-size: 20rpx;
   padding: 2rpx 12rpx;
-  border-radius: 999rpx;
+  border-radius: var(--radius-pill);
 }
 
 .tag-real {
@@ -211,76 +280,77 @@
   color: var(--color-primary-dark);
 }
 
-/* ---------- 车辆卡片（车来了风格：左侧大字ETA + 中间信息 + 右侧状态） ---------- */
+/* ---------- 车辆车票卡（卡片本体由全局 .ticket-card 提供：主券+副券+打孔撕票线） ---------- */
 .vehicle-card {
+  margin-bottom: 16rpx;
+}
+
+.vehicle-head {
   display: flex;
   align-items: center;
-  gap: 20rpx;
-  padding: 24rpx;
-  margin-bottom: 16rpx;
-  background: #fff;
-  border-radius: 18rpx;
-  box-shadow: 0 4rpx 14rpx rgba(0, 0, 0, 0.05);
+  gap: 12rpx;
+  margin-bottom: 12rpx;
 }
 
-.vehicle-eta-area {
-  flex-shrink: 0;
-  width: 140rpx;
-  text-align: center;
-  padding-right: 20rpx;
-  border-right: 2rpx solid #f0f0f0;
-}
-
-.vehicle-eta-num {
-  font-size: 52rpx;
-  font-weight: 800;
-  color: var(--color-primary-dark);
-  line-height: 1;
-  display: block;
-}
-
-.vehicle-eta-unit {
-  font-size: 22rpx;
-  color: var(--color-text-secondary);
-  display: block;
-  margin-top: 4rpx;
-}
-
-/* 待发车：等待时长用中小号字，不与"到下一站分钟"混淆 */
-.vehicle-wait {
-  font-size: 20rpx;
-  color: var(--color-text-secondary);
-  display: block;
-  margin-top: 4rpx;
-}
-
-.vehicle-dist {
-  font-size: 22rpx;
-  color: var(--color-text-tertiary);
-  display: block;
-  margin-top: 6rpx;
-}
-
-.vehicle-info {
+.vehicle-route {
   flex: 1;
   min-width: 0;
+  font-size: 34rpx;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: 1rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.vehicle-route-tag {
-  display: inline-block;
+/* 状态胶囊：行驶中带呼吸点 */
+.vehicle-status {
+  flex: none;
   font-size: 22rpx;
-  color: #fff;
+  color: var(--color-text-secondary);
+  padding: 6rpx 18rpx;
+  background: #EFEAE0;
+  border-radius: var(--radius-pill);
+  font-weight: 500;
+}
+
+.vehicle-status.running {
+  color: var(--color-status-shipping);
+  background: var(--color-primary-light);
+}
+
+.vehicle-status.running::before {
+  content: '';
+  display: inline-block;
+  width: 10rpx;
+  height: 10rpx;
+  background: var(--color-accent);
+  border-radius: 50%;
+  margin-right: 8rpx;
+  animation: bus-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes bus-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
+}
+
+/* 离用户最近的那台车：列表首条，一眼可辨 */
+.vehicle-nearest {
+  flex: none;
+  font-size: 20rpx;
+  padding: 4rpx 14rpx;
+  border-radius: var(--radius-pill);
   background: var(--color-primary);
-  padding: 2rpx 14rpx;
-  border-radius: 6rpx;
-  margin-bottom: 8rpx;
+  color: var(--color-on-primary);
+  font-weight: 600;
 }
 
 .vehicle-plate-row {
   display: flex;
   align-items: center;
-  gap: 8rpx;
-  margin-bottom: 6rpx;
+  gap: 10rpx;
 }
 
 .vehicle-icon {
@@ -289,70 +359,83 @@
 }
 
 .vehicle-plate {
-  font-size: 30rpx;
+  font-size: 28rpx;
   font-weight: 700;
   color: var(--color-primary-dark);
-}
-
-.vehicle-next {
-  font-size: 24rpx;
-  color: var(--color-ink);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.vehicle-badge {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8rpx;
-}
-
-.vehicle-status {
-  font-size: 22rpx;
-  padding: 4rpx 14rpx;
-  border-radius: 20rpx;
-  background: #EFEAE0;
-  color: var(--color-text-secondary);
-}
-
-/* 离用户最近的那台车：列表首条，一眼可辨 */
-.vehicle-nearest {
-  font-size: 20rpx;
-  padding: 4rpx 12rpx;
-  border-radius: 20rpx;
-  background: var(--color-primary);
-  color: var(--color-on-primary);
-  font-weight: 600;
-}
-
-.vehicle-status.running {
-  background: var(--color-primary-light);
-  color: var(--color-primary-dark);
-  font-weight: 600;
 }
 
 .vehicle-source {
   font-size: 20rpx;
   padding: 4rpx 12rpx;
-  border-radius: 999rpx;
+  border-radius: var(--radius-pill);
 }
 
 .src-real { background: var(--color-primary-light); color: var(--color-primary-dark); }
 .src-sim { background: #F8ECE3; color: var(--color-clay); }
 
+/* 山路线收紧：车牌行与下一站行之间的衔接 */
+.vehicle-road {
+  margin: 18rpx 0 14rpx;
+}
+
+.vehicle-next-row {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.vehicle-next {
+  flex: 1;
+  min-width: 0;
+  font-size: 26rpx;
+  color: var(--color-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.vehicle-dist {
+  flex: none;
+  font-size: 22rpx;
+  color: var(--color-text-secondary);
+}
+
+/* 副券：非数字态（待发/—）大字收窄；待发时长附在副券下方 */
+.ticket-card__stub-value.stub-word {
+  font-size: 30rpx;
+}
+
+.stub-wait {
+  font-size: 20rpx;
+  color: var(--color-text-secondary);
+  margin-top: 2rpx;
+}
+
 /* ---------- 老年模式与安全区 ---------- */
+.elderly-mode .summary-main { font-size: 36rpx; }
+.elderly-mode .summary-sub { font-size: 28rpx; }
+.elderly-mode .loc-bar { font-size: 30rpx; }
 .elderly-mode .loc-text { font-size: 30rpx; }
-.elderly-mode .summary-main { font-size: 32rpx; }
-.elderly-mode .section-title { font-size: 34rpx; }
+.elderly-mode .loc-action { font-size: 28rpx; }
+.elderly-mode .map-legend { font-size: 24rpx; }
+.elderly-mode .map-btn { font-size: 26rpx; }
+.elderly-mode .section-title { font-size: 38rpx; }
+.elderly-mode .section-sub { font-size: 26rpx; }
+.elderly-mode .section-more { font-size: 30rpx; }
 .elderly-mode .line-name { font-size: 32rpx; }
-.elderly-mode .vehicle-plate { font-size: 34rpx; }
+.elderly-mode .line-tag { font-size: 24rpx; }
+.elderly-mode .vehicle-route { font-size: 40rpx; }
+.elderly-mode .vehicle-status { font-size: 26rpx; }
+.elderly-mode .vehicle-nearest { font-size: 24rpx; }
+.elderly-mode .vehicle-plate { font-size: 32rpx; }
+.elderly-mode .vehicle-source { font-size: 24rpx; }
 .elderly-mode .vehicle-next { font-size: 30rpx; }
-.elderly-mode .stub-eta { font-size: 34rpx; }
+.elderly-mode .vehicle-dist { font-size: 26rpx; }
+.elderly-mode .stub-word { font-size: 36rpx; }
+.elderly-mode .stub-wait { font-size: 24rpx; }
 
 .safe-area-bottom {
   height: calc(24rpx + env(safe-area-inset-bottom));
 }
-

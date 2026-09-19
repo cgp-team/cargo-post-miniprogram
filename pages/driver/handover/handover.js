@@ -6,6 +6,7 @@
  *       后端推进 Leg1=已交接、Leg2=运输中，订单推进「部分完成/完成」。
  */
 const api = require('../../../utils/api')
+const appearance = require('../../../utils/appearance')
 const { formatBackendTime } = require('../../../utils/util')
 
 Page({
@@ -17,12 +18,18 @@ Page({
     legActions: [],
     loading: false,
     submitting: false,
-    elderlyMode: false
+    elderlyMode: false,
+    themeColor: 'green',
+    themeStyle: ''
   },
 
   onLoad() {
-    this.setData({ elderlyMode: !!wx.getStorageSync('elderlyMode') })
+    appearance.apply(this)
     this.initDriver()
+  },
+
+  onShow() {
+    appearance.apply(this)
   },
 
   onPullDownRefresh() {

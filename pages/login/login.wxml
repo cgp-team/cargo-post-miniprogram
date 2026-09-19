@@ -1,21 +1,24 @@
 <!-- 登录页面 - 农村客货邮小程序 -->
 <view class="login-page {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
-  <!-- Logo区域 -->
-  <view class="logo-section">
-    <view class="logo-img-wrap">
-      <view class="logo-placeholder">🚐</view>
-      <view class="logo-ring"></view>
+  <!-- 品牌站牌头：深绿渐变实板，与默认导航栏同色系衔接 -->
+  <view class="login-hero">
+    <view class="hero-badge">
+      <icon name="bus" size="64" color="#FFFFFF" />
     </view>
-    <text class="logo-title">农村客货邮</text>
-    <text class="logo-desc">公交带货 · 快递进村 · 农产品出山</text>
+    <text class="hero-title">农村客货邮</text>
+    <text class="hero-sub">客货邮 · 城乡直达</text>
+    <view class="hero-pills">
+      <text class="hero-pill">公交带货</text>
+      <text class="hero-pill">快递进村</text>
+      <text class="hero-pill">农产品出山</text>
+    </view>
   </view>
 
-  <!-- 登录表单 -->
+  <!-- 登录表单卡：上浮叠进站牌下缘 -->
   <view class="form-section card">
     <!-- 手机号 -->
     <view class="input-group">
       <view class="input-label-row">
-        <text class="input-icon">📱</text>
         <text class="input-label">手机号码</text>
       </view>
       <input
@@ -30,9 +33,8 @@
 
     <!-- 短信验证码模式 -->
     <block wx:if="{{loginMode === 'sms'}}">
-      <view class="input-group sms-row">
+      <view class="input-group">
         <view class="input-label-row">
-          <text class="input-icon">✉️</text>
           <text class="input-label">验证码</text>
         </view>
         <view class="sms-input-wrap">
@@ -60,7 +62,6 @@
     <block wx:else>
       <view class="input-group">
         <view class="input-label-row">
-          <text class="input-icon">🔒</text>
           <text class="input-label">登录密码</text>
         </view>
         <input
@@ -85,17 +86,28 @@
     <!-- 切换登录方式 -->
     <view class="switch-mode" bindtap="switchMode" hover-class="hover">
       <text>{{loginMode === 'sms' ? '密码登录' : '验证码登录'}}</text>
+      <icon name="arrow" size="24" color="{{iconColor}}" />
+    </view>
+
+    <!-- 其他登录方式 -->
+    <view class="login-divider">
+      <view class="divider-line"></view>
+      <text class="divider-text">其他登录方式</text>
+      <view class="divider-line"></view>
     </view>
 
     <!-- 微信一键登录（手机号快捷验证） -->
     <button class="wechat-login-btn" open-type="getPhoneNumber" bindgetphonenumber="onWechatPhoneNumber" hover-class="none">
-      <text class="wechat-emoji">💬</text>
       <text>微信一键登录</text>
     </button>
   </view>
 
   <!-- 大字模式入口 -->
   <view class="elderly-entry" bindtap="toggleElderly" hover-class="hover">
+    <icon name="font" size="28" color="#8A8778" />
     <text>大字模式：{{elderlyMode ? '已开启' : '已关闭'}}</text>
   </view>
+
+  <!-- 协议说明 -->
+  <view class="agreement">登录即表示同意《用户协议》与《隐私政策》</view>
 </view>

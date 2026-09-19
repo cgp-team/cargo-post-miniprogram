@@ -1,5 +1,7 @@
 {
   "navigationBarTitleText": "个人资料",
   "navigationBarTextStyle": "white",
-  "usingComponents": {}
+  "usingComponents": {
+    "icon": "/components/icon/index"
+  }
 }

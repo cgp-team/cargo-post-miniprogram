@@ -1,109 +1,137 @@
 /* 我的订单页样式 */
 .page-orders {
   min-height: 100vh;
-  background: var(--color-paper);
+  /* 顶部一段浅主题色渐变，与深绿导航栏顺色衔接 */
+  background: linear-gradient(180deg, var(--color-primary-light) 0rpx, var(--color-paper) 260rpx);
 }
 
-/* 状态 tab */
+/* 订单来源切换：站牌式分段开关（商城订单 / 寄货订单） */
+.order-source-tabs {
+  display: flex;
+  gap: 8rpx;
+  margin: 20rpx 24rpx 0;
+  padding: 8rpx;
+  background: #EDE7D9;
+  border-radius: var(--radius-pill);
+}
+.order-source-tab {
+  flex: 1;
+  text-align: center;
+  font-size: 28rpx;
+  color: var(--color-text-secondary);
+  padding: 14rpx 0;
+  border-radius: var(--radius-pill);
+  transition: all 0.15s ease;
+}
+.order-source-tab.active {
+  color: #fff;
+  background: var(--color-primary);
+  font-weight: 700;
+  box-shadow: 0 4rpx 12rpx var(--color-primary-shadow);
+}
+
+/* 状态筛选胶囊条：吸顶，与来源开关同一套分段语言 */
 .order-tabs {
   position: sticky;
   top: 0;
   z-index: 10;
-  display: flex;
-  background: #fff;
-  padding: 16rpx 0;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  padding: 16rpx 24rpx;
+  background: var(--color-paper);
+  box-shadow: 0 2rpx 8rpx rgba(60, 50, 30, 0.04);
 }
-
+.order-tabs-track {
+  display: flex;
+  gap: 8rpx;
+  padding: 8rpx;
+  background: #EDE7D9;
+  border-radius: var(--radius-pill);
+}
 .order-tab {
   flex: 1;
   text-align: center;
   font-size: 28rpx;
-  color: #666;
+  color: var(--color-text-secondary);
   padding: 12rpx 0;
-  position: relative;
+  border-radius: var(--radius-pill);
+  transition: all 0.15s ease;
 }
-
 .order-tab.active {
-  color: var(--color-primary);
-  font-weight: 700;
-}
-
-.order-tab.active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 48rpx;
-  height: 6rpx;
-  border-radius: 3rpx;
+  color: #fff;
   background: var(--color-primary);
+  font-weight: 700;
+  box-shadow: 0 4rpx 10rpx var(--color-primary-shadow);
 }
 
-/* 订单卡片 */
+/* 订单列表（卡片本体由全局 .ticket-card 提供：主券 + 副券 + 打孔撕票线） */
 .order-list {
-  padding: 20rpx 24rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  padding: 20rpx 24rpx 8rpx;
 }
 
-.order-card {
-  background: #fff;
-  border-radius: 20rpx;
-  padding: 24rpx;
-  margin-bottom: 20rpx;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+/* 本页副券加宽，容纳金额大字 */
+.page-orders .ticket-card__stub {
+  width: 164rpx;
+}
+.ticket-card__stub-value.stub-price {
+  font-size: 32rpx;
+  color: var(--color-price);
 }
 
+/* 票头：单号 + 状态胶囊 */
 .order-head {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-bottom: 16rpx;
-  border-bottom: 1rpx solid #F0F0F0;
+  margin-bottom: 4rpx;
 }
-
-.order-no {
-  font-size: 24rpx;
+.order-serial {
+  flex: 1;
+  min-width: 0;
+  margin-right: 16rpx;
+  font-size: 22rpx;
+  letter-spacing: 2rpx;
   color: var(--color-text-tertiary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-
 .order-status {
-  font-size: 26rpx;
+  flex-shrink: 0;
+  font-size: 24rpx;
   font-weight: 700;
   padding: 6rpx 20rpx;
   border-radius: var(--radius-pill);
 }
 
-/* 状态 chip：浅底深字 */
+/* 状态胶囊：浅底深字，语义色跟随主题 */
 .order-status.status-pending {
   color: var(--color-status-pending);
   background: #F9E9E0;
 }
-
 .order-status.status-shipping {
   color: var(--color-status-shipping);
   background: var(--color-primary-light);
 }
-
 .order-status.status-done {
   color: var(--color-status-done);
   background: #F2F0EA;
 }
 
+/* 商品行 */
 .order-goods {
   display: flex;
   align-items: center;
   gap: 16rpx;
-  padding: 20rpx 0;
+  padding: 16rpx 0;
 }
-
 .order-goods-img {
   width: 96rpx;
   height: 96rpx;
   border-radius: var(--radius-s);
   flex-shrink: 0;
 }
-
 .order-goods-img-ph {
   width: 96rpx;
   height: 96rpx;
@@ -114,82 +142,85 @@
   justify-content: center;
   flex-shrink: 0;
 }
-
 .order-goods-info {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   gap: 6rpx;
 }
-
 .order-goods-name {
   font-size: 28rpx;
-  color: #333;
+  font-weight: 500;
+  color: var(--color-ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-
 .order-goods-sub {
   font-size: 24rpx;
   color: var(--color-text-tertiary);
 }
-
 .order-goods-amount {
+  flex-shrink: 0;
   font-size: 28rpx;
   font-weight: 600;
-  color: #333;
+  color: var(--color-price);
 }
 
+/* 配送提示：浅绿小路条 */
+.order-delivery-hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 8rpx;
+  margin-top: 4rpx;
+  padding: 12rpx 18rpx;
+  border-radius: 12rpx;
+  background: var(--color-primary-light);
+  font-size: 24rpx;
+  line-height: 1.5;
+  color: var(--color-primary);
+}
+.order-delivery-hint-text {
+  flex: 1;
+}
+
+/* 票脚：时间 + 操作 */
 .order-foot {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 16rpx;
-  border-top: 1rpx solid #F0F0F0;
-}
-
-/* 配送提示：已发货=司机配送中（引导看溯源与到站提醒） */
-.order-delivery-hint {
   margin-top: 12rpx;
-  padding: 12rpx 18rpx;
-  border-radius: 12rpx;
-  background: #EAF4EC;
-  color: #2E7D32;
-  font-size: 24rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #F0EBDD;
 }
-
 .order-time {
   font-size: 24rpx;
   color: var(--color-text-tertiary);
 }
-
 .order-foot-right {
   display: flex;
   align-items: center;
   gap: 20rpx;
 }
-
-.order-total {
-  font-size: 28rpx;
-  font-weight: 700;
-  color: #333;
+.order-hint-link {
+  font-size: 24rpx;
+  color: var(--color-primary);
 }
-
 .order-cancel {
   font-size: 26rpx;
-  color: #666;
-  border: 1rpx solid #D9D9D9;
-  border-radius: 28rpx;
+  color: var(--color-text-secondary);
+  border: 1rpx solid #D8D2C4;
+  border-radius: var(--radius-pill);
   padding: 8rpx 24rpx;
 }
-
 .order-trace {
   font-size: 26rpx;
   color: var(--color-primary);
   border: 1rpx solid var(--color-primary);
-  border-radius: 28rpx;
+  border-radius: var(--radius-pill);
   padding: 8rpx 24rpx;
-  margin-right: 16rpx;
 }
-
 .order-nomore {
   text-align: center;
   font-size: 24rpx;
@@ -198,35 +229,17 @@
 }
 
 /* 老年人模式 */
+.elderly-mode .order-source-tab { font-size: 32rpx; }
 .elderly-mode .order-tab { font-size: 32rpx; }
+.elderly-mode .order-serial { font-size: 26rpx; }
+.elderly-mode .order-status { font-size: 28rpx; }
 .elderly-mode .order-goods-name { font-size: 32rpx; }
-.elderly-mode .order-status { font-size: 30rpx; }
-.elderly-mode .order-total { font-size: 32rpx; }
+.elderly-mode .order-goods-sub { font-size: 28rpx; }
+.elderly-mode .order-goods-amount { font-size: 32rpx; }
+.elderly-mode .order-delivery-hint { font-size: 28rpx; }
+.elderly-mode .order-time { font-size: 28rpx; }
+.elderly-mode .order-hint-link { font-size: 28rpx; }
 .elderly-mode .order-cancel { font-size: 30rpx; padding: 12rpx 28rpx; }
 .elderly-mode .order-trace { font-size: 30rpx; padding: 12rpx 28rpx; }
-.elderly-mode .order-no { font-size: 28rpx; }
-.elderly-mode .order-goods-sub { font-size: 28rpx; }
-.elderly-mode .order-time { font-size: 28rpx; }
-
-/* 订单来源切换：商城订单 / 寄货订单（寄货订单点卡片进「快递」页看物流详情） */
-.order-source-tabs {
-  display: flex;
-  gap: 16rpx;
-  padding: 16rpx 24rpx 0;
-  background: #fff;
-}
-.order-source-tab {
-  flex: 1;
-  text-align: center;
-  font-size: 28rpx;
-  color: #666;
-  padding: 12rpx 0;
-  border-radius: 12rpx;
-  background: #f6f2e9;
-}
-.order-source-tab.active {
-  color: #fff;
-  background: var(--color-primary);
-  font-weight: 700;
-}
-.elderly-mode .order-source-tab { font-size: 32rpx; }
+.elderly-mode .order-nomore { font-size: 28rpx; }
+.elderly-mode .ticket-card__stub-value.stub-price { font-size: 40rpx; }

@@ -1,19 +1,20 @@
-<!-- 实时公交 · 农村客货邮版"车来了"：定位 → 地图（第一视觉）→ 附近线路 → 正在运行 -->
+<!-- 实时公交 · 农村客货邮版"车来了"：站牌头（定位+概览）→ 地图（第一视觉）→ 附近线路 → 正在运行 -->
 <view class="bus-page {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
 
-  <!-- 定位状态条：已定位 · 精度 XXm / 定位精度较低 · 已扩大搜索范围 / 无法获取当前位置 -->
-  <view class="loc-bar {{radiusExpanded ? 'warn' : ''}} {{locationLevel === 'UNKNOWN' ? 'fail' : ''}}" bindtap="locateMe" hover-class="hover">
-    <icon name="pin" size="26" color="#FFFFFF" />
-    <text class="loc-text">{{locationText}}</text>
-    <!-- 精度低（可能差到公里级）时给手动选点入口：catchtap 防止冒泡触发重新定位 -->
-    <text wx:if="{{radiusExpanded}}" class="loc-action loc-action-pick" catchtap="manualPickLocation">手动选位置</text>
-    <text class="loc-action">{{locationLevel === 'UNKNOWN' ? '重新定位' : '定位'}} ↻</text>
-  </view>
-
-  <!-- 概览：根据当前位置 · 附近 N 个公交站 · M 条线路 -->
-  <view class="summary">
-    <text class="summary-main">{{nearbyLocatedText || '正在获取当前位置…'}}</text>
-    <text class="summary-sub">附近 {{nearbyStationCount}} 个公交站 · {{nearbyLineCount}} 条线路</text>
+  <!-- 站牌头：深绿实板承接导航栏，内嵌附近概览与定位状态胶囊 -->
+  <view class="bus-head">
+    <view class="summary">
+      <text class="summary-main">{{nearbyLocatedText || '正在获取当前位置…'}}</text>
+      <text class="summary-sub">附近 {{nearbyStationCount}} 个公交站 · {{nearbyLineCount}} 条线路</text>
+    </view>
+    <!-- 定位状态胶囊：已定位 · 精度 XXm / 精度较低·已扩大搜索范围（陶土橙）/ 无法获取当前位置（灰） -->
+    <view class="loc-bar {{radiusExpanded ? 'warn' : ''}} {{locationLevel === 'UNKNOWN' ? 'fail' : ''}}" bindtap="locateMe" hover-class="hover">
+      <icon name="pin" size="26" color="#FFFFFF" />
+      <text class="loc-text">{{locationText}}</text>
+      <!-- 精度低（可能差到公里级）时给手动选点入口：catchtap 防止冒泡触发重新定位 -->
+      <text wx:if="{{radiusExpanded}}" class="loc-action loc-action-pick" catchtap="manualPickLocation">手动选位置</text>
+      <text class="loc-action">{{locationLevel === 'UNKNOWN' ? '重新定位' : '定位'}} ↻</text>
+    </view>
   </view>
 
   <!-- 地图：第一视觉焦点（约 45% 屏高），含我的位置 / 公交站 / 运行车辆 / 线路 -->
@@ -66,12 +67,18 @@
         <text class="line-tag {{item.dataSource === 'REAL_TRANSIT' ? 'tag-real' : 'tag-project'}}">{{item.dataSource === 'REAL_TRANSIT' ? '现实公交站点' : '真实公交线路'}}</text>
       </view>
     </scroll-view>
-    <view wx:elif="{{loading}}" class="empty">正在加载附近线路…</view>
-    <view wx:elif="{{hasError}}" class="empty" bindtap="loadNearby" hover-class="hover">加载失败，点击重试</view>
-    <view wx:else class="empty">附近暂无公交线路</view>
+    <view wx:elif="{{loading}}" class="lines-state">
+      <empty-state icon="bus" text="正在加载附近线路…" />
+    </view>
+    <view wx:elif="{{hasError}}" class="lines-state" bindtap="loadNearby" hover-class="hover">
+      <empty-state icon="bus" text="加载失败" subText="点击重试" />
+    </view>
+    <view wx:else class="lines-state">
+      <empty-state icon="bus" text="附近暂无公交线路" />
+    </view>
   </view>
 
-  <!-- 正在运行车辆 -->
+  <!-- 正在运行车辆：车票卡（主券：线路+车牌+下一站；副券：ETA 大数字） -->
   <view class="section">
     <view class="section-header">
       <view class="section-title-wrap">
@@ -81,42 +88,48 @@
       <text class="section-sub">{{vehicles.length}} 辆</text>
     </view>
 
-    <view wx:if="{{!vehicles.length && !loading}}" class="empty">
-      <text wx:if="{{runningEmptyText}}">{{runningEmptyText}}</text>
-      <text wx:elif="{{nearbyLineCount}}">附近有 {{nearbyLineCount}} 条线路，当前暂无车辆经过</text>
-      <text wx:else>附近暂无公交车</text>
+    <view wx:if="{{!vehicles.length && !loading}}" class="running-empty">
+      <empty-state wx:if="{{runningEmptyText}}" icon="bus" text="{{runningEmptyText}}" />
+      <empty-state wx:elif="{{nearbyLineCount}}" icon="bus" text="附近有 {{nearbyLineCount}} 条线路，当前暂无车辆经过" />
+      <empty-state wx:else icon="bus" text="附近暂无公交车" />
     </view>
 
     <view
-      class="vehicle-card"
+      class="vehicle-card ticket-card"
       wx:for="{{vehicles}}"
       wx:key="busId"
       data-bus="{{item.busId}}"
       bindtap="goToBusDetail"
       hover-class="hover"
     >
-      <view class="vehicle-eta-area">
-        <text class="vehicle-eta-num">{{item.etaNumber}}</text>
-        <text class="vehicle-eta-unit">{{item.etaUnit}}</text>
-        <text class="vehicle-wait" wx:if="{{item.waitMinutes}}">{{item.waitMinutes}} 分钟后发车</text>
-        <text class="vehicle-dist" wx:if="{{item.distanceKm != null}}">{{item.distanceKm}}km</text>
-      </view>
-      <view class="vehicle-info">
-        <view class="vehicle-route-tag">{{item.routeName}}</view>
+      <view class="ticket-card__main">
+        <!-- 票号位：线路号 · 班次（无班次用车牌兜底） -->
+        <view class="ticket-card__serial">{{item.routeName}} · {{item.shiftCode || item.plateNo}}</view>
+        <view class="vehicle-head">
+          <text class="vehicle-route">{{item.routeName}}</text>
+          <text wx:if="{{item.isNearest}}" class="vehicle-nearest">离你最近</text>
+          <text class="vehicle-status {{item.statusText === '行驶中' ? 'running' : ''}}">{{item.statusText}}</text>
+        </view>
         <view class="vehicle-plate-row">
           <image class="vehicle-icon" src="{{item.simulated ? '/images/marker-bus-sim.png' : '/images/marker-bus-real.png'}}" mode="aspectFit" />
           <text class="vehicle-plate">{{item.plateNo}}</text>
+          <text class="vehicle-source {{item.simulated ? 'src-sim' : 'src-real'}}">{{item.sourceText}}</text>
         </view>
-        <view class="vehicle-next">{{item.stationText}}</view>
+        <!-- 山路线：车到下一站之间的路 -->
+        <view class="road-line vehicle-road"></view>
+        <view class="vehicle-next-row">
+          <icon name="pin" size="24" color="#8A8778" />
+          <text class="vehicle-next">{{item.stationText}}</text>
+          <text wx:if="{{item.distanceKm != null}}" class="vehicle-dist">{{item.distanceKm}}km</text>
+        </view>
       </view>
-      <view class="vehicle-badge">
-        <text wx:if="{{item.isNearest}}" class="vehicle-nearest">离你最近</text>
-        <text class="vehicle-status {{item.statusText === '行驶中' ? 'running' : ''}}">{{item.statusText}}</text>
-        <text class="vehicle-source {{item.simulated ? 'src-sim' : 'src-real'}}">{{item.sourceText}}</text>
+      <view class="ticket-card__stub">
+        <text class="ticket-card__stub-value {{item.etaUnit ? '' : 'stub-word'}}">{{item.etaNumber}}</text>
+        <text class="ticket-card__stub-label">{{item.etaUnit || item.statusText}}</text>
+        <text wx:if="{{item.waitMinutes}}" class="stub-wait">{{item.waitMinutes}} 分钟后发车</text>
       </view>
     </view>
   </view>
 
   <view class="safe-area-bottom"></view>
 </view>
-
