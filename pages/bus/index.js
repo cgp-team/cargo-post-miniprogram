@@ -16,6 +16,7 @@ const appearance = require('../../utils/appearance')
 const location = require('../../utils/location')
 const transitAmap = require('../../utils/transit-amap')
 const motion = require('../../utils/bus-motion')
+const { navThrottled } = require('../../utils/util')
 
 /** 车辆/定位刷新间隔（保留原 15s） */
 const REFRESH_MS = 15000
@@ -75,6 +76,8 @@ Page({
     this._initPageBase()
     // 定位变化（缓存秒出→后台刷新到真实位置）→ 更新地图中心 + 重查附近公交
     this._offLocationChange = location.onLocationChange((loc) => {
+      // 页面在后台时不查公交（省电省流量）；onShow 会补一次刷新
+      if (this._pageHidden) return
       this._applyLocation(loc)
       this.loadNearby()
     })
@@ -87,11 +90,15 @@ Page({
 
   onShow() {
     this._applyAppearance()
-    this.loadNearby()
+    this._pageHidden = false
+    // 首次 onShow 紧接 onLoad（刚加载过），跳过避免双发；从详情页等返回时才补刷新
+    if (this._entered) this.loadNearby()
+    this._entered = true
     this.startTimer()
   },
 
   onHide() {
+    this._pageHidden = true
     this.stopTimer()
     this._destroyAnimator()
   },
@@ -110,7 +117,8 @@ Page({
   startTimer() {
     this.stopTimer()
     this._timer = setInterval(() => {
-      this.loadNearby()
+      // 静默轮询：失败不弹 toast、不闪错误态（弱网行车时每 15s 弹窗不可接受）
+      this.loadNearby({ silent: true })
       this.loadLines({ silent: true })
     }, REFRESH_MS)
   },
@@ -141,15 +149,14 @@ Page({
     }
     const accuracyText = location.accuracyText(loc)
     const expanded = location.isCoarseAccuracy(loc)
+    // 定位对象本体只放 this._userLocation，不进 data（wxml 不绑定它，进 data 会随每次 setData 序列化到视图层）
     this.setData({
       locationText: expanded
         ? `定位精度较低（约 ${accuracyText}）· 已扩大搜索范围`
         : (accuracyText ? `已定位 · 精度 ${accuracyText}` : '已定位'),
       locationLevel: loc.level || '',
       locationAccuracy: typeof loc.accuracy === 'number' ? Math.round(loc.accuracy) : null,
-      radiusExpanded: expanded,
-      locationManual: !!(loc.manual),
-      userLocation: loc
+      radiusExpanded: expanded
     })
     this._userLocation = loc
     if (!this._userPanned) this._centerOnUser()
@@ -203,9 +210,14 @@ Page({
 
   // ==================== 附近公交（与首页同源） ====================
 
-  async loadNearby() {
+  async loadNearby(options) {
+    const silent = !!(options && options.silent)
+    // 请求序号：15s 轮询/定位变化/手动选点可并发触发，旧响应直接丢弃，不得覆盖新数据
+    const seq = (this._nearbySeq = (this._nearbySeq || 0) + 1)
+    const stale = () => seq !== this._nearbySeq || this._pageHidden
     try {
       const loc = await location.getCurrentLocation()
+      if (stale()) return
       this._applyLocation(loc)
       const hasCoords = !!(loc && loc.success
         && typeof loc.latitude === 'number' && typeof loc.longitude === 'number')
@@ -215,14 +227,17 @@ Page({
         hasCoords ? loc.latitude : null,
         hasCoords ? loc.longitude : null,
         radius,
-        district || null
+        district || null,
+        silent ? { silent: true } : undefined
       )
+      if (stale()) return
       // 客户端现实公交层补充（后端已有现实层时内部直接跳过，不重复请求高德）
       const data = await transitAmap.enrichNearby(
         raw,
         hasCoords ? loc.latitude : null,
         hasCoords ? loc.longitude : null
       )
+      if (stale()) return
       const stations = transitAmap.dedupeStations((data && data.nearbyStations) || [])
       const lines = (data && data.lines) || []
       const buses = (data && data.buses) || []
@@ -257,6 +272,9 @@ Page({
         this.setData({ mapCenter: { latitude: stations[0].latitude, longitude: stations[0].longitude } })
       }
     } catch (e) {
+      if (stale()) return
+      // 静默轮询失败保留旧数据（弱网抖动不该把已展示的线路/车辆闪成错误态）
+      if (silent) return
       this.setData({ hasError: true, loading: false })
     }
   },
@@ -322,6 +340,9 @@ Page({
     const source = e.currentTarget.dataset.source
     const primary = (appearance.THEMES[this.data.themeColor] || appearance.THEMES.green).primary
 
+    // 请求序号：道路轨迹按需拉取期间用户可能改点其他线路，旧响应不得覆盖新选中的 polyline
+    const seq = (this._lineSeq = (this._lineSeq || 0) + 1)
+
     // 再次点击同一条线路：取消选中，回到"附近线路"总览
     if (key === this.data.activeLineKey || key === 'NEARBY') {
       this.setData({ activeLineKey: 'NEARBY', polyline: [] })
@@ -354,8 +375,10 @@ Page({
     if ((!road || road.length < 2) && line.routeId) {
       try {
         const fetched = await api.getBusLinePolyline(line.routeId)
+        if (seq !== this._lineSeq) return // 等待期间用户已改选其他线路
         if (fetched && fetched.length >= 2) road = fetched
       } catch (err) {
+        if (seq !== this._lineSeq) return
         road = null
       }
     }
@@ -385,7 +408,8 @@ Page({
       const lines = (await api.getRealtimeBusLines(
         loc && loc.success ? loc.latitude : null,
         loc && loc.success ? loc.longitude : null,
-        lineRadius
+        lineRadius,
+        options && options.silent ? { silent: true } : undefined
       )) || []
       this.setData({ lines })
       // 无用户定位时，用项目线路首站兜底地图中心（不用 103/30 这类无意义默认值）
@@ -493,37 +517,8 @@ Page({
         zIndex: 9
       })
     }
-    const stations = this._stations || []
     const center = this.data.mapCenter || (loc && loc.success ? { latitude: loc.latitude, longitude: loc.longitude } : null)
-    const nearStations = center
-      ? stations.slice().sort((a, b) => this._dist(center, a) - this._dist(center, b)).slice(0, MAX_STATION_MARKERS)
-      : stations.slice(0, MAX_STATION_MARKERS)
-    nearStations.forEach((s, i) => {
-      // 自建站点（客货邮驿站/村邮站）单独标注：后期村民要用自建线路寄货，地图上必须能认出来
-      const isSelfBuilt = (s.dataSource || 'PROJECT_TRANSIT') === 'PROJECT_TRANSIT'
-      markers.push({
-        id: MARKER_STATION_BASE + i,
-        longitude: s.longitude,
-        latitude: s.latitude,
-        iconPath: '/images/marker-stop.png',
-        width: 22,
-        height: 22,
-        zIndex: 5,
-        // 最近的 8 个站点带名称标签：避免"地图上站点乱标、看不出是哪个站"
-        label: i < 8 && s.name
-          ? {
-              content: isSelfBuilt ? `驿站·${s.name}` : s.name,
-              color: isSelfBuilt ? '#7A4B12' : '#1F3B57',
-              fontSize: 10,
-              bgColor: isSelfBuilt ? '#FFF6E8' : '#FFFFFF',
-              borderRadius: 3,
-              padding: 2,
-              anchorX: -14,
-              anchorY: -8
-            }
-          : undefined
-      })
-    })
+    for (const m of this._stationMarkers(center)) markers.push(m)
     // 车辆：动画帧优先，其次原始坐标
     const byId = {}
     ;(progressed || []).forEach((p) => { byId[p.id] = p })
@@ -551,8 +546,85 @@ Page({
         }
       })
     })
+    this._commitMarkers(markers)
+  },
+
+  /**
+   * 站点 markers（带缓存）：动画帧每 100ms 调一次 _renderMarkers，
+   * 站点列表与地图中心没变就不重排不重造（排序 + 最多 20 个 label 对象纯属重复劳动）。
+   */
+  _stationMarkers(center) {
+    const stations = this._stations || []
+    const key = center ? `${center.latitude},${center.longitude}` : ''
+    const cache = this._stationCache
+    if (cache && cache.stations === stations && cache.key === key) return cache.markers
+    const nearStations = center
+      ? stations.slice().sort((a, b) => this._dist(center, a) - this._dist(center, b)).slice(0, MAX_STATION_MARKERS)
+      : stations.slice(0, MAX_STATION_MARKERS)
+    const markers = nearStations.map((s, i) => {
+      // 自建站点（客货邮驿站/村邮站）单独标注：后期村民要用自建线路寄货，地图上必须能认出来
+      const isSelfBuilt = (s.dataSource || 'PROJECT_TRANSIT') === 'PROJECT_TRANSIT'
+      return {
+        id: MARKER_STATION_BASE + i,
+        longitude: s.longitude,
+        latitude: s.latitude,
+        iconPath: '/images/marker-stop.png',
+        width: 22,
+        height: 22,
+        zIndex: 5,
+        // 最近的 8 个站点带名称标签：避免"地图上站点乱标、看不出是哪个站"
+        label: i < 8 && s.name
+          ? {
+              content: isSelfBuilt ? `驿站·${s.name}` : s.name,
+              color: isSelfBuilt ? '#7A4B12' : '#1F3B57',
+              fontSize: 10,
+              bgColor: isSelfBuilt ? '#FFF6E8' : '#FFFFFF',
+              borderRadius: 3,
+              padding: 2,
+              anchorX: -14,
+              anchorY: -8
+            }
+          : undefined
+      }
+    })
+    this._stationCache = { stations, key, markers }
+    return markers
+  },
+
+  /**
+   * 提交 markers：id 序列不变且仅经纬度变化时走路径更新（markers[i].latitude），
+   * 否则全量替换。动画帧（100ms 一帧）若整表替换，marker 会闪且每帧都把
+   * callout/label 等静态对象序列化一遍；路径更新只发变化的坐标数字。
+   */
+  _commitMarkers(markers) {
     this._markers = markers
-    this.setData({ markers })
+    const prev = this.data.markers || []
+    let sameShape = prev.length === markers.length
+    if (sameShape) {
+      for (let i = 0; i < markers.length; i++) {
+        if (!prev[i] || prev[i].id !== markers[i].id) { sameShape = false; break }
+      }
+    }
+    if (!sameShape) {
+      this.setData({ markers })
+      return
+    }
+    const patch = {}
+    let changed = false
+    for (let i = 0; i < markers.length; i++) {
+      const p = prev[i]
+      const m = markers[i]
+      // 静态属性（图标/callout/label 文案）变化走路径更新不可靠，退化整表替换
+      if (p.iconPath !== m.iconPath || p.zIndex !== m.zIndex
+        || (p.callout ? p.callout.content : '') !== (m.callout ? m.callout.content : '')
+        || (p.label ? p.label.content : '') !== (m.label ? m.label.content : '')) {
+        this.setData({ markers })
+        return
+      }
+      if (p.latitude !== m.latitude) { patch[`markers[${i}].latitude`] = m.latitude; changed = true }
+      if (p.longitude !== m.longitude) { patch[`markers[${i}].longitude`] = m.longitude; changed = true }
+    }
+    if (changed) this.setData(patch)
   },
 
   _dist(center, s) {
@@ -581,6 +653,7 @@ Page({
       return
     }
     if (markerId >= MARKER_BUS_BASE) {
+      if (navThrottled(this)) return // 防连点叠两层详情页
       wx.navigateTo({ url: `/pages/bus/detail?id=${markerId - MARKER_BUS_BASE}` })
     }
   },
@@ -588,6 +661,7 @@ Page({
   goToBusDetail(e) {
     const busId = e.currentTarget.dataset.bus
     if (busId == null) return
+    if (navThrottled(this)) return
     wx.navigateTo({ url: `/pages/bus/detail?id=${busId}` })
   },
 

@@ -7,7 +7,7 @@ const feedback = require('../../utils/feedback')
 const qrcodeRender = require('../../utils/qrcode-render')
 const reviewUtils = require('../../utils/review')
 const productImg = require('../../utils/product-img')
-const { formatBackendTime, VILLAGES } = require('../../utils/util')
+const { formatBackendTime, VILLAGES, navThrottled } = require('../../utils/util')
 
 /** 运输订单状态流（对应 TransportOrderStatusEnum，含 Phase 2 承运审核前置状态） */
 const STATUS_FLOW = [
@@ -117,6 +117,7 @@ Page({
 
   /** 跳实时公交（查看车辆位置） */
   goToBusTracking() {
+    if (navThrottled(this)) return
     wx.navigateTo({ url: '/pages/bus/index' })
   },
 
@@ -237,12 +238,17 @@ Page({
 
   /** 我买到的商品订单：商品名/图片/金额 + 送货进度（承运司机/交付站点） */
   async loadProductOrders() {
+    // 竞态守卫：切 tab/下拉刷新/加载更多并发时，旧响应不得覆盖新列表
+    // （旧响应里按"当时的 pageNo"合并，会把刷新后的第 1 页覆盖成过期数据）
+    const seq = (this._productSeq = (this._productSeq || 0) + 1)
+    const pageNo = this.data.productPageNo
     this.setData({ productLoading: true })
     try {
       const res = await api.pageMyProductOrders({
-        pageNo: this.data.productPageNo,
+        pageNo,
         pageSize: this.data.pageSize
       })
+      if (seq !== this._productSeq) return false // 已有更新的请求接管，丢弃旧响应
       const list = (res.list || []).map((o) => ({
         ...o,
         statusName: o.statusName || this.productStatusText(o.status),
@@ -255,21 +261,21 @@ Page({
           imageUrl: productImg.resolve({ name: g.productName, image: g.productImage })
         }))
       }))
-      const merged = this.data.productPageNo === 1 ? list : this.data.productOrders.concat(list)
+      const merged = pageNo === 1 ? list : this.data.productOrders.concat(list)
       const total = res.total || 0
       this.setData({
         productOrders: merged,
         productTotal: total,
         productHasMore: merged.length < total,
-        productError: false
+        productError: false,
+        productLoading: false
       })
       return true
     } catch (e) {
+      if (seq !== this._productSeq) return false
       // 错误提示已由 api.js 统一处理；标记错误态（列表为空时给"重新加载"入口），并避免下拉误弹"已刷新"
-      this.setData({ productError: true })
+      this.setData({ productError: true, productLoading: false })
       return false
-    } finally {
-      this.setData({ productLoading: false })
     }
   },
 
@@ -302,6 +308,7 @@ Page({
   goToProductOrderDetail(e) {
     const id = e.currentTarget.dataset.id
     if (!id) return
+    if (navThrottled(this)) return
     wx.navigateTo({ url: `/pages/orders/detail/detail?id=${id}` })
   },
 
@@ -315,6 +322,7 @@ Page({
 
   /** 寄货空态：去寄一件（send 非 tab 页，navigateTo） */
   goSend() {
+    if (navThrottled(this)) return
     wx.navigateTo({ url: '/pages/send/send' })
   },
 
@@ -446,11 +454,14 @@ Page({
       wx.showToast({ title: '请输入运单号', icon: 'none' })
       return
     }
-    // 查询中改票面内骨架车票卡（trackLoading 期间禁止重入，替代原全屏 loading 弹窗）
-    if (this.data.trackLoading) return
+    // 竞态：连点查询/查询中又点了列表卡片时"最新一次胜出"，旧响应直接丢弃
+    // （原"loading 期间禁止重入"会让后一次查询静默丢失，票面对不上单号）
+    const seq = (this._trackSeq = (this._trackSeq || 0) + 1)
+    // 查询中改票面内骨架车票卡（trackLoading 由最新一次请求收尾，替代原全屏 loading 弹窗）
     this.setData({ trackLoading: true, trackResult: null, noResult: false })
     try {
       const res = await api.trackParcel(no)
+      if (seq !== this._trackSeq) return
       res.timeline = this.buildTimeline(res.status)
       // WXML 不支持调用 Page 方法，进度/时间/颜色在此预计算后绑定
       res.progress = this.trackProgress(res.status)
@@ -467,7 +478,9 @@ Page({
       res.servicePointText = this.buildServicePointText(res)
       // 多段联运：一次拿运输拓扑（分段 + 换乘交接 + 方案解释）；失败退回仅分段进度
       const topology = await this.loadTopology(no)
+      if (seq !== this._trackSeq) return
       res.legs = topology.legs && topology.legs.length ? topology.legs : await this.loadLegs(no)
+      if (seq !== this._trackSeq) return
       res.handovers = topology.handovers || []
       res.planReason = topology.planReason
       res.planningModeName = topology.planningModeName
@@ -484,6 +497,7 @@ Page({
         this.drawParcelQr()
       })
     } catch (e) {
+      if (seq !== this._trackSeq) return
       this.setData({ trackResult: null, noResult: true, trackLoading: false })
     }
   },
@@ -573,9 +587,15 @@ Page({
   },
 
   async loadSendList() {
+    // 竞态守卫：下拉刷新/切 tab/加载更多并发时，旧响应不得覆盖新列表；
+    // pageNo 在请求发起时定格（旧代码在响应到达时才读 this.data.pageNo，
+    // 刷新重置 pageNo=1 后，在途的第 2 页响应会误按"第 1 页"整表替换）
+    const seq = (this._sendSeq = (this._sendSeq || 0) + 1)
+    const pageNo = this.data.pageNo
     this.setData({ loading: true })
     try {
-      const res = await api.pageMySendOrders({ pageNo: this.data.pageNo, pageSize: this.data.pageSize })
+      const res = await api.pageMySendOrders({ pageNo, pageSize: this.data.pageSize })
+      if (seq !== this._sendSeq) return false // 已有更新的请求接管，丢弃旧响应
       const list = (res.list || []).map((o) => ({
         ...o,
         statusName: o.statusName || this.statusText(o.status),
@@ -589,7 +609,7 @@ Page({
         arrivedText: this.buildArrivedText(o),
         servicePointText: this.buildServicePointText(o)
       }))
-      const merged = this.data.pageNo === 1 ? list : this.data.sendList.concat(list)
+      const merged = pageNo === 1 ? list : this.data.sendList.concat(list)
       const total = res.total || 0
       // 车快到了：首次进入阈值弹一次提醒（演示时最直观；重复刷新不打扰）
       this.notifyApproaching(list)
@@ -599,15 +619,15 @@ Page({
         sendList: merged,
         total,
         hasMore: merged.length < total,
-        sendError: false
+        sendError: false,
+        loading: false
       })
       return true
     } catch (e) {
+      if (seq !== this._sendSeq) return false
       // 错误提示已由 api.js 统一处理；标记错误态（列表为空时给"重新加载"入口），并避免下拉误弹"已刷新"
-      this.setData({ sendError: true })
+      this.setData({ sendError: true, loading: false })
       return false
-    } finally {
-      this.setData({ loading: false })
     }
   },
 

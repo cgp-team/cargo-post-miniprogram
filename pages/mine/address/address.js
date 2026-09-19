@@ -128,16 +128,20 @@ Page({
   },
 
   async loadList() {
+    // 竞态守卫：新增/删除/设默认后各自触发刷新，旧响应不得覆盖新列表
+    const seq = (this._listSeq = (this._listSeq || 0) + 1)
     this.setData({ loading: true, loadError: false })
     try {
       const list = (await api.listAddresses()) || []
+      if (seq !== this._listSeq) return
       if (this._areaMap && Object.keys(this._areaMap).length) this.decorateList(list)
       else this.setData({ list })
     } catch (e) {
+      if (seq !== this._listSeq) return
       // api 已 toast；首屏无数据时进入错误态，可点"重新加载"
       if (!this.data.list.length) this.setData({ loadError: true })
     } finally {
-      this.setData({ loading: false })
+      if (seq === this._listSeq) this.setData({ loading: false })
     }
   },
 
@@ -241,7 +245,8 @@ Page({
   /** 设为默认 */
   async setDefault(e) {
     const item = e.currentTarget.dataset.item
-    if (item.defaultStatus) return
+    if (item.defaultStatus || this._settingDefault) return // 防连点：连发两次 updateAddress
+    this._settingDefault = true
     try {
       await api.updateAddress({
         id: item.id,
@@ -252,12 +257,17 @@ Page({
         defaultStatus: true
       })
       this.loadList()
-    } catch (err) { /* api 已 toast */ }
+    } catch (err) { /* api 已 toast */ } finally {
+      this._settingDefault = false
+    }
   },
 
   /** 选择模式：点击条目回填寄件页 */
   selectAddress(e) {
     if (this.data.from !== 'send') return
+    // 防连点：navigateBack 连发会一次弹两层（直接跳过寄件页）
+    if (this._selecting) return
+    this._selecting = true
     const item = e.currentTarget.dataset.item
     getApp().globalData.selectedAddress = {
       name: item.name,

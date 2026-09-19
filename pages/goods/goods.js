@@ -4,7 +4,7 @@
  */
 const api = require('../../utils/api')
 const productImg = require('../../utils/product-img')
-const { VILLAGES } = require('../../utils/util')
+const { VILLAGES, navThrottled } = require('../../utils/util')
 
 /** 分类名 → 商品名关键词（后端暂无分类字段，按名称归类） */
 const CATEGORY_KEYWORDS = {
@@ -73,9 +73,13 @@ Page({
 
   /** 加载上架商品（分页，追加到 allProducts） */
   async loadProducts() {
+    // 请求序号：onShow 自动刷新/下拉刷新可能与在途的"加载下一页"叠加，
+    // 旧响应直接丢弃，避免上一页数据追加到重置后的列表里造成重复/串页
+    const seq = (this._loadSeq = (this._loadSeq || 0) + 1)
     this.setData({ loading: true })
     try {
       const res = await api.listProductsPage({ pageNo: this.data.pageNo, pageSize: this.data.pageSize })
+      if (seq !== this._loadSeq) return false
       const list = (res.list || []).map((p) => ({
         ...p,
         categoryId: matchCategory(p),
@@ -95,10 +99,11 @@ Page({
       return true
     } catch (e) {
       // 错误提示已由 api.js 统一处理；标记失败让首屏展示"重新加载"入口，避免下拉刷新误弹"已刷新"
-      this.setData({ loadError: true })
+      if (seq === this._loadSeq) this.setData({ loadError: true })
       return false
     } finally {
-      this.setData({ loading: false })
+      // 过期的在途请求不得把 loading 收回——更新的请求还在跑
+      if (seq === this._loadSeq) this.setData({ loading: false })
     }
   },
 
@@ -139,6 +144,7 @@ Page({
 
   /** 点击商品 → 跳详情页 */
   goToDetail(e) {
+    if (navThrottled(this)) return
     const id = e.currentTarget.dataset.id
     wx.navigateTo({ url: `/pages/goods/detail/detail?id=${id}` })
   },

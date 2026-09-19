@@ -32,6 +32,8 @@ Page({
 
   onShow() {
     appearance.apply(this)
+    // 后台期间 tick 被节流：回前台立即按时间戳校准倒计时
+    if (this._timer) this._tickCodeCountdown()
   },
 
   /** 拉取最新用户信息预填表单 */
@@ -95,7 +97,11 @@ Page({
       wx.setStorageSync('userInfo', Object.assign(cached, { nickname, avatar: this.data.avatar, sex: this.data.sex }))
       feedback.tap()
       wx.showToast({ title: '已保存', icon: 'success' })
-      setTimeout(() => wx.navigateBack(), 800)
+      // 记录句柄：若用户已先一步返回（页面销毁），onUnload 清掉，避免把栈顶别的页面再弹一层
+      this._backTimer = setTimeout(() => {
+        this._backTimer = null
+        wx.navigateBack()
+      }, 800)
     } catch (e) { /* api 已 toast */ } finally {
       this.setData({ saving: false })
     }
@@ -121,25 +127,41 @@ Page({
 
   /** 发送改密验证码（scene=3 MEMBER_UPDATE_PASSWORD） */
   async sendPwdCode() {
-    if (this.data.codeCountdown > 0) return
+    // 倒计时中 / 请求在途都拦截：原实现只挡倒计时，连点会在第一条验证码未返回时连发两条短信
+    if (this.data.codeCountdown > 0 || this._codeSending) return
     if (!this.data.mobile) {
       wx.showToast({ title: '未获取到手机号', icon: 'none' })
       return
     }
+    this._codeSending = true
     try {
       await api.sendSmsCode(this.data.mobile, 3)
       wx.showToast({ title: '验证码已发送', icon: 'success' })
-      this.setData({ codeCountdown: 60 })
-      this._timer = setInterval(() => {
-        const left = this.data.codeCountdown - 1
-        if (left <= 0) {
-          clearInterval(this._timer)
-          this.setData({ codeCountdown: 0 })
-        } else {
-          this.setData({ codeCountdown: left })
-        }
-      }, 1000)
-    } catch (e) { /* api 已 toast */ }
+      this._startCodeCountdown()
+    } catch (e) { /* api 已 toast */ } finally {
+      this._codeSending = false
+    }
+  },
+
+  /** 60s 倒计时按截止时间戳计算：退后台 setInterval 被节流，按次递减会偏慢，回前台按时间校准 */
+  _startCodeCountdown() {
+    this._clearCodeTimer()
+    this._codeEndAt = Date.now() + 60 * 1000
+    this.setData({ codeCountdown: 60 })
+    this._timer = setInterval(() => this._tickCodeCountdown(), 1000)
+  },
+
+  _tickCodeCountdown() {
+    const left = Math.max(0, Math.ceil((this._codeEndAt - Date.now()) / 1000))
+    if (left <= 0) this._clearCodeTimer()
+    if (left !== this.data.codeCountdown) this.setData({ codeCountdown: left })
+  },
+
+  _clearCodeTimer() {
+    if (this._timer) {
+      clearInterval(this._timer)
+      this._timer = null
+    }
   },
 
   /** 提交修改密码 */
@@ -170,6 +192,10 @@ Page({
   },
 
   onUnload() {
-    if (this._timer) clearInterval(this._timer)
+    this._clearCodeTimer()
+    if (this._backTimer) {
+      clearTimeout(this._backTimer)
+      this._backTimer = null
+    }
   }
 })

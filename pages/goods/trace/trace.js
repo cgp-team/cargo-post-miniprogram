@@ -35,14 +35,25 @@ Page({
     appearance.apply(this)
     if (!options.id) {
       wx.showToast({ title: '缺少订单编号', icon: 'none' })
-      setTimeout(() => wx.navigateBack(), 1200)
+      // 记下定时器：用户若先手动返回，onUnload 清掉，否则 1.2s 后会把上一页也误弹掉
+      this._backTimer = setTimeout(() => wx.navigateBack(), 1200)
       return
     }
     this.setData({ orderId: options.id })
     this.loadTrace()
   },
 
+  onUnload() {
+    if (this._backTimer) {
+      clearTimeout(this._backTimer)
+      this._backTimer = null
+    }
+  },
+
   async loadTrace() {
+    // 在途守卫：弱网下双击"重新加载"会叠相同请求，重复 setData 地图 markers 会闪
+    if (this._loadingTrace) return
+    this._loadingTrace = true
     this.setData({ loading: true, loadError: false })
     try {
       const trace = await api.getProductOrderTrace(this.data.orderId)
@@ -51,6 +62,8 @@ Page({
       // 网络失败（errMsg）给"重新加载"入口；业务错误（未发货/无轨迹，body 只有 code/msg）仍走空态
       const isNetwork = !!(e && typeof e.errMsg === 'string')
       this.setData({ trace: null, loading: false, loadError: isNetwork })
+    } finally {
+      this._loadingTrace = false
     }
   },
 

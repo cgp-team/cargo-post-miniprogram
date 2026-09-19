@@ -59,8 +59,12 @@ function cleanParams(data) {
 
 /**
  * 通用请求
+ * @param {Object} [options] options.silent：静默请求（轮询类后台刷新用），
+ *   失败不弹 toast——15s 轮询在弱网下行车会每 15s 弹一次"网络连接失败"，老人用户无所适从；
+ *   页面自身有空态/错误态兜底。接口参数与返回结构不变。
  */
-function request(url, method = 'GET', data = {}) {
+function request(url, method = 'GET', data = {}, options = {}) {
+  const silent = !!(options && options.silent)
   const token = wx.getStorageSync('token')
   // GET/POST 统一清理参数：空值不进 query/body，避免 "undefined" 字符串打到后端
   const payload = cleanParams(data)
@@ -79,7 +83,7 @@ function request(url, method = 'GET', data = {}) {
         // yudao 统一格式 {code: 0, msg: "", data: ...}
         const body = res.data
         if (!body || typeof body !== 'object') {
-          wx.showToast({ title: '请求失败', icon: 'none', duration: 2500 })
+          if (!silent) wx.showToast({ title: '请求失败', icon: 'none', duration: 2500 })
           reject(new Error('empty response'))
           return
         }
@@ -90,13 +94,13 @@ function request(url, method = 'GET', data = {}) {
           reject(body)
         } else {
           const errMsg = body.msg || '请求失败'
-          wx.showToast({ title: errMsg, icon: 'none', duration: 2500 })
+          if (!silent) wx.showToast({ title: errMsg, icon: 'none', duration: 2500 })
           reject(body)
         }
       },
       fail(err) {
         console.error('网络请求失败:', err)
-        wx.showToast({ title: '网络连接失败，请检查网络', icon: 'none', duration: 2500 })
+        if (!silent) wx.showToast({ title: '网络连接失败，请检查网络', icon: 'none', duration: 2500 })
         reject(err)
       }
     })
@@ -376,20 +380,20 @@ function getRealtimeBuses() {
 
 /** 实时公交线路（含经停点与该线在线车辆，车来了式地图+列表，免登录） */
 /** 实时公交线路（传坐标时只取附近线路：主城全量线网几百条，全量下发会超时） */
-function getRealtimeBusLines(latitude, longitude, radius) {
-  return request('/app-api/transport/bus/lines', 'GET', { latitude, longitude, radius })
+function getRealtimeBusLines(latitude, longitude, radius, options) {
+  return request('/app-api/transport/bus/lines', 'GET', { latitude, longitude, radius }, options)
 }
 
 /** 单条线路的真实道路轨迹（点开线路时按需查询，带缓存；失败由前端回退站点直线） */
-function getBusLinePolyline(routeId) {
-  return request(`/app-api/transport/bus/line-polyline?routeId=${routeId}`)
+function getBusLinePolyline(routeId, options) {
+  return request(`/app-api/transport/bus/line-polyline?routeId=${routeId}`, 'GET', {}, options)
 }
 
 /** 附近实时公交（按用户坐标 Haversine 过滤 radius 内站点/车辆；无坐标时传 district 区域 fallback）。
  *  空值参数（无定位/无区域/未指定 radius）统一由 request() 的 cleanParams 过滤，
  *  避免 wx.request 把 undefined 序列化成字符串 "undefined" 导致后端 Double 转换 400。 */
-function getNearbyRealtimeBuses(latitude, longitude, radius, district) {
-  return request('/app-api/transport/bus/nearby', 'GET', { latitude, longitude, radius, district })
+function getNearbyRealtimeBuses(latitude, longitude, radius, district, options) {
+  return request('/app-api/transport/bus/nearby', 'GET', { latitude, longitude, radius, district }, options)
 }
 
 // ==================== 取件核销 + 文件上传 ====================

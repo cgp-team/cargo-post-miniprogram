@@ -13,6 +13,7 @@ const feedback = require('../../utils/feedback')
 const reviewUtils = require('../../utils/review')
 const qrcodeRender = require('../../utils/qrcode-render')
 const util = require('../../utils/util')
+const { navThrottled } = util
 const location = require('../../utils/location')
 const transitAmap = require('../../utils/transit-amap')
 
@@ -140,6 +141,11 @@ Page({
     this._flushSaveDraft()
   },
 
+  /** 销毁兜底：异常路径（如被 redirect/reLaunch 顶掉）同样停掉草稿防抖计时器 */
+  onUnload() {
+    this._flushSaveDraft()
+  },
+
   // ==================== 表单草稿（网络差/误退出可恢复，仅 send 使用） ====================
 
   /** 表单变更后防抖 500ms 落本地 */
@@ -194,6 +200,7 @@ Page({
 
   /** 打开地址簿选择收货人 */
   goToAddressBook() {
+    if (navThrottled(this)) return
     wx.navigateTo({ url: '/pages/mine/address/address?from=send' })
   },
 
@@ -242,9 +249,13 @@ Page({
       wx.showToast({ title: '请输入更完整的取货地址', icon: 'none' })
       return
     }
+    if (this.data.tipsLoading) return // 查询中防连点（取货/送达共用 tipsLoading）
     this.setData({ tipsLoading: true })
     const tips = await transitAmap.searchAddressTips(keyword).catch(() => [])
-    this.setData({ tipsLoading: false, pickupTips: tips || [] })
+    this.setData({ tipsLoading: false })
+    // 请求期间输入已被改动：结果对应旧关键词，丢弃
+    if (keyword !== String(this.data.pickupAddressText || '').trim()) return
+    this.setData({ pickupTips: tips || [] })
     if (!tips || !tips.length) {
       wx.showToast({ title: '没找到该地址，可改用「自选站点」', icon: 'none' })
     }
@@ -257,9 +268,12 @@ Page({
       wx.showToast({ title: '请输入更完整的送达地址', icon: 'none' })
       return
     }
+    if (this.data.tipsLoading) return
     this.setData({ tipsLoading: true })
     const tips = await transitAmap.searchAddressTips(keyword).catch(() => [])
-    this.setData({ tipsLoading: false, deliveryTips: tips || [] })
+    this.setData({ tipsLoading: false })
+    if (keyword !== String(this.data.deliveryAddressText || '').trim()) return
+    this.setData({ deliveryTips: tips || [] })
     if (!tips || !tips.length) {
       wx.showToast({ title: '没找到该地址，可改用「自选站点」', icon: 'none' })
     }
@@ -298,9 +312,11 @@ Page({
       this.setData({ receiverAddress: address })
     }
     try {
+      // 竞态守卫：推荐请求返回前用户又手选了送达站点/点了别的候选，旧推荐不得覆盖
+      const seq = (this._deliverySeq = (this._deliverySeq || 0) + 1)
       const res = await api.getReachability(tip.latitude, tip.longitude)
       const rec = res && res.recommendedStation
-      if (rec && rec.id !== this.data.pickupStationId) {
+      if (seq === this._deliverySeq && rec && rec.id !== this.data.pickupStationId) {
         this.setData({
           deliveryStationId: rec.id,
           deliveryStationName: rec.name,
@@ -319,16 +335,20 @@ Page({
 
   /** 试算金额（取货 + 送达站点都选定才请求；失败静默，由提交时兜底） */
   async refreshQuote() {
+    // 竞态守卫：件数连输/站点连改会并发多个试算，旧响应不得覆盖新结果
+    const seq = (this._quoteSeq = (this._quoteSeq || 0) + 1)
     const { pickupStationId, deliveryStationId, itemCount } = this.data
     if (!pickupStationId || !deliveryStationId || pickupStationId === deliveryStationId) {
-      this.setData({ quote: null })
+      this.setData({ quote: null, quoteLoading: false })
       return
     }
     this.setData({ quoteLoading: true })
     try {
       const quote = await api.quoteSendFee(pickupStationId, deliveryStationId, Number(itemCount) || 1)
+      if (seq !== this._quoteSeq) return
       this.setData({ quote: quote || null, quoteLoading: false })
     } catch (e) {
+      if (seq !== this._quoteSeq) return
       this.setData({ quote: null, quoteLoading: false })
     }
   },
@@ -356,7 +376,9 @@ Page({
     try {
       const loc = await location.getCurrentLocation()
       if (!loc || !loc.success) {
-        this.setData({ reachLoading: false, pickupMode: 'station' })
+        // 回退自取模式同时作废在途评估（理由同 switchToStationMode）
+        this._reachSeq = (this._reachSeq || 0) + 1
+        this.setData({ reachLoading: false, pickupMode: 'station', reachability: null, pickupServiceMode: '' })
         wx.showToast({ title: '无法获取当前位置，请改用自选站点', icon: 'none' })
         return
       }
@@ -377,7 +399,9 @@ Page({
       await this._evaluateReachability(loc.latitude, loc.longitude)
       this._scheduleSaveDraft()
     } catch (e) {
-      this.setData({ reachLoading: false, pickupMode: 'station' })
+      // 定位/评估异常：回退自取模式并作废在途评估
+      this._reachSeq = (this._reachSeq || 0) + 1
+      this.setData({ reachLoading: false, pickupMode: 'station', reachability: null, pickupServiceMode: '' })
       wx.showToast({ title: '可达性判断失败，请改用自选站点', icon: 'none' })
     }
   },
@@ -416,9 +440,12 @@ Page({
 
   /** 可达性评估（与 useCurrentLocation 共用） */
   async _evaluateReachability(latitude, longitude) {
+    // 竞态守卫：连续定位/选点时，旧坐标的评估结果不得覆盖新坐标
+    const seq = (this._reachSeq = (this._reachSeq || 0) + 1)
     this.setData({ reachLoading: true })
     try {
       const res = await api.getReachability(latitude, longitude)
+      if (seq !== this._reachSeq) return
       this.setData({
         reachability: res || null,
         pickupServiceMode: (res && res.serviceMode) || '',
@@ -428,6 +455,7 @@ Page({
         this.applyPickupStation(res.recommendedStation)
       }
     } catch (e) {
+      if (seq !== this._reachSeq) return
       this.setData({ reachLoading: false })
       wx.showToast({ title: '可达性判断失败，请改用自选站点', icon: 'none' })
     }
@@ -435,7 +463,9 @@ Page({
 
   /** 切回自选取货站点 */
   switchToStationMode() {
-    this.setData({ pickupMode: 'station', reachability: null, pickupServiceMode: '' })
+    // 作废在途的可达性评估：否则评估返回后会把"推荐站点/可达卡片"写回到已切走的自取模式
+    this._reachSeq = (this._reachSeq || 0) + 1
+    this.setData({ pickupMode: 'station', reachability: null, pickupServiceMode: '', reachLoading: false })
     this._scheduleSaveDraft()
   },
 
@@ -483,12 +513,15 @@ Page({
    * 用户可一键更换 —— 避免"选了站点才发现不能寄"。
    */
   async _checkStationAccess(station) {
+    // 竞态守卫：连改站点时，旧站点的评估不得给新站点弹"建议更换"
+    const seq = (this._accessSeq = (this._accessSeq || 0) + 1)
     if (!station || station.longitude == null || station.latitude == null) {
       this.setData({ stationSuggestion: null })
       return
     }
     try {
       const res = await api.getReachability(Number(station.longitude), Number(station.latitude))
+      if (seq !== this._accessSeq) return
       const rec = res && res.recommendedStation
       const needSwitch = !!(res && res.reachable === false && rec && rec.id !== station.id)
       this.setData({
@@ -502,6 +535,7 @@ Page({
           : null
       })
     } catch (e) {
+      if (seq !== this._accessSeq) return
       this.setData({ stationSuggestion: null })
     }
   },
@@ -523,6 +557,8 @@ Page({
       wx.showToast({ title: '取货站点和送达站点不能相同', icon: 'none' })
       return
     }
+    // 手动选择优先于在途的"按地址推荐"响应（bump 序号使旧响应失效）
+    this._deliverySeq = (this._deliverySeq || 0) + 1
     this.setData({
       deliveryStationId: s.id,
       deliveryStationName: s.stationName,
@@ -762,6 +798,7 @@ Page({
 
   /** 导航到就近交接站点（wx.openLocation 需要站点坐标） */
   openServicePoint() {
+    if (navThrottled(this)) return // 连点会叠多层系统地图页
     const { servicePointLatitude: lat, servicePointLongitude: lng, servicePointStationName: name } = this.data
     if (typeof lat !== 'number' || typeof lng !== 'number') {
       wx.showToast({ title: '站点暂无坐标，请在「快递」页查看站点名', icon: 'none' })

@@ -5,6 +5,7 @@
  *   仅回用户版时用 switchTab（跳入 tab 页必须用它）
  */
 const feedback = require('../../utils/feedback')
+const { navThrottled } = require('../../utils/util')
 
 Component({
   properties: {
@@ -32,6 +33,8 @@ Component({
     switchTab(e) {
       const key = e.currentTarget.dataset.key
       if (key === this.data.current) return
+      // 防连点：redirectTo 飞行中再触发会叠导航/报 fail（工作台 ↔ 路线 ↔ 收益快速来回点）
+      if (navThrottled(this)) return
 
       feedback.tap()
 

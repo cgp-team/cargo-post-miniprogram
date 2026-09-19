@@ -5,7 +5,7 @@ const api = require('../../utils/api')
 const appearance = require('../../utils/appearance')
 const productImg = require('../../utils/product-img')
 const feedback = require('../../utils/feedback')
-const { formatBackendTime } = require('../../utils/util')
+const { formatBackendTime, navThrottled } = require('../../utils/util')
 
 /** 寄货订单状态（TransportOrderStatusEnum）：文案与「快递」页保持一致 */
 const SEND_STATUS = {
@@ -84,10 +84,12 @@ Page({
 
   async loadOrders() {
     const { source, activeTab, pageNo, pageSize } = this.data
+    // 序号守卫：连切来源/状态 tab 时旧请求的响应直接丢弃，不得覆盖新筛选的结果
+    const seq = (this._reqSeq = (this._reqSeq || 0) + 1)
     this.setData({ loading: true })
     try {
       if (source === 'SEND') {
-        await this.loadSendOrders()
+        await this.loadSendOrders(seq)
         return true
       }
       // 不传 status: undefined —— wx.request 会把它序列化成字符串 "undefined"，
@@ -98,6 +100,7 @@ Page({
         params.status = activeTab
       }
       const res = await api.pageMyProductOrders(params)
+      if (seq !== this._reqSeq) return false
       const list = (res.list || []).map((o) => ({
         ...o,
         statusClass: this.statusClass(o.status),
@@ -121,10 +124,11 @@ Page({
       return true
     } catch (e) {
       // 错误提示已由 api.js 统一处理；标记错误态（列表为空时给"重新加载"入口），并避免下拉误弹"已刷新"
-      this.setData({ loadError: true })
+      if (seq === this._reqSeq) this.setData({ loadError: true })
       return false
     } finally {
-      this.setData({ loading: false })
+      // 过期的在途请求不得把 loading 收回——更新的请求还在跑
+      if (seq === this._reqSeq) this.setData({ loading: false })
     }
   },
 
@@ -144,9 +148,10 @@ Page({
   },
 
   /** 寄货订单列表（transport_order）：字段映射到同一张卡片，点卡片进快递页物流详情 */
-  async loadSendOrders() {
+  async loadSendOrders(seq) {
     const { pageNo } = this.data
     const res = await api.pageMySendOrders({ pageNo, pageSize: this.data.pageSize })
+    if (seq !== this._reqSeq) return // 已有更新的请求在途，丢弃旧响应
     const list = (res.list || []).map((o) => ({
       source: 'SEND',
       id: o.id,
@@ -172,7 +177,8 @@ Page({
    * · 寄货订单 → 切到「快递」页并展开该单物流详情（时间轴/多段联运/取件码/地图）。
    */
   openOrderDetail(e) {
-    if (this._justCopied) return
+    if (this._justCopiedUntil && Date.now() < this._justCopiedUntil) return
+    if (navThrottled(this)) return
     const dataset = e.currentTarget.dataset || {}
     if (dataset.source === 'SEND') {
       if (!dataset.no) return
@@ -214,12 +220,11 @@ Page({
     })
   },
 
-  /** 长按单号复制（_justCopied 守卫：长按松手会补发一次 tap，避免误跳详情） */
+  /** 长按单号复制（时间戳守卫：长按松手会补发一次 tap，避免误跳详情；不用 setTimeout，页面销毁无残留） */
   copyOrderNo(e) {
     const no = e.currentTarget.dataset.no
     if (!no) return
-    this._justCopied = true
-    setTimeout(() => { this._justCopied = false }, 500)
+    this._justCopiedUntil = Date.now() + 500
     wx.setClipboardData({
       data: no,
       success: () => wx.showToast({ title: '单号已复制', icon: 'success' })
@@ -228,6 +233,7 @@ Page({
 
   /** 商品溯源（大巴轨迹） */
   goToTrace(e) {
+    if (navThrottled(this)) return
     const id = e.currentTarget.dataset.id
     wx.navigateTo({ url: `/pages/goods/trace/trace?id=${id}` })
   },

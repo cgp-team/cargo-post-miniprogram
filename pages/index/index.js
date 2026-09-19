@@ -8,6 +8,7 @@ const auth = require('../../utils/auth')
 const location = require('../../utils/location')
 const demoLocation = require('../../utils/demo-location')
 const transitAmap = require('../../utils/transit-amap')
+const { navThrottled } = require('../../utils/util')
 
 /** 天气缓存有效期：10 分钟内直接复用缓存渲染，跳过定位与网络请求 */
 const WEATHER_CACHE_TTL = 10 * 60 * 1000
@@ -105,6 +106,8 @@ Page({
     this.loadHomeData()
     // 定位变化（缓存秒出后后台刷到新位置）→ 主动刷新附近公交，避免一直用旧位置查询
     this._offLocationChange = location.onLocationChange((loc) => {
+      // 页面在后台时不查公交（省电省流量）；onShow 会补一次刷新
+      if (this._pageHidden) return
       this._applyUserLocation(loc)
       this.loadNearbyBusData()
     })
@@ -112,6 +115,7 @@ Page({
 
   onHide() {
     // 页面隐藏停止自动刷新（公交位置不动车）
+    this._pageHidden = true
     this.stopNearbyTimer()
   },
 
@@ -124,12 +128,16 @@ Page({
   },
 
   onShow() {
+    this._pageHidden = false
     // 每次显示时刷新外观设置（设置页改动后回来立即生效）
     this._applyAppearance()
-    // 刷新定位/公交/天气（各自有缓存与并发去重，不会双发；定位刷新失败保留旧缓存）
-    this.loadUserLocation()
-    this.loadNearbyBusData()
-    this.loadWeather()
+    // 首次 onShow 紧接 onLoad（onLoad 已触发加载），跳过避免双发；从其他页返回时才补刷新
+    if (this._entered) {
+      this.loadUserLocation()
+      this.loadNearbyBusData()
+      this.loadWeather()
+    }
+    this._entered = true
     // 恢复 15s 自动刷新（onHide 已停止）
     this.startNearbyTimer()
   },
@@ -382,17 +390,43 @@ Page({
   /**
    * 加载附近实时公交：真实 nearby API + 定位（精确坐标或区域 fallback）。
    * 原则：不再显示硬编码 Demo；空数据/失败有明确状态提示。
+   * 并发合流：请求在飞时再触发（15s 轮询/定位变化/手动切位置/下拉刷新）不丢也不叠加——
+   * 挂一个接续任务，在飞请求结束后用最新定位重查（旧写法直接丢弃，旧位置数据会残留到下轮 15s）。
+   * 返回 Promise 供下拉刷新等待。
    */
-  async loadNearbyBusData() {
-    if (this._nearbyLoading) return // 请求去重：上一请求未返回不发送下一次
+  loadNearbyBusData(options) {
+    if (this._nearbyLoading) {
+      if (!this._nearbyQueued) {
+        // 接续任务用最新一次触发的 options（如定时器 silent）：后触发的意图优先
+        this._nearbyQueued = this._nearbyLoading.then(() => {
+          this._nearbyLoading = this._runNearbyQuery(options)
+          return this._nearbyLoading
+        })
+        this._nearbyQueued.finally(() => {
+          this._nearbyQueued = null
+          this._nearbyLoading = null
+        })
+      }
+      return this._nearbyQueued
+    }
+    this._nearbyLoading = this._runNearbyQuery(options)
+    this._nearbyLoading.finally(() => {
+      if (!this._nearbyQueued) this._nearbyLoading = null
+    })
+    return this._nearbyLoading
+  },
+
+  /** 实际查询（内部已兜错误态，promise 不 reject；并发合流由 loadNearbyBusData 负责） */
+  async _runNearbyQuery(options) {
+    const silent = !!(options && options.silent)
     const loc = this.data.userLocation
     const hasCoords = loc && typeof loc.latitude === 'number' && typeof loc.longitude === 'number'
     // 区域 fallback：无精确坐标时，手动选择的村庄优先；否则用定位逆地理区域
     const district = !hasCoords
       ? (this.data.villageManual ? this.data.currentVillage : ((loc && loc.district) || ''))
       : ''
-    this._nearbyLoading = true
-    if (!this.data.nearbyBuses.length) {
+    // 静默轮询不闪 loading（空态/非运营时段是正常内容，不该每 15s 闪成"加载中"）
+    if (!silent && !this.data.nearbyBuses.length) {
       this.setData({ nearbyBusStatus: 'loading' })
     }
     try {
@@ -402,7 +436,8 @@ Page({
         hasCoords ? loc.latitude : null,
         hasCoords ? loc.longitude : null,
         this._nearbyRadius(loc, hasCoords), // 精度差时放宽半径（定位不准也能找到车）
-        district || null
+        district || null,
+        silent ? { silent: true } : undefined // 静默轮询失败不弹 toast（弱网每 15s 弹窗不可接受）
       )
       // 现实公交客户端层（高德小程序 SDK）：后端未配 Web 服务 key 时用小程序 key 补齐真实站点
       const data = await transitAmap.enrichNearby(
@@ -439,9 +474,9 @@ Page({
       })
     } catch (err) {
       console.error('加载附近公交失败', err)
+      // 静默轮询失败保留旧内容（不闪错误态）；还在首次 loading（没有任何内容）才亮错误态给重试入口
+      if (silent && this.data.nearbyBusStatus !== 'loading') return
       this.setData({ nearbyBusStatus: 'error' })
-    } finally {
-      this._nearbyLoading = false
     }
   },
 
@@ -495,12 +530,12 @@ Page({
     return p(d.getHours()) + ':' + p(d.getMinutes())
   },
 
-  /** 15s 自动刷新附近公交（页面隐藏停止，显示恢复；防重复定时器） */
+  /** 15s 自动刷新附近公交（页面隐藏停止，显示恢复；防重复定时器；轮询静默：弱网失败不弹 toast 不闪错误态） */
   startNearbyTimer() {
     this.stopNearbyTimer()
     this._nearbyTimer = setInterval(() => {
       this._updateBusUpdatedText()
-      this.loadNearbyBusData()
+      this.loadNearbyBusData({ silent: true })
     }, 15000)
   },
 
@@ -570,6 +605,7 @@ Page({
    * 跳转实时公交（车来了式地图+列表）
    */
   goToBusTracking() {
+    if (navThrottled(this)) return // 防连点叠两层页面
     wx.navigateTo({ url: '/pages/bus/index' })
   },
 
@@ -577,6 +613,7 @@ Page({
    * 跳转公交详情
    */
   goToBusDetail(e) {
+    if (navThrottled(this)) return
     const busId = e.currentTarget.dataset.id
     if (busId == null) return
     wx.navigateTo({ url: `/pages/bus/detail?id=${busId}` })
@@ -593,6 +630,7 @@ Page({
    * 跳转产品详情
    */
   goToProductDetail(e) {
+    if (navThrottled(this)) return
     if (e.currentTarget.dataset.demo) {
       wx.showToast({ title: '示例数据，暂未开通', icon: 'none' })
       return
@@ -613,6 +651,7 @@ Page({
    */
   goToSend() {
     if (!auth.requireLogin({ content: '登录后可发起寄货' })) return
+    if (navThrottled(this)) return
     wx.navigateTo({ url: '/pages/send/send' })
   },
 

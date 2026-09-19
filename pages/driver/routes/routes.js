@@ -4,6 +4,7 @@
  */
 const api = require('../../../utils/api')
 const appearance = require('../../../utils/appearance')
+const { navThrottled } = require('../../../utils/util')
 
 Page({
   data: {
@@ -29,6 +30,8 @@ Page({
   },
 
   async loadRoutes() {
+    // 加载中重复触发（错误态"重新加载"连点）直接忽略，避免并发请求交错写 data
+    if (this.data.loading) return
     this.setData({ loading: true, hasError: false })
     try {
       const shifts = await api.getDriverShifts()
@@ -126,17 +129,15 @@ Page({
   /** 切换路线地图显示 */
   toggleRouteMap(e) {
     const routeId = e.currentTarget.dataset.id
-    const todayRoutes = this.data.todayRoutes.map((r) => {
-      if (r.id === routeId) {
-        return { ...r, showMap: !r.showMap }
-      }
-      return r
-    })
-    this.setData({ todayRoutes })
+    const idx = this.data.todayRoutes.findIndex((r) => r.id === routeId)
+    if (idx < 0) return
+    // 路径级更新：整表替换会让每张班次卡（含 map 组件）都重渲染
+    this.setData({ ['todayRoutes[' + idx + '].showMap']: !this.data.todayRoutes[idx].showMap })
   },
 
   /** 导航到下一站 */
   navigateRoute(e) {
+    if (navThrottled(this)) return // 连点会叠多层系统地图页
     const routeId = e.currentTarget.dataset.id
     const route = this.data.todayRoutes.find((r) => r.id === routeId)
     if (!route) return

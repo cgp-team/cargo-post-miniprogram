@@ -5,6 +5,7 @@
 const api = require('../../utils/api')
 const auth = require('../../utils/auth')
 const feedback = require('../../utils/feedback')
+const { navThrottled } = require('../../utils/util')
 
 Page({
   behaviors: [require('../../behaviors/page-base')],
@@ -29,23 +30,27 @@ Page({
   },
 
   loadUserInfo() {
-    const userInfo = wx.getStorageSync('userInfo')
-    if (userInfo && auth.isLogin()) {
-      this.setData({ userInfo, isLoggedIn: true })
-    } else {
-      this.setData({ userInfo: null, isLoggedIn: false })
-    }
+    const cached = wx.getStorageSync('userInfo')
+    const loggedIn = !!(cached && auth.isLogin())
+    const next = loggedIn ? cached : null
+    // onShow 每次进页都调：内容没变就跳过 setData，避免无谓的整页 diff
+    const prev = this.data.isLoggedIn ? this.data.userInfo : null
+    if (loggedIn === this.data.isLoggedIn
+        && JSON.stringify(prev || null) === JSON.stringify(next || null)) return
+    this.setData({ userInfo: next || {}, isLoggedIn: loggedIn })
   },
 
   /** 我要寄货 - 进入农户寄货流程 */
   goToSend() {
     if (!auth.requireLogin()) return
+    if (navThrottled(this)) return
     wx.navigateTo({ url: '/pages/send/send' })
   },
 
   /** 我的订单（商城购买订单） */
   goToOrders() {
     if (!auth.requireLogin()) return
+    if (navThrottled(this)) return
     wx.navigateTo({ url: '/pages/orders/orders' })
   },
 
@@ -65,6 +70,7 @@ Page({
 
   /** 设置 */
   goToSettings() {
+    if (navThrottled(this)) return
     wx.navigateTo({ url: '/pages/settings/settings' })
   },
 
@@ -106,24 +112,28 @@ Page({
   /** 编辑个人资料 */
   goToProfile() {
     if (!auth.requireLogin()) return
+    if (navThrottled(this)) return
     wx.navigateTo({ url: '/pages/mine/profile/profile' })
   },
 
   /** 收货地址管理 */
   goToAddress() {
     if (!auth.requireLogin()) return
+    if (navThrottled(this)) return
     wx.navigateTo({ url: '/pages/mine/address/address' })
   },
 
   /** 意见反馈 */
   goToFeedback() {
     if (!auth.requireLogin()) return
+    if (navThrottled(this)) return
     wx.navigateTo({ url: '/pages/mine/feedback/feedback' })
   },
 
   /** 消息通知中心 */
   goToNotification() {
     if (!auth.requireLogin()) return
+    if (navThrottled(this)) return
     wx.navigateTo({ url: '/pages/notification/notification' })
   },
 

@@ -8,7 +8,7 @@
 const api = require('../../../utils/api')
 const appearance = require('../../../utils/appearance')
 const productImg = require('../../../utils/product-img')
-const { formatBackendTime } = require('../../../utils/util')
+const { formatBackendTime, navThrottled } = require('../../../utils/util')
 
 Page({
   data: {
@@ -35,10 +35,18 @@ Page({
     const id = options && options.id
     if (!id) {
       wx.showToast({ title: '缺少订单编号', icon: 'none' })
-      setTimeout(() => wx.navigateBack(), 1200)
+      // 记下定时器：用户若先手动返回，onUnload 清掉，否则 1.2s 后会把上一页也误弹掉
+      this._backTimer = setTimeout(() => wx.navigateBack(), 1200)
       return
     }
     this.setData({ orderId: id })
+  },
+
+  onUnload() {
+    if (this._backTimer) {
+      clearTimeout(this._backTimer)
+      this._backTimer = null
+    }
   },
 
   onShow() {
@@ -55,6 +63,9 @@ Page({
   },
 
   async loadDetail() {
+    // 在途守卫：onShow 与下拉刷新叠加/弱网连拉时避免相同请求并发（返回 false 让下拉不弹"已刷新"）
+    if (this._loadingDetail) return false
+    this._loadingDetail = true
     this.setData({ loading: true })
     try {
       const order = await api.getProductOrderTrace(this.data.orderId)
@@ -65,6 +76,7 @@ Page({
       this.setData({ order: null, items: [] })
       return false
     } finally {
+      this._loadingDetail = false
       this.setData({ loading: false })
     }
   },
@@ -120,6 +132,7 @@ Page({
 
   /** 看承运车辆轨迹（复用商品溯源页） */
   goToTrace() {
+    if (navThrottled(this)) return
     wx.navigateTo({ url: `/pages/goods/trace/trace?id=${this.data.orderId}` })
   },
 

@@ -72,17 +72,23 @@ Page({
   },
 
   async loadList() {
+    // 竞态守卫：提交成功触发的 reload 与在途的"加载更多"并发时，旧响应不得覆盖新列表；
+    // pageNo 在请求发起时定格，避免刷新重置 pageNo=1 后旧的分页响应误按第 1 页整表替换
+    const seq = (this._listSeq = (this._listSeq || 0) + 1)
+    const pageNo = this.data.pageNo
     this.setData({ loading: true, loadError: false })
     try {
-      const res = await api.pageMyFeedback({ pageNo: this.data.pageNo, pageSize: this.data.pageSize })
+      const res = await api.pageMyFeedback({ pageNo, pageSize: this.data.pageSize })
+      if (seq !== this._listSeq) return
       const list = (res.list || []).map((f) => ({ ...f, createTimeText: formatBackendTime(f.createTime) }))
-      const merged = this.data.pageNo === 1 ? list : this.data.list.concat(list)
+      const merged = pageNo === 1 ? list : this.data.list.concat(list)
       this.setData({ list: merged, total: res.total || 0, hasMore: merged.length < (res.total || 0) })
     } catch (e) {
+      if (seq !== this._listSeq) return
       // api 已 toast；首屏无数据时进入错误态，可点"重新加载"
       if (!this.data.list.length) this.setData({ loadError: true })
     } finally {
-      this.setData({ loading: false })
+      if (seq === this._listSeq) this.setData({ loading: false })
     }
   },
 
