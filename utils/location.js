@@ -574,14 +574,22 @@ async function doGetLocation(force) {
 }
 
 /** 后台异步刷新：命中缓存后补发一次真实定位（择优），成功才覆盖缓存（失败/拒绝保留旧缓存） */
+let bgRefreshing = false // 在途守卫：locateOnce 最长 ~45s（3 次高精度补测），轮询页 15s 一发会叠加
+let lastBgRefreshAt = 0  // 节流：60s 内最多补一次，避免轮询页每 15s 唤醒一次 GPS（老人机/司机行车耗电）
 function refreshInBackground() {
+  const now = Date.now()
+  if (bgRefreshing || now - lastBgRefreshAt < CACHE_FRESH_TTL) return
+  bgRefreshing = true
+  lastBgRefreshAt = now
   locateOnce().then((loc) => {
     if (!loc.success) return
     const fresh = { ...loc, source: SOURCE_AMAP, level: classifyLevel(loc) }
     writeCache(fresh)
     logLocation(fresh)
     notifyListeners(fresh)
-  }).catch(() => {})
+  }).catch(() => {}).finally(() => {
+    bgRefreshing = false
+  })
 }
 
 /** 权限拒绝：有旧缓存则兜底返回（stale），否则 UNKNOWN + denied 标记 */

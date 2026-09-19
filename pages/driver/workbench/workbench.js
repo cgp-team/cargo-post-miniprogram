@@ -8,7 +8,8 @@ const api = require('../../../utils/api')
 const appearance = require('../../../utils/appearance')
 const feedback = require('../../../utils/feedback')
 const nav = require('../../../utils/nav')
-const location = require('../../../utils/location')
+const location = require('../../../utils/location')
+const { navThrottled } = require('../../../utils/util')
 
 /** 位置上报间隔（毫秒） */
 const LOCATION_REPORT_INTERVAL = 10000
@@ -134,6 +135,9 @@ Page({
 
   /** 加载司机身份 + 班次 + 任务 */
   async loadAll() {
+    // 加载中重复触发（错误横幅连点/任务完成回调与手动刷新重叠）直接忽略，避免并发 setData 交错
+    if (this._loadingAll) return
+    this._loadingAll = true
     try {
       // 身份由后端按登录会员解析，前端不再传手机号/driverId
       const profile = await api.getDriverProfile()
@@ -185,6 +189,8 @@ Page({
     } catch (e) {
       // 网络失败给顶部横幅重试入口，不能让司机对着空页面点不动发车
       this.setData({ loaded: true, loadError: true })
+    } finally {
+      this._loadingAll = false
     }
   },
 
@@ -551,12 +557,18 @@ Page({
   /** 单次位置监控：查询后端 → 判断来源 → 更新导航 */
   async monitorTick() {
     if (!this.driverId) return
+    // 弱网下单次请求最长 10s 才超时，3s 轮询不加守卫会叠加并发请求（行车弱网场景）
+    if (this._positionPolling) return
+    this._positionPolling = true
     try {
-      const pos = await api.getDriverPosition(this.driverId)
+      // 轮询走 silent 通道（同 URL 同参数，与 api.getDriverPosition 等价）：弱网行车每 3s 弹一次
+      // "网络连接失败"toast 不可接受；api.js 的 driver 包装函数未开放 options 且该文件有并行改动
+      const pos = await api.request('/app-api/transport/driver/position', 'GET', { driverId: this.driverId }, { silent: true })
       if (!pos) return
 
       const source = pos.dataSource || 'NONE'
-      this.setData({ locationSource: source })
+      // 来源不变不 setData：3s 轮询每轮都写会触发无谓渲染
+      if (source !== this.data.locationSource) this.setData({ locationSource: source })
 
       if (source === 'SIMULATED' && pos.simRunning && pos.simLatitude != null && pos.simLongitude != null) {
         // SIMULATED：使用模拟引擎坐标，不上报真实 GPS
@@ -572,24 +584,36 @@ Page({
       }
     } catch (e) {
       // 静默，等待下一轮
+    } finally {
+      this._positionPolling = false
     }
   },
 
   /** 上报真实 GPS（仅 REAL 状态调用） */
   async reportRealLocation() {
+    // 上报节流：3s 轮询只读后端位置，真实 GPS 上报按 LOCATION_REPORT_INTERVAL(10s) 执行。
+    // 高精度定位单次最长 15s 才返回，按 3s 频次发起会叠加多个 wx.getLocation，耗电且弱网下堆积
+    if (this._reporting) return
+    const now = Date.now()
+    if (now - (this._lastReportAt || 0) < LOCATION_REPORT_INTERVAL) return
+    this._reporting = true
+    this._lastReportAt = now
     // 统一走 LocationService（GCJ-02，与站点表/高德/地图一致），避免页面各自调 wx.getLocation
     try {
       const loc = await location.getDeviceLocationGcj02()
       if (!loc || !loc.success) return // 权限问题由 onLocationFail 处理
-      api.reportDriverLocation({
+      // 上报走 silent 通道（同 URL 同参数，等价 api.reportDriverLocation）：弱网失败不弹 toast
+      api.request('/app-api/transport/driver/location', 'POST', {
         driverId: this.driverId,
         shiftId: this.shiftId,
         longitude: loc.longitude,
         latitude: loc.latitude,
         speedKmh: 0 // LocationService 不返回速度；车辆速度由后端按里程/时长估算
-      }).catch(() => {})
+      }, { silent: true }).catch(() => {})
     } catch (e) {
       // 静默，等待下一轮
+    } finally {
+      this._reporting = false
     }
   },
 
@@ -654,11 +678,21 @@ Page({
 
   /** 纯导航推进：给定坐标更新地图中心/下一站距离/进度/到站（模拟模式与真实 GPS 共用） */
   updateNavByCoord(latitude, longitude, speedKmh) {
-    // 地图跟随当前位置
-    this.setData({ mapLatitude: latitude, mapLongitude: longitude })
+    // 地图中心跟随：位移 <约11m(0.0001°) 不重排地图——停靠时 GPS 抖动几米，
+    // 每 3s 重排一次会让地图闪烁，还会顶掉司机手动缩放；本 tick 的变更合并成一次 setData
+    const patch = {}
+    if (typeof this._lastMapLat !== 'number'
+        || Math.abs(latitude - this._lastMapLat) > 0.0001
+        || Math.abs(longitude - this._lastMapLng) > 0.0001) {
+      this._lastMapLat = latitude
+      this._lastMapLng = longitude
+      patch.mapLatitude = latitude
+      patch.mapLongitude = longitude
+    }
 
     if (this.data.status !== 'driving') {
-      this.setData({ speed: speedKmh })
+      patch.speed = speedKmh
+      this.setData(patch)
       return
     }
 
@@ -666,7 +700,7 @@ Page({
     // 无任务段导航时回退旧班次站点逻辑
     if (points.length < 2) {
       const stops = this.shiftStops || []
-      if (stops.length < 2) { this.setData({ speed: speedKmh }); return }
+      if (stops.length < 2) { patch.speed = speedKmh; this.setData(patch); return }
       const nextIdx = Math.min(this.data.currentStopIndex + 1, stops.length - 1)
       const next = stops[nextIdx]
       const dist = Math.round(distanceMeters(latitude, longitude, next.latitude, next.longitude))
@@ -675,6 +709,7 @@ Page({
       const ratio = segLen > 0 ? Math.max(0, Math.min(1, 1 - dist / segLen)) : 0
       const percent = Math.round(((nextIdx - 1 + ratio) / (stops.length - 1)) * 100)
       this.setData({
+        ...patch,
         speed: speedKmh,
         currentStation: prev.stationName,
         nextStation: next.stationName,
@@ -694,16 +729,17 @@ Page({
       const next = ti + 1
       if (next < points.length) {
         this.applyNavView(next)
-        this.setData({ speed: speedKmh, nextStationDistance: 0 })
+        this.setData({ ...patch, speed: speedKmh, nextStationDistance: 0 })
       } else {
-        this.setData({ speed: speedKmh })
+        patch.speed = speedKmh
+        this.setData(patch)
       }
       return
     }
 
     // 距目标 ≤50m → 点亮「到达」按钮
-    if (dist <= ARRIVE_RADIUS_METERS) this.setData({ canArrive: true })
-    else if (this.data.canArrive) this.setData({ canArrive: false })
+    if (dist <= ARRIVE_RADIUS_METERS) patch.canArrive = true
+    else if (this.data.canArrive) patch.canArrive = false
 
     // 进度：站间按距离线性插值
     const prev = points[ti - 1] || target
@@ -712,6 +748,7 @@ Page({
     const percent = Math.round(((ti - 1 + ratio) / (points.length - 1)) * 100)
 
     this.setData({
+      ...patch,
       speed: speedKmh,
       nextStation: target.stationName,
       nextStationDistance: dist,
@@ -951,8 +988,10 @@ Page({
     wx.showToast({ title: successText, icon: 'success' })
     const pickups = this.data.pendingPickups.filter((p) => p.orderId !== order.orderId)
     this.refreshCargo(pickups)
-    // 装车完成继续行驶（连续任务导航：推进到下一站）
-    setTimeout(() => {
+    // 装车完成继续行驶（连续任务导航：推进到下一站）。定时器挂实例并在 onHide/onUnload 清理：
+    // 否则页面销毁后回调仍会执行 continueToNextStation → 重新拉起位置上报轮询（泄漏）
+    this._continueTimer = setTimeout(() => {
+      this._continueTimer = null
       this.continueToNextStation()
     }, 1500)
   },
@@ -973,14 +1012,16 @@ Page({
   /**
    * 跳过装车，继续行驶
    */
-  /** 多段联运：进入货物交接页（拍照确认换乘交接） */
-  goHandover() {
+  /** 多段联运：进入货物交接页（拍照确认换乘交接） */
+  goHandover() {
+    if (navThrottled(this)) return
     feedback.tap()
     wx.navigateTo({ url: '/pages/driver/handover/handover' })
   },
 
   /** 通知铃铛：进入司机消息中心（driverMode=1 拉司机消息） */
-  goNotifications() {
+  goNotifications() {
+    if (navThrottled(this)) return
     wx.navigateTo({ url: '/pages/notification/notification?driverMode=1' })
   },
 
@@ -1003,7 +1044,16 @@ Page({
     })
   },
 
-  onHide() {
+  /** 清理"装车后 1.5s 自动推进下一站"的一次性定时器（防页面销毁后回调重启上报轮询） */
+  _clearContinueTimer() {
+    if (this._continueTimer) {
+      clearTimeout(this._continueTimer)
+      this._continueTimer = null
+    }
+  },
+
+  onHide() {
+    this._clearContinueTimer()
     // 切后台时停掉位置上报定时器，onShow 恢复在途时重启，避免后台持续定位耗电
     if (this.locationTimer) {
       clearInterval(this.locationTimer)
@@ -1011,7 +1061,8 @@ Page({
     }
   },
 
-  onUnload() {
+  onUnload() {
+    this._clearContinueTimer()
     if (this.locationTimer) {
       clearInterval(this.locationTimer)
       this.locationTimer = null

@@ -52,10 +52,12 @@ Page({
 
   loadAll() {
     if (!this.data.driverId) return Promise.resolve()
+    // 在飞则复用同一个 promise：下拉刷新与操作后刷新不叠加（否则三路请求并发打两份）
+    if (this._loadingAll) return this._loadingAll
     this.setData({ loading: true, loadError: false })
     // 三路请求各自兜底；全部失败说明是网络问题，亮错误态而不是冒充"暂无待交接"
     let failed = 0
-    return Promise.all([
+    this._loadingAll = Promise.all([
       api.getDriverHandovers(this.data.driverId).catch(() => { failed += 1; return [] }),
       api.getDriverLegs(this.data.driverId).catch(() => { failed += 1; return [] }),
       api.getDriverCurrentLeg(this.data.driverId).catch(() => { failed += 1; return null })
@@ -77,7 +79,11 @@ Page({
         legActions: this.buildLegActions(currentLeg),
         loadError: failed === 3
       })
-    }).finally(() => this.setData({ loading: false }))
+    }).finally(() => {
+      this._loadingAll = null
+      this.setData({ loading: false })
+    })
+    return this._loadingAll
   },
 
   /** 司机端按钮状态机（需求 §58）：按当前段状态给出可用操作 */
@@ -104,15 +110,17 @@ Page({
     const action = e.currentTarget.dataset.action
     const leg = this.data.currentLeg
     if (!leg) return
+    // 先上锁再拍照：拍照窗口内连点会绕过守卫重复提交段操作
+    this.setData({ submitting: true })
     let photoUrl = ''
     if (action === 'handover-confirm') {
       try {
         photoUrl = await this.takePhoto()
       } catch (err) {
+        this.setData({ submitting: false })
         return // 交接确认必须拍照留证
       }
     }
-    this.setData({ submitting: true })
     wx.showLoading({ title: '处理中…', mask: true })
     try {
       await api.driverLegAction(action, { driverId: this.data.driverId, legId: leg.id, photoUrl: photoUrl || undefined })
@@ -157,6 +165,8 @@ Page({
   async onConfirm(e) {
     if (this.data.submitting) return
     const handoverId = e.currentTarget.dataset.id
+    // 先上锁再拍照：拍照/确认弹窗期间连点会绕过守卫重复确认交接
+    this.setData({ submitting: true })
     let photoUrl = ''
     try {
       photoUrl = await this.takePhoto()
@@ -171,9 +181,11 @@ Page({
           success: (r) => resolve(r.confirm)
         })
       })
-      if (!res) return
+      if (!res) {
+        this.setData({ submitting: false })
+        return
+      }
     }
-    this.setData({ submitting: true })
     wx.showLoading({ title: '确认交接…', mask: true })
     try {
       await api.confirmDriverHandover({

@@ -101,25 +101,30 @@ function requestOpenMeteo(lat, lon, attempt, resolve) {
   const model = models[attempt]
   const timeout = 8000
 
-  const timer = setTimeout(() => {
+  // settle 守卫：超时已降级到下一档后，本档迟到的回包必须丢弃——
+  // 否则会再发一次重复请求（弱网双倍流量），甚至用旧档数据覆盖新档结果
+  let settled = false
+  const next = () => {
     if (attempt < models.length - 1) requestOpenMeteo(lat, lon, attempt + 1, resolve)
     else resolve(localMockWeather())
-  }, timeout)
+  }
+  const finish = (fn) => {
+    if (settled) return
+    settled = true
+    clearTimeout(timer)
+    fn()
+  }
+
+  const timer = setTimeout(() => finish(next), timeout)
 
   wx.request({
     url: weatherUrl(lat, lon, model),
-    success: (res) => {
-      clearTimeout(timer)
+    success: (res) => finish(() => {
       const data = parseOpenMeteo(res)
       if (data) { resolve(data); return }
-      if (attempt < models.length - 1) requestOpenMeteo(lat, lon, attempt + 1, resolve)
-      else resolve(localMockWeather())
-    },
-    fail: () => {
-      clearTimeout(timer)
-      if (attempt < models.length - 1) requestOpenMeteo(lat, lon, attempt + 1, resolve)
-      else resolve(localMockWeather())
-    }
+      next()
+    }),
+    fail: () => finish(next)
   })
 }
 

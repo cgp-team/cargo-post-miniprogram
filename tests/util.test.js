@@ -5,7 +5,7 @@
  * 覆盖：寄货「长×宽×高(cm) → 体积(m³)」换算（正数/零/负数/非法/精度）。
  */
 const assert = require('assert')
-const { cmSizeToM3, validatePhone, haversineKm } = require('../utils/util')
+const { cmSizeToM3, validatePhone, haversineKm, navThrottled } = require('../utils/util')
 
 // 50cm × 40cm × 30cm = 0.06 m³
 assert.strictEqual(cmSizeToM3(50, 40, 30), 0.06)
@@ -25,5 +25,12 @@ assert.strictEqual(validatePhone('12800138000'), false)
 assert.strictEqual(haversineKm(30.6, 104.1, 30.6, 104.1), 0)
 assert.ok(Math.abs(haversineKm(30.0, 104.0, 31.0, 104.0) - 111.19) < 0.5)
 assert.strictEqual(haversineKm(30.6, 104.1, 30.7, 104.2), haversineKm(30.7, 104.2, 30.6, 104.1))
+
+// 跳转防连点：首次放行，gap 内连点拦截，超过 gap 再次放行；不同页面实例互不干扰
+const pageA = {}
+assert.strictEqual(navThrottled(pageA), false)
+assert.strictEqual(navThrottled(pageA), true)
+const pageB = {}
+assert.strictEqual(navThrottled(pageB), false)
 
 console.log('util.test.js 全部通过')

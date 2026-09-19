@@ -51,10 +51,10 @@ Page({
     this.stopTimer()
   },
 
-  /** 每 15s 静默刷新，保持车辆状态接近实时 */
+  /** 每 15s 静默刷新，保持车辆状态接近实时（失败不弹 toast、不清空已展示数据） */
   startTimer() {
     this.stopTimer()
-    this._timer = setInterval(() => this.loadDetail(), REFRESH_MS)
+    this._timer = setInterval(() => this.loadDetail({ silent: true }), REFRESH_MS)
   },
 
   stopTimer() {
@@ -64,7 +64,12 @@ Page({
     }
   },
 
-  async loadDetail() {
+  async loadDetail(options) {
+    const silent = !!(options && options.silent)
+    // 请求序号：15s 轮询与下拉刷新可并发（弱网下单次链路含 3 个串行请求，可能超 15s），
+    // 旧响应直接丢弃，不得覆盖新数据（否则进度/位置来回跳）
+    const seq = (this._detailSeq = (this._detailSeq || 0) + 1)
+    const stale = () => seq !== this._detailSeq
     try {
       // 我的位置（统一 LocationService，页面不直接调 wx.getLocation）；先定位再拉线路，
       // 这样 /bus/lines 只返回附近线路（主城线网几百条，全量下发会超时）
@@ -75,9 +80,12 @@ Page({
       } catch (e) {
         me = null
       }
+      if (stale()) return
       const lines = (await api.getRealtimeBusLines(
-        me ? me.latitude : null, me ? me.longitude : null, 15000
+        me ? me.latitude : null, me ? me.longitude : null, 15000,
+        silent ? { silent: true } : undefined
       )) || []
+      if (stale()) return
       const busId = Number(this.data.busId)
       let found = null
       let points = []
@@ -91,20 +99,29 @@ Page({
         }
       }
       if (!found) {
+        // 静默刷新时车辆暂时查不到（下线/移出半径）保留旧数据，避免页面闪空态
+        if (silent && this.data.bus) return
         this.setData({ loading: false, bus: null, stops: [], loadError: 'notfound' })
         return
       }
       const progress = found.progress || 0
       const linePoints = (points || []).filter((p) => p.longitude != null && p.latitude != null)
-      // 真实道路轨迹：按需查询（后端带 5 分钟缓存）；失败/为空 → 回退站点直线
+      // 真实道路轨迹：按 routeId 缓存只拉一次（之前每 15s 轮询都重拉，弱网下纯属浪费）；
+      // 失败/为空 → 回退站点直线
       let roadPoints = null
-      if (this._line && this._line.routeId) {
+      const routeId = this._line && this._line.routeId
+      if (this._roadCache && routeId && this._roadCache.routeId === routeId) {
+        roadPoints = this._roadCache.points
+      } else if (routeId) {
         try {
-          const road = await api.getBusLinePolyline(this._line.routeId)
+          const road = await api.getBusLinePolyline(routeId, silent ? { silent: true } : undefined)
+          if (stale()) return
           if (road && road.length >= 2) {
             roadPoints = road.map((p) => ({ latitude: p.latitude, longitude: p.longitude }))
+            this._roadCache = { routeId, points: roadPoints }
           }
         } catch (e) {
+          if (stale()) return
           roadPoints = null
         }
       }
@@ -171,7 +188,9 @@ Page({
               }]
             : []
         })(),
-        mapCenter: found.latitude != null ? { latitude: found.latitude, longitude: found.longitude } : this.data.mapCenter,
+        mapCenter: !this._userPanned && found.latitude != null
+          ? { latitude: found.latitude, longitude: found.longitude }
+          : this.data.mapCenter,
         sourceText: found.locationSource === 'REAL_FRESH' ? '实时（司机上报）'
           : (found.locationSource === 'REAL_STALE' ? '位置可能过期'
             : (sim ? '班次推算位置' : '位置暂不可用')),
@@ -181,7 +200,17 @@ Page({
         loadError: ''
       })
     } catch (e) {
+      if (stale()) return
+      // 静默刷新失败保留旧数据（弱网抖动不该把已展示的车辆信息闪成错误态）
+      if (silent && this.data.bus) return
       this.setData({ loading: false, bus: null, loadError: 'network' })
+    }
+  },
+
+  /** 用户拖动/缩放地图后不再每 15s 抢回中心（与首页/公交地图同一约定） */
+  onRegionChange(e) {
+    if (e.causedBy === 'drag' || e.causedBy === 'scale') {
+      this._userPanned = true
     }
   },
 

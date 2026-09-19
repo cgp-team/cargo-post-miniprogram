@@ -7,6 +7,15 @@ const util = require('../../utils/util')
 const feedback = require('../../utils/feedback')
 const appearance = require('../../utils/appearance')
 
+/** 测试验证码提示仅非正式版可见；读取环境信息失败按正式版处理（宁可不提示，不可让 Page 注册失败） */
+function isNotRelease() {
+  try {
+    return wx.getAccountInfoSync().miniProgram.envVersion !== 'release'
+  } catch (e) {
+    return false
+  }
+}
+
 Page({
   data: {
     phone: '',
@@ -17,7 +26,7 @@ Page({
     loginMode: 'sms', // 'sms' | 'password'
     loading: false,
     // 测试验证码提示仅非正式版可见
-    showSmsTip: wx.getAccountInfoSync().miniProgram.envVersion !== 'release',
+    showSmsTip: isNotRelease(),
     elderlyMode: false,
     themeColor: 'green',
     themeStyle: ''
@@ -27,10 +36,17 @@ Page({
     appearance.apply(this)
   },
 
+  onShow() {
+    // 小程序后台 setInterval 会被节流：回前台按截止时间戳立即校准一次倒计时
+    if (this._smsTimer) this._tickSmsCountdown()
+  },
+
   onUnload() {
-    if (this._smsTimer) {
-      clearInterval(this._smsTimer)
-      this._smsTimer = null
+    this._clearSmsTimer()
+    // 登录成功后的延迟跳转：页面已销毁就不再抢跳（用户已主动离开）
+    if (this._redirectTimer) {
+      clearTimeout(this._redirectTimer)
+      this._redirectTimer = null
     }
   },
 
@@ -63,20 +79,36 @@ Page({
     try {
       await api.sendSmsCode(phone, 1)
       wx.showToast({ title: '验证码已发送', icon: 'success' })
-      // 60秒倒计时
-      this.setData({ smsCountdown: 60 })
-      this._smsTimer = setInterval(() => {
-        const count = this.data.smsCountdown - 1
-        if (count <= 0) {
-          clearInterval(this._smsTimer)
-          this._smsTimer = null
-        }
-        this.setData({ smsCountdown: count })
-      }, 1000)
+      this._startSmsCountdown()
     } catch (err) {
       // 错误提示已由 api.js 处理
     } finally {
       this.setData({ smsCodeSending: false })
+    }
+  },
+
+  /**
+   * 60s 倒计时：按截止时间戳算剩余，而非"每秒 -1"。
+   * 小程序退后台后 setInterval 被节流，按次递减会让倒计时比真实时间慢，
+   * 用户看到还在倒数、服务端却已放行/过期；时间戳口径回前台即校准。
+   */
+  _startSmsCountdown() {
+    this._clearSmsTimer()
+    this._smsEndAt = Date.now() + 60 * 1000
+    this.setData({ smsCountdown: 60 })
+    this._smsTimer = setInterval(() => this._tickSmsCountdown(), 1000)
+  },
+
+  _tickSmsCountdown() {
+    const left = Math.max(0, Math.ceil((this._smsEndAt - Date.now()) / 1000))
+    if (left <= 0) this._clearSmsTimer()
+    if (left !== this.data.smsCountdown) this.setData({ smsCountdown: left })
+  },
+
+  _clearSmsTimer() {
+    if (this._smsTimer) {
+      clearInterval(this._smsTimer)
+      this._smsTimer = null
     }
   },
 
@@ -130,7 +162,7 @@ Page({
 
   /** 微信小程序一键登录：手机号快捷验证回调 */
   onWechatPhoneNumber(e) {
-    if (this.data.loading) return // 防重复点击（请求中）
+    if (this.data.loading || this._wechatStarting) return // 防重复点击（wx.login 返回前 loading 尚未置位，需单独把守）
     // e.detail.code 为动态令牌（需小程序已开通"手机号快捷验证"能力）；未开通或用户拒绝时无 code
     const phoneCode = e.detail.code
     if (!phoneCode) {
@@ -138,8 +170,10 @@ Page({
       return
     }
     // 1. wx.login() 获取 loginCode
+    this._wechatStarting = true
     wx.login({
       success: (res) => {
+        this._wechatStarting = false
         if (!res.code) {
           wx.showToast({ title: '微信登录失败，请重试', icon: 'none' })
           return
@@ -147,6 +181,7 @@ Page({
         this._wechatLogin(phoneCode, res.code)
       },
       fail: () => {
+        this._wechatStarting = false
         wx.showToast({ title: '微信登录失败，请重试', icon: 'none' })
       }
     })
@@ -183,7 +218,9 @@ Page({
     }
 
     wx.showToast({ title: '登录成功', icon: 'success', duration: 1500 })
-    setTimeout(() => {
+    // 记录句柄：onUnload 时清掉，避免页面销毁后回调里再抢跳（会把用户从新页面拽走）
+    this._redirectTimer = setTimeout(() => {
+      this._redirectTimer = null
       this._redirectAfterLogin()
     }, 1500)
   },

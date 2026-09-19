@@ -38,6 +38,7 @@
         markers="{{markers}}"
         polyline="{{polyline}}"
         show-location
+        bindregionchange="onRegionChange"
       ></map>
     </view>
 

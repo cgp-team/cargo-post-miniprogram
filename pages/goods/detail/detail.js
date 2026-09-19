@@ -6,6 +6,7 @@ const productImg = require('../../../utils/product-img')
 const feedback = require('../../../utils/feedback')
 const auth = require('../../../utils/auth')
 const util = require('../../../utils/util')
+const { navThrottled } = util
 
 Page({
   behaviors: [require('../../../behaviors/page-base')],
@@ -36,7 +37,15 @@ Page({
       this.loadDetail(id)
     } else {
       wx.showToast({ title: '缺少商品编号', icon: 'none' })
-      setTimeout(() => wx.navigateBack(), 1200)
+      // 记下定时器：用户若先手动返回，onUnload 清掉，否则 1.2s 后会把上一页也误弹掉
+      this._backTimer = setTimeout(() => wx.navigateBack(), 1200)
+    }
+  },
+
+  onUnload() {
+    if (this._backTimer) {
+      clearTimeout(this._backTimer)
+      this._backTimer = null
     }
   },
 
@@ -47,6 +56,9 @@ Page({
 
   /** 加载商品详情 */
   async loadDetail(id) {
+    // 在途守卫：弱网下双击"重新加载"会叠相同请求
+    if (this._loadingDetail) return
+    this._loadingDetail = true
     try {
       const p = await api.getProduct(id)
       if (p) {
@@ -58,6 +70,8 @@ Page({
     } catch (e) {
       // 错误提示已由 api.js 统一处理；不自动退回，留在本页给"重新加载"入口（农村弱网一次失败很常见）
       this.setData({ loadError: true })
+    } finally {
+      this._loadingDetail = false
     }
   },
 
@@ -68,8 +82,9 @@ Page({
     this.loadDetail(this._productId)
   },
 
-  /** 返回上一页 */
+  /** 返回上一页（防连点：双击返回会连弹两层，跳过列表页） */
   goBack() {
+    if (navThrottled(this)) return
     wx.navigateBack()
   },
 

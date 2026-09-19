@@ -40,6 +40,8 @@ Page({
   },
 
   async loadEarnings() {
+    // 加载中重复触发（错误态"重新加载"连点）直接忽略，避免并发请求交错写 data
+    if (this.data.loading) return
     this.setData({ loading: true, hasError: false })
     try {
       const e = await api.getDriverEarnings()

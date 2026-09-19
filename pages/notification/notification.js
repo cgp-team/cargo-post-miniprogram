@@ -5,7 +5,7 @@
 const api = require('../../utils/api')
 const appearance = require('../../utils/appearance')
 const feedback = require('../../utils/feedback')
-const { formatBackendTime } = require('../../utils/util')
+const { formatBackendTime, navThrottled } = require('../../utils/util')
 
 // 事件类型图标映射
 const EVENT_ICONS = {
@@ -86,7 +86,9 @@ Page({
   },
 
   async loadList() {
-    if (this.data.loading) return
+    // 序号守卫（而非 loading 早退）：连切「全部/未读」时旧响应直接丢弃；
+    // 旧实现 loading 早退会把新筛选的加载整个吞掉，且旧响应盖在新筛选下
+    const seq = (this._reqSeq = (this._reqSeq || 0) + 1)
     this.setData({ loading: true })
     try {
       const params = { pageNo: this.data.pageNo, pageSize: this.data.pageSize }
@@ -94,6 +96,7 @@ Page({
       const res = this.data.driverMode && this.driverId
         ? await api.pageDriverMessages({ ...params, driverId: this.driverId })
         : await api.pageMyNotifications(params)
+      if (seq !== this._reqSeq) return false
       const list = (res.list || []).map((n) => ({
         ...n,
         icon: EVENT_ICONS[n.eventType] || '🔔',
@@ -109,10 +112,11 @@ Page({
       return true
     } catch (e) {
       // 错误提示已由 api.js 统一处理；标记错误态（列表为空时给"重新加载"入口），并避免下拉误弹"已刷新"
-      this.setData({ loadError: true })
+      if (seq === this._reqSeq) this.setData({ loadError: true })
       return false
     } finally {
-      this.setData({ loading: false })
+      // 过期的在途请求不得把 loading 收回——更新的请求还在跑
+      if (seq === this._reqSeq) this.setData({ loading: false })
     }
   },
 
@@ -133,27 +137,32 @@ Page({
     this.reload()
   },
 
-  /** 点消息：标记已读；带订单的跳包裹追踪 */
-  async onTapItem(e) {
+  /** 点消息：标记已读；带订单的跳包裹轨迹 */
+  onTapItem(e) {
     // 长按复制单号后松手会补发一次 tap，吞掉避免误标已读/误跳详情
     if (this._suppressTapUntil && Date.now() < this._suppressTapUntil) {
       this._suppressTapUntil = 0
       return
     }
     const { id, orderId } = e.currentTarget.dataset
-    const item = this.data.list.find((n) => n.id === id)
+    const idx = this.data.list.findIndex((n) => n.id === id)
+    const item = idx >= 0 ? this.data.list[idx] : null
     if (item && item.readStatus === 0) {
-      try {
-        this.data.driverMode && this.driverId
-          ? await api.readDriverMessage(id, this.driverId)
-          : await api.readNotification(id)
-      } catch (err) { /* api 容错toast */ }
-      const list = this.data.list.map((n) => (n.id === id ? { ...n, readStatus: 1 } : n))
-      this.setData({ list, unreadCount: Math.max(0, this.data.unreadCount - 1) })
+      // 弱网不等已读接口：先本地标读（路径更新单条字段，不整表替换、列表不闪）；
+      // 接口失败也不阻塞跳转——原实现失败同样标读，口径一致
+      this.setData({
+        [`list[${idx}].readStatus`]: 1,
+        unreadCount: Math.max(0, this.data.unreadCount - 1)
+      })
+      const markRead = this.data.driverMode && this.driverId
+        ? api.readDriverMessage(id, this.driverId)
+        : api.readNotification(id)
+      markRead.catch(() => { /* api 容错toast */ })
     }
-    // 跳转到订单追踪页
+    // 跳转到订单轨迹页（溯源页路由参数名是 id；防连点避免叠两层页面）
     if (orderId) {
-      wx.navigateTo({ url: '/pages/goods/trace/trace?orderId=' + orderId })
+      if (navThrottled(this)) return
+      wx.navigateTo({ url: '/pages/goods/trace/trace?id=' + orderId })
     }
   },
 

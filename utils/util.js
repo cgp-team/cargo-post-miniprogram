@@ -55,6 +55,20 @@ function formatNumber(n) {
 }
 
 /**
+ * 页面跳转防连点：gap 毫秒内重复触发视为连点，返回 true 让调用方直接 return。
+ * 快速双击 navigateTo 会叠两层相同页面；用时间戳而非 setTimeout，
+ * 页面销毁后无残留回调，不需要 onUnload 清理。
+ * 用法：if (navThrottled(this)) return
+ */
+function navThrottled(page, gap) {
+  const now = Date.now()
+  const g = gap || 400
+  if (page._navAt && now - page._navAt < g) return true
+  page._navAt = now
+  return false
+}
+
+/**
  * 村庄列表（首页/商城/快递页切换村庄入口共用，改动一处全局生效）
  */
 const VILLAGES = ['云山村', '大湾村', '青山镇', '竹林乡', '溪口村', '双河镇']
@@ -79,5 +93,6 @@ module.exports = {
   haversineKm,
   formatTime,
   formatBackendTime,
+  navThrottled,
   VILLAGES
 }
