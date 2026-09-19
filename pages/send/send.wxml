@@ -1,243 +1,288 @@
-<!-- 寄货页 - 农户一键寄货 -->
+<!-- 寄货页 - 农户一键寄货（站牌头 + 分组卡片 + 固定提交栏） -->
 <view class="page-send {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
 
   <!-- Step 1: 填写货物信息 -->
-  <view wx:if="{{step === 1}}" class="step-card">
-    <view class="step-title">
-      <text class="step-num">1</text>
-      <text>填写货物信息</text>
+  <view wx:if="{{step === 1}}" class="step-body">
+    <!-- 站牌头：页内锚点，与导航栏同色系衔接 -->
+    <view class="signpost send-signpost">
+      <view class="signpost-badge">第 1 步 · 共 3 步</view>
+      <view class="signpost-title">填写货物信息</view>
+      <view class="signpost-sub">写清货物与收发站点，费用提前算给你看</view>
     </view>
 
-    <view class="form-group">
-      <text class="form-label">货物名称 *</text>
-      <input
-        class="form-input"
-        placeholder="如：脆李、土鸡蛋、红薯粉"
-        value="{{goodsName}}"
-        bindinput="onNameInput"
-      />
-    </view>
-
-    <view class="form-group">
-      <text class="form-label">货物重量 *</text>
-      <view class="weight-row">
-        <input
-          class="form-input flex-1"
-          type="digit"
-          placeholder="如：50"
-          value="{{goodsWeight}}"
-          bindinput="onWeightInput"
-        />
-        <text class="weight-unit">斤</text>
+    <!-- 物品信息 -->
+    <view class="card form-card">
+      <view class="form-sec-title">
+        <icon name="box" size="32" color="{{iconDeep}}" />
+        <text>物品信息</text>
       </view>
-    </view>
 
-    <view class="form-group">
-      <text class="form-label">货物类型 *</text>
-      <picker mode="selector" range="{{categoryOptions}}" value="{{categoryIndex}}" bindchange="onCategoryChange">
-        <view class="picker-value">
-          <text>{{cargoCategory}}</text>
-          <text class="picker-arrow">▾</text>
-        </view>
-      </picker>
-    </view>
-
-    <view class="form-group">
-      <text class="form-label">货物件数 *</text>
-      <view class="weight-row">
+      <view class="form-group">
+        <text class="form-label">货物名称 *</text>
         <input
-          class="form-input flex-1"
-          type="number"
-          placeholder="如：2"
-          value="{{itemCount}}"
-          bindinput="onItemCountInput"
-        />
-        <text class="weight-unit">件</text>
-      </view>
-    </view>
-
-    <view class="form-group">
-      <text class="form-label">货物体积 *</text>
-      <view class="size-row">
-        <input
-          class="form-input size-input"
-          type="digit"
-          placeholder="长cm"
-          value="{{sizeLength}}"
-          data-field="sizeLength"
-          bindinput="onSizeInput"
-        />
-        <text class="size-x">×</text>
-        <input
-          class="form-input size-input"
-          type="digit"
-          placeholder="宽cm"
-          value="{{sizeWidth}}"
-          data-field="sizeWidth"
-          bindinput="onSizeInput"
-        />
-        <text class="size-x">×</text>
-        <input
-          class="form-input size-input"
-          type="digit"
-          placeholder="高cm"
-          value="{{sizeHeight}}"
-          data-field="sizeHeight"
-          bindinput="onSizeInput"
+          class="form-input"
+          placeholder="如：脆李、土鸡蛋、红薯粉"
+          value="{{goodsName}}"
+          bindinput="onNameInput"
         />
       </view>
-      <text class="form-hint">体积约 {{volumeText}} m³（按长×宽×高，单位厘米换算）</text>
-    </view>
 
-    <view class="form-group">
-      <view class="switch-row">
-        <view class="switch-text">
-          <text class="form-label">生鲜 / 需冷链</text>
-          <text class="form-hint">勾选后承运方需人工确认运输条件</text>
-        </view>
-        <switch checked="{{freshFlag}}" color="{{iconColor}}" bindchange="onFreshChange" />
-      </view>
-    </view>
-
-    <view class="form-group">
-      <text class="form-label">备注（选填）</text>
-      <textarea
-        class="form-textarea"
-        placeholder="补充说明，如：麻烦放阴凉处"
-        value="{{goodsNote}}"
-        bindinput="onNoteInput"
-        maxlength="100"
-      />
-    </view>
-
-    <view class="form-group">
-      <text class="form-label">取货方式 *</text>
-      <view class="pickup-mode-row">
-        <view class="mode-btn {{pickupMode === 'location' ? 'active' : ''}}" bindtap="useCurrentLocation" hover-class="hover">
-          <text>使用当前位置</text>
-        </view>
-        <!-- 手动选点：手机未开"精确位置"/室内/WiFi 定位时误差可达公里级（显示到隔壁区），点地图纠正 -->
-        <view class="mode-btn" bindtap="manualPickLocation" hover-class="hover">
-          <text>手动选位置</text>
-        </view>
-        <view class="mode-btn {{pickupMode === 'station' ? 'active' : ''}}" bindtap="switchToStationMode" hover-class="hover">
-          <text>自选取货站点</text>
+      <view class="form-group">
+        <text class="form-label">货物重量 *</text>
+        <view class="weight-row">
+          <input
+            class="form-input flex-1"
+            type="digit"
+            placeholder="如：50"
+            value="{{goodsWeight}}"
+            bindinput="onWeightInput"
+          />
+          <text class="weight-unit">斤</text>
         </view>
       </view>
 
-      <!-- 手填取货地址 → 推荐站点：村民不用先懂"站点"，写地址即可 -->
-      <view class="addr-row">
-        <input
-          class="addr-input"
-          placeholder="填写取货地址，如：重庆大学A区…"
-          value="{{pickupAddressText}}"
-          bindinput="onPickupAddressInput"
-          confirm-type="search"
-          bindconfirm="recommendPickupByAddress"
+      <view class="form-group">
+        <text class="form-label">货物类型 *</text>
+        <picker mode="selector" range="{{categoryOptions}}" value="{{categoryIndex}}" bindchange="onCategoryChange">
+          <view class="picker-value">
+            <text>{{cargoCategory}}</text>
+            <text class="picker-arrow">▾</text>
+          </view>
+        </picker>
+      </view>
+
+      <view class="form-group">
+        <text class="form-label">货物件数 *</text>
+        <view class="weight-row">
+          <input
+            class="form-input flex-1"
+            type="number"
+            placeholder="如：2"
+            value="{{itemCount}}"
+            bindinput="onItemCountInput"
+          />
+          <text class="weight-unit">件</text>
+        </view>
+      </view>
+
+      <view class="form-group">
+        <text class="form-label">货物体积 *</text>
+        <view class="size-row">
+          <input
+            class="form-input size-input"
+            type="digit"
+            placeholder="长cm"
+            value="{{sizeLength}}"
+            data-field="sizeLength"
+            bindinput="onSizeInput"
+          />
+          <text class="size-x">×</text>
+          <input
+            class="form-input size-input"
+            type="digit"
+            placeholder="宽cm"
+            value="{{sizeWidth}}"
+            data-field="sizeWidth"
+            bindinput="onSizeInput"
+          />
+          <text class="size-x">×</text>
+          <input
+            class="form-input size-input"
+            type="digit"
+            placeholder="高cm"
+            value="{{sizeHeight}}"
+            data-field="sizeHeight"
+            bindinput="onSizeInput"
+          />
+        </view>
+        <text class="form-hint">体积约 {{volumeText}} m³（按长×宽×高，单位厘米换算）</text>
+      </view>
+
+      <view class="form-group">
+        <view class="switch-row">
+          <view class="switch-text">
+            <text class="form-label">生鲜 / 需冷链</text>
+            <text class="form-hint">勾选后承运方需人工确认运输条件</text>
+          </view>
+          <switch checked="{{freshFlag}}" color="{{iconColor}}" bindchange="onFreshChange" />
+        </view>
+      </view>
+
+      <view class="form-group">
+        <text class="form-label">备注（选填）</text>
+        <textarea
+          class="form-textarea"
+          placeholder="补充说明，如：麻烦放阴凉处"
+          value="{{goodsNote}}"
+          bindinput="onNoteInput"
+          maxlength="100"
         />
-        <view class="addr-btn" bindtap="recommendPickupByAddress" hover-class="hover">
-          {{tipsLoading ? '查询中' : '推荐站点'}}
-        </view>
-      </view>
-      <view wx:if="{{pickupTips.length}}" class="tip-list">
-        <view
-          wx:for="{{pickupTips}}"
-          wx:key="index"
-          class="tip-item"
-          data-index="{{index}}"
-          bindtap="onPickupTipTap"
-          hover-class="hover"
-        >
-          <text class="tip-name">{{item.name}}</text>
-          <text class="tip-addr">{{item.district}}{{item.address}}</text>
-        </view>
-      </view>
-
-      <view wx:if="{{locCoarse}}" class="reach-card warn">
-        <text class="reach-title">当前定位精度较低（约 {{locAccuracyText}}）</text>
-        <text class="reach-line">位置可能偏差几百米到几公里，建议点「手动选位置」在地图上点准，或开启手机「精确位置」</text>
-      </view>
-
-      <view wx:if="{{reachLoading}}" class="reach-card">正在判断当前位置能否安排取货…</view>
-      <view wx:elif="{{reachability}}" class="reach-card {{reachability.reachable ? 'ok' : 'warn'}}">
-        <text class="reach-title">{{reachability.reachable ? '当前位置可由车辆就近服务' : '当前位置车辆无法直接进入'}}</text>
-        <text wx:if="{{reachability.recommendedStation}}" class="reach-line">推荐服务站点：{{reachability.recommendedStation.name}}</text>
-        <text wx:if="{{reachability.distanceKm != null}}" class="reach-line">距离约 {{reachability.distanceKm}} km · 步行约 {{reachability.walkMinutes}} 分钟{{reachability.distanceProvider === 'HAVERSINE' ? '（路线估算）' : ''}}</text>
-        <text class="reach-line reach-reason">{{reachability.message}}</text>
-        <view wx:if="{{!reachability.reachable && reachability.recommendedStation}}" class="reach-btn" bindtap="useRecommendedStation" hover-class="hover">使用推荐站点</view>
-      </view>
-      <text wx:if="{{originalAddress}}" class="form-hint">原始地址：{{originalAddress}}</text>
-    </view>
-
-    <view class="form-group">
-      <text class="form-label">取货站点 *</text>
-      <station-picker
-        title="选择取货站点"
-        placeholder="请选择取货站点"
-        stations="{{stations}}"
-        value="{{pickupStationId}}"
-        loading="{{stationsLoading}}"
-        error="{{stationsError}}"
-        bindchange="onPickupStationChange"
-        bindretry="loadStations"
-      />
-      <!-- 该站点车辆进不去时：提示并就就近更换（不可达场景的首要操作） -->
-      <view wx:if="{{stationSuggestion}}" class="station-suggest">
-        <text class="station-suggest-text">
-          {{stationSuggestion.message}}{{stationSuggestion.distanceKm ? '（距所选站点约 ' + stationSuggestion.distanceKm + ' km）' : ''}}
-        </text>
-        <view class="station-suggest-btn" bindtap="applyStationSuggestion" hover-class="hover">
-          改用「{{stationSuggestion.name}}」
-        </view>
       </view>
     </view>
 
-    <view class="form-group">
-      <text class="form-label">送达站点 *</text>
-      <!-- 手填送达地址 → 推荐送达站点：与取货侧同一套逻辑 -->
-      <view class="addr-row">
-        <input
-          class="addr-input"
-          placeholder="填写送达地址，如：沙坪坝重庆大学A区…"
-          value="{{deliveryAddressText}}"
-          bindinput="onDeliveryAddressInput"
-          confirm-type="search"
-          bindconfirm="recommendDeliveryByAddress"
-        />
-        <view class="addr-btn" bindtap="recommendDeliveryByAddress" hover-class="hover">
-          {{tipsLoading ? '查询中' : '推荐站点'}}
+    <!-- 寄件：取货站点 -->
+    <view class="card form-card">
+      <view class="form-sec-title">
+        <icon name="pin" size="32" color="{{iconColor}}" />
+        <text>寄件 · 怎么取货</text>
+      </view>
+
+      <view class="form-group">
+        <text class="form-label">取货方式 *</text>
+        <view class="pickup-mode-row">
+          <view class="mode-btn {{pickupMode === 'location' ? 'active' : ''}}" bindtap="useCurrentLocation" hover-class="hover">
+            <text>使用当前位置</text>
+          </view>
+          <!-- 手动选点：手机未开"精确位置"/室内/WiFi 定位时误差可达公里级（显示到隔壁区），点地图纠正 -->
+          <view class="mode-btn" bindtap="manualPickLocation" hover-class="hover">
+            <text>手动选位置</text>
+          </view>
+          <view class="mode-btn {{pickupMode === 'station' ? 'active' : ''}}" bindtap="switchToStationMode" hover-class="hover">
+            <text>自选取货站点</text>
+          </view>
+        </view>
+
+        <!-- 手填取货地址 → 推荐站点：村民不用先懂"站点"，写地址即可 -->
+        <view class="addr-row">
+          <input
+            class="addr-input"
+            placeholder="填写取货地址，如：重庆大学A区…"
+            value="{{pickupAddressText}}"
+            bindinput="onPickupAddressInput"
+            confirm-type="search"
+            bindconfirm="recommendPickupByAddress"
+          />
+          <view class="addr-btn" bindtap="recommendPickupByAddress" hover-class="hover">
+            {{tipsLoading ? '查询中' : '推荐站点'}}
+          </view>
+        </view>
+        <view wx:if="{{pickupTips.length}}" class="tip-list">
+          <view
+            wx:for="{{pickupTips}}"
+            wx:key="index"
+            class="tip-item"
+            data-index="{{index}}"
+            bindtap="onPickupTipTap"
+            hover-class="hover"
+          >
+            <text class="tip-name">{{item.name}}</text>
+            <text class="tip-addr">{{item.district}}{{item.address}}</text>
+          </view>
+        </view>
+
+        <view wx:if="{{locCoarse}}" class="reach-card warn">
+          <text class="reach-title">当前定位精度较低（约 {{locAccuracyText}}）</text>
+          <text class="reach-line">位置可能偏差几百米到几公里，建议点「手动选位置」在地图上点准，或开启手机「精确位置」</text>
+        </view>
+
+        <view wx:if="{{reachLoading}}" class="reach-card">正在判断当前位置能否安排取货…</view>
+        <view wx:elif="{{reachability}}" class="reach-card {{reachability.reachable ? 'ok' : 'warn'}}">
+          <text class="reach-title">{{reachability.reachable ? '当前位置可由车辆就近服务' : '当前位置车辆无法直接进入'}}</text>
+          <text wx:if="{{reachability.recommendedStation}}" class="reach-line">推荐服务站点：{{reachability.recommendedStation.name}}</text>
+          <text wx:if="{{reachability.distanceKm != null}}" class="reach-line">距离约 {{reachability.distanceKm}} km · 步行约 {{reachability.walkMinutes}} 分钟{{reachability.distanceProvider === 'HAVERSINE' ? '（路线估算）' : ''}}</text>
+          <text class="reach-line reach-reason">{{reachability.message}}</text>
+          <view wx:if="{{!reachability.reachable && reachability.recommendedStation}}" class="reach-btn" bindtap="useRecommendedStation" hover-class="hover">使用推荐站点</view>
+        </view>
+        <text wx:if="{{originalAddress}}" class="form-hint">原始地址：{{originalAddress}}</text>
+      </view>
+
+      <view class="form-group">
+        <text class="form-label">取货站点 *</text>
+        <!-- 站点触发行：起点绿 pin 圆标 + 站名 + 箭头（组件内部） -->
+        <view class="station-anchor">
+          <view class="station-anchor-pin">
+            <icon name="pin" size="30" color="#FFFFFF" />
+          </view>
+          <station-picker
+            class="station-anchor-picker"
+            title="选择取货站点"
+            placeholder="请选择取货站点"
+            stations="{{stations}}"
+            value="{{pickupStationId}}"
+            loading="{{stationsLoading}}"
+            error="{{stationsError}}"
+            bindchange="onPickupStationChange"
+            bindretry="loadStations"
+          />
+        </view>
+        <!-- 该站点车辆进不去时：提示并就就近更换（不可达场景的首要操作） -->
+        <view wx:if="{{stationSuggestion}}" class="station-suggest">
+          <text class="station-suggest-text">
+            {{stationSuggestion.message}}{{stationSuggestion.distanceKm ? '（距所选站点约 ' + stationSuggestion.distanceKm + ' km）' : ''}}
+          </text>
+          <view class="station-suggest-btn" bindtap="applyStationSuggestion" hover-class="hover">
+            改用「{{stationSuggestion.name}}」
+          </view>
         </view>
       </view>
-      <view wx:if="{{deliveryTips.length}}" class="tip-list">
-        <view
-          wx:for="{{deliveryTips}}"
-          wx:key="index"
-          class="tip-item"
-          data-index="{{index}}"
-          bindtap="onDeliveryTipTap"
-          hover-class="hover"
-        >
-          <text class="tip-name">{{item.name}}</text>
-          <text class="tip-addr">{{item.district}}{{item.address}}</text>
+    </view>
+
+    <!-- 收件：送达站点 -->
+    <view class="card form-card">
+      <view class="form-sec-title">
+        <icon name="pin" size="32" color="{{iconClay}}" />
+        <text>收件 · 送到哪里</text>
+      </view>
+
+      <view class="form-group">
+        <text class="form-label">送达站点 *</text>
+        <!-- 手填送达地址 → 推荐送达站点：与取货侧同一套逻辑 -->
+        <view class="addr-row">
+          <input
+            class="addr-input"
+            placeholder="填写送达地址，如：沙坪坝重庆大学A区…"
+            value="{{deliveryAddressText}}"
+            bindinput="onDeliveryAddressInput"
+            confirm-type="search"
+            bindconfirm="recommendDeliveryByAddress"
+          />
+          <view class="addr-btn" bindtap="recommendDeliveryByAddress" hover-class="hover">
+            {{tipsLoading ? '查询中' : '推荐站点'}}
+          </view>
+        </view>
+        <view wx:if="{{deliveryTips.length}}" class="tip-list">
+          <view
+            wx:for="{{deliveryTips}}"
+            wx:key="index"
+            class="tip-item"
+            data-index="{{index}}"
+            bindtap="onDeliveryTipTap"
+            hover-class="hover"
+          >
+            <text class="tip-name">{{item.name}}</text>
+            <text class="tip-addr">{{item.district}}{{item.address}}</text>
+          </view>
+        </view>
+        <!-- 站点触发行：终点橙 pin 圆标 -->
+        <view class="station-anchor">
+          <view class="station-anchor-pin station-anchor-pin--clay">
+            <icon name="pin" size="30" color="#FFFFFF" />
+          </view>
+          <station-picker
+            class="station-anchor-picker"
+            title="选择送达站点"
+            placeholder="请选择送达站点"
+            stations="{{stations}}"
+            value="{{deliveryStationId}}"
+            loading="{{stationsLoading}}"
+            error="{{stationsError}}"
+            bindchange="onDeliveryStationChange"
+            bindretry="loadStations"
+          />
         </view>
       </view>
-      <station-picker
-        title="选择送达站点"
-        placeholder="请选择送达站点"
-        stations="{{stations}}"
-        value="{{deliveryStationId}}"
-        loading="{{stationsLoading}}"
-        error="{{stationsError}}"
-        bindchange="onDeliveryStationChange"
-        bindretry="loadStations"
-      />
     </view>
 
     <!-- 费用试算：填完取货/送达地址即出金额（件单价×件数 + 里程费），不用等提交后才看得到 -->
     <view class="quote-card">
       <view wx:if="{{quoteLoading}}" class="quote-hint">正在试算费用…</view>
       <block wx:elif="{{quote}}">
-        <text class="quote-amount">预计费用 ¥{{quote.amount}}</text>
+        <view class="quote-head">
+          <text class="quote-title">费用试算</text>
+          <text class="quote-amount">¥{{quote.amount}}</text>
+        </view>
+        <!-- 山路线：取货站到送达站之间的一段路 -->
+        <view class="road-line quote-road"></view>
         <text class="quote-detail">
           件数费 ¥{{quote.itemFee}}{{quote.distanceFee > 0 ? ' + 里程费 ¥' + quote.distanceFee : ''}}（{{quote.itemCount}} 件{{quote.distanceKm != null ? ' · 计价里程 ' + quote.distanceKm + ' km' : ''}}）
         </text>
@@ -265,67 +310,96 @@
       <view class="rp-retry" bindtap="retryRoutePreview" hover-class="hover">重新查询</view>
     </view>
 
-    <button class="btn-primary send-btn" bindtap="goToPhoto">下一步：拍照确认</button>
+    <!-- 固定提交栏：价格预估 + 主行动 -->
+    <view class="form-foot-bar">
+      <view class="form-foot-price">
+        <block wx:if="{{quote}}">
+          <text class="form-foot-price-label">预估费用</text>
+          <text class="form-foot-price-value">¥{{quote.amount}}</text>
+        </block>
+        <text wx:else class="form-foot-price-hint">选好站点自动出价</text>
+      </view>
+      <button class="btn-primary" bindtap="goToPhoto">下一步：拍照确认</button>
+    </view>
   </view>
 
   <!-- Step 2: 拍照确认 -->
-  <view wx:if="{{step === 2}}" class="step-card">
-    <view class="step-title">
-      <text class="step-num">2</text>
-      <text>拍照确认货物</text>
+  <view wx:if="{{step === 2}}" class="step-body">
+    <view class="signpost send-signpost">
+      <view class="signpost-badge">第 2 步 · 共 3 步</view>
+      <view class="signpost-title">拍照确认货物</view>
+      <view class="signpost-sub">拍张货物照片，司机取货更好认</view>
     </view>
 
-    <view class="photo-area" bindtap="takePhoto" hover-class="hover">
-      <image wx:if="{{photoPath}}" class="photo-preview" src="{{photoPath}}" mode="aspectFill"></image>
-      <view wx:else class="photo-placeholder">
-        <icon class="photo-camera" name="camera" size="80" color="{{iconColor}}" />
-        <text class="photo-hint">点击拍照</text>
-        <text class="photo-sub">拍摄货物照片，方便司机辨认</text>
+    <!-- 货物照片 -->
+    <view class="card form-card">
+      <view class="form-sec-title">
+        <icon name="camera" size="32" color="{{iconDeep}}" />
+        <text>货物照片</text>
       </view>
-    </view>
-
-    <view class="info-summary">
-      <view class="info-row">
-        <text class="info-label">货物</text>
-        <text class="info-value">{{goodsName}}</text>
-      </view>
-      <view class="info-row">
-        <text class="info-label">重量</text>
-        <text class="info-value">{{goodsWeight}} 斤</text>
-      </view>
-      <view class="info-row">
-        <text class="info-label">类型</text>
-        <text class="info-value">{{cargoCategory}}</text>
-      </view>
-      <view class="info-row">
-        <text class="info-label">件数</text>
-        <text class="info-value">{{itemCount}} 件</text>
-      </view>
-      <view class="info-row">
-        <text class="info-label">体积</text>
-        <text class="info-value">{{sizeLength}}×{{sizeWidth}}×{{sizeHeight}} cm（{{volumeText}} m³）</text>
-      </view>
-      <view wx:if="{{freshFlag}}" class="info-row">
-        <text class="info-label">生鲜</text>
-        <text class="info-value">需冷链，承运方确认</text>
-      </view>
-      <view wx:if="{{pickupMode === 'location'}}" class="info-row">
-        <text class="info-label">取货方式</text>
-        <text class="info-value">就近站点{{reachability && !reachability.reachable ? '（送站交接）' : ''}}</text>
-      </view>
-      <view wx:if="{{pickupMode === 'location' && reachability && reachability.distanceKm != null}}" class="info-row">
-        <text class="info-label">距离/步行</text>
-        <text class="info-value">{{reachability.distanceKm}} km · 约 {{reachability.walkMinutes}} 分钟</text>
-      </view>
-      <view wx:if="{{goodsNote}}" class="info-row">
-        <text class="info-label">备注</text>
-        <text class="info-value">{{goodsNote}}</text>
+      <view class="photo-area" bindtap="takePhoto" hover-class="hover">
+        <image wx:if="{{photoPath}}" class="photo-preview" src="{{photoPath}}" mode="aspectFill"></image>
+        <view wx:else class="photo-placeholder">
+          <icon class="photo-camera" name="camera" size="80" color="{{iconColor}}" />
+          <text class="photo-hint">点击拍照</text>
+          <text class="photo-sub">拍摄货物照片，方便司机辨认</text>
+        </view>
       </view>
     </view>
 
-    <view class="receiver-section">
+    <!-- 信息核对 -->
+    <view class="card form-card">
+      <view class="form-sec-title">
+        <icon name="list" size="32" color="{{iconDeep}}" />
+        <text>信息核对</text>
+      </view>
+      <view class="info-summary">
+        <view class="info-row">
+          <text class="info-label">货物</text>
+          <text class="info-value">{{goodsName}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">重量</text>
+          <text class="info-value">{{goodsWeight}} 斤</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">类型</text>
+          <text class="info-value">{{cargoCategory}}</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">件数</text>
+          <text class="info-value">{{itemCount}} 件</text>
+        </view>
+        <view class="info-row">
+          <text class="info-label">体积</text>
+          <text class="info-value">{{sizeLength}}×{{sizeWidth}}×{{sizeHeight}} cm（{{volumeText}} m³）</text>
+        </view>
+        <view wx:if="{{freshFlag}}" class="info-row">
+          <text class="info-label">生鲜</text>
+          <text class="info-value">需冷链，承运方确认</text>
+        </view>
+        <view wx:if="{{pickupMode === 'location'}}" class="info-row">
+          <text class="info-label">取货方式</text>
+          <text class="info-value">就近站点{{reachability && !reachability.reachable ? '（送站交接）' : ''}}</text>
+        </view>
+        <view wx:if="{{pickupMode === 'location' && reachability && reachability.distanceKm != null}}" class="info-row">
+          <text class="info-label">距离/步行</text>
+          <text class="info-value">{{reachability.distanceKm}} km · 约 {{reachability.walkMinutes}} 分钟</text>
+        </view>
+        <view wx:if="{{goodsNote}}" class="info-row">
+          <text class="info-label">备注</text>
+          <text class="info-value">{{goodsNote}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 收货信息 -->
+    <view class="card form-card">
       <view class="receiver-head">
-        <text class="receiver-title">收货信息</text>
+        <view class="form-sec-title">
+          <icon name="user" size="32" color="{{iconDeep}}" />
+          <text>收货信息</text>
+        </view>
         <view class="receiver-addr-book" bindtap="goToAddressBook" hover-class="hover">
           <icon name="pin" size="28" color="{{iconColor}}" />
           <text>地址簿</text>
@@ -361,16 +435,20 @@
       </view>
     </view>
 
-    <view class="step-actions">
+    <!-- 固定提交栏：上一步重填 + 确认发布 -->
+    <view class="form-foot-bar">
       <button class="btn-outline" bindtap="resetSend">重新填写</button>
       <button class="btn-primary" bindtap="confirmSend">确认发布</button>
     </view>
   </view>
 
   <!-- Step 3: 提交成功 -->
-  <view wx:if="{{step === 3}}" class="step-card match-success">
-    <icon class="match-emoji" name="send" size="100" color="{{iconColor}}" />
-    <text class="match-title">寄货已提交！</text>
+  <view wx:if="{{step === 3}}" class="step-body match-success">
+    <view class="signpost send-signpost">
+      <view class="signpost-badge">寄货单已受理</view>
+      <view class="signpost-title">寄货已提交！</view>
+      <view class="signpost-sub">保存好单号，可在「我的寄货」查看进度</view>
+    </view>
 
     <!-- 承运审核结果：可运/不可运/需操作 实时反馈 -->
     <view wx:if="{{reviewMode}}" class="review-card review-{{reviewMode}}">
@@ -387,14 +465,26 @@
       </view>
     </view>
 
-    <view class="match-bus-card">
-      <canvas type="2d" id="qrCanvas" class="qr-canvas"></canvas>
-      <text class="order-no-display">{{orderNo}}</text>
-      <text class="bus-detail">寄货订单号 · 请妥善保存</text>
-      <text wx:if="{{orderAmount != null}}" class="bus-detail">订单金额 ¥{{orderAmount}}</text>
-      <view class="qr-actions">
-        <button class="qr-btn" bindtap="copyOrderNo">复制单号</button>
-        <button class="qr-btn" open-type="share" bindtap="noop">分享查件</button>
+    <!-- 订单车票：主券放二维码与单号，副券放金额 -->
+    <view class="match-bus-card ticket-card">
+      <view class="ticket-card__main qr-main">
+        <canvas type="2d" id="qrCanvas" class="qr-canvas"></canvas>
+        <text class="order-no-display">{{orderNo}}</text>
+        <text class="bus-detail">寄货订单号 · 请妥善保存</text>
+        <view class="qr-actions">
+          <button class="qr-btn" bindtap="copyOrderNo">复制单号</button>
+          <button class="qr-btn" open-type="share" bindtap="noop">分享查件</button>
+        </view>
+      </view>
+      <view class="ticket-card__stub">
+        <block wx:if="{{orderAmount != null}}">
+          <text class="ticket-card__stub-value stub-price">¥{{orderAmount}}</text>
+          <text class="ticket-card__stub-label">订单金额</text>
+        </block>
+        <block wx:else>
+          <icon name="qr" size="56" color="#8A8778" />
+          <text class="ticket-card__stub-label">取件扫码</text>
+        </block>
       </view>
     </view>
 

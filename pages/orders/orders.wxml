@@ -1,6 +1,6 @@
 <!-- 我的订单页 -->
 <view class="page-orders {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
-  <!-- 订单来源：商城订单（默认）/ 寄货订单（与「快递」页同源） -->
+  <!-- 订单来源：商城订单（默认）/ 寄货订单（与「快递」页同源），站牌式分段开关 -->
   <view class="order-source-tabs">
     <view
       wx:for="{{sourceTabs}}"
@@ -8,24 +8,28 @@
       class="order-source-tab {{source === item.key ? 'active' : ''}}"
       data-key="{{item.key}}"
       bindtap="switchSource"
+      hover-class="hover"
     >{{item.name}}</view>
   </view>
 
-  <!-- 状态 tab -->
+  <!-- 状态筛选胶囊条（吸顶） -->
   <view class="order-tabs" wx:if="{{source === 'PRODUCT'}}">
-    <view
-      wx:for="{{statusTabs}}"
-      wx:key="name"
-      class="order-tab {{activeTab === item.key ? 'active' : ''}}"
-      data-key="{{item.key}}"
-      bindtap="switchTab"
-    >{{item.name}}</view>
+    <view class="order-tabs-track">
+      <view
+        wx:for="{{statusTabs}}"
+        wx:key="name"
+        class="order-tab {{activeTab === item.key ? 'active' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="switchTab"
+        hover-class="hover"
+      >{{item.name}}</view>
+    </view>
   </view>
 
-  <!-- 订单列表 -->
+  <!-- 订单列表：一张订单 = 一张车票，主券放信息、副券放金额/件数 -->
   <view class="order-list" wx:if="{{list.length}}">
     <view
-      class="order-card"
+      class="ticket-card"
       wx:for="{{list}}"
       wx:key="id"
       data-source="{{item.source}}"
@@ -34,43 +38,59 @@
       bindtap="openOrderDetail"
       hover-class="hover"
     >
-      <view class="order-head">
-        <text class="order-no">单号 {{item.orderNo}}</text>
-        <text class="order-status {{item.statusClass}}">{{item.statusName}}</text>
-      </view>
-      <!-- 寄货订单：一张卡片=一个包裹（物品名/重量/件数）；点卡片进「快递」页看物流详情 -->
-      <block wx:if="{{item.source === 'SEND'}}">
-        <view class="order-goods">
-          <view class="order-goods-img-ph"><icon name="box" size="44" color="{{iconColor}}" /></view>
-          <view class="order-goods-info">
-            <text class="order-goods-name">{{item.goodsName}}</text>
-            <text class="order-goods-sub">
-              <block wx:if="{{item.goodsWeight}}">重量 {{item.goodsWeight}}kg · </block>{{item.itemCount || 1}} 件
-            </text>
+      <view class="ticket-card__main">
+        <view class="order-head">
+          <text class="order-serial">单号 {{item.orderNo}}</text>
+          <text class="order-status {{item.statusClass}}">{{item.statusName}}</text>
+        </view>
+        <!-- 寄货订单：一张卡片=一个包裹（物品名/重量/件数）；点卡片进「快递」页看物流详情 -->
+        <block wx:if="{{item.source === 'SEND'}}">
+          <view class="order-goods">
+            <view class="order-goods-img-ph"><icon name="box" size="44" color="{{iconColor}}" /></view>
+            <view class="order-goods-info">
+              <text class="order-goods-name">{{item.goodsName}}</text>
+              <text class="order-goods-sub">
+                <block wx:if="{{item.goodsWeight}}">重量 {{item.goodsWeight}}kg · </block>{{item.itemCount || 1}} 件
+              </text>
+            </view>
+            <text class="order-goods-amount">{{item.itemCount || 1}} 件</text>
           </view>
-          <text class="order-goods-amount">{{item.itemCount || 1}} 件</text>
+        </block>
+        <block wx:else>
+          <view class="order-goods" wx:for="{{item.items}}" wx:for-item="g" wx:key="productId">
+            <image wx:if="{{g.imageUrl}}" class="order-goods-img" src="{{g.imageUrl}}" mode="aspectFill" lazy-load />
+            <view wx:else class="order-goods-img-ph"><icon name="leaf" size="44" color="{{iconColor}}" /></view>
+            <view class="order-goods-info">
+              <text class="order-goods-name">{{g.productName}}</text>
+              <text class="order-goods-sub">¥{{g.productPrice}} × {{g.quantity}}</text>
+            </view>
+            <text class="order-goods-amount">¥{{g.amount}}</text>
+          </view>
+        </block>
+        <!-- 配送提示：已发货=司机配送中（引导看溯源与到站提醒） -->
+        <view wx:if="{{item.deliveryHint}}" class="order-delivery-hint">
+          <icon name="bus" size="24" color="{{iconColor}}" />
+          <text class="order-delivery-hint-text">{{item.deliveryHint}}</text>
         </view>
-      </block>
-      <block wx:else>
-        <view class="order-goods" wx:for="{{item.items}}" wx:for-item="g" wx:key="productId">
-        <image wx:if="{{g.imageUrl}}" class="order-goods-img" src="{{g.imageUrl}}" mode="aspectFill" lazy-load />
-        <view wx:else class="order-goods-img-ph"><icon name="leaf" size="44" color="{{iconColor}}" /></view>
-        <view class="order-goods-info">
-          <text class="order-goods-name">{{g.productName}}</text>
-          <text class="order-goods-sub">¥{{g.productPrice}} × {{g.quantity}}</text>
+        <view class="order-foot">
+          <text class="order-time">{{item.createTimeText}}</text>
+          <view class="order-foot-right">
+            <text wx:if="{{item.source === 'SEND'}}" class="order-hint-link">点卡片看物流详情 ›</text>
+            <view wx:if="{{item.source !== 'SEND' && (item.status === 1 || item.status === 2)}}" class="order-trace" data-id="{{item.id}}" catchtap="goToTrace" hover-class="hover">产地溯源</view>
+            <view wx:if="{{item.source !== 'SEND' && item.status === 0}}" class="order-cancel" data-id="{{item.id}}" catchtap="cancelOrder" hover-class="hover">取消订单</view>
+          </view>
         </view>
-        <text class="order-goods-amount">¥{{g.amount}}</text>
       </view>
-      </block>
-      <view wx:if="{{item.deliveryHint}}" class="order-delivery-hint">{{item.deliveryHint}}</view>
-      <view class="order-foot">
-        <text class="order-time">{{item.createTimeText}}</text>
-        <view class="order-foot-right">
-          <text wx:if="{{item.source !== 'SEND'}}" class="order-total">合计 ¥{{item.totalAmount}}</text>
-          <text wx:else class="order-total">点卡片看物流详情 ›</text>
-          <view wx:if="{{item.source !== 'SEND' && (item.status === 1 || item.status === 2)}}" class="order-trace" data-id="{{item.id}}" catchtap="goToTrace" hover-class="hover">产地溯源</view>
-          <view wx:if="{{item.source !== 'SEND' && item.status === 0}}" class="order-cancel" data-id="{{item.id}}" catchtap="cancelOrder" hover-class="hover">取消订单</view>
-        </view>
+      <!-- 副券：商城订单放合计金额，寄货订单放件数 -->
+      <view class="ticket-card__stub">
+        <block wx:if="{{item.source !== 'SEND'}}">
+          <text class="ticket-card__stub-value stub-price">¥{{item.totalAmount}}</text>
+          <text class="ticket-card__stub-label">合计</text>
+        </block>
+        <block wx:else>
+          <text class="ticket-card__stub-value">{{item.itemCount || 1}}</text>
+          <text class="ticket-card__stub-label">寄货件数</text>
+        </block>
       </view>
     </view>
     <view wx:if="{{!hasMore}}" class="order-nomore">没有更多了</view>

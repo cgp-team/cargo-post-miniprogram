@@ -1,195 +1,342 @@
+/* 车辆详情页 · 设计语言：山乡巴士 · 站牌与车票 */
+
 .detail-page {
   min-height: 100vh;
-  background: var(--color-paper);
+  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-paper) 380rpx);
   padding: 24rpx;
+  box-sizing: border-box;
 }
 
-.bus-head {
-  background: var(--color-primary);
-  border-radius: 24rpx;
-  padding: 32rpx;
-  color: #fff;
-}
-.head-plate {
-  font-size: 44rpx;
-  font-weight: 700;
-}
-.head-route {
-  font-size: 26rpx;
-  opacity: 0.9;
-  margin-top: 8rpx;
-}
-.head-tags {
-  display: flex;
-  margin-top: 20rpx;
-}
-.tag {
-  font-size: 22rpx;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 10rpx;
-  padding: 6rpx 16rpx;
-  margin-right: 12rpx;
-}
-.tag.status.running {
-  background: var(--color-gold);
-}
-.tag.demo {
-  background: var(--color-clay);
-}
-.head-meta {
-  display: flex;
-  justify-content: space-between;
-  font-size: 24rpx;
-  margin-top: 20rpx;
-  opacity: 0.95;
-}
-
-.progress-card {
-  background: #fff;
-  border-radius: 20rpx;
-  padding: 28rpx;
-  margin-top: 20rpx;
-}
-.progress-track {
-  height: 16rpx;
-  background: var(--color-primary-light);
-  border-radius: 8rpx;
-  position: relative;
-}
-.progress-fill {
-  height: 100%;
-  background: var(--color-primary);
-  border-radius: 8rpx;
-}
-.progress-thumb {
-  position: absolute;
-  top: -6rpx;
-  width: 28rpx;
-  height: 28rpx;
-  border-radius: 50%;
-  background: #fff;
-  border: 4rpx solid var(--color-primary);
-  margin-left: -14rpx;
-}
-.progress-label {
-  display: flex;
-  justify-content: space-between;
-  font-size: 22rpx;
-  color: #888;
-  margin-top: 16rpx;
-}
-
-.stops {
-  margin-top: 20rpx;
-  background: #fff;
-  border-radius: 20rpx;
-  padding: 16rpx 24rpx;
-}
-.stop-item {
-  display: flex;
-  align-items: flex-start;
-}
-.stop-rail {
-  position: relative;
-  width: 40rpx;
-  display: flex;
-  justify-content: center;
-  padding-top: 30rpx;
-}
-/* 站台时间轴纵向连接线 */
-.stop-rail::after {
-  content: '';
-  position: absolute;
-  top: 46rpx;
-  bottom: 0;
-  width: 2rpx;
-  background: #e8e4da;
-}
-.stop-item.passed .stop-rail::after {
-  background: var(--color-accent);
-}
-.stop-item:last-child .stop-rail::after {
-  display: none;
-}
-.stop-dot {
+/* ---------- 站牌头（底板/落款横档/光晕由全局 .signpost 提供，内容压在上层） ---------- */
+.head-top {
   position: relative;
   z-index: 1;
-  width: 20rpx;
-  height: 20rpx;
-  border-radius: 50%;
-  background: #ddd;
-}
-.stop-item.passed .stop-dot {
-  background: var(--color-accent);
-}
-.stop-item.current .stop-dot {
-  background: var(--color-primary);
-  box-shadow: 0 0 0 8rpx var(--color-primary-light);
-}
-.stop-body {
-  flex: 1;
-  padding: 22rpx 0;
-  border-bottom: 1rpx solid #f0f0f0;
-}
-.stop-item:last-child .stop-body {
-  border-bottom: none;
-}
-.stop-name {
-  font-size: 28rpx;
-  color: var(--color-ink);
-}
-.stop-item.passed .stop-name {
-  color: #aaa;
-  text-decoration: line-through;
-}
-.stop-item.current .stop-name {
-  font-weight: 700;
-  color: var(--color-primary-dark);
-}
-.stop-min {
-  font-size: 20rpx;
-  color: #bbb;
-  margin-left: 12rpx;
-}
-.stop-state {
-  font-size: 20rpx;
-  color: #999;
-  padding-top: 26rpx;
-  width: 90rpx;
-  text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
 }
 
-.empty {
-  text-align: center;
-  color: #999;
-  font-size: 24rpx;
-  padding: 100rpx 0;
+.head-plate {
+  font-size: 44rpx;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 2rpx;
 }
 
-/* 老年模式放大 */
-.elderly-mode .head-plate {
-  font-size: 50rpx;
+/* 状态胶囊：行驶中着稻谷金，一眼可辨 */
+.head-status {
+  flex: none;
+  font-size: 22rpx;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1rpx solid rgba(255, 255, 255, 0.4);
+  padding: 6rpx 18rpx;
+  border-radius: var(--radius-pill);
 }
-.elderly-mode .stop-name {
-  font-size: 32rpx;
+
+.head-status.running {
+  background: var(--color-gold);
+  border-color: transparent;
+  font-weight: 600;
 }
-.elderly-mode .stop-state {
-  font-size: 24rpx;
+
+.head-route {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-top: 12rpx;
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.92);
 }
-/* 补充：线路副标题/空态提示同步放大 */
-.elderly-mode .head-route {
-  font-size: 30rpx;
-}
-.elderly-mode .empty {
-  font-size: 30rpx;
-}
-/* 顶部地图：车辆实时位置 + 线路 + 我的位置 */
-.detail-map-wrap {
-  height: 40vh;
+
+.head-station {
+  min-width: 0;
   overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.head-tags {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 14rpx;
+}
+
+.tag {
+  font-size: 22rpx;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-pill);
+  padding: 6rpx 18rpx;
+  margin: 0 12rpx 8rpx 0;
+}
+
+/* 运行说明：与票身信息分隔一道浅线 */
+.head-meta {
+  position: relative;
+  z-index: 1;
+  margin-top: 14rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid rgba(255, 255, 255, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.head-state {
+  font-size: 26rpx;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.head-meta-line {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* ---------- 地图卡 ---------- */
+.detail-map-wrap {
+  margin-top: 24rpx;
+  height: 40vh;
+  border-radius: 24rpx;
+  overflow: hidden;
+  border: 1rpx solid rgba(60, 50, 30, 0.05);
+  box-shadow: var(--shadow-card);
 }
 
 .detail-map {
   width: 100%;
   height: 100%;
 }
+
+/* ---------- 区块标题（对齐首页/列表页节奏） ---------- */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 28rpx 4rpx 18rpx;
+}
+
+.section-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+}
+
+.section-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  letter-spacing: 0.5rpx;
+}
+
+.section-sub {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: var(--color-primary-dark);
+  background: var(--color-primary-light);
+  padding: 4rpx 18rpx;
+  border-radius: var(--radius-pill);
+}
+
+/* ---------- 行程进度：虚线山路轨道，巴士图标走到当前进度 ---------- */
+.progress-card {
+  background: #FFFDF8;
+  border-radius: 20rpx;
+  padding: 40rpx 28rpx 28rpx;
+  box-shadow: var(--shadow-card);
+}
+
+.progress-track {
+  position: relative;
+  height: 12rpx;
+  border-radius: 6rpx;
+  background: repeating-linear-gradient(90deg, #E4DECD 0, #E4DECD 10rpx, transparent 10rpx, transparent 18rpx);
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: 6rpx;
+  background: linear-gradient(90deg, var(--color-accent), var(--color-primary));
+}
+
+.progress-thumb {
+  position: absolute;
+  top: -16rpx;
+  width: 44rpx;
+  height: 44rpx;
+  margin-left: -22rpx;
+  border-radius: 50%;
+  background: var(--color-primary);
+  border: 4rpx solid #ffffff;
+  box-shadow: 0 4rpx 12rpx var(--color-primary-shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 22rpx;
+  color: var(--color-text-secondary);
+  margin-top: 22rpx;
+}
+
+/* ---------- 经停站点：竖向时间线（圆点 + 虚线山路连线） ---------- */
+.stops {
+  background: #FFFDF8;
+  border-radius: 20rpx;
+  padding: 8rpx 24rpx;
+  box-shadow: var(--shadow-card);
+}
+
+.stop-item {
+  display: flex;
+  align-items: stretch;
+}
+
+.stop-rail {
+  position: relative;
+  flex: none;
+  width: 44rpx;
+  display: flex;
+  justify-content: center;
+  padding-top: 30rpx;
+}
+
+/* 圆点上方的来路 / 下方的去路：首尾相接成一条连续虚线山路 */
+.stop-rail::before,
+.stop-rail::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  margin-left: -2rpx;
+  width: 4rpx;
+  background: repeating-linear-gradient(180deg, #DCD5C2 0, #DCD5C2 8rpx, transparent 8rpx, transparent 16rpx);
+}
+
+.stop-rail::before { top: 0; height: 34rpx; }
+.stop-rail::after { top: 48rpx; bottom: 0; }
+
+/* 首站无来路，末站无去路 */
+.stop-item:first-child .stop-rail::before,
+.stop-item:last-child .stop-rail::after {
+  display: none;
+}
+
+/* 分色：已过站的去路绿色；到达已过站/当前站的来路绿色（车已驶过） */
+.stop-item.passed .stop-rail::after,
+.stop-item.passed .stop-rail::before,
+.stop-item.current .stop-rail::before {
+  background: repeating-linear-gradient(180deg, var(--color-accent) 0, var(--color-accent) 8rpx, transparent 8rpx, transparent 16rpx);
+}
+
+.stop-dot {
+  position: relative;
+  z-index: 1;
+  width: 18rpx;
+  height: 18rpx;
+  border-radius: 50%;
+  background: #FFFDF8;
+  border: 3rpx solid #CFC8B4;
+}
+
+.stop-item.passed .stop-dot {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.stop-item.current .stop-dot {
+  width: 24rpx;
+  height: 24rpx;
+  background: var(--color-primary);
+  border-color: #ffffff;
+  animation: stop-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes stop-pulse {
+  0%, 100% { box-shadow: 0 0 0 6rpx var(--color-primary-light); }
+  50% { box-shadow: 0 0 0 12rpx var(--color-primary-light); }
+}
+
+.stop-body {
+  flex: 1;
+  min-width: 0;
+  padding: 22rpx 0;
+  border-bottom: 1rpx solid #F0EAE0;
+}
+
+.stop-item:last-child .stop-body {
+  border-bottom: none;
+}
+
+.stop-name {
+  font-size: 28rpx;
+  color: var(--color-ink);
+}
+
+.stop-item.passed .stop-name {
+  color: var(--color-text-tertiary);
+  text-decoration: line-through;
+}
+
+.stop-item.current .stop-name {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+}
+
+.stop-min {
+  font-size: 20rpx;
+  color: var(--color-text-tertiary);
+  margin-left: 12rpx;
+}
+
+.stop-state {
+  flex: none;
+  align-self: flex-start;
+  width: 96rpx;
+  margin-top: 24rpx;
+  text-align: right;
+  font-size: 20rpx;
+  color: var(--color-text-tertiary);
+}
+
+.stop-state.passed {
+  color: var(--color-status-done);
+}
+
+/* 当前站：浅绿胶囊深绿字 */
+.stop-state.current {
+  color: var(--color-primary-dark);
+  background: var(--color-primary-light);
+  border-radius: var(--radius-pill);
+  padding: 4rpx 0;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* ---------- 空态/加载 ---------- */
+.detail-state {
+  padding: 20rpx 0;
+}
+
+/* ---------- 老年模式 ---------- */
+.elderly-mode .head-plate { font-size: 50rpx; }
+.elderly-mode .head-status { font-size: 26rpx; }
+.elderly-mode .head-route { font-size: 30rpx; }
+.elderly-mode .tag { font-size: 26rpx; }
+.elderly-mode .head-state { font-size: 30rpx; }
+.elderly-mode .head-meta-line { font-size: 28rpx; }
+.elderly-mode .section-title { font-size: 38rpx; }
+.elderly-mode .section-sub { font-size: 26rpx; }
+.elderly-mode .progress-label { font-size: 26rpx; }
+.elderly-mode .stop-name { font-size: 32rpx; }
+.elderly-mode .stop-min { font-size: 24rpx; }
+.elderly-mode .stop-state { font-size: 24rpx; width: 112rpx; }

@@ -1,41 +1,52 @@
 <!-- 我的页 - 个人中心 + 卖家入口 -->
 <view class="page-mine {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
 
-  <!-- 未登录态 -->
+  <!-- 未登录态：站牌头 -->
   <view wx:if="{{!isLoggedIn}}" class="login-banner">
-    <view class="login-safe" style="height: {{statusBarHeight || 0}}px"></view>
+    <view style="height: {{statusBarHeight || 0}}px"></view>
     <view class="login-content" bindtap="goToLogin" hover-class="hover">
-      <text class="login-avatar">👤</text>
-      <text class="login-text">点击登录，享受更多服务</text>
+      <view class="login-avatar-wrap">
+        <icon name="user" size="52" color="#FFFFFF" />
+      </view>
+      <view class="login-info">
+        <text class="login-text">点击登录，享受更多服务</text>
+        <text class="login-sub">客货邮 · 城乡直达</text>
+      </view>
       <text class="login-arrow">›</text>
     </view>
   </view>
 
   <!-- 已登录态 -->
   <view wx:else>
-    <!-- 用户信息区 -->
+    <!-- 用户信息区：站牌式头部（深绿实板 + 落款横档 + 光晕 + 角色线路章） -->
     <view class="user-banner">
-      <view class="banner-safe" style="height: {{statusBarHeight || 0}}px"></view>
+      <view style="height: {{statusBarHeight || 0}}px"></view>
       <view class="banner-bg"></view>
       <view class="banner-content" bindtap="goToProfile" hover-class="hover">
         <view class="user-avatar-wrap">
           <image wx:if="{{userInfo.avatar}}" class="user-avatar-img" src="{{userInfo.avatar}}" mode="aspectFill" />
-          <text wx:else class="user-avatar-emoji">👤</text>
+          <icon wx:else name="user" size="56" color="#FFFFFF" />
         </view>
         <view class="user-detail">
           <text class="user-name">{{userInfo.nickname || '用户'}}</text>
           <text class="user-mobile">{{userInfo.mobile || ''}}</text>
         </view>
-        <view class="user-role-tag">🏘 村民</view>
+        <view class="user-role-tag">
+          <icon name="home" size="22" color="#FFFFFF" />
+          <text>村民</text>
+        </view>
       </view>
     </view>
 
-    <!-- 卖家核心入口（适老化大按钮） -->
+    <!-- 农户服务（悬浮卡 + 陶土橙大按钮，质感对齐 btn 体系） -->
     <view class="farmer-section">
-      <view class="farmer-title">🧑‍🌾 农户服务</view>
+      <view class="farmer-title-wrap">
+        <icon name="leaf" size="30" color="{{iconDeep}}" />
+        <text class="farmer-title">农户服务</text>
+      </view>
       <view class="farmer-buttons">
         <view class="farmer-btn send-btn" bindtap="goToSend" hover-class="hover">
-          <icon class="farmer-btn-emoji" name="send" size="64" color="#FFFFFF" />
+          <icon class="farmer-btn-icon" name="send" size="64" color="#FFFFFF" />
           <text class="farmer-btn-text">我要寄货</text>
           <text class="farmer-btn-desc">语音下单 · 大巴承运 · 直达城里</text>
         </view>
@@ -43,53 +54,73 @@
     </view>
 
     <!-- 功能菜单 -->
+    <view class="menu-caption">我的服务</view>
     <view class="menu-section">
       <view class="menu-item" bindtap="goToOrders" hover-class="hover">
-        <icon class="menu-emoji" name="list" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
+        <view class="menu-icon-box">
+          <icon name="list" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
+        </view>
         <text class="menu-text">我的订单</text>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-item" bindtap="goToMySend" hover-class="hover">
-        <icon class="menu-emoji" name="send" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
+        <view class="menu-icon-box">
+          <icon name="send" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
+        </view>
         <text class="menu-text">我的寄货</text>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-item" bindtap="goToMyShopping" hover-class="hover">
-        <icon class="menu-emoji" name="shop" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
+        <view class="menu-icon-box">
+          <icon name="shop" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
+        </view>
         <text class="menu-text">我的购物</text>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-item" bindtap="switchToDriver" hover-class="hover">
-        <icon class="menu-emoji" name="bus" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
+        <view class="menu-icon-box clay-box">
+          <icon name="bus" size="{{elderlyMode ? 48 : 40}}" color="{{iconClay}}" />
+        </view>
         <text class="menu-text">切换为司机模式</text>
         <text class="menu-arrow">›</text>
       </view>
     </view>
 
     <!-- 设置区 -->
+    <view class="menu-caption">服务与设置</view>
     <view class="menu-section">
       <view class="menu-item" bindtap="goToAddress" hover-class="hover">
-        <icon class="menu-emoji" name="pin" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
+        <view class="menu-icon-box">
+          <icon name="pin" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
+        </view>
         <text class="menu-text">收货地址</text>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-item" bindtap="goToFeedback" hover-class="hover">
-        <icon class="menu-emoji" name="edit" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
+        <view class="menu-icon-box">
+          <icon name="edit" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
+        </view>
         <text class="menu-text">意见反馈</text>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-item" bindtap="goToNotification" hover-class="hover">
-        <icon class="menu-emoji" name="notice" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
+        <view class="menu-icon-box">
+          <icon name="notice" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
+        </view>
         <text class="menu-text">消息通知</text>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-item" bindtap="goToProfile" hover-class="hover">
-        <icon class="menu-emoji" name="user" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
+        <view class="menu-icon-box">
+          <icon name="user" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
+        </view>
         <text class="menu-text">个人资料</text>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-item" bindtap="goToSettings" hover-class="hover">
-        <icon class="menu-emoji" name="gear" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
+        <view class="menu-icon-box">
+          <icon name="gear" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
+        </view>
         <text class="menu-text">设置</text>
         <text class="menu-arrow">›</text>
       </view>
@@ -97,7 +128,9 @@
 
     <view class="menu-section">
       <view class="menu-item logout" bindtap="handleLogout" hover-class="hover">
-        <icon class="menu-emoji" name="logout" size="{{elderlyMode ? 48 : 40}}" color="#C0392B" />
+        <view class="menu-icon-box danger-box">
+          <icon name="logout" size="{{elderlyMode ? 48 : 40}}" color="#C0392B" />
+        </view>
         <text class="menu-text">退出登录</text>
         <text class="menu-arrow">›</text>
       </view>

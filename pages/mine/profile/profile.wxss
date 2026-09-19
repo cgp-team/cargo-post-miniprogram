@@ -1,45 +1,57 @@
 /* 个人资料页 */
 .page-profile {
   min-height: 100vh;
-  background: var(--color-paper);
+  background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--color-paper) 280rpx);
   padding-bottom: 40rpx;
 }
 
-.section-label {
-  padding: 28rpx 32rpx 14rpx;
-  font-size: 26rpx;
-  color: #888;
+/* 分区标题（对齐首页 section 手法：图标 + 深绿粗题） */
+.section-head {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  padding: 32rpx 32rpx 18rpx;
+}
+.section-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-primary-dark);
+  letter-spacing: 0.5rpx;
 }
 
-.card {
-  margin: 0 24rpx;
+/* 表单卡片：暖白 + 柔和阴影（圆角/阴影继承全局 .card，这里定页边距与内距） */
+.card.form-card {
+  margin: 0 24rpx 24rpx;
   padding: 8rpx 28rpx 28rpx;
-  background: #fff;
-  border-radius: 20rpx;
 }
 
 .form-item {
   display: flex;
   align-items: center;
-  padding: 26rpx 0;
-  border-bottom: 1rpx solid #F0F0F0;
+  padding: 28rpx 0;
+  border-bottom: 1rpx solid #F2ECDF;
   font-size: 28rpx;
 }
 .form-item:last-of-type {
   border-bottom: none;
 }
 .form-label {
-  width: 140rpx;
-  color: #333;
+  width: 150rpx;
+  color: var(--color-ink);
+  font-weight: 500;
   flex-shrink: 0;
 }
 .form-input {
   flex: 1;
   font-size: 28rpx;
+  color: var(--color-ink);
+}
+.form-ph {
+  color: var(--color-text-tertiary);
 }
 .form-static {
   flex: 1;
-  color: #999;
+  color: var(--color-text-secondary);
 }
 .form-right {
   flex: 1;
@@ -48,7 +60,7 @@
   justify-content: flex-end;
 }
 .form-arrow {
-  color: #CCC;
+  color: var(--color-text-tertiary);
   font-size: 36rpx;
   margin-left: 12rpx;
 }
@@ -57,33 +69,37 @@
   width: 96rpx;
   height: 96rpx;
   border-radius: 50%;
+  border: 2rpx solid #EFE8D8;
 }
 .avatar-placeholder {
   width: 96rpx;
   height: 96rpx;
   border-radius: 50%;
-  background: #F0F0F0;
+  background: var(--color-primary-light);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 48rpx;
 }
 
+/* 性别胶囊：未选浅绿底，选中站牌绿实底 */
 .sex-row {
   flex: 1;
   display: flex;
   gap: 20rpx;
 }
 .sex-chip {
-  padding: 10rpx 36rpx;
+  padding: 12rpx 38rpx;
   border-radius: 999rpx;
-  background: #F5F5F5;
-  color: #666;
+  background: var(--color-primary-light);
+  color: var(--color-text-secondary);
   font-size: 26rpx;
+  transition: all 0.15s ease;
 }
 .sex-chip.active {
   background: var(--color-primary);
   color: #fff;
+  font-weight: 600;
+  box-shadow: 0 4rpx 12rpx var(--color-primary-shadow);
 }
 
 .code-btn {
@@ -94,27 +110,26 @@
   border: 2rpx solid var(--color-primary);
   color: var(--color-primary);
   font-size: 24rpx;
+  font-weight: 500;
 }
 .code-btn.disabled {
-  border-color: #CCC;
-  color: #999;
+  border-color: #D8D2C4;
+  color: var(--color-text-tertiary);
 }
 
-.primary-btn {
+.save-btn {
   margin-top: 28rpx;
-  background: var(--color-primary);
-  color: #fff;
-  font-size: 30rpx;
-  border-radius: 999rpx;
 }
-.primary-btn[disabled] {
-  opacity: 0.6;
+/* 去掉微信 button 默认描边 */
+.save-btn::after {
+  border: none;
 }
 
 /* 老年人模式 */
-.elderly-mode .section-label { font-size: 30rpx; }
+.elderly-mode .section-title { font-size: 36rpx; }
 .elderly-mode .form-item { font-size: 32rpx; padding: 32rpx 0; }
+.elderly-mode .form-label { width: 170rpx; }
 .elderly-mode .form-input { font-size: 32rpx; }
+.elderly-mode .form-static { font-size: 32rpx; }
 .elderly-mode .sex-chip { font-size: 30rpx; padding: 14rpx 42rpx; }
 .elderly-mode .code-btn { font-size: 28rpx; }
-.elderly-mode .primary-btn { font-size: 34rpx; padding: 8rpx 0; }

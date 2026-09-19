@@ -184,7 +184,7 @@
 .search-input {
   flex: 1;
   font-size: 28rpx;
-  color: #333;
+  color: var(--color-ink);
 }
 
 .search-input::placeholder {
@@ -395,7 +395,7 @@
 .feature-name {
   font-size: 24rpx;
   font-weight: 600;
-  color: #333;
+  color: var(--color-ink);
 }
 
 /* 通用section */
@@ -620,7 +620,7 @@
 .product-name {
   font-size: 28rpx;
   font-weight: 600;
-  color: #333;
+  color: var(--color-ink);
   display: block;
   overflow: hidden;
   text-overflow: ellipsis;

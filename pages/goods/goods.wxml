@@ -1,14 +1,16 @@
 <!-- 商城页 - 买家界面 -->
 <view class="page-goods {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
-  <!-- 顶部村选择栏 -->
+  <!-- 顶部站牌栏：深绿实板 + 落款横档 -->
   <view class="top-bar" style="padding-top: {{statusBarHeight + 16}}px">
     <view class="top-bar-main">
-      <view class="location-info" bindtap="switchVillage" hover-class="hover">
-        <text class="loc-emoji">📌</text>
-        <text class="village-name">{{currentVillage}}</text>
-        <text class="arrow-down">▾</text>
+      <view class="top-left">
+        <view class="location-info" bindtap="switchVillage" hover-class="hover">
+          <text class="village-name">{{currentVillage}}</text>
+          <text class="arrow-down">▾</text>
+          <text class="top-badge">商城</text>
+        </view>
+        <text class="top-sub">山货集市 · 村里直发</text>
       </view>
-      <text class="header-title">商城</text>
       <view class="user-avatar" bindtap="goToProfile" hover-class="hover">
         <text wx:if="{{userInfo.nickname}}">{{userInfo.nickname}}</text>
         <icon wx:else name="user" size="40" color="#FFFFFF" />
@@ -16,7 +18,7 @@
     </view>
   </view>
 
-  <!-- 分类标签 -->
+  <!-- 分类标签（横滑胶囊） -->
   <scroll-view class="category-scroll" scroll-x>
     <view class="category-list">
       <view
@@ -49,15 +51,17 @@
     >
       <view class="product-img-wrap">
         <image wx:if="{{item.imageUrl}}" src="{{item.imageUrl}}" class="goods-img-real" mode="aspectFill" lazy-load />
-        <icon wx:else name="leaf" size="72" color="{{iconAccent}}" />
+        <icon wx:else name="leaf" size="72" color="#D9A441" />
         <view wx:if="{{item.badge}}" class="product-badge">
-          <text>🚌 {{item.badge}}</text>
+          <icon name="bus" size="22" color="#FFFFFF" />
+          <text>{{item.badge}}</text>
         </view>
       </view>
       <view class="product-info">
         <text class="product-name">{{item.name}}</text>
         <view class="product-from">
-          <text>🏘 {{item.fromVillage}}</text>
+          <icon name="pin" size="20" color="#D9A441" />
+          <text>{{item.fromVillage}}</text>
         </view>
         <view class="product-price-row">
           <text class="product-price">¥{{item.price}}</text>

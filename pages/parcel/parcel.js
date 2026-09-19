@@ -326,7 +326,7 @@ Page({
     try {
       const t = await api.getParcelTopology(no)
       if (!t) return { legs: [], handovers: [] }
-      // 运输链地图：按段连线（已完成为绿色、进行中为橙色、未完成为灰色），换乘点标注在折线拐点
+      // 运输链地图：按段连线（主题色系：已完成为站牌绿、当前段为新芽绿加粗、未开始为暖灰），换乘点标注在折线拐点
       const points = []
       const polyline = []
       const markers = []
@@ -341,8 +341,8 @@ Page({
         const to = { latitude: l.toLatitude, longitude: l.toLongitude }
         if (!points.length) points.push(from)
         points.push(to)
-        // 白色+蓝色主题：已完成=深蓝、当前段=亮蓝、未开始=灰
-        const color = l.status === 11 ? '#1F5E9E' : (l.status >= 7 && l.status <= 10 ? '#2E7BBF' : '#9AA5B1')
+        // 主题色系：已完成=站牌绿、当前段=新芽绿、未开始=暖灰（与图例 .lg-* 同色）
+        const color = l.status === 11 ? '#2E7D32' : (l.status >= 7 && l.status <= 10 ? '#4CAF50' : '#B9B4A6')
         const isActive = activeLeg && l.id === activeLeg.id
         // 真实道路轨迹优先（navigationPolyline 来自高德路网）；无则站点直连
         const road = (l.navigationPolyline || []).map((p) => ({ latitude: p.latitude, longitude: p.longitude }))
@@ -360,7 +360,7 @@ Page({
             latitude: l.toLatitude, longitude: l.toLongitude,
             iconPath: '/images/marker-stop.png', width: 30, height: 30,
             callout: {
-              content: '换乘站 ' + (l.toStationName || ''), color: '#123F6E',
+              content: '换乘站 ' + (l.toStationName || ''), color: '#1C4B2E',
               fontSize: 11, borderRadius: 6, padding: 4, display: 'ALWAYS'
             }
           })
@@ -376,14 +376,14 @@ Page({
         markers.push({
           id: 2, latitude: last.latitude, longitude: last.longitude,
           iconPath: '/images/marker-end.png', width: 30, height: 30,
-          callout: { content: '目的站', color: '#1565C0', fontSize: 11, borderRadius: 6, padding: 4, display: 'BYCLICK' }
+          callout: { content: '目的站', color: '#C75B2A', fontSize: 11, borderRadius: 6, padding: 4, display: 'BYCLICK' }
         })
         // 当前段两端高亮圈：一眼看出"货现在在哪一段"
         if (activeLeg) {
           circles.push({ latitude: activeLeg.fromLatitude, longitude: activeLeg.fromLongitude, radius: 90,
-            color: '#2E7BBFB3', fillColor: '#2E7BBF33', strokeWidth: 2 })
+            color: '#4CAF50B3', fillColor: '#4CAF5033', strokeWidth: 2 })
           circles.push({ latitude: activeLeg.toLatitude, longitude: activeLeg.toLongitude, radius: 90,
-            color: '#2E7BBFB3', fillColor: '#2E7BBF33', strokeWidth: 2 })
+            color: '#4CAF50B3', fillColor: '#4CAF5033', strokeWidth: 2 })
         }
       }
       return {

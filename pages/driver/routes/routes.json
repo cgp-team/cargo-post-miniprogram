@@ -1,6 +1,8 @@
 {
   "usingComponents": {
-    "driver-tab-bar": "../../../components/driver-tab-bar/index"
+    "driver-tab-bar": "../../../components/driver-tab-bar/index",
+    "icon": "/components/icon/index",
+    "empty-state": "/components/empty-state/index"
   },
   "navigationStyle": "custom"
 }

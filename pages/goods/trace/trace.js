@@ -115,7 +115,7 @@ Page({
       polyline,
       mapCenter: center,
       trackPoints,
-      stops: points.map((p) => ({ sequenceNo: p.sequenceNo, stationName: p.stationName, plannedMinutes: p.plannedMinutes || 0 })),
+      stops: this.markStops(points, trace),
       lastReportText: this.formatTime(trace.lastReportTime),
       statusText: trace.statusName || '',
       arrivedText: this.buildArrivedText(trace),
@@ -123,6 +123,39 @@ Page({
       deliverTimeText: this.formatTime(trace.deliverTime),
       loading: false
     }, () => this.drawOrderQr())
+  },
+
+  /**
+   * 站点进度：为时间线标记 已途经/当前所在站（纯展示派生，不改接口数据）。
+   * 已妥投 → 全部已途经；司机已到达交付点 → 最后一站为当前站；
+   * 否则取离最近上报位置最近的站点为当前站（已装车未上报时不高亮）。
+   */
+  markStops(points, trace) {
+    const total = points.length
+    let current = -1
+    if (trace.deliverTime) {
+      current = total
+    } else if (trace.driverArrived) {
+      current = total - 1
+    } else if (trace.currentLongitude && trace.currentLatitude) {
+      let best = Infinity
+      points.forEach((p, i) => {
+        const dLng = p.longitude - trace.currentLongitude
+        const dLat = p.latitude - trace.currentLatitude
+        const dist = dLng * dLng + dLat * dLat
+        if (dist < best) {
+          best = dist
+          current = i
+        }
+      })
+    }
+    return points.map((p, i) => ({
+      sequenceNo: p.sequenceNo,
+      stationName: p.stationName,
+      plannedMinutes: p.plannedMinutes || 0,
+      isPassed: current >= total || i < current,
+      isCurrent: i === current
+    }))
   },
 
   /** 司机已到达/已交付文案：用户端"司机已到达交付点"提醒（后端 shift_execution 为源） */

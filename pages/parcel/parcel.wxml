@@ -1,6 +1,6 @@
 <!-- 寄货/包裹追踪页 -->
 <view class="page-parcel {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
-  <!-- 顶部栏 -->
+  <!-- 顶部站牌栏：深绿实板 + 落款横档（与首页同一套站牌语言） -->
   <view class="top-bar" style="padding-top: {{statusBarHeight + 16}}px">
     <view class="top-bar-main">
       <view class="location-info" bindtap="switchVillage" hover-class="hover">
@@ -13,55 +13,64 @@
         <text>{{userInfo.nickname || '👤'}}</text>
       </view>
     </view>
+  </view>
 
-    <!-- 单号查询 -->
-    <view class="search-bar">
-      <icon name="box" size="36" color="#8A8778" class="search-icon" />
-      <input
-        class="search-input"
-        type="text"
-        value="{{trackingNo}}"
-        placeholder="输入运单号查询物流"
-        bindinput="onTrackingInput"
-        confirm-type="search"
-        bindconfirm="searchParcel"
-      />
-      <view class="search-btn" bindtap="searchParcel" hover-class="hover">查询</view>
-    </view>
+  <!-- 单号查询：悬浮查询条，压住站牌下缘 -->
+  <view class="search-bar">
+    <icon name="search" size="34" color="#8A8778" class="search-icon" />
+    <input
+      class="search-input"
+      type="text"
+      value="{{trackingNo}}"
+      placeholder="输入运单号查询物流"
+      bindinput="onTrackingInput"
+      confirm-type="search"
+      bindconfirm="searchParcel"
+    />
+    <view class="search-btn" bindtap="searchParcel" hover-class="hover">查询</view>
   </view>
 
   <!-- 乘车安排（村民到站通知：客运订单已派车，含车辆与实时位置入口） -->
   <view wx:if="{{arrangements.length}}" class="arrange-section">
-    <view class="arrange-header">
-      <view class="arrange-title"><icon name="bus" size="32" color="#2B2B28" /><text>我的乘车安排</text></view>
-      <text class="arrange-sub" bindtap="goToBusTracking">实时公交 ›</text>
+    <view class="section-header">
+      <view class="section-title-wrap">
+        <icon name="bus" size="32" color="{{iconDeep}}" />
+        <text class="section-title">我的乘车安排</text>
+      </view>
+      <text class="section-more" bindtap="goToBusTracking" hover-class="hover">实时公交 ›</text>
     </view>
-    <view class="arrange-card" wx:for="{{arrangements}}" wx:key="orderId">
-      <view class="arrange-route">
-        <view class="arrange-station">
-          <text class="station-name">{{item.boardingStationName || '—'}}</text>
-          <text class="station-label">上车站</text>
+    <view class="arrange-card ticket-card" wx:for="{{arrangements}}" wx:key="orderId">
+      <view class="ticket-card__main">
+        <view class="ticket-card__serial">单号: {{item.orderNo}}</view>
+        <!-- 上下车站：虚线山路 + 大巴连接 -->
+        <view class="arrange-route">
+          <view class="arrange-station">
+            <text class="station-name">{{item.boardingStationName || '—'}}</text>
+            <text class="station-label">上车站</text>
+          </view>
+          <view class="arrange-mid">
+            <view class="mid-line"></view>
+            <icon name="bus" size="30" color="{{iconColor}}" class="mid-bus" />
+          </view>
+          <view class="arrange-station">
+            <text class="station-name">{{item.alightingStationName || '—'}}</text>
+            <text class="station-label">下车站</text>
+          </view>
         </view>
-        <view class="arrange-mid">
-          <view class="mid-line"></view>
-          <icon name="bus" size="30" color="{{iconColor}}" class="mid-bus" />
-        </view>
-        <view class="arrange-station">
-          <text class="station-name">{{item.alightingStationName || '—'}}</text>
-          <text class="station-label">下车站</text>
+        <view class="arrange-footer">
+          <text wx:if="{{item.vehiclePlateNo}}" class="arrange-plate">{{item.vehiclePlateNo}}</text>
+          <text wx:else class="pill-gold">待派车</text>
+          <view class="arrange-cta" bindtap="goToBusTracking" hover-class="hover"><icon name="pin" size="24" color="{{iconColor}}" />查看车辆实时位置 ›</view>
         </view>
       </view>
-      <view class="arrange-footer">
-        <text class="arrange-no">{{item.orderNo}} · {{item.vehiclePlateNo || '待派车'}}</text>
-        <text class="arrange-status {{item.planStatus === 1 || item.planStatus === 2 ? 'live' : ''}}">
-          {{item.planStatus === 1 || item.planStatus === 2 ? '在途' : item.statusName}}
-        </text>
+      <view class="ticket-card__stub">
+        <text class="ticket-card__stub-value stub-status {{item.planStatus === 1 || item.planStatus === 2 ? 'on-trip' : ''}}">{{item.planStatus === 1 || item.planStatus === 2 ? '在途' : item.statusName}}</text>
+        <text class="ticket-card__stub-label">乘车状态</text>
       </view>
-      <view class="arrange-cta" bindtap="goToBusTracking"><icon name="pin" size="24" color="{{iconColor}}" />查看车辆实时位置 ›</view>
     </view>
   </view>
 
-  <!-- 状态切换 -->
+  <!-- 状态切换：分段控件 -->
   <view class="tab-row">
     <view
       class="tab-item {{activeTab === 0 ? 'active' : ''}}"
@@ -80,73 +89,74 @@
     >单号查询</view>
   </view>
 
-  <!-- Tab0: 我的寄货列表 -->
+  <!-- Tab0: 我的寄货列表（车票卡：主券信息 + 副券状态） -->
   <view wx:if="{{activeTab === 0}}" class="parcel-list">
     <view
-      class="parcel-card"
+      class="parcel-card ticket-card"
       wx:for="{{sendList}}"
       wx:key="id"
       data-no="{{item.orderNo}}"
       bindtap="openSendDetail"
       hover-class="hover"
     >
-      <view class="parcel-header">
-        <view class="parcel-title-row">
-          <icon name="box" size="48" color="{{iconColor}}" />
-          <view class="parcel-info">
-            <text class="parcel-name">{{item.goodsName || '寄货'}}</text>
-            <text class="parcel-no">单号: {{item.orderNo}}</text>
-          </view>
+      <view class="ticket-card__main">
+        <view class="ticket-card__serial">单号: {{item.orderNo}}</view>
+        <view class="parcel-head">
+          <icon name="box" size="40" color="{{iconColor}}" />
+          <text class="parcel-name">{{item.goodsName || '寄货'}}</text>
         </view>
-        <view class="parcel-status {{item.statusClass}}">{{item.statusName}}</view>
+        <view class="parcel-meta">
+          <view class="route-weight"><icon name="box" size="26" color="#8A8778" /><text>重量 {{item.goodsWeight}}kg</text></view>
+          <text class="parcel-eta">{{item.createTimeText}}</text>
+        </view>
+        <!-- 货物信息（寄货页填写）：类型 / 件数 / 体积 / 生鲜 -->
+        <view wx:if="{{item.cargoCategory || item.itemCount}}" class="parcel-cargo-row">
+          <text class="cargo-chip">{{item.cargoCategory || '农产品'}}</text>
+          <text class="cargo-chip">{{item.itemCount || 1}} 件</text>
+          <text wx:if="{{item.volumeM3}}" class="cargo-chip">{{item.volumeM3}} m³</text>
+          <text wx:if="{{item.freshFlag}}" class="cargo-chip cargo-chip-fresh">生鲜冷链</text>
+        </view>
+        <!-- 车来取货/送货提醒：承运车辆实时位置 → 距目标站点分钟 -->
+        <view wx:if="{{item.arrived}}" class="parcel-approach parcel-arrived">
+          <icon name="notice" size="30" color="#FFFFFF" />
+          <text class="parcel-approach-text">{{item.arrivedText}}</text>
+        </view>
+        <view wx:if="{{item.approaching}}" class="parcel-approach" catchtap="goToBusTracking" hover-class="hover">
+          <icon name="bus" size="30" color="#FFFFFF" />
+          <text class="parcel-approach-text">车快到了 {{item.carrierEtaMinutes}} 分钟 · {{item.vehiclePlate || '班车'}} 距{{item.targetStation || '站点'}}{{item.carrierLocationSource === 'SIMULATED' ? '（位置推算）' : ''}}</text>
+        </view>
+        <view wx:elif="{{item.carrierText}}" class="parcel-carrier-list" catchtap="goToBusTracking" hover-class="hover">
+          <icon name="bus" size="26" color="{{iconColor}}" />
+          <text>{{item.carrierText}}</text>
+        </view>
+        <!-- 邮快件取件码默认打码，点「查看」展开明文（点明文复制，司机核销凭码） -->
+        <view wx:if="{{item.pickupCode}}" class="parcel-code-row">
+          <text class="parcel-code-label">取件码</text>
+          <text
+            wx:if="{{item.showCode}}"
+            class="parcel-code-value"
+            data-code="{{item.pickupCode}}"
+            catchtap="copyPickupCode" hover-class="hover"
+          >{{item.pickupCode}}</text>
+          <text wx:else class="parcel-code-value masked">＊＊＊＊</text>
+          <text class="parcel-code-toggle" data-index="{{index}}" catchtap="toggleCode" hover-class="hover">{{item.showCode ? '收起' : '查看'}}</text>
+        </view>
+        <!-- 待客户操作：确认已送站 → 待入池 -->
+        <view wx:if="{{item.status === 7 && item.servicePointText}}" class="parcel-service-point">
+          <text class="service-point-text">{{item.servicePointText}}</text>
+          <text
+            wx:if="{{item.servicePointLatitude && item.servicePointLongitude}}"
+            class="service-point-nav"
+            data-lat="{{item.servicePointLatitude}}" data-lng="{{item.servicePointLongitude}}" data-name="{{item.servicePointStationName}}"
+            catchtap="openServicePoint" hover-class="hover"
+          >导航前往</text>
+        </view>
+        <button wx:if="{{item.status === 7}}" class="btn-station-confirm" data-id="{{item.id}}" catchtap="confirmStationAction" hover-class="hover">我已送到指定站点，确认入池</button>
       </view>
-      <view class="parcel-route">
-        <view class="route-weight"><icon name="bus" size="26" color="#6B675C" /><text>重量 {{item.goodsWeight}}kg</text></view>
-        <text class="parcel-eta">{{item.createTimeText}}</text>
+      <view class="ticket-card__stub">
+        <text class="ticket-card__stub-value stub-status {{item.statusClass}}">{{item.statusName}}</text>
+        <text class="ticket-card__stub-label">包裹状态</text>
       </view>
-      <!-- 物体信息（寄货页填写）：类型 / 件数 / 体积 / 生鲜 -->
-      <view wx:if="{{item.cargoCategory || item.itemCount}}" class="parcel-cargo-row">
-        <text class="cargo-chip">{{item.cargoCategory || '农产品'}}</text>
-        <text class="cargo-chip">{{item.itemCount || 1}} 件</text>
-        <text wx:if="{{item.volumeM3}}" class="cargo-chip">{{item.volumeM3}} m³</text>
-        <text wx:if="{{item.freshFlag}}" class="cargo-chip cargo-chip-fresh">生鲜冷链</text>
-      </view>
-      <!-- 车来取货/送货提醒：承运车辆实时位置 → 距目标站点分钟 -->
-      <view wx:if="{{item.arrived}}" class="parcel-approach parcel-arrived">
-        <icon name="notice" size="30" color="#FFFFFF" />
-        <text class="parcel-approach-text">{{item.arrivedText}}</text>
-      </view>
-      <view wx:if="{{item.approaching}}" class="parcel-approach" catchtap="goToBusTracking" hover-class="hover">
-        <icon name="bus" size="30" color="#FFFFFF" />
-        <text class="parcel-approach-text">车快到了 {{item.carrierEtaMinutes}} 分钟 · {{item.vehiclePlate || '班车'}} 距{{item.targetStation || '站点'}}{{item.carrierLocationSource === 'SIMULATED' ? '（位置推算）' : ''}}</text>
-      </view>
-      <view wx:elif="{{item.carrierText}}" class="parcel-carrier-list" catchtap="goToBusTracking" hover-class="hover">
-        <icon name="bus" size="26" color="{{iconColor}}" />
-        <text>{{item.carrierText}}</text>
-      </view>
-      <!-- 邮快件取件码默认打码，点「查看」展开明文（点明文复制，司机核销凭码） -->
-      <view wx:if="{{item.pickupCode}}" class="parcel-code-row">
-        <text class="parcel-code-label">取件码</text>
-        <text
-          wx:if="{{item.showCode}}"
-          class="parcel-code-value"
-          data-code="{{item.pickupCode}}"
-          catchtap="copyPickupCode" hover-class="hover"
-        >{{item.pickupCode}}</text>
-        <text wx:else class="parcel-code-value masked">＊＊＊＊</text>
-        <text class="parcel-code-toggle" data-index="{{index}}" catchtap="toggleCode" hover-class="hover">{{item.showCode ? '收起' : '查看'}}</text>
-      </view>
-      <!-- 待客户操作：确认已送站 → 待入池 -->
-      <view wx:if="{{item.status === 7 && item.servicePointText}}" class="parcel-service-point">
-        <text class="service-point-text">{{item.servicePointText}}</text>
-        <text
-          wx:if="{{item.servicePointLatitude && item.servicePointLongitude}}"
-          class="service-point-nav"
-          data-lat="{{item.servicePointLatitude}}" data-lng="{{item.servicePointLongitude}}" data-name="{{item.servicePointStationName}}"
-          catchtap="openServicePoint" hover-class="hover"
-        >导航前往</text>
-      </view>
-      <button wx:if="{{item.status === 7}}" class="btn-station-confirm" data-id="{{item.id}}" catchtap="confirmStationAction" hover-class="hover">我已送到指定站点，确认入池</button>
     </view>
 
     <view class="loading-state" wx:if="{{loading && sendList.length}}">加载中…</view>
@@ -155,49 +165,50 @@
     <empty-state wx:if="{{!sendList.length && !loading}}" icon="box" text="还没有寄货记录" />
   </view>
 
-  <!-- Tab1: 我的购物（商城订单：我买的东西由大巴司机送到交付站点，进度在这里看） -->
+  <!-- Tab1: 我的购物（商城订单：与寄货同一票面条目，进度在这里看） -->
   <view wx:if="{{activeTab === 1}}" class="parcel-list">
     <view
-      class="parcel-card"
+      class="parcel-card ticket-card"
       wx:for="{{productOrders}}"
       wx:key="id"
       data-id="{{item.id}}"
       bindtap="goToProductOrderDetail"
       hover-class="hover"
     >
-      <view class="parcel-header">
-        <view class="parcel-title-row">
-          <icon name="box" size="48" color="{{iconColor}}" />
-          <view class="parcel-info">
-            <text class="parcel-name">{{item.items[0] ? item.items[0].productName : '购物订单'}}</text>
-            <text class="parcel-no">单号: {{item.orderNo}}</text>
+      <view class="ticket-card__main">
+        <view class="ticket-card__serial">单号: {{item.orderNo}}</view>
+        <view class="parcel-head">
+          <icon name="shop" size="40" color="{{iconColor}}" />
+          <text class="parcel-name">{{item.items[0] ? item.items[0].productName : '购物订单'}}</text>
+        </view>
+
+        <!-- 商品明细（第一个商品 + 其余件数） -->
+        <view class="mall-goods-row" wx:if="{{item.items.length}}">
+          <image wx:if="{{item.items[0].imageUrl}}" class="mall-goods-img" src="{{item.items[0].imageUrl}}" mode="aspectFill" lazy-load />
+          <view wx:else class="mall-goods-img-ph"><icon name="leaf" size="40" color="{{iconColor}}" /></view>
+          <view class="mall-goods-info">
+            <text class="mall-goods-name">{{item.items[0].productName}}</text>
+            <text class="mall-goods-sub">¥{{item.items[0].productPrice}} × {{item.items[0].quantity}}</text>
+          </view>
+          <view class="mall-goods-right">
+            <text class="mall-goods-amount">¥{{item.totalAmountText}}</text>
+            <text wx:if="{{item.items.length > 1}}" class="mall-goods-more">等 {{item.items.length}} 件商品</text>
           </view>
         </view>
-        <view class="parcel-status {{item.statusClass}}">{{item.statusName}}</view>
-      </view>
 
-      <!-- 商品明细（第一个商品 + 其余件数） -->
-      <view class="mall-goods-row" wx:if="{{item.items.length}}">
-        <image wx:if="{{item.items[0].imageUrl}}" class="mall-goods-img" src="{{item.items[0].imageUrl}}" mode="aspectFill" lazy-load />
-        <view wx:else class="mall-goods-img-ph"><icon name="leaf" size="40" color="{{iconColor}}" /></view>
-        <view class="mall-goods-info">
-          <text class="mall-goods-name">{{item.items[0].productName}}</text>
-          <text class="mall-goods-sub">¥{{item.items[0].productPrice}} × {{item.items[0].quantity}}</text>
+        <view wx:if="{{item.deliveryHint}}" class="parcel-carrier-list">
+          <icon name="bus" size="26" color="{{iconColor}}" />
+          <text>{{item.deliveryHint}}</text>
         </view>
-        <view class="mall-goods-right">
-          <text class="mall-goods-amount">¥{{item.totalAmountText}}</text>
-          <text wx:if="{{item.items.length > 1}}" class="mall-goods-more">等 {{item.items.length}} 件商品</text>
+
+        <view class="parcel-meta parcel-meta-foot">
+          <text class="parcel-tap-hint">点击查看订单详情 ›</text>
+          <text class="parcel-eta">{{item.createTimeText}}</text>
         </view>
       </view>
-
-      <view wx:if="{{item.deliveryHint}}" class="parcel-carrier-list">
-        <icon name="bus" size="26" color="{{iconColor}}" />
-        <text>{{item.deliveryHint}}</text>
-      </view>
-
-      <view class="parcel-route">
-        <text class="parcel-tap-hint">点击查看订单详情 ›</text>
-        <text class="parcel-eta">{{item.createTimeText}}</text>
+      <view class="ticket-card__stub">
+        <text class="ticket-card__stub-value stub-status {{item.statusClass}}">{{item.statusName}}</text>
+        <text class="ticket-card__stub-label">订单状态</text>
       </view>
     </view>
 
@@ -207,126 +218,128 @@
     <empty-state wx:if="{{!productOrders.length && !productLoading}}" icon="box" text="还没有购物订单" btnText="去逛逛" bind:tapbtn="goShopping" />
   </view>
 
-  <!-- Tab2: 单号查询结果 -->
+  <!-- Tab2: 单号查询结果（车票式物流详情：副券放运输进度） -->
   <view wx:if="{{activeTab === 2}}" class="parcel-list">
-    <view wx:if="{{trackResult}}" class="parcel-card">
-      <view class="parcel-header">
-        <view class="parcel-title-row">
-          <icon name="box" size="48" color="{{iconColor}}" />
-          <view class="parcel-info">
-            <text class="parcel-name">{{trackResult.goodsName || '寄货'}}</text>
-            <text class="parcel-no">单号: {{trackResult.orderNo}}</text>
+    <view wx:if="{{trackResult}}" class="parcel-card ticket-card track-card">
+      <view class="ticket-card__main">
+        <view class="ticket-card__serial">单号: {{trackResult.orderNo}}</view>
+        <view class="parcel-head">
+          <icon name="box" size="40" color="{{iconColor}}" />
+          <text class="parcel-name">{{trackResult.goodsName || '寄货'}}</text>
+          <view class="parcel-status {{trackResult.statusClass}}">{{trackResult.statusName}}</view>
+        </view>
+        <view class="parcel-meta">
+          <view class="route-weight"><icon name="box" size="26" color="#8A8778" /><text>重量 {{trackResult.goodsWeight}}kg</text></view>
+          <text class="parcel-eta">{{trackResult.createTimeText}}</text>
+        </view>
+
+        <!-- 货运审核状态（Phase 2 承运审核，按 reviewStatus 展示；reasonCode 文案由 reviewNotice 统一映射） -->
+        <view wx:if="{{trackResult.reviewNotice}}" class="parcel-audit fail"><icon name="info" size="28" color="#C0392B" /><text>{{trackResult.reviewNotice}}</text></view>
+        <view wx:elif="{{trackResult.reviewStatus === 2}}" class="parcel-audit warn"><icon name="notice" size="28" color="#B27A12" /><text>需您到指定站点交接后即可进入运输流程</text></view>
+        <view wx:elif="{{trackResult.reviewStatus === 3 || trackResult.auditStatus === 0}}" class="parcel-audit warn"><icon name="clock" size="28" color="#B27A12" /><text>审核中：货物正在等待平台审核</text></view>
+        <view wx:elif="{{trackResult.auditStatus === 2}}" class="parcel-audit fail"><icon name="info" size="28" color="#C0392B" /><text>审核未通过：{{trackResult.rejectReason || '货物不符合运输要求'}}</text></view>
+
+        <!-- 待客户操作：确认已送站 → 待入池 -->
+        <view wx:if="{{trackResult.status === 7 && trackResult.servicePointText}}" class="parcel-service-point">
+          <text class="service-point-text">{{trackResult.servicePointText}}</text>
+          <text
+            wx:if="{{trackResult.servicePointLatitude && trackResult.servicePointLongitude}}"
+            class="service-point-nav"
+            data-lat="{{trackResult.servicePointLatitude}}" data-lng="{{trackResult.servicePointLongitude}}" data-name="{{trackResult.servicePointStationName}}"
+            bindtap="openServicePoint" hover-class="hover"
+          >导航前往</text>
+        </view>
+        <button wx:if="{{trackResult.status === 7}}" class="btn-station-confirm" data-id="{{trackResult.id}}" bindtap="confirmStationAction" hover-class="hover">我已送到指定站点，确认入池</button>
+
+        <!-- 承运班次与到达预估（已分配/已发车时由后端返回） -->
+        <view wx:if="{{trackResult.vehiclePlate || trackResult.etaText}}" class="parcel-carrier">
+          <view wx:if="{{trackResult.vehiclePlate}}" class="carrier-row"><icon name="bus" size="28" color="{{iconColor}}" /><text>{{trackResult.shiftCode || '班车'}} · {{trackResult.vehiclePlate}}</text></view>
+          <view wx:if="{{trackResult.arrived}}" class="carrier-row parcel-carrier-arrived"><icon name="notice" size="28" color="#C0392B" /><text>{{trackResult.arrivedText}}</text></view>
+          <view wx:if="{{trackResult.etaText}}" class="carrier-row parcel-carrier-eta"><icon name="clock" size="28" color="{{iconColor}}" /><text>{{trackResult.etaText}}</text></view>
+          <view wx:if="{{trackResult.carrierLongitude}}" class="carrier-row" bindtap="goToBusTracking" hover-class="hover"><icon name="pin" size="28" color="{{iconColor}}" /><text class="carrier-link">查看车辆实时位置 ›</text></view>
+        </view>
+
+        <!-- 多段联运：运输链地图（圆角卡片 + 阴影，与下方图例/分段衔接） -->
+        <view wx:if="{{trackResult.showMap}}" class="parcel-map-wrap">
+          <map
+            class="parcel-map"
+            latitude="{{trackResult.mapCenter.latitude}}"
+            longitude="{{trackResult.mapCenter.longitude}}"
+            scale="12"
+            polyline="{{trackResult.mapPolyline}}"
+            markers="{{trackResult.mapMarkers}}"
+            circles="{{trackResult.mapCircles}}"
+            include-points="{{trackResult.mapPoints}}"
+            show-location
+          ></map>
+          <view class="parcel-map-current" wx:if="{{trackResult.activeLegText}}"><icon name="bus" size="26" color="{{iconColor}}" /><text>{{trackResult.activeLegText}}</text></view>
+          <view class="parcel-map-legend">
+            <text class="lg lg-done">━ 已完成段</text>
+            <text class="lg lg-doing">━ 当前段（加粗高亮）</text>
+            <text class="lg lg-todo">━ 未开始段</text>
+            <text class="lg lg-est">┅ 虚线＝估算段</text>
+            <text class="lg lg-hub">◆ 换乘站</text>
           </view>
         </view>
-        <view class="parcel-status {{trackResult.statusClass}}">{{trackResult.statusName}}</view>
-      </view>
-      <view class="parcel-route">
-        <view class="route-weight"><icon name="bus" size="26" color="#6B675C" /><text>重量 {{trackResult.goodsWeight}}kg</text></view>
-        <text class="parcel-eta">{{trackResult.createTimeText}}</text>
-      </view>
 
-      <!-- 货运审核状态（Phase 2 承运审核，按 reviewStatus 展示；reasonCode 文案由 reviewNotice 统一映射） -->
-      <view wx:if="{{trackResult.reviewNotice}}" class="parcel-audit fail"><icon name="info" size="28" color="#C0392B" /><text>{{trackResult.reviewNotice}}</text></view>
-      <view wx:elif="{{trackResult.reviewStatus === 2}}" class="parcel-audit warn"><icon name="notice" size="28" color="#C75B2A" /><text>需您到指定站点交接后即可进入运输流程</text></view>
-      <view wx:elif="{{trackResult.reviewStatus === 3 || trackResult.auditStatus === 0}}" class="parcel-audit warn"><icon name="clock" size="28" color="#B27A12" /><text>审核中：货物正在等待平台审核</text></view>
-      <view wx:elif="{{trackResult.auditStatus === 2}}" class="parcel-audit fail"><icon name="info" size="28" color="#C0392B" /><text>审核未通过：{{trackResult.rejectReason || '货物不符合运输要求'}}</text></view>
-
-      <!-- 待客户操作：确认已送站 → 待入池 -->
-      <view wx:if="{{trackResult.status === 7 && trackResult.servicePointText}}" class="parcel-service-point">
-        <text class="service-point-text">{{trackResult.servicePointText}}</text>
-        <text
-          wx:if="{{trackResult.servicePointLatitude && trackResult.servicePointLongitude}}"
-          class="service-point-nav"
-          data-lat="{{trackResult.servicePointLatitude}}" data-lng="{{trackResult.servicePointLongitude}}" data-name="{{trackResult.servicePointStationName}}"
-          bindtap="openServicePoint" hover-class="hover"
-        >导航前往</text>
-      </view>
-      <button wx:if="{{trackResult.status === 7}}" class="btn-station-confirm" data-id="{{trackResult.id}}" bindtap="confirmStationAction" hover-class="hover">我已送到指定站点，确认入池</button>
-
-      <!-- 承运班次与到达预估（已分配/已发车时由后端返回） -->
-      <view wx:if="{{trackResult.vehiclePlate || trackResult.etaText}}" class="parcel-carrier">
-        <view wx:if="{{trackResult.vehiclePlate}}" class="carrier-row"><icon name="bus" size="28" color="{{iconColor}}" /><text>{{trackResult.shiftCode || '班车'}} · {{trackResult.vehiclePlate}}</text></view>
-        <view wx:if="{{trackResult.arrived}}" class="carrier-row parcel-carrier-arrived"><icon name="notice" size="28" color="#C0392B" /><text>{{trackResult.arrivedText}}</text></view>
-        <view wx:if="{{trackResult.etaText}}" class="carrier-row parcel-carrier-eta"><icon name="clock" size="28" color="{{iconColor}}" /><text>{{trackResult.etaText}}</text></view>
-        <view wx:if="{{trackResult.carrierLongitude}}" class="carrier-row" bindtap="goToBusTracking" hover-class="hover"><icon name="pin" size="28" color="{{iconColor}}" /><text class="carrier-link">查看车辆实时位置 ›</text></view>
-      </view>
-
-      <!-- 多段联运：分段进度（第一段：A→B（司机张）→ 第二段：B→C（司机李）） -->
-      <view wx:if="{{trackResult.showMap}}" class="parcel-map-wrap">
-        <map
-          class="parcel-map"
-          latitude="{{trackResult.mapCenter.latitude}}"
-          longitude="{{trackResult.mapCenter.longitude}}"
-          scale="12"
-          polyline="{{trackResult.mapPolyline}}"
-          markers="{{trackResult.mapMarkers}}"
-          circles="{{trackResult.mapCircles}}"
-          include-points="{{trackResult.mapPoints}}"
-          show-location
-        ></map>
-        <view class="parcel-map-current" wx:if="{{trackResult.activeLegText}}">{{trackResult.activeLegText}}</view>
-        <view class="parcel-map-legend">
-          <text class="lg lg-done">━ 已完成段</text>
-          <text class="lg lg-doing">━ 当前段（加粗高亮）</text>
-          <text class="lg lg-todo">━ 未开始段</text>
-          <text class="lg lg-est">┅ 虚线＝估算段</text>
-          <text class="lg lg-hub">◆ 换乘站</text>
-        </view>
-      </view>
-
-      <view wx:if="{{trackResult.legs.length > 1}}" class="parcel-legs">
-        <text class="parcel-legs-title">多段联运 · 换乘进度</text>
-        <text wx:if="{{trackResult.planReason}}" class="parcel-plan-reason">方案说明：{{trackResult.planReason}}</text>
-        <view class="parcel-leg" wx:for="{{trackResult.legs}}" wx:key="legSequence">
-          <view class="leg-index">{{item.legSequence}}</view>
-          <view class="leg-body">
-            <text class="leg-route">{{item.progressText}}</text>
-            <text class="leg-sub">
-              {{item.statusName}}<block wx:if="{{item.driverName}}"> · 司机{{item.driverName}}</block><block wx:if="{{item.plateNo}}"> · {{item.plateNo}}</block>
-            </text>
-            <text class="leg-eta" wx:if="{{item.etaText}}">{{item.etaText}}</text>
+        <view wx:if="{{trackResult.legs.length > 1}}" class="parcel-legs">
+          <text class="parcel-legs-title">多段联运 · 换乘进度</text>
+          <text wx:if="{{trackResult.planReason}}" class="parcel-plan-reason">方案说明：{{trackResult.planReason}}</text>
+          <view class="parcel-leg" wx:for="{{trackResult.legs}}" wx:key="legSequence">
+            <view class="leg-index">{{item.legSequence}}</view>
+            <view class="leg-body">
+              <text class="leg-route">{{item.progressText}}</text>
+              <text class="leg-sub">
+                {{item.statusName}}<block wx:if="{{item.driverName}}"> · 司机{{item.driverName}}</block><block wx:if="{{item.plateNo}}"> · {{item.plateNo}}</block>
+              </text>
+              <text class="leg-eta" wx:if="{{item.etaText}}">{{item.etaText}}</text>
+            </view>
           </view>
         </view>
-      </view>
 
-      <!-- 换乘交接（多段联运在换乘站的货物交接记录） -->
-      <view wx:if="{{trackResult.handovers.length > 0}}" class="parcel-legs">
-        <text class="parcel-legs-title">换乘交接</text>
-        <view class="parcel-leg" wx:for="{{trackResult.handovers}}" wx:key="id">
-          <view class="leg-index">🔄</view>
-          <view class="leg-body">
-            <text class="leg-route">{{item.stationName || '换乘站'}}</text>
-            <text class="leg-sub">{{item.statusName}}<block wx:if="{{item.fromDriverName}}"> · {{item.fromDriverName}} → {{item.toDriverName || '待接'}}</block></text>
-            <text class="leg-eta" wx:if="{{item.timeText}}">{{item.timeText}}</text>
+        <!-- 换乘交接（多段联运在换乘站的货物交接记录） -->
+        <view wx:if="{{trackResult.handovers.length > 0}}" class="parcel-legs">
+          <text class="parcel-legs-title">换乘交接</text>
+          <view class="parcel-leg" wx:for="{{trackResult.handovers}}" wx:key="id">
+            <view class="leg-index leg-index-transfer">换</view>
+            <view class="leg-body">
+              <text class="leg-route">{{item.stationName || '换乘站'}}</text>
+              <text class="leg-sub">{{item.statusName}}<block wx:if="{{item.fromDriverName}}"> · {{item.fromDriverName}} → {{item.toDriverName || '待接'}}</block></text>
+              <text class="leg-eta" wx:if="{{item.timeText}}">{{item.timeText}}</text>
+            </view>
           </view>
         </view>
-      </view>
 
-      <!-- 进度条 -->
-      <view class="progress-bar">
-        <view class="progress-fill" style="width: {{trackResult.progress}}%"></view>
-      </view>
+        <!-- 运输进度：虚线山路，绿色为已走段 -->
+        <view class="progress-road">
+          <view class="progress-road-fill" style="width: {{trackResult.progress}}%"></view>
+        </view>
 
-      <!-- 时间轴 -->
-      <view class="timeline">
-        <view class="timeline-item" wx:for="{{trackResult.timeline}}" wx:key="label">
-          <view class="timeline-dot {{item.done ? 'done' : ''}}"></view>
-          <view class="timeline-content">
-            <text class="timeline-time">{{item.label}}</text>
-            <text class="timeline-desc">{{item.desc}}</text>
+        <!-- 时间轴：虚线山路串联站点圆点 -->
+        <view class="timeline">
+          <view class="timeline-item" wx:for="{{trackResult.timeline}}" wx:key="label">
+            <view class="timeline-dot {{item.done ? 'done' : ''}}"></view>
+            <view class="timeline-content">
+              <text class="timeline-time">{{item.label}}</text>
+              <text class="timeline-desc">{{item.desc}}</text>
+            </view>
           </view>
         </view>
-      </view>
 
-      <!-- 查件二维码：取件 / 司机扫码核销 -->
-      <view class="parcel-qr-block">
-        <text class="parcel-pickup-code" wx:if="{{trackResult.pickupCode}}">取件码：{{trackResult.pickupCode}}</text>
-        <canvas type="2d" id="parcelQrCanvas" class="parcel-qr-canvas"></canvas>
-        <text class="parcel-qr-tip">取件 · 司机扫码核销</text>
-        <text class="parcel-qr-receiver" wx:if="{{trackResult.pickupCode && (trackResult.receiverName || trackResult.receiverMobile)}}">
-          收件人：{{trackResult.receiverName || ''}} {{trackResult.receiverMobile || ''}}
-        </text>
-        <button class="parcel-qr-copy" bindtap="copyTrackNo">复制单号</button>
+        <!-- 查件二维码：票面末联（撕票线之上），取件 / 司机扫码核销 -->
+        <view class="parcel-qr-block">
+          <text class="parcel-pickup-code" wx:if="{{trackResult.pickupCode}}">取件码：{{trackResult.pickupCode}}</text>
+          <canvas type="2d" id="parcelQrCanvas" class="parcel-qr-canvas"></canvas>
+          <text class="parcel-qr-tip">取件 · 司机扫码核销</text>
+          <text class="parcel-qr-receiver" wx:if="{{trackResult.pickupCode && (trackResult.receiverName || trackResult.receiverMobile)}}">
+            收件人：{{trackResult.receiverName || ''}} {{trackResult.receiverMobile || ''}}
+          </text>
+          <button class="parcel-qr-copy" bindtap="copyTrackNo" hover-class="hover">复制单号</button>
+        </view>
+      </view>
+      <view class="ticket-card__stub">
+        <text class="ticket-card__stub-value">{{trackResult.progress}}<text class="stub-unit">%</text></text>
+        <text class="ticket-card__stub-label">运输进度</text>
       </view>
     </view>
 

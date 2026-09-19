@@ -1,37 +1,53 @@
+<!-- 设置页 -->
 <view class="page-settings {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
-  <!-- 老年人模式 -->
-  <view class="section-label">🧓 显示设置</view>
-  <view class="setting-item" bindtap="toggleElderly" hover-class="hover">
-    <view class="setting-left">
-      <text class="setting-emoji">🔍</text>
-      <view class="setting-info">
-        <text class="setting-name">老年人模式</text>
-        <text class="setting-desc">更大字体、更大按钮，方便长辈使用</text>
-      </view>
+  <!-- 头部站牌带：与导航栏同色衔接 -->
+  <view class="page-head">
+    <view class="head-row">
+      <icon name="gear" size="40" color="#FFFFFF" />
+      <text class="head-title">设置</text>
     </view>
-    <view class="toggle-switch {{elderlyMode ? 'on' : 'off'}}">
-      <view class="toggle-knob"></view>
+    <text class="head-sub">字体与主题颜色，全端即时生效</text>
+  </view>
+
+  <!-- 显示设置 -->
+  <view class="section-label">
+    <icon name="font" size="28" color="{{iconDeep}}" />
+    <text>显示设置</text>
+  </view>
+  <view class="group-card">
+    <view class="group-row" bindtap="toggleElderly" hover-class="hover">
+      <view class="row-icon"><icon name="font" size="38" color="{{iconColor}}" /></view>
+      <view class="row-info">
+        <text class="row-name">老年人模式</text>
+        <text class="row-desc">更大字体、更大按钮，方便长辈使用</text>
+      </view>
+      <view class="toggle-switch {{elderlyMode ? 'on' : 'off'}}">
+        <view class="toggle-knob"></view>
+      </view>
     </view>
   </view>
 
   <!-- 主题颜色 -->
-  <view class="section-label">🎨 主题颜色</view>
-  <view class="theme-list">
+  <view class="section-label">
+    <icon name="sun" size="28" color="{{iconDeep}}" />
+    <text>主题颜色</text>
+  </view>
+  <view class="group-card">
     <view
       wx:for="{{themeList}}"
       wx:key="key"
-      class="theme-row {{themeColor === item.key ? 'active' : ''}}"
+      class="group-row theme-row {{themeColor === item.key ? 'active' : ''}}"
       data-key="{{item.key}}"
       bindtap="switchTheme" hover-class="hover"
     >
       <view class="theme-dot" style="background: {{item.color}}">
-        <text wx:if="{{themeColor === item.key}}" class="theme-check">✓</text>
+        <icon wx:if="{{themeColor === item.key}}" name="check" size="34" color="#FFFFFF" />
       </view>
-      <view class="theme-info">
-        <text class="theme-name">{{item.name}}</text>
-        <text class="theme-desc">{{item.desc}}</text>
+      <view class="row-info">
+        <text class="row-name">{{item.name}}</text>
+        <text class="row-desc">{{item.desc}}</text>
       </view>
-      <view wx:if="{{themeColor === item.key}}" class="theme-radio"></view>
+      <text wx:if="{{themeColor === item.key}}" class="theme-current">使用中</text>
     </view>
   </view>
 </view>
