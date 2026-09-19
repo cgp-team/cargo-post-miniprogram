@@ -80,7 +80,7 @@
 /* ==================== 当前运输段任务卡（陶土橙描边 = 待行动） ==================== */
 .current-leg {
   margin: 24rpx;
-  background: #FFFDF8;
+  background: var(--color-card);
   border-radius: 22rpx;
   padding: 28rpx;
   box-shadow: var(--shadow-card), inset 0 0 0 2rpx var(--color-clay);
@@ -169,7 +169,7 @@
   text-overflow: ellipsis;
   text-align: center;
   border-radius: 14rpx;
-  background: linear-gradient(135deg, var(--color-clay), #A64A1F);
+  background: linear-gradient(135deg, var(--color-clay), var(--color-clay-deep));
   box-shadow: 0 6rpx 16rpx rgba(199, 91, 42, 0.22);
   color: #ffffff;
   font-size: 30rpx;
@@ -185,7 +185,7 @@
 }
 
 .ho-card {
-  background: #FFFDF8;
+  background: var(--color-card);
   border-radius: 22rpx;
   padding: 28rpx;
   box-shadow: var(--shadow-card);
@@ -286,7 +286,7 @@
 }
 
 .leg {
-  background: #FFFDF8;
+  background: var(--color-card);
   border-radius: 18rpx;
   padding: 24rpx 28rpx;
   box-shadow: var(--shadow-card);

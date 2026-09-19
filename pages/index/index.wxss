@@ -190,7 +190,7 @@
   border-radius: 14rpx;
   border: 1rpx solid rgba(60, 50, 30, 0.06);
   box-shadow: 0 8rpx 28rpx rgba(60, 50, 30, 0.12);
-  background: #FFFDF8;
+  background: var(--color-card);
 }
 
 .search-input {
@@ -206,7 +206,7 @@
 /* 天气详情卡（点击胶囊展开；主题色系：米纸底 + 深绿字 + 金色点缀） */
 .weather-card {
   margin: 20rpx 28rpx 0;
-  background: #FFFDF8;
+  background: var(--color-card);
   border-radius: 20rpx;
   padding: 24rpx 28rpx;
   border: 1rpx solid rgba(217, 164, 65, 0.28);
@@ -230,7 +230,7 @@
   width: 96rpx;
   height: 96rpx;
   border-radius: 50%;
-  background: #FBF3DF;
+  background: var(--color-gold-light);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -300,10 +300,10 @@
 .weather-tips {
   max-width: 220rpx;
   font-size: 22rpx;
-  color: #8A6A1F;
+  color: var(--color-gold-deep);
   text-align: right;
   line-height: 1.5;
-  background: #FBF3DF;
+  background: var(--color-gold-light);
   padding: 10rpx 16rpx;
   border-radius: 12rpx;
 }
@@ -313,7 +313,7 @@
   display: flex;
   justify-content: space-around;
   padding-top: 18rpx;
-  border-top: 1rpx solid #F0E8D5;
+  border-top: 1rpx solid var(--color-track);
 }
 
 .forecast-item {
@@ -341,7 +341,7 @@
 .notice-swiper {
   margin: 24rpx 28rpx;
   height: 80rpx;
-  background: linear-gradient(135deg, #FBF3DF, #F6E8C4);
+  background: linear-gradient(135deg, var(--color-gold-light), #F6E8C4);
   border-radius: 12rpx;
   border: 1rpx solid rgba(217, 164, 65, 0.28);
   box-shadow: 0 2rpx 10rpx rgba(217, 164, 65, 0.10);
@@ -414,9 +414,9 @@
 
 /* 四宫格配色全部取自主题板：站牌绿 / 稻谷金 / 深站牌绿 / 陶土橙 */
 .green-bg { background: linear-gradient(135deg, var(--color-primary), var(--color-accent)); box-shadow: 0 6rpx 18rpx var(--color-primary-shadow); }
-.gold-bg { background: linear-gradient(135deg, var(--color-gold), #B98A2E); box-shadow: 0 6rpx 18rpx rgba(217,164,65,0.24); }
+.gold-bg { background: linear-gradient(135deg, var(--color-gold), var(--color-gold-deep)); box-shadow: 0 6rpx 18rpx rgba(217,164,65,0.24); }
 .deep-bg { background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary)); box-shadow: 0 6rpx 18rpx var(--color-primary-shadow); }
-.clay-bg { background: linear-gradient(135deg, var(--color-clay), #A64A1F); box-shadow: 0 6rpx 18rpx rgba(199,91,42,0.24); }
+.clay-bg { background: linear-gradient(135deg, var(--color-clay), var(--color-clay-deep)); box-shadow: 0 6rpx 18rpx rgba(199,91,42,0.24); }
 
 .feature-name {
   font-size: 24rpx;
@@ -488,7 +488,7 @@
   font-size: 22rpx;
   color: var(--color-text-secondary);
   padding: 6rpx 18rpx;
-  background: #EFEAE0;
+  background: var(--color-track);
   border-radius: 20rpx;
   font-weight: 500;
 }
@@ -530,7 +530,7 @@
   justify-content: space-between;
   align-items: center;
   padding-top: 14rpx;
-  border-top: 1rpx solid #F0F0F0;
+  border-top: 1rpx solid var(--color-track);
 }
 
 .bus-next {

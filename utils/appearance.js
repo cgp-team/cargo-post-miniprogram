@@ -41,7 +41,12 @@ const THEMES = {
     clay: '#C75B2A',       // 陶土橙（司机/行动暖色）
     gold: '#D9A441',       // 稻谷金（农产品价格/公告）
     paper: '#F6F2E9',      // 米纸底（页面底色）
-    ink: '#2B2B28'         // 墨字（正文）
+    ink: '#2B2B28',        // 墨字（正文）
+    // 表面色：卡片/输入框/描边/轨道等（与 app.wxss 默认值一致）
+    card: '#FFFDF8', cardWarm: '#FCF8EC', field: '#FBF8F1',
+    line: '#E4DECD', lineDeep: '#D8D2C4', track: '#EDE7D9',
+    goldLight: '#FBF3DF', goldDeep: '#8A6A1F',
+    clayLight: '#F8ECE3', clayDeep: '#A64A1F'
   },
   orange: {
     name: '陶土橙',
@@ -53,7 +58,11 @@ const THEMES = {
     clay: '#C75B2A',
     gold: '#D9A441',
     paper: '#F6F2E9',
-    ink: '#2B2B28'
+    ink: '#2B2B28',
+    card: '#FFFDF8', cardWarm: '#FCF8EC', field: '#FBF8F1',
+    line: '#E4DECD', lineDeep: '#D8D2C4', track: '#EDE7D9',
+    goldLight: '#FBF3DF', goldDeep: '#8A6A1F',
+    clayLight: '#F8ECE3', clayDeep: '#A64A1F'
   },
   blue: {
     name: '山泉蓝',
@@ -65,7 +74,12 @@ const THEMES = {
     clay: '#C75B2A',
     gold: '#D9A441',
     paper: '#F5F8FC',
-    ink: '#2B2B28'
+    ink: '#2B2B28',
+    // 蓝主题表面色偏冷白，与纸底同族
+    card: '#FFFFFF', cardWarm: '#F0F5FA', field: '#F7FAFD',
+    line: '#DCE6EE', lineDeep: '#C7D5E0', track: '#E4EBF2',
+    goldLight: '#FBF3DF', goldDeep: '#8A6A1F',
+    clayLight: '#F8ECE3', clayDeep: '#A64A1F'
   },
   red: {
     name: '中国红',
@@ -77,7 +91,11 @@ const THEMES = {
     clay: '#C75B2A',       // 陶土橙（司机/行动暖色）
     gold: '#D9A441',       // 稻谷金（农产品价格/公告）
     paper: '#F6F2E9',      // 米纸底（页面底色）
-    ink: '#2B2B28'         // 墨字（正文）
+    ink: '#2B2B28',        // 墨字（正文）
+    card: '#FFFDF8', cardWarm: '#FCF8EC', field: '#FBF8F1',
+    line: '#E4DECD', lineDeep: '#D8D2C4', track: '#EDE7D9',
+    goldLight: '#FBF3DF', goldDeep: '#8A6A1F',
+    clayLight: '#F8ECE3', clayDeep: '#A64A1F'
   }
 }
 
@@ -128,7 +146,17 @@ function themeStyle(color) {
     `--color-status-pending:${s.statusPending};`,
     `--color-status-shipping:${s.statusShipping};`,
     `--color-status-done:${s.statusDone};`,
-    `--color-status-warn:${s.statusWarn};`
+    `--color-status-warn:${s.statusWarn};`,
+    `--color-card:${t.card};`,
+    `--color-card-warm:${t.cardWarm};`,
+    `--color-field:${t.field};`,
+    `--color-line:${t.line};`,
+    `--color-line-deep:${t.lineDeep};`,
+    `--color-track:${t.track};`,
+    `--color-gold-light:${t.goldLight};`,
+    `--color-gold-deep:${t.goldDeep};`,
+    `--color-clay-light:${t.clayLight};`,
+    `--color-clay-deep:${t.clayDeep};`
   ].join('')
 }
 

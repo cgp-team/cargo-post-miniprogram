@@ -11,7 +11,7 @@
   gap: 8rpx;
   margin: 20rpx 24rpx 0;
   padding: 8rpx;
-  background: #EDE7D9;
+  background: var(--color-track);
   border-radius: var(--radius-pill);
 }
 .order-source-tab {
@@ -48,7 +48,7 @@
   display: flex;
   gap: 8rpx;
   padding: 8rpx;
-  background: #EDE7D9;
+  background: var(--color-track);
   border-radius: var(--radius-pill);
 }
 .order-tab {
@@ -118,7 +118,7 @@
 /* 状态胶囊：浅底深字，语义色跟随主题 */
 .order-status.status-pending {
   color: var(--color-status-pending);
-  background: #F9E9E0;
+  background: var(--color-clay-light);
 }
 .order-status.status-shipping {
   color: var(--color-status-shipping);
@@ -126,7 +126,7 @@
 }
 .order-status.status-done {
   color: var(--color-status-done);
-  background: #F2F0EA;
+  background: var(--color-track);
 }
 
 /* 商品行 */
@@ -202,7 +202,7 @@
   align-items: center;
   margin-top: 12rpx;
   padding-top: 16rpx;
-  border-top: 1rpx solid #F0EBDD;
+  border-top: 1rpx solid var(--color-track);
 }
 .order-time {
   font-size: 24rpx;
@@ -221,7 +221,7 @@
   position: relative;
   font-size: 26rpx;
   color: var(--color-text-secondary);
-  border: 1rpx solid #D8D2C4;
+  border: 1rpx solid var(--color-line-deep);
   border-radius: var(--radius-pill);
   padding: 8rpx 24rpx;
 }

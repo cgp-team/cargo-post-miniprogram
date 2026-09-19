@@ -18,7 +18,7 @@
   align-items: center;
   padding: 16rpx 0 12rpx;
   position: relative;
-  color: #8A8578;
+  color: var(--color-text-tertiary, #8A8578);
   transition: all 0.3s;
 }
 

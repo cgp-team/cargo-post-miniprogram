@@ -136,12 +136,12 @@
 .login-page .input-field {
   width: 100%;
   height: 96rpx;
-  border: 2rpx solid #E4DECD;
+  border: 2rpx solid var(--color-line);
   border-radius: 14rpx;
   padding: 0 28rpx;
   font-size: 30rpx;
   color: var(--color-ink);
-  background-color: #FBF8F1;
+  background-color: var(--color-field);
   box-sizing: border-box;
   transition: all 0.15s ease;
 }
@@ -184,7 +184,7 @@
 }
 
 .sms-btn.disabled {
-  background: #EFEAE0;
+  background: var(--color-track);
   color: var(--color-text-tertiary);
 }
 
@@ -192,10 +192,10 @@
 .sms-tip {
   margin: -12rpx 0 4rpx;
   padding: 12rpx 20rpx;
-  background: #FBF3DF;
+  background: var(--color-gold-light);
   border-radius: 12rpx;
   font-size: 24rpx;
-  color: #8A6A1F;
+  color: var(--color-gold-deep);
   text-align: center;
 }
 
@@ -234,7 +234,7 @@
 .divider-line {
   flex: 1;
   height: 1rpx;
-  background: #E4DECD;
+  background: var(--color-line);
 }
 
 .divider-text {
@@ -250,7 +250,7 @@
   justify-content: center;
   margin-top: 28rpx;
   height: 96rpx;
-  background: #FFFDF8;
+  background: var(--color-card);
   border: 2rpx solid var(--color-accent);
   border-radius: 10rpx;
   font-size: 32rpx;

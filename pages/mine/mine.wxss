@@ -168,7 +168,7 @@
 .farmer-section {
   margin: -36rpx 24rpx 24rpx;
   padding: 24rpx 24rpx 26rpx;
-  background: #FFFDF8;
+  background: var(--color-card);
   border-radius: 20rpx;
   box-shadow: var(--shadow-card);
   position: relative;
@@ -247,7 +247,7 @@
 
 .menu-section {
   margin: 0 24rpx 24rpx;
-  background: #FFFDF8;
+  background: var(--color-card);
   border-radius: 20rpx;
   overflow: hidden;
   box-shadow: var(--shadow-card);
@@ -259,7 +259,7 @@
   gap: 20rpx;
   padding: 26rpx 28rpx;
   transition: all 0.15s ease;
-  border-bottom: 1rpx solid #F2ECDF;
+  border-bottom: 1rpx solid var(--color-track);
 }
 
 .menu-item:last-child { border-bottom: none; }

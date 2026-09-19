@@ -151,7 +151,7 @@
 
 /* ---------- 行程进度：虚线山路轨道，巴士图标走到当前进度 ---------- */
 .progress-card {
-  background: #FFFDF8;
+  background: var(--color-card);
   border-radius: 20rpx;
   padding: 40rpx 28rpx 28rpx;
   box-shadow: var(--shadow-card);
@@ -161,7 +161,7 @@
   position: relative;
   height: 12rpx;
   border-radius: 6rpx;
-  background: repeating-linear-gradient(90deg, #E4DECD 0, #E4DECD 10rpx, transparent 10rpx, transparent 18rpx);
+  background: repeating-linear-gradient(90deg, var(--color-line) 0, var(--color-line) 10rpx, transparent 10rpx, transparent 18rpx);
 }
 
 .progress-fill {
@@ -195,7 +195,7 @@
 
 /* ---------- 经停站点：竖向时间线（圆点 + 虚线山路连线） ---------- */
 .stops {
-  background: #FFFDF8;
+  background: var(--color-card);
   border-radius: 20rpx;
   padding: 8rpx 24rpx;
   box-shadow: var(--shadow-card);
@@ -248,7 +248,7 @@
   width: 18rpx;
   height: 18rpx;
   border-radius: 50%;
-  background: #FFFDF8;
+  background: var(--color-card);
   border: 3rpx solid #CFC8B4;
 }
 
@@ -273,7 +273,7 @@
   flex: 1;
   min-width: 0;
   padding: 22rpx 0;
-  border-bottom: 1rpx solid #F0EAE0;
+  border-bottom: 1rpx solid var(--color-track);
 }
 
 .stop-item:last-child .stop-body {

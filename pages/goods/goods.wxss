@@ -130,8 +130,8 @@
   padding: 12rpx 30rpx;
   font-size: 26rpx;
   color: var(--color-text-secondary);
-  background: #FFFDF8;
-  border: 1rpx solid #EAE3D2;
+  background: var(--color-card);
+  border: 1rpx solid var(--color-line);
   border-radius: 999rpx;
   box-shadow: 0 2rpx 8rpx rgba(60, 50, 30, 0.04);
   transition: all 0.15s ease;
@@ -156,7 +156,7 @@
 }
 
 .product-card {
-  background: #FFFDF8;
+  background: var(--color-card);
   border-radius: 20rpx;
   overflow: hidden;
   box-shadow: var(--shadow-card);
@@ -171,7 +171,7 @@
 .product-img-wrap {
   width: 100%;
   height: 300rpx;
-  background: #FBF3DF;
+  background: var(--color-gold-light);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -191,7 +191,7 @@
   display: flex;
   align-items: center;
   gap: 6rpx;
-  background: linear-gradient(135deg, var(--color-gold), #B98A2E);
+  background: linear-gradient(135deg, var(--color-gold), var(--color-gold-deep));
   color: #ffffff;
   font-size: 20rpx;
   font-weight: 600;
