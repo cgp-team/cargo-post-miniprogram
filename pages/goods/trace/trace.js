@@ -201,10 +201,22 @@ Page({
     return String(t).replace('T', ' ').substring(5, 16)
   },
 
-  /** 预览司机核验凭证照片（装车/妥投） */
+  /** 预览司机核验凭证照片（装车/妥投，两张一起可左右翻） */
   previewProof(e) {
     const url = e.currentTarget.dataset.url
     if (!url) return
-    wx.previewImage({ urls: [url], current: url })
+    const trace = this.data.trace || {}
+    const urls = [trace.loadPhotoUrl, trace.deliverPhotoUrl].filter(Boolean)
+    wx.previewImage({ urls: urls.length ? urls : [url], current: url })
+  },
+
+  /** 长按复制订单号（客服核对/手工录单要用） */
+  copyOrderNo() {
+    const no = this.data.trace && this.data.trace.orderNo
+    if (!no) return
+    wx.setClipboardData({
+      data: no,
+      success: () => wx.showToast({ title: '订单号已复制', icon: 'success' })
+    })
   }
 })

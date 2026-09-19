@@ -71,7 +71,7 @@
     <!-- 订单二维码：司机扫码装车 / 妥投（票根式，带撕票线） -->
     <view class="order-qr-card" wx:if="{{trace.orderNo}}">
       <canvas type="2d" id="mallOrderQr" class="order-qr-canvas"></canvas>
-      <text class="order-qr-no">{{trace.orderNo}}</text>
+      <text class="order-qr-no" bindlongpress="copyOrderNo">{{trace.orderNo}}</text>
       <view class="order-qr-divider"></view>
       <text class="order-qr-tip">司机扫码装车 / 妥投核验</text>
     </view>

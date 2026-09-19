@@ -78,6 +78,7 @@
     <button
       class="btn-primary login-btn"
       bindtap="handleLogin" hover-class="hover"
+      disabled="{{loading}}"
       loading="{{loading}}"
     >
       {{loginMode === 'sms' ? '验证码登录' : '密码登录'}}
@@ -97,7 +98,7 @@
     </view>
 
     <!-- 微信一键登录（手机号快捷验证） -->
-    <button class="wechat-login-btn" open-type="getPhoneNumber" bindgetphonenumber="onWechatPhoneNumber" hover-class="none">
+    <button class="wechat-login-btn" open-type="getPhoneNumber" bindgetphonenumber="onWechatPhoneNumber" disabled="{{loading}}" hover-class="none">
       <text>微信一键登录</text>
     </button>
   </view>

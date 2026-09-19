@@ -65,7 +65,7 @@
           </view>
           <view class="task-action" wx:for="{{stop.actions}}" wx:key="index" wx:for-item="act">
             <text class="task-action-name">{{act.actionName}}</text>
-            <text wx:if="{{act.orderNo}}" class="task-action-order">{{act.orderNo}}</text>
+            <text wx:if="{{act.orderNo}}" class="task-action-order" bindlongpress="copyOrderNo" data-no="{{act.orderNo}}">{{act.orderNo}}</text>
             <text wx:if="{{act.quantity}}" class="task-action-qty">×{{act.quantity}}</text>
           </view>
         </view>
@@ -289,7 +289,7 @@
           <text class="pickup-name">{{item.bizType === 'PRODUCT' ? (item.goodsName || '商城订单') : (item.orderType === 3 ? (item.mailNo || '快递') : (item.goodsName || '寄货'))}}</text>
           <text wx:if="{{item.bizType === 'PRODUCT'}}" class="pickup-detail">商城订单 · 送至 {{item.receiverAddress || '自提站点'}}（{{item.receiverName || '收件人'}} {{item.receiverMobile || ''}}）</text>
           <text wx:else class="pickup-detail">{{item.weightKg}}kg · {{item.orderType === 3 ? ('取件码 ' + (item.pickupCode || '—')) : (item.receiverName || '待定')}}</text>
-          <text class="pickup-detail">{{item.orderNo}}</text>
+          <text class="pickup-detail" bindlongpress="copyOrderNo" data-no="{{item.orderNo}}">{{item.orderNo}}</text>
         </view>
         <view class="pickup-check {{item.checked ? 'checked' : ''}}">
           <view wx:if="{{item.checked}}" class="anim-pop">
@@ -308,7 +308,7 @@
       <view class="task-item anim-rise" wx:for="{{tasks}}" wx:key="id" style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms">
         <text class="task-station">{{item.stationName || '—'}}</text>
         <text class="task-action">{{item.actionName}}</text>
-        <text class="task-order" wx:if="{{item.orderNo}}">{{item.orderNo}}</text>
+        <text class="task-order" wx:if="{{item.orderNo}}" bindlongpress="copyOrderNo" data-no="{{item.orderNo}}">{{item.orderNo}}</text>
       </view>
     </view>
 

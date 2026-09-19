@@ -118,17 +118,22 @@ Page({
     wx.navigateTo({ url: `/pages/goods/trace/trace?id=${this.data.orderId}` })
   },
 
-  /** 看司机核验凭证大图 */
+  /** 看司机核验凭证大图（装车/妥投两张一起，可左右翻） */
   previewProof(e) {
     const url = e.currentTarget.dataset.url
     if (!url) return
-    wx.previewImage({ urls: [url], current: url })
+    const order = this.data.order || {}
+    const urls = [order.loadPhotoUrl, order.deliverPhotoUrl].filter(Boolean)
+    wx.previewImage({ urls: urls.length ? urls : [url], current: url })
   },
 
   /** 复制订单号（司机扫码/客服核对要用） */
   copyOrderNo() {
     const no = this.data.order && this.data.order.orderNo
     if (!no) return
-    wx.setClipboardData({ data: no })
+    wx.setClipboardData({
+      data: no,
+      success: () => wx.showToast({ title: '订单号已复制', icon: 'success' })
+    })
   }
 })

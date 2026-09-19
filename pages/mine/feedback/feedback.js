@@ -4,6 +4,7 @@
  */
 const api = require('../../../utils/api')
 const appearance = require('../../../utils/appearance')
+const feedback = require('../../../utils/feedback')
 const { formatBackendTime } = require('../../../utils/util')
 
 Page({
@@ -42,6 +43,7 @@ Page({
 
   /** 提交反馈 */
   async submit() {
+    if (this.data.submitting) return // 防重复点击（按钮已 disabled，双保险）
     const { content, name, mobile } = this.data
     if (!content.trim()) {
       wx.showToast({ title: '请填写反馈内容', icon: 'none' })
@@ -54,7 +56,8 @@ Page({
         name: name.trim(),
         mobile: mobile.trim()
       })
-      wx.showToast({ title: '已提交，感谢反馈', icon: 'success' })
+      feedback.tap()
+      wx.showToast({ title: '感谢反馈', icon: 'success' })
       this.setData({ content: '' })
       this.reloadList()
     } catch (e) { /* api 已 toast */ } finally {

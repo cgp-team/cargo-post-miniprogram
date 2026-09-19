@@ -338,7 +338,7 @@
         <text>货物照片</text>
       </view>
       <view class="photo-area" bindtap="takePhoto" hover-class="hover">
-        <image wx:if="{{photoPath}}" class="photo-preview" src="{{photoPath}}" mode="aspectFill"></image>
+        <image wx:if="{{photoPath}}" class="photo-preview" src="{{photoPath}}" mode="aspectFill" bindlongpress="previewPhoto" hover-class="hover"></image>
         <view wx:else class="photo-placeholder">
           <icon class="photo-camera" name="camera" size="80" color="{{iconColor}}" />
           <text class="photo-hint">点击拍照</text>
@@ -438,7 +438,7 @@
     <!-- 固定提交栏：上一步重填 + 确认发布 -->
     <view class="form-foot-bar">
       <button class="btn-outline" bindtap="resetSend">重新填写</button>
-      <button class="btn-primary" bindtap="confirmSend">确认发布</button>
+      <button class="btn-primary" bindtap="confirmSend" disabled="{{submitting}}" loading="{{submitting}}">确认发布</button>
     </view>
   </view>
 
@@ -469,7 +469,7 @@
     <view class="match-bus-card ticket-card anim-pop" style="animation-delay: 120ms">
       <view class="ticket-card__main qr-main">
         <canvas type="2d" id="qrCanvas" class="qr-canvas"></canvas>
-        <text class="order-no-display">{{orderNo}}</text>
+        <text class="order-no-display" bindlongpress="copyOrderNo">{{orderNo}}</text>
         <text class="bus-detail">寄货订单号 · 请妥善保存</text>
         <view class="qr-actions">
           <button class="qr-btn" bindtap="copyOrderNo">复制单号</button>

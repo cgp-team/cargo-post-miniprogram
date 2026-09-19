@@ -138,14 +138,12 @@ Page({
       const profile = await api.getDriverProfile()
       if (!profile) {
         wx.showToast({ title: '未找到司机档案，请联系管理员', icon: 'none', duration: 2500 })
-        // 加载司机未读消息数
-      api.getDriverUnreadCount(profile.driverId).then((count) => {
-        this.setData({ driverUnreadCount: count || 0 })
-      }).catch(() => {})
-      this.setData({ loaded: true })
+        this.setData({ loaded: true })
         return
       }
       this.driverId = profile.driverId
+      // 司机消息中心（notification?driverMode=1）从 globalData 取 driverId
+      getApp().globalData.driverId = profile.driverId
       const [shifts, pickups, tasks, route] = await Promise.all([
         api.getDriverShifts().catch(() => []),
         api.getDriverPickups().catch(() => []),
@@ -165,8 +163,7 @@ Page({
         // Phase 9：司机路线真实道路 polyline + 偏航判定（只报警不自动改方案）
         deviated: !!(route && route.deviated),
         deviationMeters: route && route.deviationMeters != null ? route.deviationMeters : 0,
-        pendingHandoverCount: (handovers || []).length,
-        driverUnreadCount: 0
+        pendingHandoverCount: (handovers || []).length
       })
       this.driverRoutePolyline = route && route.polyline && route.polyline.length >= 2
         ? route.polyline.map((p) => ({ longitude: p.longitude, latitude: p.latitude }))
@@ -185,10 +182,6 @@ Page({
       }).catch(() => {})
       this.setData({ loaded: true })
     } catch (e) {
-      // 加载司机未读消息数
-      api.getDriverUnreadCount(profile.driverId).then((count) => {
-        this.setData({ driverUnreadCount: count || 0 })
-      }).catch(() => {})
       this.setData({ loaded: true })
     }
   },
@@ -611,6 +604,7 @@ Page({
         tmplIds: [tpl.id],
         success: (res) => {
           if (res[tpl.id] === 'accept') {
+            feedback.tap()
             wx.showToast({ title: '订阅成功', icon: 'success' })
           } else {
             wx.showToast({ title: '未订阅', icon: 'none' })
@@ -635,6 +629,7 @@ Page({
         title: '需要定位权限',
         content: '行驶中需获取位置上报监控中心，请在设置中开启定位权限',
         confirmText: '去设置',
+        confirmColor: '#C75B2A',
         success: (r) => {
           if (r.confirm) wx.openSetting()
         }
@@ -658,7 +653,7 @@ Page({
   /** 纯导航推进：给定坐标更新地图中心/下一站距离/进度/到站（模拟模式与真实 GPS 共用） */
   updateNavByCoord(latitude, longitude, speedKmh) {
     // 地图跟随当前位置
-    this.setData({ mapLatitude: longitude, mapLongitude: latitude })
+    this.setData({ mapLatitude: latitude, mapLongitude: longitude })
 
     if (this.data.status !== 'driving') {
       this.setData({ speed: speedKmh })
@@ -917,13 +912,18 @@ Page({
       title: '手动输入单号',
       editable: true,
       placeholderText: '扫码不可用时，输入订单号',
+      confirmText: '确认',
+      confirmColor: '#C75B2A',
       success: (res) => {
         if (!res.confirm) {
           wx.showToast({ title: '已取消', icon: 'none' })
           return
         }
         const no = String(res.content || '').trim()
-        if (!no) return
+        if (!no) {
+          wx.showToast({ title: '请输入订单号', icon: 'none' })
+          return
+        }
         this.handleScannedCode(no, action, successText)
       }
     })
@@ -975,6 +975,22 @@ Page({
   goHandover() {
     feedback.tap()
     wx.navigateTo({ url: '/pages/driver/handover/handover' })
+  },
+
+  /** 通知铃铛：进入司机消息中心（driverMode=1 拉司机消息） */
+  goNotifications() {
+    wx.navigateTo({ url: '/pages/notification/notification?driverMode=1' })
+  },
+
+  /** 长按复制单号（电话核对/手动录入场景要报完整单号）；系统自带「已复制」提示 */
+  copyOrderNo(e) {
+    const no = e.currentTarget.dataset.no
+    if (!no) return
+    try {
+      wx.setClipboardData({ data: String(no) })
+    } catch (err) {
+      // 桩环境/低版本静默降级
+    }
   },
 
   skipLoading() {

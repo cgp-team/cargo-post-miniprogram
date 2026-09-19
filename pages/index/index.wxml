@@ -12,7 +12,7 @@
         <text class="top-sub">客货邮 · 城乡直达</text>
       </view>
       <view class="user-avatar" bindtap="goToProfile" hover-class="hover">
-        <image wx:if="{{userInfo.avatarUrl}}" src="{{userInfo.avatarUrl}}" mode="aspectFill" />
+        <image wx:if="{{userInfo.avatar}}" src="{{userInfo.avatar}}" mode="aspectFill" />
         <icon wx:else name="user" size="40" color="#FFFFFF" />
       </view>
     </view>

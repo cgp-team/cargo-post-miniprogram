@@ -54,7 +54,7 @@
         <text class="n-content">{{item.content}}</text>
         <view class="n-meta">
           <text class="n-pill n-pill--type">{{item.eventTypeName || '通知'}}</text>
-          <view class="n-pill n-pill--order" wx:if="{{item.orderNo}}">
+          <view class="n-pill n-pill--order" wx:if="{{item.orderNo}}" catchlongpress="copyOrderNo" data-no="{{item.orderNo}}">
             <icon name="box" size="20" color="{{iconClay}}" />
             <text class="n-pill--order-no">{{item.orderNo}}</text>
           </view>

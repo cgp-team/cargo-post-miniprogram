@@ -24,7 +24,7 @@
       <view class="banner-bg"></view>
       <view class="banner-content" bindtap="goToProfile" hover-class="hover">
         <view class="user-avatar-wrap">
-          <image wx:if="{{userInfo.avatar}}" class="user-avatar-img" src="{{userInfo.avatar}}" mode="aspectFill" />
+          <image wx:if="{{userInfo.avatar}}" class="user-avatar-img" src="{{userInfo.avatar}}" mode="aspectFill" bindlongpress="previewAvatar" hover-class="hover" />
           <icon wx:else name="user" size="56" color="#FFFFFF" />
         </view>
         <view class="user-detail">

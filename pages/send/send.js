@@ -90,6 +90,7 @@ Page({
     // 提交结果
     orderNo: '',
     orderAmount: null,
+    submitting: false, // 确认发布防重入（按钮 disabled/loading 同步绑定）
     elderlyMode: false,
     themeColor: 'green',
     themeStyle: ''
@@ -423,7 +424,8 @@ Page({
     if (!s) return
     this.applyPickupStation({ id: s.id, name: s.name })
     this.setData({ stationSuggestion: null })
-    wx.showToast({ title: `已改用「${s.name}」`, icon: 'success' })
+    // 站点名长度不定，超 7 字改用 none，避免 success 图标 toast 折行
+    wx.showToast({ title: `已改用「${s.name}」`, icon: 'none' })
   },
 
   /** 送达站点变更：同步 ID/名称；与取货相同则拦截；清空旧路线预估 */
@@ -521,6 +523,7 @@ Page({
           const url = await api.uploadFile(temp)
           wx.hideLoading()
           this.setData({ photoUrl: url })
+          feedback.tap()
           wx.showToast({ title: '照片已上传', icon: 'success' })
         } catch (e) {
           wx.hideLoading()
@@ -533,7 +536,7 @@ Page({
   /** 确认发布 → 真实创建货运订单（只提交站点/货物/收货信息，不提交前端距离结果） */
   async confirmSend() {
     const { photoPath, photoUrl, receiverMobile } = this.data
-    if (this.submitting) return
+    if (this.data.submitting) return
     if (!photoPath) {
       wx.showToast({ title: '请先拍照确认货物', icon: 'none' })
       return
@@ -546,7 +549,7 @@ Page({
       wx.showToast({ title: '请输入正确的收货电话', icon: 'none' })
       return
     }
-    this.submitting = true
+    this.setData({ submitting: true })
     wx.showLoading({ title: '提交中…', mask: true })
     try {
       // 照片上传失败/超时不再直接卡住发布：先补传一次，仍失败再让用户选择"不带照片提交"
@@ -560,7 +563,7 @@ Page({
         } else {
           const goOn = await this._confirmWithoutPhoto()
           if (!goOn) {
-            this.submitting = false
+            this.setData({ submitting: false })
             wx.hideLoading()
             return
           }
@@ -588,7 +591,7 @@ Page({
         receiverMobile: receiverMobile.trim(),
         receiverAddress: this.data.receiverAddress.trim()
       })
-      this.submitting = false
+      this.setData({ submitting: false })
       wx.hideLoading()
       // 订单已创建：先切到成功页（保证"已发布"一定可见），再补审核结果文案。
       // 展示层异常绝不能让用户以为"没发布成功"而重复提交。
@@ -601,7 +604,7 @@ Page({
         console.warn('[send] 审核结果展示异常（订单已创建）', e)
       }
     } catch (e) {
-      this.submitting = false
+      this.setData({ submitting: false })
       wx.hideLoading()
       // 错误提示已由 api.js 统一处理，保留当前页面现场
     }
@@ -624,6 +627,7 @@ Page({
         title: '照片未上传成功',
         content: '网络较慢导致照片上传失败，是否不带照片提交？（受理后工作人员仍会现场核实货物）',
         confirmText: '继续提交',
+        confirmColor: '#C75B2A',
         cancelText: '重试上传',
         success: (res) => resolve(!!res.confirm),
         fail: () => resolve(false)
@@ -695,6 +699,13 @@ Page({
     })
   },
 
+  /** 长按预览已拍货物照片（点按仍是重拍，不冲突） */
+  previewPhoto() {
+    const url = this.data.photoUrl || this.data.photoPath
+    if (!url) return
+    wx.previewImage({ urls: [url], current: url })
+  },
+
   noop() {},
 
   /** 转发给收货人查件 */
@@ -756,7 +767,8 @@ Page({
       servicePointLatitude: null,
       servicePointLongitude: null,
       orderNo: '',
-      orderAmount: null
+      orderAmount: null,
+      submitting: false
     })
   },
 

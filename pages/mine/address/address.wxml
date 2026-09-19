@@ -68,7 +68,7 @@
         <text class="form-label">默认地址</text>
         <switch checked="{{formDefault}}" bindchange="onFormDefaultChange" color="{{iconColor}}" />
       </view>
-      <button class="btn-primary save-btn" bindtap="saveAddress">保存</button>
+      <button class="btn-primary save-btn" bindtap="saveAddress" disabled="{{saving}}">保存</button>
     </view>
   </view>
 

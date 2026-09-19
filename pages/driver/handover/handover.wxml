@@ -21,7 +21,7 @@
     </view>
     <!-- 山路线：起讫站之间的路 -->
     <view class="road-line"></view>
-    <text class="cl-meta">
+    <text class="cl-meta" bindlongpress="copyOrderNo" data-no="{{currentLeg.orderNo || currentLeg.orderId}}">
       订单 {{currentLeg.orderNo || currentLeg.orderId}}
       <block wx:if="{{currentLeg.distanceKm}}"> · {{currentLeg.distanceKm}}km</block>
       <block wx:if="{{currentLeg.durationMinutes}}"> · 预计{{currentLeg.durationMinutes}}分钟</block>
@@ -49,7 +49,7 @@
         </view>
         <view class="ho-body">
           <view class="card-head">
-            <text class="order-no">{{item.orderNo || ('订单 ' + item.orderId)}}</text>
+            <text class="order-no" bindlongpress="copyOrderNo" data-no="{{item.orderNo || item.orderId}}">{{item.orderNo || ('订单 ' + item.orderId)}}</text>
             <text class="status">{{item.statusName}}</text>
           </view>
           <text class="goods">{{item.goodsName || '货物'}} · {{item.itemCount}} 件<block wx:if="{{item.weightKg}}"> · {{item.weightKg}}kg</block></text>

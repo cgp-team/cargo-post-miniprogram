@@ -82,6 +82,7 @@ Page({
 
   /** 登录按钮统一入口：按当前登录模式分发 */
   handleLogin() {
+    if (this.data.loading) return // 防重复点击（请求中）
     if (this.data.loginMode === 'sms') this.handleSmsLogin()
     else this.handlePasswordLogin()
   },
@@ -129,6 +130,7 @@ Page({
 
   /** 微信小程序一键登录：手机号快捷验证回调 */
   onWechatPhoneNumber(e) {
+    if (this.data.loading) return // 防重复点击（请求中）
     // e.detail.code 为动态令牌（需小程序已开通"手机号快捷验证"能力）；未开通或用户拒绝时无 code
     const phoneCode = e.detail.code
     if (!phoneCode) {

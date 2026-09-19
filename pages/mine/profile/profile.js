@@ -4,6 +4,7 @@
  */
 const api = require('../../../utils/api')
 const appearance = require('../../../utils/appearance')
+const feedback = require('../../../utils/feedback')
 
 Page({
   data: {
@@ -78,6 +79,7 @@ Page({
 
   /** 保存资料（后端 nickname/avatar/sex 均按必填校验，回传当前表单值即可） */
   async saveProfile() {
+    if (this.data.saving) return // 防重复点击（按钮已 disabled，双保险）
     const nickname = this.data.nickname.trim()
     if (!nickname) {
       wx.showToast({ title: '请输入昵称', icon: 'none' })
@@ -91,11 +93,18 @@ Page({
       await api.updateUser(payload)
       const cached = wx.getStorageSync('userInfo') || {}
       wx.setStorageSync('userInfo', Object.assign(cached, { nickname, avatar: this.data.avatar, sex: this.data.sex }))
+      feedback.tap()
       wx.showToast({ title: '已保存', icon: 'success' })
       setTimeout(() => wx.navigateBack(), 800)
     } catch (e) { /* api 已 toast */ } finally {
       this.setData({ saving: false })
     }
+  },
+
+  /** 长按预览当前头像（点按仍是更换头像，不冲突） */
+  previewAvatar() {
+    if (!this.data.avatar) return
+    wx.previewImage({ urls: [this.data.avatar], current: this.data.avatar })
   },
 
   onPasswordInput(e) {
@@ -119,7 +128,7 @@ Page({
     }
     try {
       await api.sendSmsCode(this.data.mobile, 3)
-      wx.showToast({ title: '验证码已发送', icon: 'none' })
+      wx.showToast({ title: '验证码已发送', icon: 'success' })
       this.setData({ codeCountdown: 60 })
       this._timer = setInterval(() => {
         const left = this.data.codeCountdown - 1
@@ -135,6 +144,7 @@ Page({
 
   /** 提交修改密码 */
   async changePassword() {
+    if (this.data.changingPwd) return // 防重复点击（按钮已 disabled，双保险）
     const { password, passwordConfirm, smsCode } = this.data
     if (!smsCode.trim()) {
       wx.showToast({ title: '请输入短信验证码', icon: 'none' })
@@ -151,6 +161,7 @@ Page({
     this.setData({ changingPwd: true })
     try {
       await api.updatePassword({ password, code: smsCode.trim() })
+      feedback.tap()
       wx.showToast({ title: '密码已修改', icon: 'success' })
       this.setData({ password: '', passwordConfirm: '', smsCode: '' })
     } catch (e) { /* api 已 toast */ } finally {
