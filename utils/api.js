@@ -295,75 +295,76 @@ function confirmStationAction(orderId) {
 }
 
 // ==================== 司机端 ====================
+// driver 系包装函数末位均可选传 options（透传 request 第 4 参，如 { silent: true } 静默轮询不弹 toast）
 
 /** 司机档案（登录会员识别身份） */
-function getDriverProfile() {
-  return request('/app-api/transport/driver/profile')
+function getDriverProfile(options) {
+  return request('/app-api/transport/driver/profile', 'GET', {}, options)
 }
 
 /** 今日班次与经停站点 */
-function getDriverShifts() {
-  return request('/app-api/transport/driver/shifts')
+function getDriverShifts(options) {
+  return request('/app-api/transport/driver/shifts', 'GET', {}, options)
 }
 
 /** 待装车任务 */
-function getDriverPickups() {
-  return request('/app-api/transport/driver/pickups')
+function getDriverPickups(options) {
+  return request('/app-api/transport/driver/pickups', 'GET', {}, options)
 }
 
 /** 运营统计 */
-function getDriverEarnings() {
-  return request('/app-api/transport/driver/earnings')
+function getDriverEarnings(options) {
+  return request('/app-api/transport/driver/earnings', 'GET', {}, options)
 }
 
 /** 调度任务（算法派单结果，预留） */
-function getDriverTasks(driverId) {
-  return request('/app-api/transport/driver/tasks', 'GET', { driverId })
+function getDriverTasks(driverId, options) {
+  return request('/app-api/transport/driver/tasks', 'GET', { driverId }, options)
 }
 
 /** 司机路线（完整任务段有序经停 + 真实道路 polyline + 偏航判定，Phase 9 地图数据） */
-function getDriverRoute(driverId) {
-  return request('/app-api/transport/driver/route', 'GET', { driverId })
+function getDriverRoute(driverId, options) {
+  return request('/app-api/transport/driver/route', 'GET', { driverId }, options)
 }
 
 /** 发车：创建当天班次执行记录，订单推进已发车 */
-function driverDepart(driverId, shiftId) {
-  return request('/app-api/transport/driver/depart', 'POST', { driverId, shiftId })
+function driverDepart(driverId, shiftId, options) {
+  return request('/app-api/transport/driver/depart', 'POST', { driverId, shiftId }, options)
 }
 
 /** 到站：更新当前站点；到达终点站时完成班次 */
-function driverArrive(driverId, shiftId, stationId) {
-  return request('/app-api/transport/driver/arrive', 'POST', { driverId, shiftId, stationId })
+function driverArrive(driverId, shiftId, stationId, options) {
+  return request('/app-api/transport/driver/arrive', 'POST', { driverId, shiftId, stationId }, options)
 }
 
 /** 装车确认：货运订单推进运输中（货运强制带司机收件照片） */
-function driverPickupConfirm(driverId, orderId, driverPhotoUrl) {
-  return request('/app-api/transport/driver/pickup-confirm', 'POST', { driverId, orderId, driverPhotoUrl })
+function driverPickupConfirm(driverId, orderId, driverPhotoUrl, options) {
+  return request('/app-api/transport/driver/pickup-confirm', 'POST', { driverId, orderId, driverPhotoUrl }, options)
 }
 
 /** 妥投确认：货运订单推进已完成 */
-function driverDeliver(driverId, orderId) {
-  return request('/app-api/transport/driver/deliver', 'POST', { driverId, orderId })
+function driverDeliver(driverId, orderId, options) {
+  return request('/app-api/transport/driver/deliver', 'POST', { driverId, orderId }, options)
 }
 
 /** 商城订单装车确认（司机拍照核验凭证，订单保持已发货/配送中） */
-function driverProductLoad(driverId, orderId, driverPhotoUrl) {
-  return request('/app-api/transport/driver/product-load', 'POST', { driverId, orderId, driverPhotoUrl })
+function driverProductLoad(driverId, orderId, driverPhotoUrl, options) {
+  return request('/app-api/transport/driver/product-load', 'POST', { driverId, orderId, driverPhotoUrl }, options)
 }
 
 /** 商城订单妥投完成（司机交付凭证，订单转已完成，用户端可见） */
-function driverProductDeliver(driverId, orderId, driverPhotoUrl) {
-  return request('/app-api/transport/driver/product-deliver', 'POST', { driverId, orderId, driverPhotoUrl })
+function driverProductDeliver(driverId, orderId, driverPhotoUrl, options) {
+  return request('/app-api/transport/driver/product-deliver', 'POST', { driverId, orderId, driverPhotoUrl }, options)
 }
 
 /** 上报车辆位置（行驶中定时调用） */
-function reportDriverLocation(data) {
-  return request('/app-api/transport/driver/location', 'POST', data)
+function reportDriverLocation(data, options) {
+  return request('/app-api/transport/driver/location', 'POST', data, options)
 }
 
 /** 司机车辆当前位置（真实上报 REAL + 模拟引擎 SIMULATED） */
-function getDriverPosition(driverId) {
-  return request('/app-api/transport/driver/position', 'GET', { driverId })
+function getDriverPosition(driverId, options) {
+  return request('/app-api/transport/driver/position', 'GET', { driverId }, options)
 }
 
 /** 微信订阅消息模板列表（@PermitAll，返回含 id=模板ID/title/type） */
@@ -399,8 +400,8 @@ function getNearbyRealtimeBuses(latitude, longitude, radius, district, options) 
 // ==================== 取件核销 + 文件上传 ====================
 
 /** 取件核销：邮快件收件人取件，司机确认（校验取件码） */
-function driverPickupVerify(driverId, orderId, pickupCode) {
-  return request('/app-api/transport/driver/pickup-verify', 'POST', { driverId, orderId, pickupCode })
+function driverPickupVerify(driverId, orderId, pickupCode, options) {
+  return request('/app-api/transport/driver/pickup-verify', 'POST', { driverId, orderId, pickupCode }, options)
 }
 
 // ==================== 消息通知中心 ====================
@@ -428,18 +429,18 @@ function readAllNotifications(orderId) {
 // ==================== 多段联运（司机交接 / 运输段进度） ====================
 
 /** 待确认的货物交接任务 */
-function getDriverHandovers(driverId) {
-  return request('/app-api/transport/driver/handovers', 'GET', { driverId })
+function getDriverHandovers(driverId, options) {
+  return request('/app-api/transport/driver/handovers', 'GET', { driverId }, options)
 }
 
 /** 确认货物交接（拍照核验） */
-function confirmDriverHandover(data) {
-  return request('/app-api/transport/driver/handover/confirm', 'POST', data)
+function confirmDriverHandover(data, options) {
+  return request('/app-api/transport/driver/handover/confirm', 'POST', data, options)
 }
 
 /** 我的运输段进度 */
-function getDriverLegs(driverId) {
-  return request('/app-api/transport/driver/legs', 'GET', { driverId })
+function getDriverLegs(driverId, options) {
+  return request('/app-api/transport/driver/legs', 'GET', { driverId }, options)
 }
 
 /** 用户端：按订单号查多段运输进度 */
@@ -455,28 +456,28 @@ function getParcelTopology(no) {
 // ==================== 司机运输段任务（接受/导航/到达/装货/发车/交接/完成） ====================
 
 /** 当前运输段（司机任务详情） */
-function getDriverCurrentLeg(driverId) {
-  return request('/app-api/transport/driver/current-leg', 'GET', { driverId })
+function getDriverCurrentLeg(driverId, options) {
+  return request('/app-api/transport/driver/current-leg', 'GET', { driverId }, options)
 }
 
 /** 运输段操作：action ∈ accept/navigate/arrive-origin/load/start/arrive-dest/handover-start/handover-confirm/complete */
-function driverLegAction(action, data) {
-  return request(`/app-api/transport/driver/leg/${action}`, 'POST', data)
+function driverLegAction(action, data, options) {
+  return request(`/app-api/transport/driver/leg/${action}`, 'POST', data, options)
 }
 
 /** 司机消息中心分页 */
-function pageDriverMessages(params) {
-  return request('/app-api/transport/driver/messages', 'GET', params)
+function pageDriverMessages(params, options) {
+  return request('/app-api/transport/driver/messages', 'GET', params, options)
 }
 
 /** 司机未读消息数 */
-function getDriverUnreadCount(driverId) {
-  return request('/app-api/transport/driver/messages/unread-count', 'GET', { driverId })
+function getDriverUnreadCount(driverId, options) {
+  return request('/app-api/transport/driver/messages/unread-count', 'GET', { driverId }, options)
 }
 
 /** 标记司机消息已读 */
-function readDriverMessage(id, driverId) {
-  return request(`/app-api/transport/driver/messages/read?id=${id}&driverId=${driverId}`, 'PUT')
+function readDriverMessage(id, driverId, options) {
+  return request(`/app-api/transport/driver/messages/read?id=${id}&driverId=${driverId}`, 'PUT', {}, options)
 }
 
 /** 上传文件（照片），返回文件 URL（infra app 文件上传，免登录） */

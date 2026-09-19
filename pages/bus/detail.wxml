@@ -82,7 +82,10 @@
           <text class="stop-name">{{item.stationName}}</text>
           <text class="stop-min" wx:if="{{item.plannedMinutes}}">计划{{item.plannedMinutes}}分</text>
         </view>
-        <text class="stop-state {{item.state}}">{{item.state === 'passed' ? '✓ 已过' : item.state === 'current' ? '● 当前' : ''}}</text>
+        <view class="stop-state {{item.state}}">
+          <block wx:if="{{item.state === 'passed'}}"><icon name="check" size="20" color="#8A8778" /><text>已过</text></block>
+          <block wx:elif="{{item.state === 'current'}}"><text class="stop-state-dot"></text><text>当前</text></block>
+        </view>
       </view>
     </view>
   </block>

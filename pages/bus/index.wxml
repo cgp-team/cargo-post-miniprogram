@@ -13,7 +13,7 @@
       <text class="loc-text">{{locationText}}</text>
       <!-- 精度低（可能差到公里级）时给手动选点入口：catchtap 防止冒泡触发重新定位 -->
       <text wx:if="{{radiusExpanded}}" class="loc-action loc-action-pick" catchtap="manualPickLocation">手动选位置</text>
-      <text class="loc-action">{{locationLevel === 'UNKNOWN' ? '重新定位' : '定位'}} ↻</text>
+      <view class="loc-action"><text>{{locationLevel === 'UNKNOWN' ? '重新定位' : '定位'}}</text><icon name="refresh" size="24" color="#FFFFFF" /></view>
     </view>
   </view>
 
