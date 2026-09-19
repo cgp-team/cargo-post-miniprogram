@@ -117,7 +117,8 @@
     </view>
 
     <view wx:if="{{!vehicles.length && !loading}}" class="running-empty">
-      <empty-state wx:if="{{runningEmptyText}}" icon="bus" text="{{runningEmptyText}}" />
+      <empty-state wx:if="{{hasError}}" icon="bus" text="网络不太好，车辆信息没加载出来" btnText="重新加载" bind:tapbtn="loadNearby" />
+      <empty-state wx:elif="{{runningEmptyText}}" icon="bus" text="{{runningEmptyText}}" />
       <empty-state wx:elif="{{nearbyLineCount}}" icon="bus" text="附近有 {{nearbyLineCount}} 条线路，当前暂无车辆经过" />
       <empty-state wx:else icon="bus" text="附近暂无公交车" />
     </view>

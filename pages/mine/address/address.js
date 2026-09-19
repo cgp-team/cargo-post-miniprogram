@@ -14,6 +14,7 @@ Page({
     from: '', // from=send 时为选择模式
     list: [],
     loading: false,
+    loadError: false, // 列表加载失败（错误态带"重新加载"入口）
     saving: false, // 保存地址防重入（按钮 disabled 同步绑定）
     // 编辑弹层
     showForm: false,
@@ -127,12 +128,15 @@ Page({
   },
 
   async loadList() {
-    this.setData({ loading: true })
+    this.setData({ loading: true, loadError: false })
     try {
       const list = (await api.listAddresses()) || []
       if (this._areaMap && Object.keys(this._areaMap).length) this.decorateList(list)
       else this.setData({ list })
-    } catch (e) { /* api 已 toast */ } finally {
+    } catch (e) {
+      // api 已 toast；首屏无数据时进入错误态，可点"重新加载"
+      if (!this.data.list.length) this.setData({ loadError: true })
+    } finally {
       this.setData({ loading: false })
     }
   },

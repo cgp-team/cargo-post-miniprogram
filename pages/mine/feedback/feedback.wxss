@@ -150,3 +150,12 @@
 .elderly-mode .fb-content { font-size: 32rpx; }
 .elderly-mode .fb-reply-tag { font-size: 26rpx; }
 .elderly-mode .fb-reply-text { font-size: 30rpx; }
+
+/* 分页 footer：加载中 / 没有更多了（与订单页 .order-nomore 同范式） */
+.fb-foot {
+  text-align: center;
+  font-size: 24rpx;
+  color: var(--color-text-tertiary);
+  padding: 20rpx 0;
+}
+.elderly-mode .fb-foot { font-size: 28rpx; }

@@ -40,6 +40,7 @@ Page({
     total: 0,
     hasMore: true,
     loading: false,
+    sendError: false,
     // 乘车安排（村民到站通知）
     arrangements: [],
     // 单号查询结果
@@ -51,7 +52,8 @@ Page({
     productPageNo: 1,
     productTotal: 0,
     productHasMore: true,
-    productLoading: false
+    productLoading: false,
+    productError: false
   },
 
   onLoad(options) {
@@ -191,11 +193,22 @@ Page({
     wx.openLocation({ latitude: lat, longitude: lng, name: name || '交接站点', scale: 16 })
   },
 
+  /** 转发给亲友：tab 页直达包裹页（寄件 / 购物进度 / 单号查询都在这里） */
+  onShareAppMessage() {
+    return { title: '咱村的客货邮——你的包裹到哪儿了？点这里看', path: '/pages/parcel/parcel' }
+  },
+
+  /** 下拉刷新收尾：停动画 + 成功时统一"已刷新"反馈（失败已由 api 层 toast，不重复弹） */
+  _finishRefresh(ok) {
+    wx.stopPullDownRefresh()
+    if (ok !== false) wx.showToast({ title: '已刷新', icon: 'success', duration: 1000 })
+  },
+
   onPullDownRefresh() {
     if (this.data.activeTab === 0) {
-      this.reloadSendList().finally(() => wx.stopPullDownRefresh())
+      this.reloadSendList().then((ok) => this._finishRefresh(ok))
     } else if (this.data.activeTab === 1) {
-      this.reloadProductOrders().finally(() => wx.stopPullDownRefresh())
+      this.reloadProductOrders().then((ok) => this._finishRefresh(ok))
     } else {
       wx.stopPullDownRefresh()
     }
@@ -247,10 +260,14 @@ Page({
       this.setData({
         productOrders: merged,
         productTotal: total,
-        productHasMore: merged.length < total
+        productHasMore: merged.length < total,
+        productError: false
       })
+      return true
     } catch (e) {
-      // 错误提示已由 api.js 统一处理
+      // 错误提示已由 api.js 统一处理；标记错误态（列表为空时给"重新加载"入口），并避免下拉误弹"已刷新"
+      this.setData({ productError: true })
+      return false
     } finally {
       this.setData({ productLoading: false })
     }
@@ -294,6 +311,11 @@ Page({
     if (!no) return
     this.setData({ activeTab: 2, trackingNo: no })
     this.searchParcel()
+  },
+
+  /** 寄货空态：去寄一件（send 非 tab 页，navigateTo） */
+  goSend() {
+    wx.navigateTo({ url: '/pages/send/send' })
   },
 
   /** 购物订单空态：去商城逛逛 */
@@ -576,10 +598,14 @@ Page({
       this.setData({
         sendList: merged,
         total,
-        hasMore: merged.length < total
+        hasMore: merged.length < total,
+        sendError: false
       })
+      return true
     } catch (e) {
-      // 错误提示已由 api.js 统一处理
+      // 错误提示已由 api.js 统一处理；标记错误态（列表为空时给"重新加载"入口），并避免下拉误弹"已刷新"
+      this.setData({ sendError: true })
+      return false
     } finally {
       this.setData({ loading: false })
     }

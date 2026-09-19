@@ -18,6 +18,7 @@ Page({
     currentLeg: null,
     legActions: [],
     loading: false,
+    loadError: false,
     submitting: false,
     elderlyMode: false,
     themeColor: 'green',
@@ -40,20 +41,24 @@ Page({
   async initDriver() {
     try {
       const profile = await api.getDriverProfile()
-      this.setData({ driverId: profile && profile.driverId })
+      this.setData({ driverId: profile && profile.driverId, loadError: false })
       await this.loadAll()
     } catch (e) {
-      wx.showToast({ title: '未识别到司机身份', icon: 'none' })
+      // 身份都没拉到时亮错误态（重试入口走 initDriver 全流程）
+      this.setData({ loadError: true })
+      wx.showToast({ title: '网络不太好，请点重新加载', icon: 'none' })
     }
   },
 
   loadAll() {
     if (!this.data.driverId) return Promise.resolve()
-    this.setData({ loading: true })
+    this.setData({ loading: true, loadError: false })
+    // 三路请求各自兜底；全部失败说明是网络问题，亮错误态而不是冒充"暂无待交接"
+    let failed = 0
     return Promise.all([
-      api.getDriverHandovers(this.data.driverId).catch(() => []),
-      api.getDriverLegs(this.data.driverId).catch(() => []),
-      api.getDriverCurrentLeg(this.data.driverId).catch(() => null)
+      api.getDriverHandovers(this.data.driverId).catch(() => { failed += 1; return [] }),
+      api.getDriverLegs(this.data.driverId).catch(() => { failed += 1; return [] }),
+      api.getDriverCurrentLeg(this.data.driverId).catch(() => { failed += 1; return null })
     ]).then(([handovers, legs, currentLeg]) => {
       this.setData({
         handovers: (handovers || []).map((h) => ({ ...h, handoverTimeText: formatBackendTime(h.handoverTime) })),
@@ -69,7 +74,8 @@ Page({
               routeText: `${currentLeg.fromStationName || ''} → ${currentLeg.toStationName || ''}`
             }
           : null,
-        legActions: this.buildLegActions(currentLeg)
+        legActions: this.buildLegActions(currentLeg),
+        loadError: failed === 3
       })
     }).finally(() => this.setData({ loading: false }))
   },

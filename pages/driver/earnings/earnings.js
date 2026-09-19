@@ -22,6 +22,7 @@ Page({
 
     loading: false,
     loaded: false,
+    hasError: false,
     elderlyMode: false,
     themeColor: 'green',
     themeStyle: ''
@@ -39,7 +40,7 @@ Page({
   },
 
   async loadEarnings() {
-    this.setData({ loading: true })
+    this.setData({ loading: true, hasError: false })
     try {
       const e = await api.getDriverEarnings()
       const records = (e.records || []).map((r) => ({
@@ -62,7 +63,8 @@ Page({
         loaded: true
       })
     } catch (e) {
-      this.setData({ loaded: true })
+      // 网络失败不能冒充"暂无收益记录"，亮错误态给重新加载入口
+      this.setData({ loaded: true, hasError: true })
     } finally {
       this.setData({ loading: false })
     }

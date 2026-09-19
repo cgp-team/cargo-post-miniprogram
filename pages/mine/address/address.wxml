@@ -29,7 +29,29 @@
       </view>
     </view>
 
-    <empty-state wx:if="{{!list.length && !loading}}" emoji="📍" text="还没有收货地址，点击下方新增" />
+    <!-- 加载态：骨架屏（仿地址卡轮廓） -->
+    <view wx:if="{{loading && !list.length}}">
+      <view class="skeleton-card">
+        <view class="skeleton sk-name"></view>
+        <view class="skeleton sk-line"></view>
+      </view>
+      <view class="skeleton-card">
+        <view class="skeleton sk-name"></view>
+        <view class="skeleton sk-line"></view>
+      </view>
+    </view>
+
+    <!-- 错误态：不甩技术名词，给重试入口 -->
+    <empty-state
+      wx:if="{{loadError && !list.length && !loading}}"
+      emoji="📡"
+      text="地址列表没加载出来"
+      subText="网络不太好，稍后再试一次"
+      btnText="重新加载"
+      bind:tapbtn="loadList"
+    />
+
+    <empty-state wx:if="{{!list.length && !loading && !loadError}}" emoji="📍" text="还没有收货地址，点击下方新增" />
   </view>
 
   <!-- 新增按钮 -->

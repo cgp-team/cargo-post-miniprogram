@@ -2,6 +2,7 @@
   "navigationStyle": "custom",
   "backgroundColor": "#F6F2E9",
   "usingComponents": {
-    "icon": "/components/icon/index"
+    "icon": "/components/icon/index",
+    "empty-state": "/components/empty-state/index"
   }
 }

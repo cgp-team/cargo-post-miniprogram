@@ -47,7 +47,8 @@ Page({
     pageSize: 10,
     total: 0,
     hasMore: true,
-    loading: true
+    loading: true,
+    loadError: false // 首屏加载失败（区别于"没有商品"空态）
   },
 
   onLoad() {
@@ -87,12 +88,14 @@ Page({
       this.setData({
         allProducts,
         total,
-        hasMore: list.length >= this.data.pageSize && allProducts.length < total
+        hasMore: list.length >= this.data.pageSize && allProducts.length < total,
+        loadError: false
       })
       this.applyCategory()
       return true
     } catch (e) {
-      // 错误提示已由 api.js 统一处理；返回失败标记，避免下拉刷新误弹"已刷新"
+      // 错误提示已由 api.js 统一处理；标记失败让首屏展示"重新加载"入口，避免下拉刷新误弹"已刷新"
+      this.setData({ loadError: true })
       return false
     } finally {
       this.setData({ loading: false })
@@ -157,5 +160,13 @@ Page({
       wx.stopPullDownRefresh()
       if (ok !== false) wx.showToast({ title: '已刷新', icon: 'success', duration: 1000 })
     })
+  },
+
+  /** 分享山货集市（tab 页，path 不带参数） */
+  onShareAppMessage() {
+    return {
+      title: '山货集市——咱村山货，村里直发到家',
+      path: '/pages/goods/goods'
+    }
   }
 })

@@ -1221,3 +1221,32 @@
 .elderly-mode .scan-text { font-size: 52rpx; }
 .elderly-mode .scan-hint { font-size: 28rpx; }
 .elderly-mode .skip-btn { font-size: 34rpx; }
+
+/* ========== 加载失败横幅（与偏航告警同族，右侧带重试入口） ========== */
+.load-error-banner {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin: 24rpx 24rpx 0;
+  padding: 18rpx 24rpx;
+  border-radius: 16rpx;
+  background: rgba(192, 57, 43, 0.08);
+  border: 1rpx solid rgba(192, 57, 43, 0.35);
+}
+
+.load-error-text {
+  flex: 1;
+  font-size: 26rpx;
+  color: var(--color-danger);
+  font-weight: 500;
+}
+
+.load-error-retry {
+  font-size: 26rpx;
+  color: var(--color-primary);
+  font-weight: 600;
+  padding: 8rpx 20rpx;
+}
+
+.elderly-mode .load-error-text { font-size: 30rpx; }
+.elderly-mode .load-error-retry { font-size: 30rpx; }

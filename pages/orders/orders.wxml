@@ -143,8 +143,9 @@
     </view>
   </view>
 
-  <!-- 空状态 -->
-  <empty-state wx:if="{{!list.length && !loading}}" icon="box" text="还没有订单" btnText="去逛逛" bind:tapbtn="goHome" />
+  <!-- 空状态 / 错误状态（网络差时给明确的重试入口） -->
+  <empty-state wx:if="{{!list.length && !loading && !loadError}}" icon="box" text="还没有订单" subText="去逛逛山货集市，看中了大巴给你捎回家" btnText="去逛逛" bind:tapbtn="goShopping" />
+  <empty-state wx:if="{{!list.length && !loading && loadError}}" icon="box" text="没能加载订单列表" subText="网络不太好，再试一次" btnText="重新加载" bind:tapbtn="reload" />
 
   <view class="safe-area-bottom"></view>
 </view>

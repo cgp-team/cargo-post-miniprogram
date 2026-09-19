@@ -23,7 +23,8 @@ Page({
     pageSize: 10,
     total: 0,
     hasMore: true,
-    loading: false
+    loading: false,
+    loadError: false // 首屏加载失败（错误态带"重新加载"入口）
   },
 
   onLoad() {
@@ -66,18 +67,21 @@ Page({
   },
 
   reloadList() {
-    this.setData({ pageNo: 1, list: [], total: 0, hasMore: true })
+    this.setData({ pageNo: 1, list: [], total: 0, hasMore: true, loadError: false })
     return this.loadList()
   },
 
   async loadList() {
-    this.setData({ loading: true })
+    this.setData({ loading: true, loadError: false })
     try {
       const res = await api.pageMyFeedback({ pageNo: this.data.pageNo, pageSize: this.data.pageSize })
       const list = (res.list || []).map((f) => ({ ...f, createTimeText: formatBackendTime(f.createTime) }))
       const merged = this.data.pageNo === 1 ? list : this.data.list.concat(list)
       this.setData({ list: merged, total: res.total || 0, hasMore: merged.length < (res.total || 0) })
-    } catch (e) { /* api 已 toast */ } finally {
+    } catch (e) {
+      // api 已 toast；首屏无数据时进入错误态，可点"重新加载"
+      if (!this.data.list.length) this.setData({ loadError: true })
+    } finally {
       this.setData({ loading: false })
     }
   },

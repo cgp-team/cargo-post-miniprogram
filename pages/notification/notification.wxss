@@ -286,6 +286,13 @@
   box-sizing: border-box;
 }
 
+.more-nomore {
+  margin: 28rpx auto 0;
+  text-align: center;
+  font-size: 24rpx;
+  color: var(--color-text-tertiary);
+}
+
 /* ============ 老年人模式：通知页字体放大 ============ */
 .elderly-mode .tab { font-size: 32rpx; padding: 14rpx 40rpx; }
 .elderly-mode .read-all { font-size: 30rpx; }
@@ -294,3 +301,4 @@
 .elderly-mode .n-content { font-size: 32rpx; }
 .elderly-mode .n-pill { font-size: 26rpx; padding: 8rpx 20rpx; }
 .elderly-mode .more { font-size: 30rpx; }
+.elderly-mode .more-nomore { font-size: 28rpx; }

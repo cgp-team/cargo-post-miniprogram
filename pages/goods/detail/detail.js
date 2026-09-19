@@ -11,6 +11,7 @@ Page({
   behaviors: [require('../../../behaviors/page-base')],
   data: {
     product: null,
+    loadError: false, // 详情加载失败（弱网常见）：留在本页给重试入口
     statusBarHeight: 20,
     elderlyMode: false,
     themeColor: 'green',
@@ -31,6 +32,7 @@ Page({
 
     const id = options.id
     if (id) {
+      this._productId = id // 分享 path 与重试都要用
       this.loadDetail(id)
     } else {
       wx.showToast({ title: '缺少商品编号', icon: 'none' })
@@ -49,13 +51,21 @@ Page({
       const p = await api.getProduct(id)
       if (p) {
         this.setData({
-          product: { ...p, price: Number(p.price).toFixed(2), imageUrl: productImg.resolve(p) }
+          product: { ...p, price: Number(p.price).toFixed(2), imageUrl: productImg.resolve(p) },
+          loadError: false
         })
       }
     } catch (e) {
-      // 错误提示已由 api.js 统一处理
-      setTimeout(() => wx.navigateBack(), 1200)
+      // 错误提示已由 api.js 统一处理；不自动退回，留在本页给"重新加载"入口（农村弱网一次失败很常见）
+      this.setData({ loadError: true })
     }
+  },
+
+  /** 加载失败 → 重新加载 */
+  retryLoad() {
+    if (!this._productId) return
+    this.setData({ loadError: false })
+    this.loadDetail(this._productId)
   },
 
   /** 返回上一页 */
@@ -120,6 +130,15 @@ Page({
     const url = this.data.product && this.data.product.imageUrl
     if (!url) return
     wx.previewImage({ urls: [url], current: url })
+  },
+
+  /** 分享商品：标题带商品名，path 带商品 id */
+  onShareAppMessage() {
+    const p = this.data.product
+    return {
+      title: p ? `咱村直发的${p.name}，城里也能买到` : '山货集市——咱村山货，村里直发到家',
+      path: `/pages/goods/detail/detail?id=${this._productId || ''}`
+    }
   },
 
   /** 提交订单 */

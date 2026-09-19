@@ -68,9 +68,11 @@
     </view>
   </view>
 
-  <empty-state wx:elif="{{!loading}}" emoji="📭" text="暂无消息" subText="订单状态更新后会在这里推送" />
+  <empty-state wx:elif="{{!loading && !loadError}}" emoji="📭" text="暂无消息" subText="订单状态更新后会在这里推送" />
+  <empty-state wx:elif="{{!loading && loadError}}" emoji="📭" text="没能加载消息" subText="网络不太好，再试一次" btnText="重新加载" bind:tapbtn="reload" />
 
   <view class="more" wx:if="{{hasMore && list.length > 0}}" bindtap="loadMore" hover-class="hover">
     {{loading ? '加载中...' : '点击加载更多'}}
   </view>
+  <view class="more-nomore" wx:if="{{!hasMore && list.length > 0}}">没有更多了</view>
 </view>

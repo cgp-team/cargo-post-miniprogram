@@ -67,7 +67,7 @@
       </view>
     </view>
 
-    <!-- 加载骨架（仿明细行轮廓）/ 空态 -->
+    <!-- 加载骨架（仿明细行轮廓）/ 错误态 / 空态 -->
     <view wx:if="{{loading}}">
       <view class="skeleton-card sk-record" wx:for="{{[1, 2, 3]}}" wx:key="*this">
         <view class="skeleton sk-icon"></view>
@@ -79,6 +79,7 @@
         <view class="skeleton sk-amount"></view>
       </view>
     </view>
+    <empty-state wx:elif="{{hasError}}" icon="wallet" text="网络不太好，收益没加载出来" btnText="重新加载" bind:tapbtn="loadEarnings" />
     <empty-state wx:elif="{{loaded && !records.length}}" icon="wallet" text="暂无收益记录" subText="订单完成后自动记录在这里" />
   </view>
 

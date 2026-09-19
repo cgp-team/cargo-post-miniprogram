@@ -13,6 +13,7 @@ Page({
     themeColor: 'green',
     themeStyle: '',
     loading: true,
+    loadError: false, // 网络请求失败（区别于"未发货无轨迹"空态）
     trace: null, // 接口原始数据
     // 地图
     mapCenter: { lng: 116.4, lat: 39.9 },
@@ -42,13 +43,22 @@ Page({
   },
 
   async loadTrace() {
-    this.setData({ loading: true })
+    this.setData({ loading: true, loadError: false })
     try {
       const trace = await api.getProductOrderTrace(this.data.orderId)
       this.renderTrace(trace || {})
     } catch (e) {
-      // 未发货/无轨迹等：展示空态
-      this.setData({ trace: null, loading: false })
+      // 网络失败（errMsg）给"重新加载"入口；业务错误（未发货/无轨迹，body 只有 code/msg）仍走空态
+      const isNetwork = !!(e && typeof e.errMsg === 'string')
+      this.setData({ trace: null, loading: false, loadError: isNetwork })
+    }
+  },
+
+  /** 分享溯源/物流进度：path 带订单号（路由参数名为 id） */
+  onShareAppMessage() {
+    return {
+      title: '你的包裹到哪儿了？点这里看',
+      path: `/pages/goods/trace/trace?id=${this.data.orderId || ''}`
     }
   },
 

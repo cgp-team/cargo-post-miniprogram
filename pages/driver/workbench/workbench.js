@@ -99,6 +99,7 @@ Page({
     mapLongitude: 108.21,
 
     loaded: false,
+    loadError: false,
     driverUnreadCount: 0
   },
 
@@ -180,9 +181,10 @@ Page({
       api.getDriverUnreadCount(profile.driverId).then((count) => {
         this.setData({ driverUnreadCount: count || 0 })
       }).catch(() => {})
-      this.setData({ loaded: true })
+      this.setData({ loaded: true, loadError: false })
     } catch (e) {
-      this.setData({ loaded: true })
+      // 网络失败给顶部横幅重试入口，不能让司机对着空页面点不动发车
+      this.setData({ loaded: true, loadError: true })
     }
   },
 

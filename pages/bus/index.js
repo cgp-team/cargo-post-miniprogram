@@ -591,6 +591,14 @@ Page({
     wx.navigateTo({ url: `/pages/bus/detail?id=${busId}` })
   },
 
+  /** 分享实时公交：落到本页，标题带品牌钩子 */
+  onShareAppMessage() {
+    return {
+      title: '咱村的客货邮——公交带货、快递进村、农产品出山',
+      path: '/pages/bus/index'
+    }
+  },
+
   onPullDownRefresh() {
     Promise.all([this.loadLines(), this.loadNearby()]).finally(() => wx.stopPullDownRefresh())
   }

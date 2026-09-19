@@ -22,6 +22,24 @@ const CARGO_CATEGORIES = ['农产品', '生鲜果蔬', '日用品', '文件票�
 /** 单件限重（kg）：与后端承运审核规则一致，超限前端先提示，避免提交后被拒运 */
 const MAX_WEIGHT_KG = 30
 
+/** 草稿存储 key 与字段清单：只存表单本体，照片临时路径/路线预估/费用试算等派生数据不存 */
+const DRAFT_KEY = 'sendDraft'
+const DRAFT_FIELDS = [
+  'goodsName', 'goodsWeight', 'goodsNote',
+  'categoryIndex', 'cargoCategory', 'itemCount',
+  'sizeLength', 'sizeWidth', 'sizeHeight', 'freshFlag',
+  'pickupMode', 'originalAddress', 'originalLatitude', 'originalLongitude', 'pickupServiceMode',
+  'pickupStationId', 'pickupStationName', 'deliveryStationId', 'deliveryStationName',
+  'pickupAddressText', 'deliveryAddressText',
+  'receiverName', 'receiverMobile', 'receiverAddress'
+]
+/** 判断草稿是否有实际内容（只填了默认值不算，避免空草稿也弹"已恢复"） */
+const DRAFT_MEANINGFUL_FIELDS = [
+  'goodsName', 'goodsWeight', 'goodsNote', 'sizeLength', 'sizeWidth', 'sizeHeight',
+  'pickupStationId', 'deliveryStationId', 'pickupAddressText', 'deliveryAddressText',
+  'receiverName', 'receiverMobile', 'receiverAddress'
+]
+
 Page({
   data: {
     step: 1,          // 1=填写信息, 2=拍照确认, 3=提交成功
@@ -100,6 +118,7 @@ Page({
     if (!auth.requireLogin()) return
     appearance.apply(this)
     this.loadStations()
+    this._restoreDraft()
   },
 
   onShow() {
@@ -112,7 +131,65 @@ Page({
         receiverMobile: selected.mobile,
         receiverAddress: selected.address
       })
+      this._scheduleSaveDraft()
     }
+  },
+
+  /** 页面隐藏（返回/切后台/跳地址簿）时补写草稿，防抖窗口内的最后输入不丢 */
+  onHide() {
+    this._flushSaveDraft()
+  },
+
+  // ==================== 表单草稿（网络差/误退出可恢复，仅 send 使用） ====================
+
+  /** 表单变更后防抖 500ms 落本地 */
+  _scheduleSaveDraft() {
+    if (this._draftTimer) clearTimeout(this._draftTimer)
+    this._draftTimer = setTimeout(() => {
+      this._draftTimer = null
+      this._saveDraft()
+    }, 500)
+  },
+
+  _saveDraft() {
+    try {
+      const draft = {}
+      DRAFT_FIELDS.forEach((field) => { draft[field] = this.data[field] })
+      wx.setStorageSync(DRAFT_KEY, draft)
+    } catch (e) { /* 存储失败不影响填写 */ }
+  },
+
+  _flushSaveDraft() {
+    if (!this._draftTimer) return
+    clearTimeout(this._draftTimer)
+    this._draftTimer = null
+    this._saveDraft()
+  },
+
+  _clearDraft() {
+    if (this._draftTimer) {
+      clearTimeout(this._draftTimer)
+      this._draftTimer = null
+    }
+    try { wx.removeStorageSync(DRAFT_KEY) } catch (e) { /* 忽略 */ }
+  },
+
+  /** 读回上次未提交的草稿（含已选站点；照片临时路径不恢复，恢复到第 1 步重拍重算） */
+  _restoreDraft() {
+    let draft = null
+    try {
+      draft = wx.getStorageSync(DRAFT_KEY)
+    } catch (e) {
+      return
+    }
+    if (!draft || typeof draft !== 'object') return
+    if (!DRAFT_MEANINGFUL_FIELDS.some((field) => !!draft[field])) return
+    const patch = {}
+    DRAFT_FIELDS.forEach((field) => {
+      if (draft[field] !== undefined) patch[field] = draft[field]
+    })
+    this.setData(patch, () => this.recalcVolume())
+    wx.showToast({ title: '已恢复上次填写', icon: 'none' })
   },
 
   /** 打开地址簿选择收货人 */
@@ -132,29 +209,31 @@ Page({
     }
   },
 
-  onNameInput(e) { this.setData({ goodsName: e.detail.value }) },
-  onWeightInput(e) { this.setData({ goodsWeight: e.detail.value }) },
-  onNoteInput(e) { this.setData({ goodsNote: e.detail.value }) },
-  onReceiverNameInput(e) { this.setData({ receiverName: e.detail.value }) },
-  onReceiverMobileInput(e) { this.setData({ receiverMobile: e.detail.value }) },
-  onReceiverAddressInput(e) { this.setData({ receiverAddress: e.detail.value }) },
+  onNameInput(e) { this.setData({ goodsName: e.detail.value }); this._scheduleSaveDraft() },
+  onWeightInput(e) { this.setData({ goodsWeight: e.detail.value }); this._scheduleSaveDraft() },
+  onNoteInput(e) { this.setData({ goodsNote: e.detail.value }); this._scheduleSaveDraft() },
+  onReceiverNameInput(e) { this.setData({ receiverName: e.detail.value }); this._scheduleSaveDraft() },
+  onReceiverMobileInput(e) { this.setData({ receiverMobile: e.detail.value }); this._scheduleSaveDraft() },
+  onReceiverAddressInput(e) { this.setData({ receiverAddress: e.detail.value }); this._scheduleSaveDraft() },
 
   /** 货物类型选择 */
   onCategoryChange(e) {
     const index = Number(e.detail.value) || 0
     this.setData({ categoryIndex: index, cargoCategory: CARGO_CATEGORIES[index] })
+    this._scheduleSaveDraft()
   },
 
   /** 货物件数：仅保留正整数 */
   onItemCountInput(e) {
     const value = String(e.detail.value || '').replace(/[^\d]/g, '')
     this.setData({ itemCount: value }, () => this.refreshQuote())
+    this._scheduleSaveDraft()
   },
 
   // ==================== 手填地址 → 推荐站点（取货 / 送达） ====================
 
-  onPickupAddressInput(e) { this.setData({ pickupAddressText: e.detail.value, pickupTips: [] }) },
-  onDeliveryAddressInput(e) { this.setData({ deliveryAddressText: e.detail.value, deliveryTips: [] }) },
+  onPickupAddressInput(e) { this.setData({ pickupAddressText: e.detail.value, pickupTips: [] }); this._scheduleSaveDraft() },
+  onDeliveryAddressInput(e) { this.setData({ deliveryAddressText: e.detail.value, deliveryTips: [] }); this._scheduleSaveDraft() },
 
   /** 取货地址：高德输入提示拿候选（村民不用自己找站点，写地址即可） */
   async recommendPickupByAddress() {
@@ -203,6 +282,7 @@ Page({
     })
     await this._evaluateReachability(tip.latitude, tip.longitude)
     this.refreshQuote()
+    this._scheduleSaveDraft()
   },
 
   /** 选中送达候选地址：坐标 → 推荐送达站点 → 重新试算 */
@@ -234,6 +314,7 @@ Page({
       // 推荐失败不影响手填地址本身，用户仍可自选站点
     }
     this.refreshQuote()
+    this._scheduleSaveDraft()
   },
 
   /** 试算金额（取货 + 送达站点都选定才请求；失败静默，由提交时兜底） */
@@ -257,11 +338,13 @@ Page({
     const field = e.currentTarget.dataset.field
     const value = String(e.detail.value || '').replace(/[^\d.]/g, '')
     this.setData({ [field]: value }, () => this.recalcVolume())
+    this._scheduleSaveDraft()
   },
 
   /** 是否生鲜/需冷链（true → 后端转人工确认承运条件） */
   onFreshChange(e) {
     this.setData({ freshFlag: !!e.detail.value })
+    this._scheduleSaveDraft()
   },
 
   /**
@@ -292,6 +375,7 @@ Page({
       })
       // 可达性评估（可达 → 直接就近取货；不可达 → 等用户点「使用推荐站点」确认）
       await this._evaluateReachability(loc.latitude, loc.longitude)
+      this._scheduleSaveDraft()
     } catch (e) {
       this.setData({ reachLoading: false, pickupMode: 'station' })
       wx.showToast({ title: '可达性判断失败，请改用自选站点', icon: 'none' })
@@ -324,6 +408,7 @@ Page({
         locAccuracyText: ''
       })
       await this._evaluateReachability(picked.latitude, picked.longitude)
+      this._scheduleSaveDraft()
     } catch (e) {
       wx.showToast({ title: '选择位置失败，请重试', icon: 'none' })
     }
@@ -351,6 +436,7 @@ Page({
   /** 切回自选取货站点 */
   switchToStationMode() {
     this.setData({ pickupMode: 'station', reachability: null, pickupServiceMode: '' })
+    this._scheduleSaveDraft()
   },
 
   /** 把推荐站点写入取货站点（与手动选择共用同一字段，提交口径一致） */
@@ -362,6 +448,7 @@ Page({
       routeStatus: 'idle',
       routePreviewKey: ''
     }, () => this.refreshQuote())
+    this._scheduleSaveDraft()
   },
 
   /** 长×宽×高(cm) → 体积(m³)：0.01m 换算，保留 4 位小数（与 decimal(12,4) 对齐） */
@@ -387,6 +474,7 @@ Page({
     }, () => this.refreshQuote())
     // 站点不可直达（车辆进不去）时，后端会给出"就近可服务站点"，前端提示一键更换
     this._checkStationAccess(s)
+    this._scheduleSaveDraft()
   },
 
   /**
@@ -442,6 +530,7 @@ Page({
       routeStatus: 'idle',
       routePreviewKey: ''
     }, () => this.refreshQuote())
+    this._scheduleSaveDraft()
   },
 
   /** 下一步：基础校验 → 路线预览（缓存命中直接复用）→ 成功才进入拍照页 */
@@ -593,8 +682,9 @@ Page({
       })
       this.setData({ submitting: false })
       wx.hideLoading()
-      // 订单已创建：先切到成功页（保证"已发布"一定可见），再补审核结果文案。
+      // 订单已创建：清掉本地草稿，再切到成功页（保证"已发布"一定可见），再补审核结果文案。
       // 展示层异常绝不能让用户以为"没发布成功"而重复提交。
+      this._clearDraft()
       const amount = res.totalAmount != null ? res.totalAmount : (this.data.quote ? this.data.quote.amount : null)
       this.setData({ orderNo: res.orderNo, orderAmount: amount, step: 3 }, () => this.drawQr())
       try {
@@ -710,9 +800,9 @@ Page({
 
   /** 转发给收货人查件 */
   onShareAppMessage() {
-    // step 1/2 未提交时无单号，转发通用文案
+    // step 1/2 未提交时无单号，转发品牌文案 + 本页路径（口径与全站分享一致：咱村的客货邮）
     if (!this.data.orderNo) {
-      return { title: '客货邮便民服务平台', path: '/pages/parcel/parcel' }
+      return { title: '咱村的客货邮——山货填个单，大巴捎进城', path: '/pages/send/send' }
     }
     return {
       title: `寄货单 ${this.data.orderNo} 已提交，点击查看物流进度`,
@@ -722,6 +812,7 @@ Page({
 
   /** 重新发布 */
   resetSend() {
+    this._clearDraft()
     this.setData({
       step: 1,
       goodsName: '',

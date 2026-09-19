@@ -82,7 +82,7 @@
     </view>
   </view>
 
-  <!-- 加载骨架（仿班次卡轮廓）/ 空态 -->
+  <!-- 加载骨架（仿班次卡轮廓）/ 错误态 / 空态 -->
   <view wx:if="{{loading}}">
     <view class="skeleton-card" wx:for="{{[1, 2]}}" wx:key="*this">
       <view class="sk-head">
@@ -98,6 +98,7 @@
       <view class="skeleton sk-line w55"></view>
     </view>
   </view>
+  <empty-state wx:elif="{{hasError}}" icon="bus" text="网络不太好，班次没加载出来" btnText="重新加载" bind:tapbtn="loadRoutes" />
   <empty-state wx:elif="{{loaded && !todayRoutes.length}}" icon="bus" text="今日暂无班次" subText="新的排班会显示在这里" />
 
   <!-- 底部TabBar -->

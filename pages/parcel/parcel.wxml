@@ -189,7 +189,8 @@
     </view>
     <view class="loading-state" wx:elif="{{!hasMore && sendList.length}}">没有更多了</view>
 
-    <empty-state wx:if="{{!sendList.length && !loading}}" icon="box" text="还没有寄货记录" />
+    <empty-state wx:if="{{!sendList.length && !loading && !sendError}}" icon="box" text="还没有寄货记录" subText="山货出山、包裹进村，点这里寄一件" btnText="去寄一件" bind:tapbtn="goSend" />
+    <empty-state wx:if="{{!sendList.length && !loading && sendError}}" icon="box" text="没能加载寄货列表" subText="网络不太好，再试一次" btnText="重新加载" bind:tapbtn="reloadSendList" />
   </view>
 
   <!-- Tab1: 我的购物（商城订单：与寄货同一票面条目，进度在这里看） -->
@@ -269,7 +270,8 @@
     </view>
     <view class="loading-state" wx:elif="{{!productHasMore && productOrders.length}}">没有更多了</view>
 
-    <empty-state wx:if="{{!productOrders.length && !productLoading}}" icon="box" text="还没有购物订单" btnText="去逛逛" bind:tapbtn="goShopping" />
+    <empty-state wx:if="{{!productOrders.length && !productLoading && !productError}}" icon="box" text="还没有购物订单" btnText="去逛逛" bind:tapbtn="goShopping" />
+    <empty-state wx:if="{{!productOrders.length && !productLoading && productError}}" icon="box" text="没能加载购物订单" subText="网络不太好，再试一次" btnText="重新加载" bind:tapbtn="reloadProductOrders" />
   </view>
 
   <!-- Tab2: 单号查询结果（车票式物流详情：副券放运输进度） -->
