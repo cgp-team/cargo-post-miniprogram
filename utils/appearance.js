@@ -163,6 +163,13 @@ function semanticVars(t) {
 function themeStyle(color, darkMode) {
   const t = THEMES[color] || THEMES[DEFAULT_THEME]
   const s = darkMode ? Object.assign({}, semanticVars(t), DARK_TEXT) : semanticVars(t)
+  if (darkMode) {
+    // 深色表面上的对比度补强：陶土橙价格/待办换亮橙，进行中换强调色，提醒换稻谷金
+    s.price = DARK_SURFACES.clayDeep
+    s.statusPending = DARK_SURFACES.clayDeep
+    s.statusShipping = t.accent
+    s.statusWarn = t.gold
+  }
   // 深色模式覆盖表面色/文字色/纸底/墨字；主色板与状态语义色保持
   const surf = darkMode ? DARK_SURFACES : t
   const paper = surf.paper

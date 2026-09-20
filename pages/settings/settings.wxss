@@ -7,34 +7,7 @@
 
 /* 头部站牌带：深绿渐变，与主题导航栏无缝衔接 */
 .page-head {
-  position: relative;
-  overflow: hidden;
   padding: 28rpx 28rpx 32rpx;
-  background: linear-gradient(160deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
-}
-
-/* 顶部落款横档（站牌金属边） */
-.page-head::before {
-  content: '';
-  position: absolute;
-  top: 12rpx;
-  left: 28rpx;
-  right: 28rpx;
-  height: 5rpx;
-  background: rgba(255, 255, 255, 0.26);
-  border-radius: 3rpx;
-}
-
-.page-head::after {
-  content: '';
-  position: absolute;
-  top: -40rpx;
-  right: -20rpx;
-  width: 200rpx;
-  height: 200rpx;
-  background: radial-gradient(circle, rgba(255,255,255,0.10) 0%, transparent 70%);
-  border-radius: 50%;
-  pointer-events: none;
 }
 
 .head-row {
