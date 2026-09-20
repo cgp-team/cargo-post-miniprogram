@@ -182,7 +182,7 @@
 
     <!-- 订阅派单通知 -->
     <view class="subscribe-entry" bindtap="subscribeDispatch" hover-class="hover">
-      <icon name="notice" size="28" color="#8A6A1F" />
+      <icon name="notice" size="28" color="{{iconGoldDeep}}" />
       <text>订阅派单通知</text>
     </view>
 

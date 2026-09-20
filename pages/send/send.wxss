@@ -201,7 +201,7 @@
   padding: 0 20rpx;
   border-radius: 14rpx;
   border: 2rpx solid var(--color-line);
-  background: #FFFFFF;
+  background: var(--color-field);
   font-size: 26rpx;
   color: var(--color-ink);
 }
@@ -229,7 +229,7 @@
   margin-top: 10rpx;
   border-radius: 14rpx;
   border: 1rpx solid var(--color-line);
-  background: #FFFFFF;
+  background: var(--color-field);
   overflow: hidden;
   box-shadow: var(--shadow-card);
 }
@@ -393,8 +393,8 @@
   margin-top: 12rpx;
   padding: 18rpx 22rpx;
   border-radius: 16rpx;
-  background: #FDF3E7;
-  border: 2rpx solid #F0D9B8;
+  background: rgba(217, 164, 65, 0.12);
+  border: 2rpx solid rgba(217, 164, 65, 0.35);
 }
 .station-suggest-text {
   display: block;
@@ -562,8 +562,8 @@
   box-shadow: var(--shadow-card);
 }
 .review-passed { background: #EAF3EA; border: 2rpx solid #CBE3CB; }
-.review-conditional, .review-manual, .review-pending { background: #FDF3E7; border: 2rpx solid #F0D9B8; }
-.review-rejected { background: #FBEDEA; border: 2rpx solid #F0C4BA; }
+.review-conditional, .review-manual, .review-pending { background: rgba(217, 164, 65, 0.12); border: 2rpx solid rgba(217, 164, 65, 0.35); }
+.review-rejected { background: rgba(192, 57, 43, 0.10); border: 2rpx solid rgba(192, 57, 43, 0.30); }
 .review-title-row { display: flex; align-items: center; gap: 12rpx; }
 .review-title { font-size: 30rpx; font-weight: 700; color: var(--color-primary-dark); }
 .review-rejected .review-title { color: var(--color-danger); }

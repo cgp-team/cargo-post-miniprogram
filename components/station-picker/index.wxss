@@ -33,7 +33,7 @@
 .sp-sheet {
   position: fixed;
   left: 0; right: 0; bottom: 0;
-  background: #fff;
+  background: var(--color-card);
   border-radius: 24rpx 24rpx 0 0;
   padding-bottom: env(safe-area-inset-bottom);
   z-index: 901;

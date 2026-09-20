@@ -147,8 +147,8 @@
   margin-right: 20rpx;
 }
 
-.n-card.level-WARNING .n-icon { background: #F7EFD8; }
-.n-card.level-EXCEPTION .n-icon { background: #F9E5E2; }
+.n-card.level-WARNING .n-icon { background: rgba(217, 164, 65, 0.16); }
+.n-card.level-EXCEPTION .n-icon { background: rgba(192, 57, 43, 0.14); }
 .n-card.level-ACTION_REQUIRED .n-icon { background: var(--color-clay-light); }
 
 .n-icon-emoji {

@@ -25,6 +25,16 @@
         <view class="toggle-knob"></view>
       </view>
     </view>
+    <view class="group-row" bindtap="toggleDark" hover-class="hover">
+      <view class="row-icon"><icon name="sun" size="38" color="{{iconColor}}" /></view>
+      <view class="row-info">
+        <text class="row-name">深色模式</text>
+        <text class="row-desc">暖黑夜览，司机夜间行车不刺眼</text>
+      </view>
+      <view class="toggle-switch {{darkMode ? 'on' : 'off'}}">
+        <view class="toggle-knob"></view>
+      </view>
+    </view>
   </view>
 
   <!-- 主题颜色 -->

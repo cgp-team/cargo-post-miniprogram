@@ -42,6 +42,8 @@ page {
   --color-gold-deep: #8A6A1F;   /* 稻谷金深字 */
   --color-clay-light: #F8ECE3;  /* 陶土橙浅底 */
   --color-clay-deep: #A64A1F;   /* 陶土橙深字 */
+  --color-skeleton-a: #EAE4D4;  /* 骨架流光两端 */
+  --color-skeleton-b: #F7F2E6;  /* 骨架流光中段 */
 
   --radius-s: 8rpx;
   --radius-m: 16rpx;
@@ -449,7 +451,7 @@ page {
   to   { background-position: -200% 0; }
 }
 .skeleton {
-  background: linear-gradient(90deg, #EAE4D4 25%, #F7F2E6 50%, #EAE4D4 75%);
+  background: linear-gradient(90deg, var(--color-skeleton-a) 25%, var(--color-skeleton-b) 50%, var(--color-skeleton-a) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.3s linear infinite;
   border-radius: 8rpx;
