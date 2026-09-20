@@ -4,6 +4,7 @@ const feedback = require('../../utils/feedback')
 Page({
   data: {
     elderlyMode: false,
+    darkMode: false,
     themeColor: 'green',
     themeStyle: '',
     themeList: [
@@ -30,6 +31,15 @@ Page({
     wx.setStorageSync('elderlyMode', next)
     getApp().globalData.elderlyMode = next
     // 立即刷新本页显示
+    appearance.apply(this)
+  },
+
+  /** 深色模式 — 整行点击切换 */
+  toggleDark() {
+    const next = !this.data.darkMode
+    feedback.tap()
+    wx.setStorageSync('darkMode', next)
+    getApp().globalData.darkMode = next
     appearance.apply(this)
   },
 

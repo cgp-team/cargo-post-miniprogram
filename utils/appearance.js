@@ -99,12 +99,47 @@ const THEMES = {
   }
 }
 
+/**
+ * 深色模式表面色（darkMode=true 时覆盖对应变量；主色板不变，站牌头保持主题色）
+ * 暖黑体系，与米纸底同族；金色/陶土浅底用深色浊调，深字换亮字保证对比度。
+ */
+const DARK_SURFACES = {
+  paper: '#171512',
+  ink: '#EDE7D9',
+  card: '#24211B',
+  cardWarm: '#2C2820',
+  field: '#26231D',
+  line: '#3B362B',
+  lineDeep: '#4A4436',
+  track: '#322E26',
+  goldLight: '#38301C',
+  goldDeep: '#DDBB6E',
+  clayLight: '#3A241A',
+  clayDeep: '#E8906B'
+}
+
+/** 深色模式下的文字色（覆盖 semanticVars 中性色） */
+const DARK_TEXT = {
+  textSecondary: '#B3AC9B',
+  textTertiary: '#8A8674',
+  statusDone: '#8A8674'
+}
+
+/** 深色模式下的主题浅底（--color-primary-light）：各主题深浊调 */
+const DARK_PRIMARY_LIGHT = {
+  green: '#1C2B1E',
+  orange: '#2E211A',
+  blue: '#16222E',
+  red: '#2B1A1B'
+}
+
 /** 读取当前设置 */
 function getSettings() {
   const elderlyMode = !!wx.getStorageSync('elderlyMode')
+  const darkMode = !!wx.getStorageSync('darkMode')
   const saved = wx.getStorageSync('themeColor')
   const themeColor = THEMES[saved] ? saved : DEFAULT_THEME
-  return { elderlyMode, themeColor }
+  return { elderlyMode, darkMode, themeColor }
 }
 
 /**
@@ -125,20 +160,25 @@ function semanticVars(t) {
 }
 
 /** 生成主题 CSS 变量内联样式字符串 */
-function themeStyle(color) {
+function themeStyle(color, darkMode) {
   const t = THEMES[color] || THEMES[DEFAULT_THEME]
-  const s = semanticVars(t)
+  const s = darkMode ? Object.assign({}, semanticVars(t), DARK_TEXT) : semanticVars(t)
+  // 深色模式覆盖表面色/文字色/纸底/墨字；主色板与状态语义色保持
+  const surf = darkMode ? DARK_SURFACES : t
+  const paper = surf.paper
+  const ink = surf.ink
+  const light = darkMode ? (DARK_PRIMARY_LIGHT[(THEMES[color] ? color : DEFAULT_THEME)] || DARK_PRIMARY_LIGHT[DEFAULT_THEME]) : t.light
   return [
     `--color-primary:${t.primary};`,
     `--color-primary-dark:${t.dark};`,
     `--color-accent:${t.accent};`,
-    `--color-primary-light:${t.light};`,
+    `--color-primary-light:${light};`,
     `--color-primary-shadow:${t.shadow};`,
     `--color-on-primary:#ffffff;`,
     `--color-clay:${t.clay};`,
     `--color-gold:${t.gold};`,
-    `--color-paper:${t.paper};`,
-    `--color-ink:${t.ink};`,
+    `--color-paper:${paper};`,
+    `--color-ink:${ink};`,
     `--color-price:${s.price};`,
     `--color-danger:${s.danger};`,
     `--color-text-secondary:${s.textSecondary};`,
@@ -147,16 +187,18 @@ function themeStyle(color) {
     `--color-status-shipping:${s.statusShipping};`,
     `--color-status-done:${s.statusDone};`,
     `--color-status-warn:${s.statusWarn};`,
-    `--color-card:${t.card};`,
-    `--color-card-warm:${t.cardWarm};`,
-    `--color-field:${t.field};`,
-    `--color-line:${t.line};`,
-    `--color-line-deep:${t.lineDeep};`,
-    `--color-track:${t.track};`,
-    `--color-gold-light:${t.goldLight};`,
-    `--color-gold-deep:${t.goldDeep};`,
-    `--color-clay-light:${t.clayLight};`,
-    `--color-clay-deep:${t.clayDeep};`
+    `--color-card:${surf.card};`,
+    `--color-card-warm:${surf.cardWarm};`,
+    `--color-field:${surf.field};`,
+    `--color-line:${surf.line};`,
+    `--color-line-deep:${surf.lineDeep};`,
+    `--color-track:${surf.track};`,
+    `--color-gold-light:${surf.goldLight};`,
+    `--color-gold-deep:${surf.goldDeep};`,
+    `--color-clay-light:${surf.clayLight};`,
+    `--color-clay-deep:${surf.clayDeep};`,
+    `--color-skeleton-a:${darkMode ? '#332F27' : '#EAE4D4'};`,
+    `--color-skeleton-b:${darkMode ? '#3D382E' : '#F7F2E6'};`
   ].join('')
 }
 
@@ -165,26 +207,31 @@ function themeStyle(color) {
  * 需在页面 onShow / onLoad 中调用；值未变化时跳过 setData，避免多余渲染。
  * WXML 中的 <icon> 无法继承 CSS 变量，图标请绑定：
  *   color="{{iconColor}}" 主色 / {{iconDeep}} 深色 / {{iconAccent}} 强调色 / {{iconClay}} 陶土橙（各主题固定）
+ *   {{iconGoldDeep}} 稻谷金深字（深色模式自动换亮金）
  */
 function apply(page) {
   const s = getSettings()
   const t = THEMES[s.themeColor] || THEMES[DEFAULT_THEME]
   const patch = {
     elderlyMode: s.elderlyMode,
+    darkMode: s.darkMode,
     themeColor: s.themeColor,
-    themeStyle: themeStyle(s.themeColor),
+    themeStyle: themeStyle(s.themeColor, s.darkMode),
     iconColor: t.primary,
     iconDeep: t.dark,
     iconAccent: t.accent,
-    iconClay: t.clay
+    iconClay: t.clay,
+    iconGoldDeep: s.darkMode ? DARK_SURFACES.goldDeep : '#8A6A1F'
   }
   const changed = Object.keys(patch).some((k) => page.data[k] !== patch[k])
   if (changed) page.setData(patch)
-  // 导航栏跟随主题深色（login 页已删除 json 覆盖，同样走这里）
-  if (_lastNavTheme !== s.themeColor || _lastNavPage !== page) {
-    _lastNavTheme = s.themeColor
+  // 深色模式导航栏压黑，否则跟随主题深色
+  const navBg = s.darkMode ? '#171512' : t.dark
+  const navKey = s.themeColor + (s.darkMode ? '/dark' : '')
+  if (_lastNavTheme !== navKey || _lastNavPage !== page) {
+    _lastNavTheme = navKey
     _lastNavPage = page
-    wx.setNavigationBarColor({ frontColor: '#ffffff', backgroundColor: t.dark })
+    wx.setNavigationBarColor({ frontColor: '#ffffff', backgroundColor: navBg })
   }
   return s
 }

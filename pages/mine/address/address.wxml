@@ -2,7 +2,7 @@
 <view class="page-address {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
 
   <view wx:if="{{from === 'send'}}" class="select-tip">
-    <icon name="pin" size="26" color="#8A6A1F" />
+    <icon name="pin" size="26" color="{{iconGoldDeep}}" />
     <text>点击地址即可填入寄件单</text>
   </view>
 

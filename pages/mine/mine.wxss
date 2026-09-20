@@ -277,7 +277,7 @@
 }
 
 .menu-icon-box.clay-box { background: rgba(199, 91, 42, 0.12); }
-.menu-icon-box.danger-box { background: #F9E9E7; }
+.menu-icon-box.danger-box { background: rgba(192, 57, 43, 0.10); }
 
 .menu-text { flex: 1; font-size: 30rpx; color: var(--color-ink); font-weight: 500; }
 .menu-arrow { font-size: 36rpx; color: var(--color-text-tertiary); }
