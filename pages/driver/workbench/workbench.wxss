@@ -165,6 +165,12 @@
   background: var(--color-clay);
 }
 
+/* 已完成：稻谷金收口（一天任务跑完的"勋章"感） */
+.status-tag.done {
+  background: var(--color-gold);
+  color: var(--color-ink);
+}
+
 /* 山路进度：虚线道路 + 已走白实段 + 陶土橙描边圆点 */
 .progress-bar-wrap {
   position: relative;
@@ -1173,6 +1179,14 @@
   font-size: 30rpx;
   color: var(--color-text-secondary);
   padding: 12rpx 40rpx 32rpx;
+}
+
+/* ========== 已完成面板（复用停靠横幅的站牌圆徽语言） ========== */
+.done-panel {
+  padding: 60rpx 24rpx 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 /* ============ 老年人模式：司机端工作台字号放大 ============ */

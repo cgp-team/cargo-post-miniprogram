@@ -466,10 +466,17 @@ Page({
       // WXML 不支持调用 Page 方法，进度/时间/颜色在此预计算后绑定
       res.progress = this.trackProgress(res.status)
       res.createTimeText = formatBackendTime(res.createTime)
-      res.statusClass = this.statusClass(res.status)
+      // 承运审核拒运（reviewStatus=4）：chip 与列表同口径显示"审核不通过"（红），不再停留在"待审核"
+      const rejected = res.reviewStatus === 4
+      res.statusName = rejected ? '审核不通过' : (res.statusName || this.statusText(res.status))
+      res.statusClass = rejected ? 'status-fail' : this.statusClass(res.status)
+      // 体积展示与寄货页核对口径一致：去尾零
+      res.volumeText = res.volumeM3 != null && res.volumeM3 !== '' ? String(Number(res.volumeM3)) : ''
       res.etaText = this.buildEtaText(res)
       // 承运审核拒运提示（reviewStatus=4 审核不通过 + 原因）
       res.reviewNotice = this.buildReviewNotice(res)
+      // 长时间未接单提示（已入池前超过 24h 无人承运，给村民一个明确的说法）
+      res.waitHint = this.buildWaitHint(res)
       // 车来取货/送货提醒（单号查询同样生效，演示时可直接查单看到倒计时）
       res.carrierText = this.buildCarrierText(res)
       res.approaching = !!res.carrierApproaching
@@ -541,7 +548,7 @@ Page({
     wx.previewImage({ urls: [url], current: url })
   },
 
-  /** 列表项取件码：点击明文复制（司机核销凭码） */
+  /** 取件码：点按明文即复制（列表与单号查询详情同口径，司机核销凭码） */
   copyPickupCode(e) {
     const code = e.currentTarget.dataset.code
     if (code) {
@@ -596,19 +603,25 @@ Page({
     try {
       const res = await api.pageMySendOrders({ pageNo, pageSize: this.data.pageSize })
       if (seq !== this._sendSeq) return false // 已有更新的请求接管，丢弃旧响应
-      const list = (res.list || []).map((o) => ({
-        ...o,
-        statusName: o.statusName || this.statusText(o.status),
-        statusClass: this.statusClass(o.status),
-        showCode: false,
-        createTimeText: formatBackendTime(o.createTime),
-        carrierText: this.buildCarrierText(o),
-        approaching: !!o.carrierApproaching,
-        // 司机到站提醒：司机端「确认到达」后 carriedArrived=true（后端为源，含司机姓名/站点）
-        arrived: !!o.carrierArrived,
-        arrivedText: this.buildArrivedText(o),
-        servicePointText: this.buildServicePointText(o)
-      }))
+      const list = (res.list || []).map((o) => {
+        // 承运审核拒运（reviewStatus=4）：状态 chip 不能再显示"待审核"，与单号查询页的拒运提示同口径
+        const rejected = o.reviewStatus === 4
+        return {
+          ...o,
+          statusName: rejected ? '审核不通过' : (o.statusName || this.statusText(o.status)),
+          statusClass: rejected ? 'status-fail' : this.statusClass(o.status),
+          showCode: false,
+          createTimeText: formatBackendTime(o.createTime),
+          // 体积展示与寄货页核对口径一致：去尾零（后端 decimal(12,4) 会带成 0.1250）
+          volumeText: o.volumeM3 != null && o.volumeM3 !== '' ? String(Number(o.volumeM3)) : '',
+          carrierText: this.buildCarrierText(o),
+          approaching: !!o.carrierApproaching,
+          // 司机到站提醒：司机端「确认到达」后 carriedArrived=true（后端为源，含司机姓名/站点）
+          arrived: !!o.carrierArrived,
+          arrivedText: this.buildArrivedText(o),
+          servicePointText: this.buildServicePointText(o)
+        }
+      })
       const merged = pageNo === 1 ? list : this.data.sendList.concat(list)
       const total = res.total || 0
       // 车快到了：首次进入阈值弹一次提醒（演示时最直观；重复刷新不打扰）
@@ -661,6 +674,21 @@ Page({
     if (!res || res.reviewStatus !== 4) return ''
     const reason = reviewUtils.reasonText(res.reviewReasonCodes)
     return reason ? `审核不通过：${reason}` : '审核不通过，该货物暂不支持承运'
+  },
+
+  /**
+   * 长时间未接单提示：还未分配班次（已创建/待审核/待入池/已入池）且下单超 24 小时。
+   * 拒运/待客户操作/已取消各有专属提示，不重复打扰。
+   */
+  buildWaitHint(res) {
+    if (!res || res.reviewStatus === 4) return ''
+    if ([0, 1, 6, 8].indexOf(res.status) < 0) return ''
+    let ms = 0
+    const t = res.createTime
+    if (typeof t === 'number') ms = t
+    else if (t) ms = Date.parse(String(t).replace(/-/g, '/').replace('T', ' '))
+    if (!ms || Date.now() - ms < 24 * 3600000) return ''
+    return '这单等得有点久了：调度员还在安排班次，可到取货站点问问，或在「我的 → 意见反馈」留言催办'
   },
 
   /** 到达预估文案：优先「预计 HH:mm 到达 X站」，否则「约 N 分钟后到达 X站」 */

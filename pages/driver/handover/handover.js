@@ -213,12 +213,5 @@ Page({
     } catch (err) {
       // 桩环境/低版本静默降级
     }
-  },
-
-  onSwitchTab(e) {
-    const key = e.currentTarget.dataset.key
-    if (key === 'workbench') wx.redirectTo({ url: '/pages/driver/workbench/workbench' })
-    else if (key === 'routes') wx.redirectTo({ url: '/pages/driver/routes/routes' })
-    else if (key === 'earnings') wx.redirectTo({ url: '/pages/driver/earnings/earnings' })
   }
 })

@@ -128,6 +128,11 @@
   color: var(--color-status-done);
   background: var(--color-track);
 }
+/* 审核不通过：专用红（危险语义），与快递页拒运 chip 同口径 */
+.order-status.status-fail {
+  color: var(--color-danger);
+  background: rgba(192, 57, 43, 0.10);
+}
 
 /* 商品行 */
 .order-goods {

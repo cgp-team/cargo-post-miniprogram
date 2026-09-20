@@ -98,7 +98,8 @@
         <text class="info-value">{{order.routeName}}{{order.shiftCode ? ' · ' + order.shiftCode : ''}}</text>
       </view>
       <view class="detail-actions">
-        <view class="detail-btn" bindtap="goToTrace" hover-class="hover">查看车辆轨迹</view>
+        <!-- 与订单列表口径一致：仅已发货/已完成的订单有车辆轨迹可看 -->
+        <view wx:if="{{order.status === 1 || order.status === 2}}" class="detail-btn" bindtap="goToTrace" hover-class="hover">查看车辆轨迹</view>
         <view class="detail-btn ghost" bindtap="copyOrderNo" hover-class="hover">复制订单号</view>
       </view>
     </view>

@@ -12,6 +12,7 @@ Page({
   behaviors: [require('../../../behaviors/page-base')],
   data: {
     product: null,
+    soldOut: false, // 已售罄（stock 为 0，含后端回传字符串 '0' 的兼容）
     loadError: false, // 详情加载失败（弱网常见）：留在本页给重试入口
     statusBarHeight: 20,
     elderlyMode: false,
@@ -64,6 +65,7 @@ Page({
       if (p) {
         this.setData({
           product: { ...p, price: Number(p.price).toFixed(2), imageUrl: productImg.resolve(p) },
+          soldOut: p.stock != null && Number(p.stock) <= 0,
           loadError: false
         })
       }
@@ -92,7 +94,7 @@ Page({
   buyNow() {
     if (!this.data.product) return
     // 已售罄不响应
-    if (this.data.product.stock === 0) return
+    if (this.data.soldOut) return
     // 未登录拦截（统一入口）
     if (!auth.requireLogin({ content: '登录后才能下单购买' })) return
     // 初始化弹窗（收货电话预填登录手机号）
@@ -122,8 +124,8 @@ Page({
   },
 
   quantityPlus() {
-    const stock = this.data.product.stock
-    const max = typeof stock === 'number' ? stock : 99
+    const stockNum = Number(this.data.product.stock)
+    const max = Number.isFinite(stockNum) ? stockNum : 99
     if (max <= 0) return
     const q = Math.min(max, this.data.quantity + 1)
     this.setData({ quantity: q, totalAmount: this.calcAmount(q) })

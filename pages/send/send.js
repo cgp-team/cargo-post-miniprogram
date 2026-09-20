@@ -55,8 +55,8 @@ Page({
     sizeLength: '',
     sizeWidth: '',
     sizeHeight: '',
-    volumeM3: 0,          // 长×宽×高(cm) 折算 m³，提交用
-    volumeText: '0.0000', // 展示用（保留 4 位小数）
+    volumeM3: 0,          // 长×宽×高(cm) 折算 m³，提交用（4 位小数）
+    volumeText: '0',      // 展示用（去尾零，与「快递」页体积 chip 同口径）
     freshFlag: false,
     // 取货方式：'station' 自选取货站点 / 'location' 使用当前位置（含可达性评估与推荐站点）
     pickupMode: 'station',
@@ -481,11 +481,11 @@ Page({
     this._scheduleSaveDraft()
   },
 
-  /** 长×宽×高(cm) → 体积(m³)：0.01m 换算，保留 4 位小数（与 decimal(12,4) 对齐） */
+  /** 长×宽×高(cm) → 体积(m³)：提交值按 0.01m 换算保留 4 位小数（与 decimal(12,4) 对齐），展示去尾零 */
   recalcVolume() {
     const { sizeLength, sizeWidth, sizeHeight } = this.data
     const volumeM3 = util.cmSizeToM3(sizeLength, sizeWidth, sizeHeight)
-    this.setData({ volumeM3, volumeText: volumeM3.toFixed(4) })
+    this.setData({ volumeM3, volumeText: String(volumeM3) })
   },
 
   /** 取货站点变更：同步 ID/名称；与送达相同则拦截；清空旧路线预估 */
@@ -782,7 +782,7 @@ Page({
       case 3:
         return { reviewMode: 'manual', reviewTitle: '待人工审核', reviewHint: '工作人员将尽快确认承运条件，请留意通知', reviewReasonText: reasonText }
       case 4:
-        return { reviewMode: 'rejected', reviewTitle: '审核不通过', reviewHint: '该货物暂不支持承运，无法进入运输流程', reviewReasonText: reasonText }
+        return { reviewMode: 'rejected', reviewTitle: '审核不通过', reviewHint: '该货物暂不支持承运，可点下方「重新填写」修改货物信息后再提交', reviewReasonText: reasonText }
       default:
         return { reviewMode: 'pending', reviewTitle: '审核中', reviewHint: '正在为您确认承运条件', reviewReasonText: reasonText }
     }
@@ -862,7 +862,7 @@ Page({
       sizeWidth: '',
       sizeHeight: '',
       volumeM3: 0,
-      volumeText: '0.0000',
+      volumeText: '0',
       freshFlag: false,
       pickupMode: 'station',
       reachLoading: false,
@@ -898,6 +898,13 @@ Page({
       orderAmount: null,
       submitting: false
     })
+  },
+
+  /** 查看寄货进度：切「快递」tab 并直接展开该单物流详情（与「我的订单 → 寄货订单」同一套 parcelIntent 口径） */
+  goTrack() {
+    if (!this.data.orderNo) return
+    getApp().globalData.parcelIntent = { type: 'track', no: this.data.orderNo }
+    wx.switchTab({ url: '/pages/parcel/parcel' })
   },
 
   /** 返回首页 */

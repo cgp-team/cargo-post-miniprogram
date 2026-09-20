@@ -115,7 +115,7 @@
         <view wx:if="{{item.cargoCategory || item.itemCount}}" class="parcel-cargo-row">
           <text class="cargo-chip">{{item.cargoCategory || '农产品'}}</text>
           <text class="cargo-chip">{{item.itemCount || 1}} 件</text>
-          <text wx:if="{{item.volumeM3}}" class="cargo-chip">{{item.volumeM3}} m³</text>
+          <text wx:if="{{item.volumeM3}}" class="cargo-chip">{{item.volumeText}} m³</text>
           <text wx:if="{{item.freshFlag}}" class="cargo-chip cargo-chip-fresh">生鲜冷链</text>
         </view>
         <!-- 车来取货/送货提醒：承运车辆实时位置 → 距目标站点分钟 -->
@@ -289,12 +289,23 @@
           <view class="route-weight"><icon name="box" size="26" color="#8A8778" /><text>重量 {{trackResult.goodsWeight}}kg</text></view>
           <text class="parcel-eta">{{trackResult.createTimeText}}</text>
         </view>
+        <!-- 货物信息（类型/件数/体积/生鲜）：与「我的寄货」列表同一套 chips，列表 → 详情口径一致 -->
+        <view wx:if="{{trackResult.cargoCategory || trackResult.itemCount}}" class="parcel-cargo-row">
+          <text class="cargo-chip">{{trackResult.cargoCategory || '农产品'}}</text>
+          <text class="cargo-chip">{{trackResult.itemCount || 1}} 件</text>
+          <text wx:if="{{trackResult.volumeM3}}" class="cargo-chip">{{trackResult.volumeText}} m³</text>
+          <text wx:if="{{trackResult.freshFlag}}" class="cargo-chip cargo-chip-fresh">生鲜冷链</text>
+        </view>
 
         <!-- 货运审核状态（Phase 2 承运审核，按 reviewStatus 展示；reasonCode 文案由 reviewNotice 统一映射） -->
         <view wx:if="{{trackResult.reviewNotice}}" class="parcel-audit fail"><icon name="info" size="28" color="#C0392B" /><text>{{trackResult.reviewNotice}}</text></view>
         <view wx:elif="{{trackResult.reviewStatus === 2}}" class="parcel-audit warn"><icon name="notice" size="28" color="#B27A12" /><text>需您到指定站点交接后即可进入运输流程</text></view>
         <view wx:elif="{{trackResult.reviewStatus === 3 || trackResult.auditStatus === 0}}" class="parcel-audit warn"><icon name="clock" size="28" color="#B27A12" /><text>审核中：货物正在等待平台审核</text></view>
         <view wx:elif="{{trackResult.auditStatus === 2}}" class="parcel-audit fail"><icon name="info" size="28" color="#C0392B" /><text>审核未通过：{{trackResult.rejectReason || '货物不符合运输要求'}}</text></view>
+        <!-- 审核不通过：给再编辑入口，不把用户堵在死路（与寄货页成功屏「重新填写」同口径） -->
+        <button wx:if="{{trackResult.reviewStatus === 4}}" class="btn-station-confirm" bindtap="goSend" hover-class="hover">重新寄一件</button>
+        <!-- 长时间未接单：下单超 24h 仍未分配班次时的明确说法 -->
+        <view wx:if="{{trackResult.waitHint}}" class="parcel-audit warn"><icon name="clock" size="28" color="#B27A12" /><text>{{trackResult.waitHint}}</text></view>
 
         <!-- 待客户操作：确认已送站 → 待入池 -->
         <view wx:if="{{trackResult.status === 7 && trackResult.servicePointText}}" class="parcel-service-point">
@@ -387,7 +398,8 @@
 
         <!-- 查件二维码：票面末联（撕票线之上），取件 / 司机扫码核销 -->
         <view class="parcel-qr-block">
-          <text class="parcel-pickup-code" wx:if="{{trackResult.pickupCode}}" data-code="{{trackResult.pickupCode}}" bindlongpress="copyPickupCode" hover-class="hover">取件码：{{trackResult.pickupCode}}</text>
+          <!-- 取件码：点按即复制（与「我的寄货」列表的取件码交互同口径），二维码供司机扫码核销 -->
+          <text class="parcel-pickup-code" wx:if="{{trackResult.pickupCode}}" data-code="{{trackResult.pickupCode}}" catchtap="copyPickupCode" hover-class="hover">取件码：{{trackResult.pickupCode}}</text>
           <canvas type="2d" id="parcelQrCanvas" class="parcel-qr-canvas"></canvas>
           <text class="parcel-qr-tip">取件 · 司机扫码核销</text>
           <text class="parcel-qr-receiver" wx:if="{{trackResult.pickupCode && (trackResult.receiverName || trackResult.receiverMobile)}}">

@@ -5,6 +5,12 @@ const api = require('../../../utils/api')
 const appearance = require('../../../utils/appearance')
 const { formatBackendTime } = require('../../../utils/util')
 
+/** 金额统一两位小数（与订单详情/快递页 toFixed(2) 口径一致；非数字兜底 0.00） */
+function toMoney(v) {
+  const n = Number(v)
+  return isFinite(n) ? n.toFixed(2) : '0.00'
+}
+
 Page({
   data: {
     statusBarHeight: 0,
@@ -50,13 +56,13 @@ Page({
         type: '货运订单',
         goods: r.goodsName || '寄货',
         weight: r.weightKg ? r.weightKg + 'kg' : '',
-        amount: r.totalAmount || '0',
+        amount: toMoney(r.totalAmount),
         time: formatBackendTime(r.createTime),
         status: r.statusName || ''
       }))
       this.setData({
-        totalEarnings: e.totalAmount || '0.00',
-        todayEarnings: e.todayAmount || '0.00',
+        totalEarnings: toMoney(e.totalAmount),
+        todayEarnings: toMoney(e.todayAmount),
         totalOrders: e.totalOrders || 0,
         todayOrders: e.todayOrders || 0,
         shiftCount: e.shiftCount || 0,

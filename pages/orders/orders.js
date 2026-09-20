@@ -17,6 +17,9 @@ const SEND_STATUS_CLASS = {
   2: 'status-shipping', 3: 'status-shipping', 4: 'status-done', 5: 'status-done'
 }
 
+/** 商城订单状态兜底文案（后端偶尔缺 statusName 时）：与「快递 - 我的购物」同一口径 */
+const PRODUCT_STATUS = { 0: '待发货', 1: '配送中', 2: '已完成', 3: '已取消' }
+
 Page({
   data: {
     // 订单来源：商城订单（默认，行为不变）/ 寄货订单（与「快递」页同一批数据）
@@ -103,13 +106,18 @@ Page({
       if (seq !== this._reqSeq) return false
       const list = (res.list || []).map((o) => ({
         ...o,
+        statusName: o.statusName || PRODUCT_STATUS[o.status] || '',
         statusClass: this.statusClass(o.status),
+        // 金额统一两位小数展示口径（与商品详情/快递页一致）
+        totalAmount: o.totalAmount != null ? Number(o.totalAmount).toFixed(2) : o.totalAmount,
         // 配送提示：已发货=司机配送中（点溯源看司机/轨迹/到站提醒），已完成=已送达
         deliveryHint: o.status === 1 ? '司机配送中 · 点「产地溯源」看司机与到站提醒'
           : (o.status === 2 ? '已送达 · 点「产地溯源」看交付凭证' : ''),
         createTimeText: formatBackendTime(o.createTime),
         items: (o.items || []).map((g) => ({
           ...g,
+          productPrice: g.productPrice != null ? Number(g.productPrice).toFixed(2) : g.productPrice,
+          amount: g.amount != null ? Number(g.amount).toFixed(2) : g.amount,
           imageUrl: productImg.resolve({ name: g.productName, image: g.productImage })
         }))
       }))
@@ -152,20 +160,24 @@ Page({
     const { pageNo } = this.data
     const res = await api.pageMySendOrders({ pageNo, pageSize: this.data.pageSize })
     if (seq !== this._reqSeq) return // 已有更新的请求在途，丢弃旧响应
-    const list = (res.list || []).map((o) => ({
-      source: 'SEND',
-      id: o.id,
-      orderNo: o.orderNo,
-      status: o.status,
-      statusName: o.statusName || SEND_STATUS[o.status] || '',
-      statusClass: SEND_STATUS_CLASS[o.status] || 'status-done',
-      createTime: o.createTime || '',
-      createTimeText: formatBackendTime(o.createTime),
-      goodsName: o.goodsName || '寄货',
-      itemCount: o.itemCount || 1,
-      goodsWeight: o.goodsWeight,
-      items: []
-    }))
+    const list = (res.list || []).map((o) => {
+      // 承运审核拒运（reviewStatus=4）：chip 显示"审核不通过"（红），与快递页同口径
+      const rejected = o.reviewStatus === 4
+      return {
+        source: 'SEND',
+        id: o.id,
+        orderNo: o.orderNo,
+        status: o.status,
+        statusName: rejected ? '审核不通过' : (o.statusName || SEND_STATUS[o.status] || ''),
+        statusClass: rejected ? 'status-fail' : (SEND_STATUS_CLASS[o.status] || 'status-done'),
+        createTime: o.createTime || '',
+        createTimeText: formatBackendTime(o.createTime),
+        goodsName: o.goodsName || '寄货',
+        itemCount: o.itemCount || 1,
+        goodsWeight: o.goodsWeight,
+        items: []
+      }
+    })
     const total = res.total || 0
     const merged = pageNo === 1 ? list : this.data.list.concat(list)
     this.setData({ list: merged, total, hasMore: merged.length < total, loadError: false })

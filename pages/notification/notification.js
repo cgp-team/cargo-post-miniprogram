@@ -60,6 +60,16 @@ Page({
     this.reload()
   },
 
+  /** 司机模式缺 driverId 时补拉一次档案（工作台首屏未加载完就点铃铛的时序空洞） */
+  async ensureDriverId() {
+    if (!this.data.driverMode || this.driverId) return
+    try {
+      const profile = await api.getDriverProfile()
+      this.driverId = profile && profile.driverId
+      if (this.driverId) getApp().globalData.driverId = this.driverId
+    } catch (e) { /* 拉不到档案：走列表错误态，不混用用户消息接口 */ }
+  },
+
   onShow() {
     appearance.apply(this)
   },
@@ -73,10 +83,12 @@ Page({
 
   reload() {
     this.setData({ pageNo: 1, list: [], total: 0, hasMore: true })
-    return Promise.all([this.loadList(), this.loadUnread()])
+    return this.ensureDriverId().then(() => Promise.all([this.loadList(), this.loadUnread()]))
   },
 
   async loadUnread() {
+    // 司机模式拿不到 driverId 时不降级打用户消息接口（两边消息口径不同，混用会串数据）
+    if (this.data.driverMode && !this.driverId) return false
     try {
       const count = this.data.driverMode && this.driverId
         ? await api.getDriverUnreadCount(this.driverId)
@@ -86,6 +98,11 @@ Page({
   },
 
   async loadList() {
+    // 司机模式拿不到 driverId：亮错误态给重试入口，不降级打用户消息接口
+    if (this.data.driverMode && !this.driverId) {
+      this.setData({ loadError: true })
+      return false
+    }
     // 序号守卫（而非 loading 早退）：连切「全部/未读」时旧响应直接丢弃；
     // 旧实现 loading 早退会把新筛选的加载整个吞掉，且旧响应盖在新筛选下
     const seq = (this._reqSeq = (this._reqSeq || 0) + 1)
@@ -137,14 +154,14 @@ Page({
     this.reload()
   },
 
-  /** 点消息：标记已读；带订单的跳包裹轨迹 */
+  /** 点消息：标记已读；带订单的按消息来源跳到对应订单视图 */
   onTapItem(e) {
     // 长按复制单号后松手会补发一次 tap，吞掉避免误标已读/误跳详情
     if (this._suppressTapUntil && Date.now() < this._suppressTapUntil) {
       this._suppressTapUntil = 0
       return
     }
-    const { id, orderId } = e.currentTarget.dataset
+    const { id, orderId, orderNo } = e.currentTarget.dataset
     const idx = this.data.list.findIndex((n) => n.id === id)
     const item = idx >= 0 ? this.data.list[idx] : null
     if (item && item.readStatus === 0) {
@@ -159,11 +176,22 @@ Page({
         : api.readNotification(id)
       markRead.catch(() => { /* api 容错toast */ })
     }
-    // 跳转到订单轨迹页（溯源页路由参数名是 id；防连点避免叠两层页面）
-    if (orderId) {
-      if (navThrottled(this)) return
-      wx.navigateTo({ url: '/pages/goods/trace/trace?id=' + orderId })
+    if (!orderId && !orderNo) return
+    if (navThrottled(this)) return
+    // 司机消息（任务/交接提醒）里的 orderId 是货运单 id，没有对应的村民端页面：回工作台看任务
+    if (this.data.driverMode) {
+      wx.navigateBack()
+      return
     }
+    // 寄件（货运）事件通知（审核/入池/调度/发车/交接/妥投）：按业务单号进「快递 → 单号查询」，
+    // 与「我的订单 → 寄货订单」同一套 parcelIntent 口径；商品溯源页（product-order/trace?id=）接不住货运单 id
+    if (orderNo) {
+      getApp().globalData.parcelIntent = { type: 'track', no: orderNo }
+      wx.switchTab({ url: '/pages/parcel/parcel' })
+      return
+    }
+    // 兜底：只有数字 id 没有单号时维持原跳转（商城订单溯源页路由参数名是 id；防连点避免叠两层页面）
+    wx.navigateTo({ url: '/pages/goods/trace/trace?id=' + orderId })
   },
 
   /** 长按复制单号；系统自带「已复制」提示 */
