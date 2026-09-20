@@ -44,7 +44,7 @@
     <view class="n-card anim-rise {{item.readStatus === 0 ? 'unread' : 'read'}} level-{{item.level || 'INFO'}}"
           style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms"
           wx:for="{{list}}" wx:key="id"
-          bindtap="onTapItem" data-id="{{item.id}}" data-order-id="{{item.orderId}}" hover-class="hover">
+          bindtap="onTapItem" data-id="{{item.id}}" data-order-id="{{item.orderId}}" data-order-no="{{item.orderNo}}" hover-class="hover">
       <view class="n-icon"><text class="n-icon-emoji">{{item.icon}}</text></view>
       <view class="n-body">
         <view class="n-top">

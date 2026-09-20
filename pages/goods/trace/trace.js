@@ -7,6 +7,9 @@ const api = require('../../../utils/api')
 const appearance = require('../../../utils/appearance')
 const qrcodeRender = require('../../../utils/qrcode-render')
 
+/** 商城订单状态兜底文案（后端偶尔缺 statusName 时）：与「我的订单/快递 - 我的购物」同一口径 */
+const PRODUCT_STATUS = { 0: '待发货', 1: '配送中', 2: '已完成', 3: '已取消' }
+
 Page({
   data: {
     elderlyMode: false,
@@ -15,6 +18,9 @@ Page({
     loading: true,
     loadError: false, // 网络请求失败（区别于"未发货无轨迹"空态）
     trace: null, // 接口原始数据
+    // 边界态：已取消 / 还未发车（无任何线路与轨迹数据时，地图无可展示内容）
+    cancelled: false,
+    notShipped: false,
     // 地图
     mapCenter: { lng: 116.4, lat: 39.9 },
     mapScale: 12,
@@ -138,9 +144,14 @@ Page({
       polyline,
       mapCenter: center,
       trackPoints,
+      // 已取消：无运输可看（隐藏二维码与地图）；未发车：有订单但还没派车/轨迹，地图无可展示内容
+      cancelled: trace.status === 3,
+      notShipped: trace.status !== 3
+        && !trace.vehiclePlate && !points.length && !track.length
+        && !(trace.currentLongitude && trace.currentLatitude),
       stops: this.markStops(points, trace),
       lastReportText: this.formatTime(trace.lastReportTime),
-      statusText: trace.statusName || '',
+      statusText: trace.statusName || PRODUCT_STATUS[trace.status] || '',
       arrivedText: this.buildArrivedText(trace),
       loadTimeText: this.formatTime(trace.loadTime),
       deliverTimeText: this.formatTime(trace.deliverTime),

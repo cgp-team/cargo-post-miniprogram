@@ -72,9 +72,9 @@
   <view class="detail-footer anim-rise">
     <view
       class="footer-btn buy-btn"
-      style="{{product && product.stock === 0 ? 'background: #C9C2B0;' : ''}}"
+      style="{{soldOut ? 'background: #C9C2B0;' : ''}}"
       bindtap="buyNow" hover-class="hover"
-    >{{product && product.stock === 0 ? '已售罄' : '立即购买'}}</view>
+    >{{soldOut ? '已售罄' : '立即购买'}}</view>
   </view>
   <view class="safe-area-bottom"></view>
 

@@ -495,7 +495,11 @@
     </view>
 
     <view class="step-actions anim-rise" style="animation-delay: 320ms">
-      <button class="btn-primary" bindtap="goHome">我知道了，返回首页</button>
+      <!-- 审核不通过：主行动改为再编辑（拒单只给"返回首页"等于把用户堵在死路） -->
+      <button wx:if="{{reviewMode === 'rejected'}}" class="btn-primary" bindtap="resetSend">重新填写，再寄一次</button>
+      <!-- 正常受理：一键直达该单物流详情，新单立刻可见 -->
+      <button wx:else class="btn-primary" bindtap="goTrack">查看寄货进度</button>
+      <button class="btn-outline" bindtap="goHome">返回首页</button>
     </view>
 
     <!-- 取货方式与原始地址（答辩演示重点：位置 ≠ 车辆能到的地方） -->

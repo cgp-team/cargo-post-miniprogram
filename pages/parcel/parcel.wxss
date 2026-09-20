@@ -270,7 +270,13 @@
   background: var(--color-track);
 }
 
-/* 副券状态大字：按语义着色（待=陶土 / 运=站牌绿 / 完=暖灰） */
+/* 审核不通过：专用红（危险语义），与寄货页拒运卡/审核提示同色 */
+.parcel-status.status-fail {
+  color: var(--color-danger);
+  background: rgba(192, 57, 43, 0.10);
+}
+
+/* 副券状态大字：按语义着色（待=陶土 / 运=站牌绿 / 完=暖灰 / 拒=红） */
 .stub-status {
   font-size: 28rpx;
   line-height: 1.2;
@@ -281,6 +287,7 @@
 .stub-status.status-pending { color: var(--color-status-pending); }
 .stub-status.status-shipping { color: var(--color-status-shipping); }
 .stub-status.status-done { color: var(--color-status-done); }
+.stub-status.status-fail { color: var(--color-danger); }
 .stub-status.on-trip { color: var(--color-primary); }
 
 .stub-unit { font-size: 22rpx; }
@@ -565,7 +572,7 @@
 }
 
 .parcel-audit.warn { background: var(--color-gold-light); color: var(--color-gold-deep); }
-.parcel-audit.fail { background: #FDECEA; color: var(--color-danger); }
+.parcel-audit.fail { background: rgba(192, 57, 43, 0.10); color: var(--color-danger); }
 
 /* 承运班次与到达预估 */
 .parcel-carrier {

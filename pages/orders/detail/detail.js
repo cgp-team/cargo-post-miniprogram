@@ -10,6 +10,9 @@ const appearance = require('../../../utils/appearance')
 const productImg = require('../../../utils/product-img')
 const { formatBackendTime, navThrottled } = require('../../../utils/util')
 
+/** 商城订单状态兜底文案（后端偶尔缺 statusName 时）：与「我的订单/快递 - 我的购物」同一口径 */
+const PRODUCT_STATUS = { 0: '待发货', 1: '配送中', 2: '已完成', 3: '已取消' }
+
 Page({
   data: {
     elderlyMode: false,
@@ -86,13 +89,14 @@ Page({
     const deliverTimeText = formatBackendTime(order.deliverTime)
     const items = (order.items || []).map((g) => ({
       ...g,
+      productPrice: g.productPrice != null ? Number(g.productPrice).toFixed(2) : '-',
       imageUrl: productImg.resolve({ name: g.productName, image: g.productImage }),
       amountText: g.amount != null ? Number(g.amount).toFixed(2) : '-'
     }))
     this.setData({
       order,
       items,
-      statusText: order.statusName || '—',
+      statusText: order.statusName || PRODUCT_STATUS[order.status] || '—',
       totalText: order.totalAmount != null ? Number(order.totalAmount).toFixed(2) : '0.00',
       createTimeText: formatBackendTime(order.createTime),
       loadTimeText,
@@ -102,8 +106,9 @@ Page({
     })
   },
 
-  /** 当前配送状态一句话（司机已到达 / 已装车 / 已妥投） */
+  /** 当前配送状态一句话（已取消 / 司机已到达 / 已装车 / 已妥投） */
   buildArrivedText(order) {
+    if (order.status === 3) return '订单已取消，未安排配送；如需帮助请联系平台客服'
     const driver = order.driverName ? `${order.driverName}${order.driverMobile ? ' ' + order.driverMobile : ''}` : ''
     if (order.deliverTime) return `${driver || '司机'}已妥投交付，感谢使用`
     if (order.loadTime) return `${driver || '司机'}已装车核验，正在配送中`
@@ -114,9 +119,15 @@ Page({
     return '商家还未发货，可稍后在「快递 - 我的购物」查看进度'
   },
 
-  /** 配送进度时间线（下单 → 派车 → 装车 → 到站 → 妥投） */
+  /** 配送进度时间线（下单 → 派车 → 装车 → 到站 → 妥投；已取消单独成链） */
   buildSteps(order, loadTimeText, deliverTimeText) {
     const createTimeText = formatBackendTime(order.createTime)
+    if (order.status === 3) {
+      return [
+        { name: '已下单', done: true, time: createTimeText },
+        { name: '订单已取消', done: true, time: '' }
+      ]
+    }
     return [
       { name: '已下单', done: true, time: createTimeText },
       { name: order.vehiclePlate ? `商家发货 · ${order.vehiclePlate} 承运` : '商家发货 · 等待派车', done: !!order.vehiclePlate, time: '' },

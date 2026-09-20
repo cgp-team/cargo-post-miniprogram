@@ -20,7 +20,7 @@
       <text class="route-badge">{{routeName || '今日班次'}}</text>
       <view class="status-tag {{status}}">
         <view wx:if="{{status === 'driving'}}" class="dot-live"></view>
-        <text>{{status === 'idle' ? '待发车' : (status === 'driving' ? '行驶中' : '停靠中')}}</text>
+        <text>{{status === 'idle' ? '待发车' : (status === 'driving' ? '行驶中' : (status === 'stopped' ? '停靠中' : '已完成'))}}</text>
       </view>
     </view>
 
@@ -36,7 +36,7 @@
       </view>
       <view class="progress-info" wx:if="{{status === 'driving'}}">
         <text class="next-stop-name">下一站：{{nextStation}}</text>
-        <text class="next-stop-dist">约{{nextStationDistance}}m</text>
+        <text class="next-stop-dist" wx:if="{{nextStationDistance > 0}}">约{{nextStationDistance}}m</text>
       </view>
     </view>
   </view>
@@ -135,8 +135,8 @@
         <text class="legend-text">未到站</text>
       </view>
     </view>
-    <!-- 导航按钮 -->
-    <view class="map-nav-bar" wx:if="{{nextStation && status !== 'idle'}}" bindtap="navigateToNextStop" hover-class="hover">
+    <!-- 导航按钮（仅行驶中：停靠/已完成时目标站即所在站，不需要再导航） -->
+    <view class="map-nav-bar" wx:if="{{nextStation && status === 'driving'}}" bindtap="navigateToNextStop" hover-class="hover">
       <icon name="road" size="30" color="#FFFFFF" />
       <text class="map-nav-text">导航到 {{nextStation}}</text>
       <text class="map-nav-dist" wx:if="{{nextStationDistance > 0}}">约{{nextStationDistance}}m</text>
@@ -231,8 +231,8 @@
         <text class="speed-unit">km/h</text>
       </view>
 
-      <!-- 前方到站提示 -->
-      <view class="next-stop-card anim-rise" wx:if="{{nextStationDistance < 1000}}">
+      <!-- 前方到站提示（拿到首个定位前距离为 0，不亮"前方 0m"） -->
+      <view class="next-stop-card anim-rise" wx:if="{{nextStationDistance > 0 && nextStationDistance < 1000}}">
         <view class="stop-alert-iconbox">
           <icon name="pin" size="40" color="{{iconClay}}" />
         </view>
@@ -283,7 +283,7 @@
         <icon name="pin" size="56" color="#FFFFFF" />
       </view>
       <text class="stop-title">已到达 {{nextStation}}</text>
-      <text class="stop-subtitle">请完成装车作业</text>
+      <text class="stop-subtitle">{{stopHint}}</text>
     </view>
 
     <!-- 待装货物列表（货运 + 邮快件） -->
@@ -343,6 +343,17 @@
     <!-- 跳过 -->
     <view class="skip-btn" bindtap="skipLoading" hover-class="hover">
       <text>跳过，继续行驶 →</text>
+    </view>
+  </view>
+
+  <!-- ========== 状态四：已完成 - 班次/任务段收口（不再显示发车按钮，防止重复发车） ========== -->
+  <view class="done-panel anim-rise" wx:if="{{status === 'done'}}">
+    <view class="stop-banner">
+      <view class="stop-iconbox">
+        <icon name="check" size="56" color="#FFFFFF" />
+      </view>
+      <text class="stop-title">本次班次已完成</text>
+      <text class="stop-subtitle">辛苦啦！新的排班与派单会自动出现在这里</text>
     </view>
   </view>
 

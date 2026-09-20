@@ -35,7 +35,7 @@ Page({
     statusBarHeight: 20,
     headerSafeStyle: 'height: 20px;',
 
-    // 当前状态: 'idle' | 'driving' | 'stopped'
+    // 当前状态: 'idle' | 'driving' | 'stopped' | 'done'（done=班次/任务段已完成）
     status: 'idle',
 
     // 司机/车辆
@@ -69,6 +69,8 @@ Page({
     navActionTotal: 0,
     targetIndex: 0,
     canArrive: false,
+    // 停靠面板副标题（按当前站动作生成，applyNavView 更新；无任务段时保持默认装车口径）
+    stopHint: '请完成装车作业',
 
     // 位置来源：由后端 Driver Position API 自动决定（REAL / SIMULATED / NONE）
     locationSource: 'NONE',
@@ -131,6 +133,19 @@ Page({
     if ((this.data.status === 'driving' || this.data.status === 'stopped') && !this.locationTimer) {
       this.startLocationReport()
     }
+    // 从消息中心/交接页返回：刷新铃铛未读与交接待确认数（已读/已确认后徽标不残留）
+    this.refreshNotices()
+  },
+
+  /** 轻量刷新司机未读消息数 + 待交接数量（静默轮询口径，失败不打扰） */
+  refreshNotices() {
+    if (!this.driverId) return
+    api.getDriverUnreadCount(this.driverId, { silent: true }).then((count) => {
+      this.setData({ driverUnreadCount: count || 0 })
+    }).catch(() => {})
+    api.getDriverHandovers(this.driverId, { silent: true }).then((handovers) => {
+      this.setData({ pendingHandoverCount: (handovers || []).length })
+    }).catch(() => {})
   },
 
   /** 加载司机身份 + 班次 + 任务 */
@@ -292,9 +307,15 @@ Page({
 
     this.applyNavView(resumeIdx)
 
+    // 班次状态收口：在途恢复行驶；已完成亮完成态（避免任务跑完又回到"待发车"让司机再点一次发车）；
+    // 其余（含任务全部完成后 loadAll 回来）归位待发车
     if (current && current.status === 1 && resumeIdx < navPoints.length) {
       this.setData({ status: 'driving' })
       this.startLocationReport()
+    } else if (current && current.status === 2) {
+      this.setData({ status: 'done' })
+    } else if (this.data.status !== 'idle') {
+      this.setData({ status: 'idle' })
     }
   },
 
@@ -304,6 +325,11 @@ Page({
     const total = points.length
     const idx = Math.min(targetIndex, total - 1)
     const t = points[idx] || {}
+    // 停靠面板副标题按本站动作生成：装卸/派送/上下客，无作业站提示可直接继续
+    const actions = []
+    if (t.pickupCount > 0) actions.push('装车')
+    if (t.deliverCount > 0) actions.push('派送')
+    if (t.boardCount > 0 || t.alightCount > 0) actions.push('上下客')
     this.setData({
       targetIndex: idx,
       currentStopIndex: idx,
@@ -317,6 +343,10 @@ Page({
       navAlightCount: t.alightCount || 0,
       navActionTotal: t.actionTotal || 0,
       navReturnPoint: !!t.isReturn,
+      // 任务段导航时表头进度条的起讫站也要跟着任务段走（否则起终点空白）
+      startStation: total ? (points[0].stationName || '') : '',
+      endStation: total ? (points[total - 1].stationName || '') : '',
+      stopHint: actions.length ? '请完成' + actions.join('、') + '作业' : '本站无装卸任务，可直接继续行驶',
       nextStation: t.stationName || '',
       currentStation: idx > 0 ? (points[idx - 1] || {}).stationName : '',
       progressPercent: total > 1 ? Math.round(idx / (total - 1) * 100) : 0,
@@ -438,11 +468,11 @@ Page({
     },
 
 
-  /** 从真实班次初始化当前班次、站点、地图、运力；在途班次恢复行驶状态 */
+  /** 从真实班次初始化当前班次、站点、地图、运力；在途班次恢复行驶状态，已完成班次亮完成态 */
   initFromShifts(shifts) {
     if (!shifts.length) return
-    // 优先在途班次，否则取第一班
-    const current = shifts.find((s) => s.status === 1) || shifts[0]
+    // 优先在途班次，其次待发车班次，最后才落到已完成/首个（全天班次跑完时不该再把已完成班次当待发）
+    const current = shifts.find((s) => s.status === 1) || shifts.find((s) => s.status === 0) || shifts[0]
     const stops = current.stops || []
     if (!stops.length) return
 
@@ -500,10 +530,14 @@ Page({
       eta: this.calcEta(current)
     })
 
-    // 班次已在途：恢复行驶状态（重进小程序不丢进度）
+    // 班次已在途：恢复行驶状态（重进小程序不丢进度）；已完成：亮完成态，不再显示发车按钮
     if (current.status === 1) {
       this.setData({ status: 'driving' })
       this.startLocationReport()
+    } else if (current.status === 2) {
+      this.setData({ status: 'done', progressPercent: 100 })
+    } else if (this.data.status !== 'idle') {
+      this.setData({ status: 'idle' })
     }
   },
 
@@ -522,7 +556,12 @@ Page({
    * 发车 - 调后端创建执行记录，成功后进入行驶中并开始位置上报
    */
   async startDrive() {
-    if (!this.driverId || !this.shiftId || this.submitting) return
+    if (this.submitting || this.data.status === 'done') return
+    // 无档案/无待发班次时给明确反馈，而不是按钮点了没反应（司机以为手机卡了）
+    if (!this.driverId || !this.shiftId) {
+      wx.showToast({ title: '今日暂无待发班次', icon: 'none', duration: 2000 })
+      return
+    }
     this.submitting = true
     try {
       await api.driverDepart(this.driverId, this.shiftId)
@@ -762,7 +801,7 @@ Page({
         clearInterval(this.locationTimer)
         this.locationTimer = null
       }
-      this.setData({ status: 'idle', currentStopIndex: ti, progressPercent: 100, speed: 0, canArrive: false })
+      this.setData({ status: 'done', currentStopIndex: ti, progressPercent: 100, speed: 0, canArrive: false })
       wx.showToast({ title: '本次任务完成', icon: 'success', duration: 2000 })
       this.loadAll()
       return
@@ -784,7 +823,7 @@ Page({
     if (points.length >= 2) {
       const next = this.data.targetIndex + 1
       if (next >= points.length) {
-        this.setData({ status: 'idle', progressPercent: 100 })
+        this.setData({ status: 'done', progressPercent: 100 })
         wx.showToast({ title: '本次任务完成', icon: 'success', duration: 2000 })
         this.loadAll()
         return

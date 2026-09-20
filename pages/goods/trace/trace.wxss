@@ -232,6 +232,38 @@
   box-shadow: var(--shadow-card);
 }
 
+/* 边界态提示条：已取消 / 还未发车（无轨迹可展示时替代地图） */
+.trace-notice {
+  margin: 24rpx 24rpx 0;
+  padding: 24rpx 28rpx;
+  display: flex;
+  align-items: flex-start;
+  gap: 16rpx;
+  border-radius: 20rpx;
+  background: var(--color-card);
+  box-shadow: var(--shadow-card);
+}
+
+.trace-notice-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.trace-notice-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--color-ink);
+}
+
+.trace-notice-sub {
+  font-size: 24rpx;
+  line-height: 1.5;
+  color: var(--color-text-tertiary);
+}
+
 .trace-map {
   width: 100%;
   height: 560rpx;
@@ -429,6 +461,8 @@
 .elderly-mode .proof-img { width: 168rpx; height: 168rpx; }
 .elderly-mode .order-qr-no { font-size: 32rpx; padding: 26rpx 28rpx; }
 .elderly-mode .order-qr-tip { font-size: 26rpx; }
+.elderly-mode .trace-notice-title { font-size: 32rpx; }
+.elderly-mode .trace-notice-sub { font-size: 28rpx; }
 .elderly-mode .legend-text { font-size: 26rpx; }
 .elderly-mode .stops-title { font-size: 34rpx; }
 .elderly-mode .stop-name { font-size: 32rpx; }
