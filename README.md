@@ -36,11 +36,11 @@ for f in tests/*.test.js; do node "$f" || exit 1; done
 
 底部自定义 tab-bar（`custom-tab-bar/`）：首页、商城、包裹、我的。
 
-- `pages/login/login`、`pages/register/register`：登录与注册。
+- `pages/login/login`：登录（短信验证码登录新用户自动注册、微信小程序一键登录、手机号 + 密码）。
 - `pages/index/index`：首页，含天气展示与平台公告轮播（点击看详情）。
 - `pages/goods/goods`、`pages/goods/detail/detail`：农产品商城列表与详情。
 - `pages/goods/trace/trace`：商品溯源，商城订单的大巴承运轨迹（地图轨迹线 + 途经站点），从「我的订单」已发货/已完成订单进入。
-- `pages/send/send`：寄件下单（货物名称/重量/类型/件数/长宽高体积/是否生鲜/备注），支持从地址簿回填收货信息。物体信息随订单落 `transport_cargo_order`（`cargo_category`/`item_count`/`volume_m3`/`fresh_flag`），「我的寄货」按标签回显；前端限重与后端承运审核规则一致（单件 30kg），超限在提交前提示。
+- `pages/send/send`：寄件下单（货物名称/重量/类型/件数/长宽高体积/是否生鲜/备注），支持从地址簿回填收货信息。物体信息随订单落 `transport_cargo_order`（`cargo_category`/`item_count`/`volume_m3`/`fresh_flag`），「我的寄货」按标签回显；前端限重与后端承运审核规则一致（单件 30kg），超限在提交前提示。表单草稿自动保存（输入防抖 + 页面隐藏补写），误退出/断网后重进提示恢复；只存表单本体，照片临时路径与费用试算等派生数据不存，提交成功后清除。
 - `pages/parcel/parcel`：快递页，三个 tab：**我的寄货**（邮快件列表直显取件码，点击卡片直接看这单的完整物流详情）/
   **我的购物**（商城买到的商品订单：商品图、金额、承运司机与送货进度，点卡片进订单详情）/
   **单号查询**（取件码二维码、承运班次与到达预估、分段联运与时间轴）。「我的」页的「我的寄货 / 我的购物」入口
@@ -51,17 +51,32 @@ for f in tests/*.test.js; do node "$f" || exit 1; done
   **点订单卡片进订单详情**。
 - `pages/orders/detail/detail`：商城订单详情（商品清单与金额、收货信息、承运车辆/司机/交付站点、
   配送进度时间线、司机装车与妥投核验凭证、跳车辆轨迹）。数据源 `GET /app-api/transport/product-order/trace`。
-- `pages/mine/mine`、`pages/settings/settings`：我的与设置（含老年人模式、主题颜色，由 `utils/appearance.js` 统一处理）。
+- `pages/mine/mine`、`pages/settings/settings`：我的与设置（老年人模式、深色模式、主题颜色，由 `utils/appearance.js` 统一处理）。
+- `pages/notification/notification`：消息通知中心（订单事件驱动：审核/入池/调度/发车/交接/妥投等），全部/未读筛选、标记已读与全部已读，点带订单的消息跳包裹轨迹；从「我的」页进入，司机端工作台以 `?driverMode=1` 复用本页。
 - `pages/mine/profile/profile`：个人资料编辑（昵称/头像/性别）与修改密码（短信验证码 scene=3）。
 - `pages/mine/address/address`：收货地址管理（member/address 接口，省市区三级选择）；寄件页「地址簿」选择模式回填。
 - `pages/mine/feedback/feedback`：意见反馈提交与我的反馈列表（含平台回复）。
 - `pages/driver/workbench/workbench`：司机工作台，含待发车 / 行驶中 / 到站停靠三态、班次进度、行李舱运力、到站任务。发车、到站、扫码装车、扫码妥投均为真实写操作；行驶中通过 `wx.getLocation` 每 10 秒上报车辆位置。
 - `pages/driver/routes/routes`：今日排班与途经站点。
 - `pages/driver/earnings/earnings`：运输收益总览与明细。
+- `pages/driver/handover/handover`：多段联运货物交接（A 车送到换乘站 → B 车到场接货），按当前运输段状态给出操作（接受任务/装货/运输/到达/交接确认等），交接确认拍照留证；从司机工作台进入。
+
+## 设计与体验（山乡巴士 · 站牌与车票）
+
+- **设计原语**（`app.wxss` 全局签名样式）：`.signpost` 站牌头（深绿渐变实板 + 顶部落款横档 + 角落光晕）、`.ticket-card` 车票卡（主券 + 泛黄副券，虚线撕票口两端打孔）、`.road-line` 山路线（虚线道路分隔，时间线/进度用）；配色语义固定——陶土橙 = 司机/行动，稻谷金 = 农产品/公告，米纸底页面，墨字正文。
+- **主题变量**：全部颜色走 CSS 变量——主色板（`--color-primary/-dark/-accent`）+ 语义色（`--color-price`/`--color-status-*`，价格统一陶土橙、危险操作独立 `--color-danger`）+ 表面色（`--color-card`/`--color-card-warm`/`--color-field`/`--color-line`/`--color-track` 等），由 `utils/appearance.js` 经页面根节点内联 style 注入。四套主题（山野绿/陶土橙/山泉蓝/中国红，默认山泉蓝）× 深色模式正交共八套皮肤：深色换暖黑表面色与文字色并补强状态色对比度，站牌头保持主题色，导航栏随之压黑。
+- **老年模式**：设置页开关，页面根节点挂 `.elderly-mode`，`app.wxss` 尾部规则放大全局字号/按钮/输入框；辅助文字对比度 ≥ 4.5:1（`--color-text-tertiary` 不允许再浅）。
+- **动效体系**：只用 transform/opacity（合成层友好），时长 200–400ms，缓动统一 `cubic-bezier(0.22, 0.61, 0.36, 1)`；原语 `.anim-rise`（卡片上浮入场）/`.anim-pop`（对话框过冲回弹）/`.anim-sheet`（半屏弹层上滑）/`.anim-fade`，列表项配 inline `animation-delay` 做阶梯入场；页面级 `page-in` 0.25s；按压反馈统一 `hover-class="hover"`（原生 hover 约 50ms 生效，比 `:active` 跟手）。
+- **骨架屏**：`.skeleton` 米纸色流光 + `.skeleton-card` 卡片占位，主要列表/详情页首屏先出骨架再出真实内容，骨架色跟随主题与深色模式。
+- **三态完整性**：加载 / 空 / 错误三态分离——网络失败亮错误态（带「重新加载」入口），不冒充"暂无数据"；空态统一 `components/empty-state` 组件（icon/emoji + 主副文案 + 可选按钮）。
+- **分享**：8 个页面实现 `onShareAppMessage`（首页/商城/商品详情/商品溯源/寄件/快递/实时公交/车辆详情），文案随上下文带商品名、单号或线路名。
+- **长按复制单号**：快递/订单/溯源/通知/司机工作台与交接等场景运单号长按复制（`wx.setClipboardData`，系统自带"已复制"提示；复制后松手补发的 tap 被吞掉，防误触跳转）。
+- **图片预览**：商品图、装车/妥投核验凭证、头像等点击调 `wx.previewImage` 放大查看。
+- **触觉反馈**：`utils/feedback.js` 主操作成功时 `wx.vibrateShort`（light），低版本/不支持环境静默降级。
 
 ## 后端对接现状
 
-- 已对接真实接口：登录注册（member 模块）、商城列表与详情与下单/订单页、寄件下单、包裹查询、我的寄货记录、司机端档案/班次/待装车/收益、平台公告、意见反馈、收货地址、个人资料与修改密码、商品溯源轨迹。
+- 已对接真实接口：登录注册（member 模块）、商城列表与详情与下单/订单页、寄件下单、包裹查询、我的寄货记录、司机端档案/班次/待装车/收益、多段联运交接（`driver/legs`/`handovers`/`handover/confirm`）、消息通知（`transport/notification/*`）、平台公告、意见反馈、收货地址、个人资料与修改密码、商品溯源轨迹。
 - 平台公告：`GET /app-api/transport/notice/list`（免登录，上架公告按 sort 排序，最多 20 条），管理端「客货邮管理 → 公告管理」发布；首页拉取失败/为空时回退静态演示公告。表 `transport_notice`（platform 仓库 `sql/incremental/V007__notice.sql`）。
 - 意见反馈：`POST /app-api/transport/feedback/create` + `GET /app-api/transport/feedback/page`（需登录，只查本人），管理端「运维客服 → 意见反馈」回复后小程序可见。表 `transport_feedback`（`sql/incremental/V008__feedback.sql`）。
 - 收货地址：`/app-api/member/address/*`（member 模块标准接口），表 `member_address`（DDL 在 `sql/mysql/transport-menu.sql`）。
