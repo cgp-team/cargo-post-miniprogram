@@ -4,9 +4,8 @@
   <view class="top-bar" style="padding-top: {{statusBarHeight + 16}}px">
     <view class="top-row">
       <view class="top-left">
-      <view class="location-info" bindtap="switchVillage" hover-class="hover">
+      <view class="location-info">
         <text class="village-name">{{currentVillage || (locationUnavailable ? '定位不可用' : '当前位置')}}</text>
-          <text class="arrow-down">▾</text>
           <text class="top-badge">县城⇄乡村</text>
         </view>
         <text class="top-sub">客货邮 · 城乡直达</text>
@@ -78,8 +77,8 @@
     </view>
   </view>
 
-  <!-- 公告横幅 -->
-  <swiper class="notice-swiper" autoplay interval="3000" circular>
+  <!-- 公告横幅（真实接口；为空时展示空态，不展示演示公告） -->
+  <swiper wx:if="{{notices.length}}" class="notice-swiper" autoplay interval="3000" circular>
     <swiper-item wx:for="{{notices}}" wx:key="id">
       <view class="notice-item" data-item="{{item}}" bindtap="showNotice" hover-class="hover">
         <view class="notice-tag">
@@ -90,6 +89,7 @@
       </view>
     </swiper-item>
   </swiper>
+  <empty-state wx:else icon="notice" text="暂无公告" subText="平台公告发布后会在这里展示" />
 
   <!-- 功能入口 - 四宫格（阶梯入场） -->
   <view class="feature-grid">
@@ -231,7 +231,8 @@
       <text class="section-more" bindtap="goToProducts" hover-class="hover">更多 ›</text>
     </view>
 
-    <scroll-view class="product-scroll" scroll-x>
+    <!-- 真实商品为空/接口失败：展示空态，不再回退演示商品 -->
+    <scroll-view wx:if="{{recommendProducts.length}}" class="product-scroll" scroll-x>
       <view
         class="product-card anim-rise"
         wx:for="{{recommendProducts}}"
@@ -239,7 +240,6 @@
         style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms"
         bindtap="goToProductDetail" hover-class="hover"
         data-id="{{item.id}}"
-        data-demo="{{item.isDemo}}"
       >
         <view class="product-img">
           <image wx:if="{{item.imageUrl}}" class="product-img-real" src="{{item.imageUrl}}" mode="aspectFill" lazy-load />
@@ -258,6 +258,7 @@
         </view>
       </view>
     </scroll-view>
+    <empty-state wx:else icon="leaf" text="暂无推荐农产品" subText="村里的好货上架后会在这里展示" />
   </view>
 
   <!-- 底部安全区 -->

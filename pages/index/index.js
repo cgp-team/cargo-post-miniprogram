@@ -6,7 +6,6 @@ const weatherApi = require('../../utils/weather')
 const productImg = require('../../utils/product-img')
 const auth = require('../../utils/auth')
 const location = require('../../utils/location')
-const demoLocation = require('../../utils/demo-location')
 const transitAmap = require('../../utils/transit-amap')
 const { navThrottled } = require('../../utils/util')
 
@@ -17,8 +16,7 @@ Page({
   behaviors: [require('../../behaviors/page-base')],
   data: {
     userInfo: {},
-    currentVillage: '云山村',
-    villageManual: false, // 用户是否手动切换过村庄（手动选择优先作为区域 fallback）
+    currentVillage: '',
     // 用户定位（统一 LocationService 结果；内部保留真实经纬度，currentVillage 只是展示文本）
     userLocation: null,
     locationDenied: false,      // 权限被拒绝（引导"去设置"）
@@ -32,11 +30,7 @@ Page({
     elderlyMode: false,
     themeColor: 'green',
     themeStyle: '',
-    notices: [
-      { id: 1, title: 'C302路公交今日新增云山村农产品临时停靠点' },
-      { id: 2, title: '好消息！周末助农专线免费承运农户农产品' },
-      { id: 3, title: '系统升级通知：物流轨迹查询功能已全面优化' }
-    ],
+    notices: [],                // 平台公告（真实接口，失败/为空时展示空态，不再硬编码演示公告）
     nearbyBuses: [],            // 附近实时公交（真实接口数据，不再硬编码 Demo）
     nearbyStations: [],         // 附近站点（用于空态区分：有站点但无车 = 非运营时间）
     nearbyLines: [],            // 附近站点关联线路（无运营车辆也展示：该区域有哪些线路/不在运营）
@@ -45,45 +39,8 @@ Page({
     nearbyBusStatus: 'loading', // loading | ok | empty | error
     nearbyBusUpdatedAt: 0,      // 最近成功更新时间戳（相对文案用）
     nearbyBusUpdatedText: '',   // "已更新：刚刚" / "更新于 12 秒前"
-    nearbyBusLocatedText: '',   // "根据当前位置展示" / "根据青山镇展示"
-    recommendProducts: [
-      {
-        id: 1,
-        name: '高山云雾茶',
-        fromVillage: '云山村',
-        price: '68.00',
-        unit: '斤',
-        imageUrl: '/images/product-tea.png',
-        isDemo: true
-      },
-      {
-        id: 2,
-        name: '土鸡蛋30枚装',
-        fromVillage: '大湾村',
-        price: '45.00',
-        unit: '箱',
-        imageUrl: '/images/product-egg.png',
-        isDemo: true
-      },
-      {
-        id: 3,
-        name: '有机红薯粉',
-        fromVillage: '竹林乡',
-        price: '28.00',
-        unit: '袋',
-        imageUrl: '/images/product-noodle.png',
-        isDemo: true
-      },
-      {
-        id: 4,
-        name: '野生山核桃',
-        fromVillage: '青山镇',
-        price: '55.00',
-        unit: '斤',
-        imageUrl: '/images/product-nut.png',
-        isDemo: true
-      }
-    ]
+    nearbyBusLocatedText: '',   // "根据当前位置展示" / "根据当前区域展示"
+    recommendProducts: []       // 推荐农产品（真实接口，失败/为空时展示空态，不再硬编码演示商品）
   },
 
   onLoad() {
@@ -196,8 +153,8 @@ Page({
         userLocation: null,
         locationDenied: !!(loc && loc.denied),
         locationUnavailable: true,
-        // 定位不可用时不再假装身在"云山村"（手动切换过村庄的用户保留其选择）
-        currentVillage: this.data.villageManual ? this.data.currentVillage : ''
+        // 定位不可用时不再假装身在某个村庄
+        currentVillage: ''
       })
       return
     }
@@ -216,9 +173,8 @@ Page({
       locationVeryPoorAccuracy: location.isVeryCoarseAccuracy(loc),
       locationAccuracyText: location.accuracyText(loc),
       locationManual: !!(loc && loc.manual),
-      // 区域名只是展示文本：手动选点优先显示用户点选的地点名（如「重庆邮电大学」）
-      currentVillage: (loc && (loc.manual && loc.name ? loc.name : loc.district))
-        || (this.data.villageManual ? this.data.currentVillage : '')
+      // 区域名只是展示文本：手动选点优先显示用户点选的地点名
+      currentVillage: (loc && (loc.manual && loc.name ? loc.name : loc.district)) || ''
     })
     const app = getApp()
     if (loc.district || (loc.manual && loc.name)) {
@@ -344,10 +300,10 @@ Page({
    * 加载首页数据
    */
   async loadHomeData() {
-    // 平台公告：真实接口，失败/为空时保留静态演示公告
+    // 平台公告：真实接口，失败/为空时首页展示空态
     this.loadNotices()
     try {
-      // 推荐商品：拉取后端上架商品，取前 4 条
+      // 推荐商品：拉取后端上架商品，取前 4 条；失败/为空时展示空态
       const list = (await api.listProducts()) || []
       this.setData({
         recommendProducts: list.slice(0, 4).map((p) => ({
@@ -364,13 +320,13 @@ Page({
     }
   },
 
-  /** 平台公告（真实接口；失败/为空时保留静态演示数据） */
+  /** 平台公告（真实接口；失败/为空时首页展示空态，不再回退静态演示公告） */
   async loadNotices() {
     try {
       const notices = (await api.listNotices()) || []
-      if (notices.length) this.setData({ notices })
+      this.setData({ notices })
     } catch (err) {
-      console.error('加载平台公告失败，使用演示数据', err)
+      console.error('加载平台公告失败', err)
     }
   },
 
@@ -421,10 +377,8 @@ Page({
     const silent = !!(options && options.silent)
     const loc = this.data.userLocation
     const hasCoords = loc && typeof loc.latitude === 'number' && typeof loc.longitude === 'number'
-    // 区域 fallback：无精确坐标时，手动选择的村庄优先；否则用定位逆地理区域
-    const district = !hasCoords
-      ? (this.data.villageManual ? this.data.currentVillage : ((loc && loc.district) || ''))
-      : ''
+    // 区域 fallback：无精确坐标时按定位逆地理区域查询
+    const district = !hasCoords ? ((loc && loc.district) || '') : ''
     // 静默轮询不闪 loading（空态/非运营时段是正常内容，不该每 15s 闪成"加载中"）
     if (!silent && !this.data.nearbyBuses.length) {
       this.setData({ nearbyBusStatus: 'loading' })
@@ -465,12 +419,9 @@ Page({
         nearbyBusStatus: buses.length ? 'ok' : (inService === false ? 'off' : 'empty'),
         nearbyBusUpdatedAt: Date.now(),
         nearbyBusUpdatedText: '已更新：刚刚',
-        nearbyBusLocatedText: loc && loc.source === location.SOURCE_DEMO
-          ? `根据${this.data.currentVillage}展示`
-          : (hasCoords
-              ? '根据当前位置展示'
-              : (this.data.villageManual ? `根据${this.data.currentVillage}展示`
-                  : (data && data.locationLevel === 'DISTRICT' ? '根据当前区域展示' : '')))
+        nearbyBusLocatedText: hasCoords
+          ? '根据当前位置展示'
+          : (data && data.locationLevel === 'DISTRICT' ? '根据当前区域展示' : '')
       })
     } catch (err) {
       console.error('加载附近公交失败', err)
@@ -561,47 +512,6 @@ Page({
   },
 
   /**
-   * 切换村庄
-   */
-  switchVillage() {
-    // 生产（release）隐藏演示入口：普通用户不能改变真实位置；开发/测试可用 DEMO 站点坐标
-    const demoAllowed = demoLocation.isDemoAllowed()
-    const itemList = ['使用真实位置']
-    if (demoAllowed) {
-      demoLocation.DEMO_LOCATIONS.forEach((d) => itemList.push(d.name))
-    }
-    wx.showActionSheet({
-      itemList,
-      success: (res) => {
-        if (res.tapIndex === 0) {
-          this._useRealLocation()
-          return
-        }
-        const demo = demoLocation.DEMO_LOCATIONS[res.tapIndex - 1]
-        if (demo) this._useDemoLocation(demo)
-      }
-    })
-  },
-
-  /** 使用真实位置：清除演示定位 → 重新微信定位 → 刷新附近公交 */
-  async _useRealLocation() {
-    location.clearDemoLocation()
-    this.setData({ villageManual: false })
-    await this.loadUserLocation()
-    this.loadNearbyBusData()
-  },
-
-  /** 使用演示定位（开发/测试）：设置预设站点坐标 → 同步 userLocation/currentVillage → 立即刷新附近公交 */
-  async _useDemoLocation(demo) {
-    const loc = location.setDemoLocation(demo.name)
-    if (!loc) return
-    this.setData({ currentVillage: demo.name, villageManual: true })
-    getApp().globalData.currentVillage = demo.name
-    this._applyUserLocation(loc) // 同步 userLocation(lat/lon/source=demo) + currentVillage
-    this.loadNearbyBusData() // 立即按 DEMO 坐标刷新附近公交
-  },
-
-  /**
    * 跳转实时公交（车来了式地图+列表）
    */
   goToBusTracking() {
@@ -631,10 +541,6 @@ Page({
    */
   goToProductDetail(e) {
     if (navThrottled(this)) return
-    if (e.currentTarget.dataset.demo) {
-      wx.showToast({ title: '示例数据，暂未开通', icon: 'none' })
-      return
-    }
     const productId = e.currentTarget.dataset.id
     wx.navigateTo({ url: `/pages/goods/detail/detail?id=${productId}` })
   },

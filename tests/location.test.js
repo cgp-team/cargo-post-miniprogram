@@ -165,48 +165,6 @@ async function main() {
     console.log('✓ 13b 超过 5 分钟的缓存不再兜底 → UNKNOWN（不伪造位置）')
   }
 
-  // 14: DEMO 青山镇 → source=demo + 坐标正确（用仓库已有站点坐标）
-  {
-    reset()
-    location.setDemoLocation('青山镇')
-    const loc = await location.getCurrentLocation()
-    assert.strictEqual(loc.source, 'DEMO')
-    assert.strictEqual(loc.latitude, 30.6234)   // ST004 青山镇站
-    assert.strictEqual(loc.longitude, 104.2345)
-    assert.strictEqual(loc.level, 'PRECISE')
-    assert.strictEqual(loc.district, '青山镇')
-    location.clearDemoLocation()
-    console.log('✓ 14 DEMO 青山镇 → source=demo + 坐标正确')
-  }
-
-  // 15: DEMO → 真实（clearDemoLocation 后回到微信 GPS）
-  {
-    reset()
-    location.setDemoLocation('青山镇')
-    await location.getCurrentLocation() // demo
-    location.clearDemoLocation()
-    const loc = await location.getCurrentLocation() // 微信真实
-    assert.strictEqual(loc.source, 'AMAP')
-    assert.strictEqual(loc.latitude, 30.5723) // mock 真实坐标
-    assert.strictEqual(loc.longitude, 104.0657)
-    console.log('✓ 15 DEMO→真实 → source=wechat')
-  }
-
-  // 16: setDemoLocation 不存在 → null；DEMO 并发去重（同一实例）
-  {
-    reset()
-    assert.strictEqual(location.setDemoLocation('不存在的村'), null)
-    location.setDemoLocation('县城客运中心')
-    const p1 = location.getCurrentLocation()
-    const p2 = location.getCurrentLocation()
-    const [a, b] = await Promise.all([p1, p2])
-    assert.strictEqual(a.source, 'DEMO')
-    assert.strictEqual(a.latitude, 30.5723) // 县城客运中心 ST001
-    assert.strictEqual(a, b) // 同一 demo 实例，无并发
-    location.clearDemoLocation()
-    console.log('✓ 16 演示名不存在返回 null；DEMO 并发去重')
-  }
-
   // 17: 精度不足（800m）→ 自动补测一次并取更准的结果（定位不准的核心修复）
   {
     reset()
@@ -261,12 +219,12 @@ async function main() {
     assert.strictEqual(location.nearbyRadius(null, 'PRECISE'), 5000)
     assert.strictEqual(location.nearbyRadius(null, 'APPROXIMATE'), 15000)
     const loc = await location.getCurrentLocation()
-    // 统一输出契约：source ∈ AMAP|CACHE|DEMO|UNKNOWN，并带 city/district/accuracy/timestamp/level
+    // 统一输出契约：source ∈ AMAP|CACHE|MANUAL|UNKNOWN，并带 city/district/accuracy/timestamp/level
     assert.deepStrictEqual(
       ['success', 'latitude', 'longitude', 'accuracy', 'timestamp', 'source', 'level', 'district'].filter((k) => !(k in loc)),
       []
     )
-    assert.ok(['AMAP', 'CACHE', 'DEMO', 'UNKNOWN'].includes(loc.source))
+    assert.ok(['AMAP', 'CACHE', 'MANUAL', 'UNKNOWN'].includes(loc.source))
   console.log('✓ 20 半径自适应 + 统一输出字段（source/level/accuracy/timestamp/district）')
   }
 

@@ -17,6 +17,7 @@ const location = require('../../utils/location')
 const transitAmap = require('../../utils/transit-amap')
 const motion = require('../../utils/bus-motion')
 const { navThrottled } = require('../../utils/util')
+const { DEFAULT_MAP_CENTER } = require('../../utils/config')
 
 /** 车辆/定位刷新间隔（保留原 15s） */
 const REFRESH_MS = 15000
@@ -30,12 +31,6 @@ const MARKER_ME = 1
 const MARKER_STATION_BASE = 1000
 /** 车辆 marker id 起始（2000 + busId），便于点击时反查 */
 const MARKER_BUS_BASE = 2000
-/**
- * 地图兜底中心：重庆邮电大学（南山·南岸区）。
- * 定位拿到真实坐标前先落在这里，避免把地图初始画到与业务无关的城市，
- * 定位成功后 {@link _centerOnUser} 会覆盖它。
- */
-const DEFAULT_MAP_CENTER = { latitude: 29.5325, longitude: 106.5765 }
 
 Page({
   behaviors: [require('../../behaviors/page-base')],
@@ -64,7 +59,7 @@ Page({
     lines: [],
     activeLineKey: 'NEARBY',
     // 地图
-    // 初始中心用项目首个场站（县城客运中心）兜底，避免用 103/30 这类无意义默认值；
+    // 初始中心用 config.DEFAULT_MAP_CENTER 兜底（定位失败时的默认中心），
     // 真实定位/最近站点到达后会被覆盖（优先级：用户位置 → 最近站点 → 项目线路首站）
     mapCenter: DEFAULT_MAP_CENTER,
     mapScale: 14,
@@ -254,7 +249,7 @@ Page({
         visibleLines: this.data.showAllLines ? visibleLines : visibleLines.slice(0, MAX_NEARBY_LINES),
         vehicles: visibleBuses.map((b, i) => this._formatVehicle(b, i)),
         nearbyLocatedText: hasCoords
-          ? (loc.source === location.SOURCE_DEMO ? `根据${loc.district || '演示地点'}展示` : '根据当前位置展示')
+          ? '根据当前位置展示'
           : (district ? `根据${district}展示` : '定位不可用'),
         // 运营时段（无车时如实展示"当前不在运营时间 + 下一班几点"，不留空白）
         inService: inServiceFlag,

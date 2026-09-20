@@ -45,7 +45,7 @@ for f in tests/*.test.js; do node "$f" || exit 1; done
   **我的购物**（商城买到的商品订单：商品图、金额、承运司机与送货进度，点卡片进订单详情）/
   **单号查询**（取件码二维码、承运班次与到达预估、分段联运与时间轴）。「我的」页的「我的寄货 / 我的购物」入口
   通过 `globalData.parcelIntent` 直达对应 tab。
-- **车来取货/送货提醒（演示可见）**：`page` 列表与单号查询会显示「班车 距<目标站>约 N 分钟」，距目标站点 **≤10 分钟**时升级为高亮「车快到了」提醒条并弹一次提示（同一订单不重复打扰）。位置来自**统一位置模型**：司机真实上报优先（5 分钟内标"实时"、过期标"位置可能过期"），无上报时用**确定性班次模拟**位置并标注"模拟演示"——因此演示时**不需要司机开 GPS** 也能看到倒计时；车辆位置与目标站点的距离/分钟按 Haversine + 均速 25km/h 估算，随时间刷新（15s）。
+- **车来取货/送货提醒**：`page` 列表与单号查询会显示「班车 距<目标站>约 N 分钟」，距目标站点 **≤10 分钟**时升级为高亮「车快到了」提醒条并弹一次提示（同一订单不重复打扰）。位置来自**统一位置模型**：司机真实上报优先（5 分钟内标"实时"、过期标"位置可能过期"），无上报时用**确定性班次模拟**位置并标注"模拟演示"——因此即使司机未开 GPS 也能看到倒计时；车辆位置与目标站点的距离/分钟按 Haversine + 均速 25km/h 估算，随时间刷新（15s）。
 - `pages/bus/index`、`pages/bus/detail`：实时公交独立页（车来了式：线路地图 + 车辆列表 + 车辆详情），从首页「附近公交」或快递页进入。
 - `pages/orders/orders`：农产品商城订单列表（状态筛选、取消订单、溯源入口），从"我的"页进入，不在 tab-bar；
   **点订单卡片进订单详情**。
@@ -77,7 +77,7 @@ for f in tests/*.test.js; do node "$f" || exit 1; done
 ## 后端对接现状
 
 - 已对接真实接口：登录注册（member 模块）、商城列表与详情与下单/订单页、寄件下单、包裹查询、我的寄货记录、司机端档案/班次/待装车/收益、多段联运交接（`driver/legs`/`handovers`/`handover/confirm`）、消息通知（`transport/notification/*`）、平台公告、意见反馈、收货地址、个人资料与修改密码、商品溯源轨迹。
-- 平台公告：`GET /app-api/transport/notice/list`（免登录，上架公告按 sort 排序，最多 20 条），管理端「客货邮管理 → 公告管理」发布；首页拉取失败/为空时回退静态演示公告。表 `transport_notice`（platform 仓库 `sql/incremental/V007__notice.sql`）。
+- 平台公告：`GET /app-api/transport/notice/list`（免登录，上架公告按 sort 排序，最多 20 条），管理端「客货邮管理 → 公告管理」发布；首页拉取失败/为空时展示空态。表 `transport_notice`（platform 仓库 `sql/incremental/V007__notice.sql`）。
 - 意见反馈：`POST /app-api/transport/feedback/create` + `GET /app-api/transport/feedback/page`（需登录，只查本人），管理端「运维客服 → 意见反馈」回复后小程序可见。表 `transport_feedback`（`sql/incremental/V008__feedback.sql`）。
 - 收货地址：`/app-api/member/address/*`（member 模块标准接口），表 `member_address`（DDL 在 `sql/mysql/transport-menu.sql`）。
 - 寄货到达预估：`send/track` 响应含 vehiclePlate/shiftCode/targetStation/estimatedArrivalTime/etaMinutes（取该订单最新调度方案明细，ETA 为未来时间才给分钟差），parcel 页据此展示「班次 + 预计到达」。
@@ -85,7 +85,7 @@ for f in tests/*.test.js; do node "$f" || exit 1; done
 - 司机端写操作闭环：`POST /app-api/transport/driver/depart`（发车）、`/arrive`（到站/终点完成班次）、`/pickup-confirm`（扫码装车）、`/deliver`（扫码妥投）、`/location`（位置上报）。班次执行状态落 `transport_shift_execution` 表（按天一条），车辆最新位置落 `transport_vehicle_location` 表（每车一行）；两张表见 `sql/incremental/V005__driver_execution.sql`。货运订单状态机：0待调度 → 1已入池 → 2已分配 → 3已发车 → 4已完成（5已取消）。
 - 监控中心（管理端）车辆位置：司机上报 5 分钟内的真实位置优先，否则回退按时刻表的插值模拟（`MonitoringServiceImpl.fillTimetableSimulation`：当前班次窗口内按经停站 `planned_minutes` 线性插值，窗口外空闲停靠起点站，无班次不上图）。
 - 实时公交（首页「附近公交 · 实时到站」）：`GET /app-api/transport/bus/realtime`、`/bus/lines`、`/bus/nearby`（均免登录）复用监控车辆位置，返回线路起终点/下一站/ETA/经度纬度；车辆带 `dataSource`（`REAL` 司机真实上报 / `SIMULATED` 时刻表模拟演示），小程序对 `SIMULATED` 显式标注「模拟演示」，不冒充真实位置。真实上报车辆按派单明细/当天班次执行回填班次与线路后才进公交列表（取不到则不上图，不猜线路）。
-- 答辩/演示：无需司机开播也能看到在线车辆——班次时刻表数据（platform 仓库 `sql/mysql/transport-demo-data.sql` 的 `transport_shift` 06:30–20:30 共 10 班）覆盖运营时段，公交页与首页附近公交在运营时段内会有 3 辆「模拟演示」班车沿真实站点插值移动；超出运营时段显示「当前不在运营时间」空态。后续完善方向：寄货流程「X班车距村口站还有Y分钟」按站 ETA 细化（当前为整单送达预估）。
+- 班次模拟车辆：无需司机开播也能看到在线车辆——班次时刻表数据（platform 仓库 `sql/mysql/transport-demo-data.sql` 的 `transport_shift` 06:30–20:30 共 10 班）覆盖运营时段，公交页与首页附近公交在运营时段内会有 3 辆标注「模拟演示」的班车沿真实站点插值移动；超出运营时段显示「当前不在运营时间」空态。后续完善方向：寄货流程「X班车距村口站还有Y分钟」按站 ETA 细化（当前为整单送达预估）。
 - 首页天气走 Open-Meteo 免费接口（无 Key），失败时回退本地模拟（`utils/weather.js`）。
 - 附近公交无在线车辆时展示「附近站点 + 关联线路 + 当前不在运营时间」空态（接口失败给可重试错误态），不展示硬编码假车辆；车辆位置的模拟/真实来源由 `dataSource` 标注。
 
@@ -117,7 +117,7 @@ for f in tests/*.test.js; do node "$f" || exit 1; done
 "附近公交"分两层：**REAL_TRANSIT**（现实公交站点）与 **PROJECT_TRANSIT**（项目自建客货邮线路）+ 模拟车辆（SIMULATED，标注"模拟演示"）。
 现实层有两条接入路线，**选一条配置即可**，都没配时不影响项目线路与模拟车辆（页面会注明"未配置现实公交数据源"），绝不伪造。
 
-### 路线 A（推荐给演示：高德微信小程序 key + 客户端 SDK，即官方 wx 插件路线）
+### 路线 A（高德微信小程序 key + 客户端 SDK，即官方 wx 插件路线）
 
 1. 高德控制台 → 应用管理 → 创建应用 → 添加 Key → **服务平台选「微信小程序」**，绑定小程序 AppID `wx687e9bf8544ac559`；
 2. SDK：`libs/amap-wx.js`（仓库已内置；如需最新版可从高德「微信小程序插件 → 相关下载」解压后覆盖，文件头部即 `function AMapWX(a){...}`，约 8KB）；
@@ -149,7 +149,7 @@ for f in tests/*.test.js; do node "$f" || exit 1; done
 - **统一定位**：全项目只有 `utils/location.js` 调用 `wx.getLocation({type:'gcj02'})`（页面禁止直调）；
   高德链路 = 设备定位（拿 accuracy）+ `amap-wx.js` 逆地理（拿 city/district），全程 **GCJ-02**，不做页面级坐标换算。
   统一输出 `{success, latitude, longitude, accuracy, timestamp, source, level, district, city}`，
-  `source ∈ AMAP | CACHE | DEMO | UNKNOWN`；日志前缀 `[AMAP_LOCATION]`。
+  `source ∈ AMAP | CACHE | MANUAL | UNKNOWN`；日志前缀 `[AMAP_LOCATION]`。
 - **搜索半径**（唯一实现 `location.nearbyRadius`）：accuracy ≤100m → 5000m；100~500m → 8000m；>500m → 15000m（后端另有上限）。
 - **定位状态文案**：`已定位 · 精度 35m` / `定位精度较低 · 已扩大搜索范围` / `无法获取当前位置`；地图上有「回到我的位置」。
 - **站点去重**：键 = 规范化名称（去掉 `(公交站)` 等后缀）+ 5 位小数坐标；同名同坐标合并为一条，**线路取并集**（客户端
@@ -158,7 +158,7 @@ for f in tests/*.test.js; do node "$f" || exit 1; done
   只重设 markers，不重置地图中心/polyline；用户拖动地图后不再抢回中心；`onHide/onUnload` 清理刷新定时器与动画。
 - **来源不伪装**：现实公交站点/线路来自高德并标注"现实公交"；项目客货邮线路标注"客货邮"；模拟车辆标注"模拟演示"，真实上报才显示"实时"。
 
-真机演示步骤：
+真机验证步骤：
 
 1. 打开小程序 → 「实时公交」：先看到定位状态与地图（而不是几十个站点列表）；
 2. 地图上应有蓝点「我的位置」+ 周边公交站 + 运行车辆（橙色 = 模拟演示）；拖动地图后中心不会被刷新抢回；
@@ -178,29 +178,16 @@ for f in tests/*.test.js; do node "$f" || exit 1; done
 2. 若第 3/4 步（发验证码/登录）返回 500 且本机 Redis 读写正常 → 后端连的 Redis（默认 yudao 公共演示 Redis）写命令被拒，按脚本结论把后端 Redis 指到本机容器并重启；部署流水线已内置同样的自检与切换（`Ensure backend has a writable Redis`）。
 3. 若磁盘满或 MySQL 只读 → 先释放空间/恢复挂载，再重启后端并复测。
 
-## 答辩演示：最短操作路径（含"一键演示"）
+## 订单全链路动线
 
-后台「班次调度」页顶部新增 **一键演示（归集→调度→审核）** 按钮，复用正式接口与权限校验，现场点一次即完成三步：
-
-1. 归集全部「待入池」订单（`POST /transport/dispatch/order-pool/collect`，`all=true`，免勾选）；
-2. 一键智能调度（`POST /transport/dispatch/plan/smart`，`auto=true`：后端自动选场站 + 自动挑候选车辆，算法决定实际车辆数）；
-3. 方案自动审核通过（`PUT /transport/dispatch/plan/review`）；
-
-**刻意不做发车核验**：核验与发车留给司机端演示（扫码装车 → 发车 → 到站妥投），保持"管理员调度 / 司机执行"的分工。
-方案审核通过后订单处于「已分配」，司机端工作台即可看到待装车任务（`driverDepart` 只依赖"司机名下 + 方案已下发"，不依赖核验记录）；
-管理员若要代核验，可在「调度方案」列表对单台车执行发车核验（原入口保留）。
-
-完成后弹窗给出「归集单数 / 方案号 / 订单数 / 车辆数 / 场站」摘要，并提示接着去司机端演示。
-
-完整演示动线（约 3 分钟）：
+一条寄货订单从下单到妥投的完整流转（便于联调时对照各环节）：
 
 1. **用户端**：我要寄货（填货物/体积/类型/件数 + 拍照）→ 提交（承运审核：普通货自动通过 → 待入池）；
-2. **后台**：点「一键演示」→ 出方案摘要；
-3. **用户端**：快递页「我的寄货」→ 看到车辆「车快到了」高亮提醒（≤10 分钟，模拟位置会标注"模拟演示"）→ 点它跳实时公交看车在动；
-4. **司机端**：工作台「扫码装车 → 发车 → 到站妥投」（订单此时已是"已分配"，发车核验由司机流程覆盖）；
-5. **用户端**：首页附近公交（现实公交站点 + 项目线路 + 演示车辆分层）→ 商城下单 → 我的订单。
+2. **后台**：班次调度页归集待入池订单 → 智能调度出方案（自动选场站与候选车辆）→ 方案审核通过后订单进入「已分配」；
+3. **司机端**：工作台「扫码装车 → 发车 → 到站妥投」（`driverDepart` 只依赖"司机名下 + 方案已下发"）；
+4. **用户端**：快递页「我的寄货」→ 车辆「车快到了」高亮提醒（≤10 分钟）→ 点它跳实时公交看车在动。
 
-> 演示前建议清一次旧数据：执行 platform 仓库 `sql/mysql/demo-reset.sql`（把 已入池/已分配/已发车 订单放回「待入池」，并清掉今天的调度方案；**不删除会员/商品/站点/班次等基础数据**，含只读校验 SQL），避免一键演示把陈年订单一起派掉。
+> 联调前如需清一次旧数据：执行 platform 仓库 `sql/mysql/demo-reset.sql`（把 已入池/已分配/已发车 订单放回「待入池」，并清掉当天的调度方案；**不删除会员/商品/站点/班次等基础数据**，含只读校验 SQL）。
 
 ## 相关仓库
 

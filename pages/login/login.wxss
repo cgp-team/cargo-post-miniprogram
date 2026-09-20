@@ -188,17 +188,6 @@
   color: var(--color-text-tertiary);
 }
 
-/* 测试验证码提示：稻谷金告示条 */
-.sms-tip {
-  margin: -12rpx 0 4rpx;
-  padding: 12rpx 20rpx;
-  background: var(--color-gold-light);
-  border-radius: 12rpx;
-  font-size: 24rpx;
-  color: var(--color-gold-deep);
-  text-align: center;
-}
-
 /* 主登录按钮：站牌式实板放大 */
 .login-btn {
   margin-top: 40rpx;
@@ -298,7 +287,6 @@
 .elderly-mode .login-btn { font-size: 40rpx; }
 .elderly-mode .wechat-login-btn { font-size: 34rpx; }
 .elderly-mode .sms-btn { font-size: 30rpx; width: 220rpx; }
-.elderly-mode .sms-tip { font-size: 28rpx; }
 .elderly-mode .switch-mode { font-size: 32rpx; padding: 26rpx 0; }
 .elderly-mode .divider-text { font-size: 26rpx; }
 .elderly-mode .elderly-entry { font-size: 32rpx; padding: 32rpx 0 26rpx; }

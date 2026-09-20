@@ -7,15 +7,6 @@ const util = require('../../utils/util')
 const feedback = require('../../utils/feedback')
 const appearance = require('../../utils/appearance')
 
-/** 测试验证码提示仅非正式版可见；读取环境信息失败按正式版处理（宁可不提示，不可让 Page 注册失败） */
-function isNotRelease() {
-  try {
-    return wx.getAccountInfoSync().miniProgram.envVersion !== 'release'
-  } catch (e) {
-    return false
-  }
-}
-
 Page({
   data: {
     phone: '',
@@ -25,8 +16,6 @@ Page({
     smsCountdown: 0,
     loginMode: 'sms', // 'sms' | 'password'
     loading: false,
-    // 测试验证码提示仅非正式版可见
-    showSmsTip: isNotRelease(),
     elderlyMode: false,
     themeColor: 'green',
     themeStyle: ''
@@ -130,7 +119,6 @@ Page({
       wx.showToast({ title: '请输入验证码', icon: 'none' })
       return
     }
-    // 测试环境固定验证码 9999
     this.setData({ loading: true })
     try {
       const res = await api.smsLogin(phone, smsCode)

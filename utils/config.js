@@ -32,6 +32,12 @@ const BASE_URLS = {
  */
 const AMAP_MINI_KEY = 'f35fa96247bd40fa437a485d710d4d02'
 
+/** 定位失败时的地图默认中心，按运营区域调整（实时公交页初始中心，拿到真实坐标前使用） */
+const DEFAULT_MAP_CENTER = { latitude: 29.5325, longitude: 106.5765 }
+
+/** 定位失败时的地图默认中心，按运营区域调整（司机工作台路线概览初始中心） */
+const DRIVER_DEFAULT_MAP_CENTER = { latitude: 30.32, longitude: 108.21 }
+
 function getBaseUrl() {
   try {
     const info = wx.getAccountInfoSync()
@@ -46,4 +52,4 @@ function getAmapMiniKey() {
   return AMAP_MINI_KEY || ''
 }
 
-module.exports = { getBaseUrl, getAmapMiniKey }
+module.exports = { getBaseUrl, getAmapMiniKey, DEFAULT_MAP_CENTER, DRIVER_DEFAULT_MAP_CENTER }
