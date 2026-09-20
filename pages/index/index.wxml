@@ -43,7 +43,7 @@
   </view>
 
   <!-- 天气详情卡（默认收起，点胶囊展开；主题色系） -->
-  <view wx:if="{{weatherExpanded && weather.temp != null}}" class="weather-card">
+  <view wx:if="{{weatherExpanded && weather.temp != null}}" class="weather-card anim-rise">
     <view class="weather-main">
       <view class="weather-left">
         <view class="weather-icon-circle">
@@ -91,30 +91,30 @@
     </swiper-item>
   </swiper>
 
-  <!-- 功能入口 - 四宫格 -->
+  <!-- 功能入口 - 四宫格（阶梯入场） -->
   <view class="feature-grid">
-    <view class="feature-item" bindtap="goToBusTracking" hover-class="hover">
+    <view class="feature-item anim-rise" bindtap="goToBusTracking" hover-class="hover">
       <view class="feature-icon-box green-bg">
         <icon name="bus" size="50" color="#FFFFFF" />
       </view>
       <text class="feature-name">实时公交</text>
     </view>
 
-    <view class="feature-item" bindtap="goToProducts" hover-class="hover">
+    <view class="feature-item anim-rise" style="animation-delay: 50ms" bindtap="goToProducts" hover-class="hover">
       <view class="feature-icon-box gold-bg">
         <icon name="leaf" size="50" color="#FFFFFF" />
       </view>
       <text class="feature-name">农产品</text>
     </view>
 
-    <view class="feature-item" bindtap="goToParcel" hover-class="hover">
+    <view class="feature-item anim-rise" style="animation-delay: 100ms" bindtap="goToParcel" hover-class="hover">
       <view class="feature-icon-box deep-bg">
         <icon name="box" size="50" color="#FFFFFF" />
       </view>
       <text class="feature-name">我的快递</text>
     </view>
 
-    <view class="feature-item" bindtap="goToSend" hover-class="hover">
+    <view class="feature-item anim-rise" style="animation-delay: 150ms" bindtap="goToSend" hover-class="hover">
       <view class="feature-icon-box clay-bg">
         <icon name="send" size="50" color="#FFFFFF" />
       </view>
@@ -137,9 +137,11 @@
       <text wx:if="{{nearbyBusUpdatedText}}" class="bus-meta-text">{{nearbyBusUpdatedText}}</text>
     </view>
 
-    <!-- 加载中 -->
-    <view wx:if="{{nearbyBusStatus === 'loading'}}" class="bus-empty">
-      <text class="bus-empty-text">正在加载附近公交…</text>
+    <!-- 加载中：骨架车票卡，轮廓对齐真实公交卡，替代纯文本 -->
+    <view wx:if="{{nearbyBusStatus === 'loading'}}" class="skeleton-card bus-skeleton">
+      <view class="skeleton sk-bus-title"></view>
+      <view class="skeleton sk-bus-route"></view>
+      <view class="skeleton sk-bus-info"></view>
     </view>
 
     <!-- 不在运营时间：如实说明服务时段与下一班，不铺"待发车"卡片 -->
@@ -182,9 +184,10 @@
     <!-- 有数据 -->
     <view wx:elif="{{nearbyBuses.length}}" class="bus-list">
       <view
-        class="bus-card ticket-card"
+        class="bus-card ticket-card anim-rise"
         wx:for="{{nearbyBuses}}"
         wx:key="busId"
+        style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms"
         bindtap="goToBusDetail" hover-class="hover"
         data-id="{{item.busId}}"
       >
@@ -230,9 +233,10 @@
 
     <scroll-view class="product-scroll" scroll-x>
       <view
-        class="product-card"
+        class="product-card anim-rise"
         wx:for="{{recommendProducts}}"
         wx:key="id"
+        style="animation-delay: {{(index > 7 ? 7 : index) * 45}}ms"
         bindtap="goToProductDetail" hover-class="hover"
         data-id="{{item.id}}"
         data-demo="{{item.isDemo}}"
