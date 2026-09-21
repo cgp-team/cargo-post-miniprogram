@@ -13,11 +13,10 @@
  */
 const BASE_URLS = {
   develop: 'http://1.15.29.107/api', // 开发服务器（仅开发版可用 HTTP，需在工具中关闭域名校验）
-  // TODO(发布前必改)：体验版/正式版必须使用已备案的 HTTPS 域名，
-  // 并在小程序后台「开发管理-服务器域名」中配置 request 合法域名。
-  // 未替换占位符前，体验版/正式版无法发起任何请求。
-  trial: 'https://YOUR_DOMAIN/api',
-  release: 'https://YOUR_DOMAIN/api'
+  // 体验版/正式版走 HTTPS 域名（Let's Encrypt 证书，自动续期）。
+  // 注意同步维护小程序后台「开发管理-服务器域名」的 request 合法域名。
+  trial: 'https://api.qwer2333.com/api',
+  release: 'https://api.qwer2333.com/api'
 }
 
 /**
