@@ -2,9 +2,18 @@
   "description": "农村客货邮小程序",
   "packOptions": {
     "ignore": [
-      { "type": "folder", "value": "tests" },
-      { "type": "folder", "value": "docs" },
-      { "type": "file", "value": "README.md" }
+      {
+        "value": "tests",
+        "type": "folder"
+      },
+      {
+        "value": "docs",
+        "type": "folder"
+      },
+      {
+        "value": "README.md",
+        "type": "file"
+      }
     ],
     "include": []
   },
@@ -45,7 +54,7 @@
   },
   "compileType": "miniprogram",
   "libVersion": "3.17.0",
-  "appid": "wx687e9bf8544ac559",
+  "appid": "wx708c2667441affd0",
   "projectname": "rural-logistics",
   "isGameTourist": false,
   "condition": {

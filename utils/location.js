@@ -6,15 +6,14 @@
  *      高德小程序 SDK（amap-wx.js）逆地理 → 同时得到 GCJ-02 坐标 + 省/市/区（city/district）；
  *   2. 设备定位 + 免费逆地理兜底（仍是 GCJ-02，source 归入 AMAP）；
  *   3. 缓存（1~5 分钟内可用；60s 内秒出，超过则同步刷新）；
- *   4. DEMO 演示坐标（开发/测试，生产 release 隐藏入口）；
- *   5. UNKNOWN（定位失败/权限拒绝 → 页面显示"定位不可用"，绝不伪造）。
+ *   4. UNKNOWN（定位失败/权限拒绝 → 页面显示"定位不可用"，绝不伪造）。
  *
  * 统一输出（业务层唯一坐标来源）：
  *   {
  *     success, latitude, longitude, accuracy,
  *     district, city,
  *     timestamp,
- *     source,   // AMAP | CACHE | DEMO | UNKNOWN
+ *     source,   // AMAP | CACHE | MANUAL | UNKNOWN
  *     level,    // PRECISE(<=100m) | APPROXIMATE | DISTRICT | UNKNOWN
  *     stale,    // true = 旧缓存兜底（非本次实时坐标）
  *     denied    // true = 用户拒绝定位权限（页面据此引导"去设置"）
@@ -30,7 +29,6 @@
  *   - 精度阈值、缓存 TTL、搜索半径等常量统一放本文件，页面不得各自写死。
  */
 const weatherApi = require('./weather')
-const demoLocationUtil = require('./demo-location')
 
 // ==================== 常量（阈值统一在此，不要在页面重复写死） ====================
 
@@ -61,10 +59,9 @@ const RADIUS_PRECISE_M = 5000
 const RADIUS_MEDIUM_M = 8000
 const RADIUS_COARSE_M = 15000
 
-/** 数据来源标识（业务层展示用；不再区分"wechat/cache/stale-cache"，统一为四种） */
+/** 数据来源标识（业务层展示用；统一为四种） */
 const SOURCE_AMAP = 'AMAP'
 const SOURCE_CACHE = 'CACHE'
-const SOURCE_DEMO = 'DEMO'
 const SOURCE_UNKNOWN = 'UNKNOWN'
 /** 手动选点（地图上点选，用户确认过的位置）：定位不准时的纠正手段 */
 const SOURCE_MANUAL = 'MANUAL'
@@ -207,7 +204,6 @@ function reverseToDistrict(lat, lon) {
 // ==================== 统一入口 ====================
 
 let pending = null // 并发去重：同一时刻只发一次定位（onLoad + onShow 不会双发）
-let demoLocation = null // DEMO 演示定位（设置了则覆盖真实定位，source=demo）
 /** 定位变化订阅者（首页用它触发"位置变了→重新查附近公交"） */
 const listeners = []
 
@@ -414,35 +410,6 @@ function notifyListeners(loc) {
 let notified = null
 
 /**
- * 设置演示定位（DEMO 模式）：用预设站点坐标替代真实 GPS，供开发/测试验证"附近公交"。
- * @param {string} name 演示名（青山镇/县城客运中心/龙泉镇）
- * @returns {object|null} demo userLocation（含 source=demo），名称不存在返回 null
- */
-function setDemoLocation(name) {
-  const demo = demoLocationUtil.findDemo(name)
-  if (!demo) return null
-  demoLocation = {
-    success: true,
-    latitude: demo.latitude,
-    longitude: demo.longitude,
-    accuracy: 50, // 演示位置视为精确（<=100 → PRECISE）
-    district: demo.district,
-    city: '演示城市',
-    timestamp: Date.now(),
-    source: SOURCE_DEMO,
-    coordType: 'GCJ02',
-    level: LEVEL_PRECISE
-  }
-  notified = demoLocation
-  return demoLocation
-}
-
-/** 清除演示定位：回到真实定位（微信 GPS） */
-function clearDemoLocation() {
-  demoLocation = null
-}
-
-/**
  * 手动选择位置（定位不准时的纠正手段）：调微信地图选点，返回统一结构（source=MANUAL）。
  *
  * 为什么需要：设备/系统给的是"粗略位置"时（未开精确位置、室内、WiFi 定位），误差可达公里级，
@@ -492,17 +459,16 @@ async function chooseLocation() {
  * 获取当前用户定位（统一入口）。
  *
  * 策略：
- *   0. DEMO 演示定位已设置 → 直接返回（source=demo），不调微信/缓存；
- *   1. 较新缓存（TTL 内）→ 直接返回（source=cache），并后台异步刷新；
- *   2. 否则微信高精度定位 → 成功则逆地理补区域、写缓存返回（source=wechat）；
- *   3. 定位失败 → 旧缓存兜底（source=stale-cache, stale=true）；无缓存 → UNKNOWN；
- *   4. 用户拒绝权限 → 返回 denied，由页面展示"去设置"引导。
+ *   1. 用户手动选点在有效期内 → 直接返回（source=MANUAL）；
+ *   2. 较新缓存（TTL 内）→ 直接返回（source=CACHE），并后台异步刷新；
+ *   3. 否则微信高精度定位 → 成功则逆地理补区域、写缓存返回（source=AMAP）；
+ *   4. 定位失败 → 旧缓存兜底（source=CACHE, stale=true）；无缓存 → UNKNOWN；
+ *   5. 用户拒绝权限 → 返回 denied，由页面展示"去设置"引导。
  *
  * @returns {Promise<object>} userLocation（含 level）
  */
 function getCurrentLocation(options) {
   const force = !!(options && options.force)
-  if (demoLocation) return Promise.resolve(demoLocation)
   if (pending) return pending // 并发去重
   pending = doGetLocation(force).then((loc) => {
     logLocation(loc)
@@ -636,10 +602,9 @@ module.exports = {
   RADIUS_PRECISE_M,
   RADIUS_MEDIUM_M,
   RADIUS_COARSE_M,
-  // 数据来源标识：AMAP / CACHE / DEMO / UNKNOWN
+  // 数据来源标识：AMAP / CACHE / MANUAL / UNKNOWN
   SOURCE_AMAP,
   SOURCE_CACHE,
-  SOURCE_DEMO,
   SOURCE_UNKNOWN,
   SOURCE_MANUAL,
   LEVEL_PRECISE,
@@ -662,8 +627,6 @@ module.exports = {
   chooseLocation,
   /** 强制重新定位（跳过缓存），供"定位不准·重新定位"/下拉刷新使用 */
   refreshLocation: () => getCurrentLocation({ force: true }),
-  setDemoLocation,
-  clearDemoLocation,
   onLocationChange,
   openLocationSetting
 }

@@ -55,7 +55,6 @@
           </button>
         </view>
       </view>
-      <view class="sms-tip" wx:if="{{showSmsTip}}">测试环境固定验证码：9999</view>
     </block>
 
     <!-- 密码模式 -->

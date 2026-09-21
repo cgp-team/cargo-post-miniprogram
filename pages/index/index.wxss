@@ -58,11 +58,6 @@
   min-height: 80rpx;
 }
 
-.arrow-down {
-  font-size: 24rpx;
-  color: rgba(255,255,255,0.8);
-}
-
 .village-name {
   font-size: 40rpx;
   font-weight: 800;
@@ -685,7 +680,6 @@
 
 /* ============ 老年人模式：首页字体放大 ============ */
 .elderly-mode .village-name { font-size: 46rpx; }
-.elderly-mode .arrow-down { font-size: 28rpx; }
 .elderly-mode .location-info { min-height: 96rpx; }
 .elderly-mode .user-avatar { width: 96rpx; height: 96rpx; }
 .elderly-mode .loc-hint { padding: 10rpx 22rpx; min-height: 96rpx; }

@@ -10,6 +10,7 @@ const feedback = require('../../../utils/feedback')
 const nav = require('../../../utils/nav')
 const location = require('../../../utils/location')
 const { navThrottled } = require('../../../utils/util')
+const { DRIVER_DEFAULT_MAP_CENTER } = require('../../../utils/config')
 
 /** 位置上报间隔（毫秒） */
 const LOCATION_REPORT_INTERVAL = 10000
@@ -98,8 +99,8 @@ Page({
     routeMapPolyline: [],
 
     // 地图中心（兜底坐标，onLoad 时用司机实时定位覆盖）
-    mapLatitude: 30.32,
-    mapLongitude: 108.21,
+    mapLatitude: DRIVER_DEFAULT_MAP_CENTER.latitude,
+    mapLongitude: DRIVER_DEFAULT_MAP_CENTER.longitude,
 
     loaded: false,
     loadError: false,
