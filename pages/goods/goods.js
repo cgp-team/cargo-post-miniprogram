@@ -4,7 +4,7 @@
  */
 const api = require('../../utils/api')
 const productImg = require('../../utils/product-img')
-const { VILLAGES, navThrottled } = require('../../utils/util')
+const { VILLAGES, navThrottled, syncTabBar } = require('../../utils/util')
 
 /** 分类名 → 商品名关键词（后端暂无分类字段，按名称归类） */
 const CATEGORY_KEYWORDS = {
@@ -63,6 +63,7 @@ Page({
   },
 
   onShow() {
+    syncTabBar(this, 1)
     const app = getApp()
     this.setData({ currentVillage: app.globalData.currentVillage || '云山村' })
     // 同步老年模式 / 主题色（设置页改动后回来立即生效）

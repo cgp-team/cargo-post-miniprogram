@@ -7,7 +7,7 @@ const feedback = require('../../utils/feedback')
 const qrcodeRender = require('../../utils/qrcode-render')
 const reviewUtils = require('../../utils/review')
 const productImg = require('../../utils/product-img')
-const { formatBackendTime, VILLAGES, navThrottled } = require('../../utils/util')
+const { formatBackendTime, VILLAGES, navThrottled, syncTabBar } = require('../../utils/util')
 
 /** 运输订单状态流（对应 TransportOrderStatusEnum，含 Phase 2 承运审核前置状态） */
 const STATUS_FLOW = [
@@ -73,6 +73,7 @@ Page({
   },
 
   onShow() {
+    syncTabBar(this, 2)
     const app = getApp()
     this.setData({ currentVillage: app.globalData.currentVillage || '云山村' })
     // 同步老年模式 / 主题色
