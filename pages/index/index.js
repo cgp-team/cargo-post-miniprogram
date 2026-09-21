@@ -7,7 +7,7 @@ const productImg = require('../../utils/product-img')
 const auth = require('../../utils/auth')
 const location = require('../../utils/location')
 const transitAmap = require('../../utils/transit-amap')
-const { navThrottled } = require('../../utils/util')
+const { navThrottled, syncTabBar } = require('../../utils/util')
 
 /** 天气缓存有效期：10 分钟内直接复用缓存渲染，跳过定位与网络请求 */
 const WEATHER_CACHE_TTL = 10 * 60 * 1000
@@ -85,6 +85,7 @@ Page({
   },
 
   onShow() {
+    syncTabBar(this, 0)
     this._pageHidden = false
     // 每次显示时刷新外观设置（设置页改动后回来立即生效）
     this._applyAppearance()

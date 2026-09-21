@@ -56,7 +56,10 @@ Component({
     switchTab(e) {
       const index = Number(e.currentTarget.dataset.index)
       const path = e.currentTarget.dataset.path
-      if (index === this.data.selected) return
+      // 按真实路由判重：选中态在切换动画期间可能与当前页不一致，只看 data.selected 会误拦截
+      const pages = getCurrentPages()
+      const cur = pages[pages.length - 1]
+      if (cur && '/' + cur.route === path) return
 
       // 立即更新本地状态，消除点击延迟感
       this.setData({ selected: index })

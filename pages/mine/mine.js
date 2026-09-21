@@ -5,7 +5,7 @@
 const api = require('../../utils/api')
 const auth = require('../../utils/auth')
 const feedback = require('../../utils/feedback')
-const { navThrottled } = require('../../utils/util')
+const { navThrottled, syncTabBar } = require('../../utils/util')
 
 Page({
   behaviors: [require('../../behaviors/page-base')],
@@ -24,6 +24,7 @@ Page({
   },
 
   onShow() {
+    syncTabBar(this, 3)
     this.loadUserInfo()
     // 同步老年模式 / 主题色（改动后回来立即生效）
     this._applyAppearance()

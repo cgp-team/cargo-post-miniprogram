@@ -86,6 +86,16 @@ function formatBackendTime(t) {
   return String(t).replace('T', ' ').substring(0, 16)
 }
 
+/**
+ * 同步自定义 tabBar 选中态（tab 页 onShow 时调用，index 为当前页 tab 序号）。
+ * 组件侧 pageLifetimes.show 按路由反查，在切换动画期间可能读到旧路由把选中态打回；
+ * 由各页面按自身序号权威上报，彻底避免选中态跳回。
+ */
+function syncTabBar(page, index) {
+  const bar = page.getTabBar && page.getTabBar()
+  if (bar && bar.data.selected !== index) bar.setData({ selected: index })
+}
+
 module.exports = {
   validatePhone,
   cmSizeToM3,
@@ -93,5 +103,6 @@ module.exports = {
   formatTime,
   formatBackendTime,
   navThrottled,
+  syncTabBar,
   VILLAGES
 }
