@@ -188,11 +188,12 @@
   color: var(--color-text-tertiary);
 }
 
-/* 主登录按钮：站牌式实板放大 */
+/* 主登录按钮：站牌式实板放大（padding 归零：避免与 btn-primary 的 24rpx 纵 padding 在 border-box 下把文字顶偏） */
 .login-btn {
   margin-top: 40rpx;
   height: 104rpx;
   line-height: 104rpx;
+  padding: 0;
   font-size: 36rpx;
 }
 

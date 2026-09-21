@@ -12,6 +12,7 @@ Page({
     phone: '',
     password: '',
     smsCode: '',
+    iconColor: '#2E7D32', // 与主题色 --color-primary 一致（切换登录方式箭头）
     smsCodeSending: false,
     smsCountdown: 0,
     loginMode: 'sms', // 'sms' | 'password'
