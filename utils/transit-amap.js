@@ -2,9 +2,8 @@
  * 现实公交·客户端数据源（高德微信小程序 SDK，官方路线）。
  *
  * 接入步骤（与 https://lbs.amap.com/api/wx/gettingstarted 一致）：
- *   1) 高德控制台申请 key：服务平台选「微信小程序」，绑定小程序 AppID（正式号 wx687e9bf8544ac559；
- *      注意：开发期若切换到测试号 wx5ac650e90ef92bb0，该 key 因 AppID 不匹配会被高德拒绝，
- *      本层自动降级为空，不影响项目自建线路）；
+ *   1) 高德控制台申请 key：服务平台选「微信小程序」，绑定小程序 AppID（正式号 wx708c2667441affd0；
+ *      若 key 绑定的 AppID 与本小程序不一致会被高德拒绝，本层自动降级为空，不影响项目自建线路）；
  *   2) amap-wx.js 放到 libs/（仓库已内置一份，可替换为「相关下载」页的最新版）；
  *   3) 微信公众平台 → 开发设置 → request 合法域名加入 https://restapi.amap.com；
  *   4) utils/config.js 的 AMAP_MINI_KEY 填上该 key。

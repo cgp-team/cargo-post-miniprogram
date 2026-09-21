@@ -4,7 +4,7 @@
 ![基础库](https://img.shields.io/badge/基础库-3.17.0-blue)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-县域**客运、货运、生鲜与邮快件协同运营**平台的微信小程序端（项目名 rural-logistics；开发期使用小程序测试号 `wx5ac650e90ef92bb0`，正式号 `wx687e9bf8544ac559` 的 secret 配好后切回），「山乡巴士 · 站牌与车票」设计体系，同时服务两类角色：村民/用户（商城、寄件、包裹查询、实时公交）与司机（工作台）。
+县域**客运、货运、生鲜与邮快件协同运营**平台的微信小程序端（项目名 rural-logistics，正式号 appid `wx708c2667441affd0`），「山乡巴士 · 站牌与车票」设计体系，同时服务两类角色：村民/用户（商城、寄件、包裹查询、实时公交）与司机（工作台）。
 
 本仓库从 [cargo-post-platform](https://github.com/cgp-team/cargo-post-platform) 拆分为独立仓库（提交历史已完整迁移）。小程序与管理端共用同一个 Spring Boot 后端（由 platform 仓库提供），只调用 `/app-api`，不直连算法服务。
 
@@ -30,7 +30,7 @@ for f in tests/*.test.js; do node "$f" || exit 1; done
 
 - **后端地址**：`getBaseUrl()` 按 `envVersion`（develop/trial/release）返回 BASE_URL。本地调试勾选「不校验合法域名」；体验版/正式版必须替换为已备案 HTTPS 域名并在微信公众平台登记。
 - **高德 key**：`AMAP_MINI_KEY` 为「微信小程序」类型 key（客户端现实公交站点层用，绑定 AppID，放小程序里是安全的）。「Web 服务」类型 key 不能放客户端，配在后端（见下文「现实公交接入」）。
-- **后端微信登录**：platform 仓库服务器外部化配置 `/opt/cargo-post/config/application-dev.yaml` 的 `wx.miniapp.appid/secret` 必须与本小程序当前使用的 appid 一致（code 与 appid 绑定），否则微信一键登录失败。当前后端已配测试号；切换正式号时两边要同步改。
+- **后端微信登录**：platform 仓库服务器外部化配置 `/opt/cargo-post/config/application-dev.yaml` 的 `wx.miniapp.appid/secret` 与本小程序 appid 一致（code 与 appid 绑定）。2026-09-21 已配置为正式号 `wx708c2667441affd0`。
 
 ## 页面结构
 
@@ -119,7 +119,7 @@ for f in tests/*.test.js; do node "$f" || exit 1; done
 
 ### 路线 A（高德微信小程序 key + 客户端 SDK，即官方 wx 插件路线）
 
-1. 高德控制台 → 应用管理 → 创建应用 → 添加 Key → **服务平台选「微信小程序」**，绑定小程序 AppID `wx687e9bf8544ac559`；
+1. 高德控制台 → 应用管理 → 创建应用 → 添加 Key → **服务平台选「微信小程序」**，绑定小程序 AppID `wx708c2667441affd0`（注意：此前绑定的旧号已弃用，需在高德控制台改为该 AppID，否则现实公交层会被高德拒绝而自动降级）；
 2. SDK：`libs/amap-wx.js`（仓库已内置；如需最新版可从高德「微信小程序插件 → 相关下载」解压后覆盖，文件头部即 `function AMapWX(a){...}`，约 8KB）；
 3. 微信公众平台 → 管理 → 开发设置 → **request 合法域名加入 `https://restapi.amap.com`**（开发版可在开发者工具勾"不校验合法域名"跳过）；
 4. `utils/config.js` 的 `AMAP_MINI_KEY = '<你的 key>'`。
