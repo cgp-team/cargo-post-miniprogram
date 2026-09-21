@@ -6,7 +6,7 @@
   padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
 }
 
-/* 头部站牌：深绿实板 + 落款横档 + 装饰光晕（与路线页同一节奏） */
+/* 头部站牌：深绿实板 + 装饰光晕（与路线页同一节奏） */
 .page-header {
   padding: 0 32rpx 40rpx;
 }

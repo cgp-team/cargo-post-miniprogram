@@ -1,6 +1,6 @@
 <!-- 寄货/包裹追踪页 -->
 <view class="page-parcel {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
-  <!-- 顶部站牌栏：深绿实板 + 落款横档（与首页同一套站牌语言） -->
+  <!-- 顶部站牌栏：深绿实板（与首页同一套站牌语言） -->
   <view class="top-bar" style="padding-top: {{statusBarHeight + 16}}px">
     <view class="top-bar-main">
       <view class="location-info" bindtap="switchVillage" hover-class="hover">

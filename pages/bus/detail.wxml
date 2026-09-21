@@ -1,7 +1,7 @@
 <!-- 实时公交车辆详情：站牌头 → 地图 → 行程进度（山路线）→ 经停站点时间线 -->
 <view class="detail-page {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
   <block wx:if="{{bus}}">
-    <!-- 站牌头：车牌 + 起讫站 + 班次/数据源标签（底板/落款横档由全局 .signpost 提供） -->
+    <!-- 站牌头：车牌 + 起讫站 + 班次/数据源标签（底板由全局 .signpost 提供） -->
     <view class="signpost anim-rise">
       <view class="head-top">
         <view class="head-plate">{{bus.plateNo}}</view>

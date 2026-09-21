@@ -15,18 +15,6 @@
   text-align: center;
 }
 
-/* 站牌顶部落款横档 */
-.login-hero::before {
-  content: '';
-  position: absolute;
-  top: 12rpx;
-  left: 32rpx;
-  right: 32rpx;
-  height: 5rpx;
-  background: rgba(255, 255, 255, 0.26);
-  border-radius: 3rpx;
-}
-
 /* 角落装饰光晕 */
 .login-hero::after {
   content: '';

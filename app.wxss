@@ -185,7 +185,7 @@ page {
 
 /* ============ 签名原语：山乡巴士 · 站牌与车票 ============ */
 
-/* 站牌头部：深绿实板 + 顶部落款横档 + 角落线路号角标 */
+/* 站牌头部：深绿实板 + 角落线路号角标 */
 .signpost {
   position: relative;
   background: linear-gradient(160deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
@@ -194,17 +194,6 @@ page {
   border-radius: 12rpx;
   box-shadow: 0 8rpx 24rpx var(--color-primary-shadow);
   overflow: hidden;
-}
-
-.signpost::before {
-  content: '';
-  position: absolute;
-  top: 8rpx;
-  left: 24rpx;
-  right: 24rpx;
-  height: 5rpx;
-  background: rgba(255, 255, 255, 0.28);
-  border-radius: 3rpx;
 }
 
 .signpost::after {
@@ -417,7 +406,7 @@ page {
   font-size: 30rpx;
 }
 
-/* 全宽站牌头（页面顶部通栏版 signpost）：深绿渐变 + 落款横档 + 角落光晕。
+/* 全宽站牌头（页面顶部通栏版 signpost）：深绿渐变 + 角落光晕。
    各页自行补 padding/内边距；.page-head 与 .page-header 为历史两种写法，样式一致 */
 .page-head,
 .page-header {
@@ -425,20 +414,6 @@ page {
   overflow: hidden;
   background: linear-gradient(160deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
 }
-
-/* 顶部落款横档（站牌金属边） */
-.page-head::before,
-.page-header::before {
-  content: '';
-  position: absolute;
-  top: 12rpx;
-  height: 5rpx;
-  background: rgba(255, 255, 255, 0.26);
-  border-radius: 3rpx;
-}
-
-.page-head::before { left: 28rpx; right: 28rpx; }
-.page-header::before { left: 30rpx; right: 30rpx; }
 
 /* 角落装饰光晕 */
 .page-head::after,

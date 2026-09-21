@@ -1,6 +1,6 @@
 <!-- 商城页 - 买家界面 -->
 <view class="page-goods {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
-  <!-- 顶部站牌栏：深绿实板 + 落款横档 -->
+  <!-- 顶部站牌栏：深绿实板 -->
   <view class="top-bar" style="padding-top: {{statusBarHeight + 16}}px">
     <view class="top-bar-main">
       <view class="top-left">

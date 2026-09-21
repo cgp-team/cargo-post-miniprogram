@@ -7,7 +7,7 @@
   font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
-/* ========== 顶部站牌头：深绿实板 + 落款横档 + 角落光晕 ========== */
+/* ========== 顶部站牌头：深绿实板 + 角落光晕 ========== */
 .progress-header {
   position: relative;
   overflow: hidden;
@@ -15,21 +15,9 @@
   padding: 0 32rpx 36rpx;
 }
 
-/* 落款横档：钉在安全区下沿，作站牌的金属顶边 */
 .header-safe {
   position: relative;
   width: 100%;
-}
-
-.header-safe::after {
-  content: '';
-  position: absolute;
-  left: 2rpx;
-  right: 2rpx;
-  bottom: 8rpx;
-  height: 5rpx;
-  background: rgba(255, 255, 255, 0.26);
-  border-radius: 3rpx;
 }
 
 /* 角落装饰光晕 */

@@ -5,7 +5,7 @@
   padding-bottom: calc(140rpx + env(safe-area-inset-bottom));
 }
 
-/* 自定义导航：深绿站牌板 + 落款横档 + 装饰光晕 */
+/* 自定义导航：深绿站牌板 + 装饰光晕 */
 .detail-nav {
   display: flex;
   align-items: center;
@@ -14,18 +14,6 @@
   padding-bottom: 20rpx;
   background: linear-gradient(160deg, var(--color-primary-dark) 0%, var(--color-primary) 60%, var(--color-primary-dark) 100%);
   overflow: hidden;
-}
-
-/* 顶部落款横档（站牌金属边） */
-.detail-nav::before {
-  content: '';
-  position: absolute;
-  top: 10rpx;
-  left: 30rpx;
-  right: 30rpx;
-  height: 5rpx;
-  background: rgba(255, 255, 255, 0.26);
-  border-radius: 3rpx;
 }
 
 .detail-nav::after {

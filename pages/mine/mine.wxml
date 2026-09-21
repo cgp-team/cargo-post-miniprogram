@@ -18,7 +18,7 @@
 
   <!-- 已登录态 -->
   <view wx:else>
-    <!-- 用户信息区：站牌式头部（深绿实板 + 落款横档 + 光晕 + 角色线路章） -->
+    <!-- 用户信息区：站牌式头部（深绿实板 + 光晕 + 角色线路章） -->
     <view class="user-banner">
       <view style="height: {{statusBarHeight || 0}}px"></view>
       <view class="banner-bg"></view>
