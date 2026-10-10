@@ -273,7 +273,9 @@
 .elderly-mode .hero-pill { font-size: 24rpx; padding: 8rpx 22rpx; }
 .elderly-mode .login-page .input-label { font-size: 32rpx; }
 .elderly-mode .login-page .input-field { font-size: 34rpx; height: 104rpx; }
-.elderly-mode .login-btn { font-size: 40rpx; }
+/* 老年模式：字号放大；padding 必须重申为 0——全局 .elderly-mode .btn-primary
+   （0,2,0）会把 app 层的 30rpx 纵 padding 加回来，line-height=height 居中随之失效 */
+.elderly-mode .login-btn { font-size: 40rpx; padding: 0; }
 .elderly-mode .wechat-login-btn { font-size: 34rpx; }
 .elderly-mode .sms-btn { font-size: 30rpx; width: 220rpx; }
 .elderly-mode .switch-mode { font-size: 32rpx; padding: 26rpx 0; }

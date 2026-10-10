@@ -1262,3 +1262,17 @@
 .elderly-mode .load-error-banner { min-height: 96rpx; }
 .elderly-mode .load-error-text { font-size: 30rpx; }
 .elderly-mode .load-error-retry { font-size: 30rpx; }
+
+/* 非司机身份整页空态：盖在站牌头/TabBar 之上，米纸底与页面同色 */
+.no-driver-mask {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 99;
+  background: var(--color-paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

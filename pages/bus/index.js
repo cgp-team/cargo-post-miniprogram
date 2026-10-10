@@ -245,7 +245,9 @@ Page({
         nearbyStations: stations,
         nearbyStationCount: stations.length,
         nearbyLines: lines,
-        nearbyLineCount: (data && data.lineCount) || lines.length,
+        // 线路数与下方列表同口径：visibleLines 已合并站点 POI 带出的现实线路，
+        // 只看后端 lineCount/lines 会出现"摘要 0 条、列表 3 条"的自相矛盾
+        nearbyLineCount: visibleLines.length,
         visibleLines: this.data.showAllLines ? visibleLines : visibleLines.slice(0, MAX_NEARBY_LINES),
         vehicles: visibleBuses.map((b, i) => this._formatVehicle(b, i)),
         nearbyLocatedText: hasCoords

@@ -110,6 +110,8 @@ Page({
     orderNo: '',
     orderAmount: null,
     submitting: false, // 确认发布防重入（按钮 disabled/loading 同步绑定）
+    // 第 1 步行内校验错误（字段名 → 错误文案）：一次性标出全部，替代逐条 toast
+    errors: {},
     elderlyMode: false,
     themeColor: 'green',
     themeStyle: ''
@@ -216,8 +218,8 @@ Page({
     }
   },
 
-  onNameInput(e) { this.setData({ goodsName: e.detail.value }); this._scheduleSaveDraft() },
-  onWeightInput(e) { this.setData({ goodsWeight: e.detail.value }); this._scheduleSaveDraft() },
+  onNameInput(e) { this.setData({ goodsName: e.detail.value }); this._clearError('goodsName'); this._scheduleSaveDraft() },
+  onWeightInput(e) { this.setData({ goodsWeight: e.detail.value }); this._clearError('goodsWeight'); this._scheduleSaveDraft() },
   onNoteInput(e) { this.setData({ goodsNote: e.detail.value }); this._scheduleSaveDraft() },
   onReceiverNameInput(e) { this.setData({ receiverName: e.detail.value }); this._scheduleSaveDraft() },
   onReceiverMobileInput(e) { this.setData({ receiverMobile: e.detail.value }); this._scheduleSaveDraft() },
@@ -234,6 +236,7 @@ Page({
   onItemCountInput(e) {
     const value = String(e.detail.value || '').replace(/[^\d]/g, '')
     this.setData({ itemCount: value }, () => this.refreshQuote())
+    this._clearError('itemCount')
     this._scheduleSaveDraft()
   },
 
@@ -358,6 +361,7 @@ Page({
     const field = e.currentTarget.dataset.field
     const value = String(e.detail.value || '').replace(/[^\d.]/g, '')
     this.setData({ [field]: value }, () => this.recalcVolume())
+    this._clearError('size')
     this._scheduleSaveDraft()
   },
 
@@ -502,6 +506,7 @@ Page({
       routeStatus: 'idle',
       routePreviewKey: ''
     }, () => this.refreshQuote())
+    this._clearError('pickupStation')
     // 站点不可直达（车辆进不去）时，后端会给出"就近可服务站点"，前端提示一键更换
     this._checkStationAccess(s)
     this._scheduleSaveDraft()
@@ -566,46 +571,55 @@ Page({
       routeStatus: 'idle',
       routePreviewKey: ''
     }, () => this.refreshQuote())
+    this._clearError('deliveryStation')
     this._scheduleSaveDraft()
   },
 
-  /** 下一步：基础校验 → 路线预览（缓存命中直接复用）→ 成功才进入拍照页 */
-  async goToPhoto() {
-    if (this.data.routeStatus === 'loading') return // 防重复点击（路线计算中）
+  /** 输入即清除该字段的行内错误（无错误时不触发 setData） */
+  _clearError(field) {
+    if (!this.data.errors[field]) return
+    this.setData({ [`errors.${field}`]: '' })
+  },
+
+  /**
+   * 第 1 步行内校验：一次收集全部错误（替代逐条 toast），
+   * 有错时滚动到第一个错误字段；返回是否通过。
+   */
+  _validateStep1() {
     const { goodsName, goodsWeight, pickupStationId, deliveryStationId } = this.data
-    if (!goodsName.trim()) {
-      wx.showToast({ title: '请输入货物名称', icon: 'none' })
-      return
-    }
+    const errors = {}
+    if (!goodsName.trim()) errors.goodsName = '请输入货物名称'
     if (!goodsWeight.trim() || Number(goodsWeight) <= 0) {
-      wx.showToast({ title: '请输入正确的货物重量', icon: 'none' })
-      return
-    }
-    // 单件限重与后端承运审核规则一致（斤 → kg），超限先提示，避免提交后被拒运
-    if (Number(goodsWeight) * 0.5 > MAX_WEIGHT_KG) {
-      wx.showToast({ title: `单件限重 ${MAX_WEIGHT_KG} 公斤（${MAX_WEIGHT_KG * 2} 斤）`, icon: 'none' })
-      return
+      errors.goodsWeight = '请输入正确的货物重量'
+    } else if (Number(goodsWeight) * 0.5 > MAX_WEIGHT_KG) {
+      // 单件限重与后端承运审核规则一致（斤 → kg），超限先提示，避免提交后被拒运
+      errors.goodsWeight = `单件限重 ${MAX_WEIGHT_KG} 公斤（${MAX_WEIGHT_KG * 2} 斤）`
     }
     if (!Number(this.data.itemCount) || Number(this.data.itemCount) < 1) {
-      wx.showToast({ title: '请输入货物件数', icon: 'none' })
-      return
+      errors.itemCount = '请输入货物件数'
     }
-    if (!(this.data.volumeM3 > 0)) {
-      wx.showToast({ title: '请填写货物长宽高', icon: 'none' })
-      return
-    }
-    if (!pickupStationId) {
-      wx.showToast({ title: '请选择取货站点', icon: 'none' })
-      return
-    }
+    if (!(this.data.volumeM3 > 0)) errors.size = '请填写货物长宽高'
+    if (!pickupStationId) errors.pickupStation = '请选择取货站点'
     if (!deliveryStationId) {
-      wx.showToast({ title: '请选择送达站点', icon: 'none' })
-      return
+      errors.deliveryStation = '请选择送达站点'
+    } else if (pickupStationId && pickupStationId === deliveryStationId) {
+      errors.deliveryStation = '取货站点和送达站点不能相同'
     }
-    if (pickupStationId === deliveryStationId) {
-      wx.showToast({ title: '取货站点和送达站点不能相同', icon: 'none' })
-      return
+    this.setData({ errors })
+    const first = Object.keys(errors)[0]
+    if (first) {
+      // 滚到第一个错误字段，让用户从头顶开始修（selector 语法，基础库 2.7.3+）
+      wx.pageScrollTo({ selector: '#f-' + first, duration: 200, offsetTop: 80 })
+      return false
     }
+    return true
+  },
+
+  /** 下一步：行内校验（一次标全）→ 路线预览（缓存命中直接复用）→ 成功才进入拍照页 */
+  async goToPhoto() {
+    if (this.data.routeStatus === 'loading') return // 防重复点击（路线计算中）
+    if (!this._validateStep1()) return
+    const { pickupStationId, deliveryStationId } = this.data
     // 相同组合已成功查询过 → 直接复用，不再请求（避免重复打高德）
     const key = `${pickupStationId}:${deliveryStationId}`
     if (this.data.routePreviewKey === key && this.data.routePreview) {

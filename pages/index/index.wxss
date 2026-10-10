@@ -712,3 +712,19 @@
 .elderly-mode .top-badge { font-size: 24rpx; }
 .elderly-mode .top-sub { font-size: 26rpx; }
 .elderly-mode .notice-tag { font-size: 26rpx; }
+
+/* 公告为空的细条占位：与 notice-swiper 同槽位同左右边距，高度减半、不抢首屏 */
+.notice-empty {
+  margin: 24rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  color: var(--color-text-tertiary);
+}
+
+.notice-empty-text { font-size: 24rpx; }
+
+.elderly-mode .notice-empty { height: 64rpx; }
+.elderly-mode .notice-empty-text { font-size: 28rpx; }

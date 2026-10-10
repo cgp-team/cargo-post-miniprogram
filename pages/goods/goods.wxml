@@ -12,7 +12,7 @@
         <text class="top-sub">山货集市 · 村里直发</text>
       </view>
       <view class="user-avatar" bindtap="goToProfile" hover-class="hover">
-        <text wx:if="{{userInfo.nickname}}">{{userInfo.nickname}}</text>
+        <text wx:if="{{avatarChar}}">{{avatarChar}}</text>
         <icon wx:else name="user" size="40" color="#FFFFFF" />
       </view>
     </view>
