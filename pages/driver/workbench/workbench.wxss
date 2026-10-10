@@ -7,7 +7,7 @@
   font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
-/* ========== 顶部站牌头：深绿实板 + 落款横档 + 角落光晕 ========== */
+/* ========== 顶部站牌头：深绿实板 + 角落光晕 ========== */
 .progress-header {
   position: relative;
   overflow: hidden;
@@ -15,21 +15,9 @@
   padding: 0 32rpx 36rpx;
 }
 
-/* 落款横档：钉在安全区下沿，作站牌的金属顶边 */
 .header-safe {
   position: relative;
   width: 100%;
-}
-
-.header-safe::after {
-  content: '';
-  position: absolute;
-  left: 2rpx;
-  right: 2rpx;
-  bottom: 8rpx;
-  height: 5rpx;
-  background: rgba(255, 255, 255, 0.26);
-  border-radius: 3rpx;
 }
 
 /* 角落装饰光晕 */
@@ -1274,3 +1262,17 @@
 .elderly-mode .load-error-banner { min-height: 96rpx; }
 .elderly-mode .load-error-text { font-size: 30rpx; }
 .elderly-mode .load-error-retry { font-size: 30rpx; }
+
+/* 非司机身份整页空态：盖在站牌头/TabBar 之上，米纸底与页面同色 */
+.no-driver-mask {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 99;
+  background: var(--color-paper);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

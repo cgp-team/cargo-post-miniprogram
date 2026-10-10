@@ -7,7 +7,7 @@ const feedback = require('../../utils/feedback')
 const qrcodeRender = require('../../utils/qrcode-render')
 const reviewUtils = require('../../utils/review')
 const productImg = require('../../utils/product-img')
-const { formatBackendTime, VILLAGES, navThrottled, syncTabBar } = require('../../utils/util')
+const { formatBackendTime, VILLAGES, navThrottled, syncTabBar, errorSubText } = require('../../utils/util')
 
 /** 运输订单状态流（对应 TransportOrderStatusEnum，含 Phase 2 承运审核前置状态） */
 const STATUS_FLOW = [
@@ -41,6 +41,9 @@ Page({
     hasMore: true,
     loading: false,
     sendError: false,
+    // 错误态副文案（按 errType 区分断网/服务异常，catch 里由 errorSubText 生成）
+    sendErrorSub: '网络不太好，再试一次',
+    productErrorSub: '网络不太好，再试一次',
     // 乘车安排（村民到站通知）
     arrangements: [],
     // 单号查询结果
@@ -62,6 +65,8 @@ Page({
     const app = getApp()
     this.setData({
       userInfo: userInfo || {},
+      // 头像圆内只放昵称首字（整段昵称在 64rpx 圆内会被截成"体…"）
+      avatarChar: userInfo && userInfo.nickname ? String(userInfo.nickname).charAt(0) : '',
       currentVillage: app.globalData.currentVillage || '云山村'
     })
     // 「我的」→「我的寄货」默认进寄货列表（switchTab 通过 globalData 传意图）
@@ -275,7 +280,7 @@ Page({
     } catch (e) {
       if (seq !== this._productSeq) return false
       // 错误提示已由 api.js 统一处理；标记错误态（列表为空时给"重新加载"入口），并避免下拉误弹"已刷新"
-      this.setData({ productError: true, productLoading: false })
+      this.setData({ productError: true, productErrorSub: errorSubText(e), productLoading: false })
       return false
     }
   },
@@ -325,6 +330,11 @@ Page({
   goSend() {
     if (navThrottled(this)) return
     wx.navigateTo({ url: '/pages/send/send' })
+  },
+
+  /** 顶部头像 → 个人中心（与商城页行为一致） */
+  goToProfile() {
+    wx.switchTab({ url: '/pages/mine/mine' })
   },
 
   /** 购物订单空态：去商城逛逛 */
@@ -640,7 +650,7 @@ Page({
     } catch (e) {
       if (seq !== this._sendSeq) return false
       // 错误提示已由 api.js 统一处理；标记错误态（列表为空时给"重新加载"入口），并避免下拉误弹"已刷新"
-      this.setData({ sendError: true, loading: false })
+      this.setData({ sendError: true, sendErrorSub: errorSubText(e), loading: false })
       return false
     }
   },

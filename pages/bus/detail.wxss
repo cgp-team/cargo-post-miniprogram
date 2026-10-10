@@ -7,7 +7,7 @@
   box-sizing: border-box;
 }
 
-/* ---------- 站牌头（底板/落款横档/光晕由全局 .signpost 提供，内容压在上层） ---------- */
+/* ---------- 站牌头（底板/光晕由全局 .signpost 提供，内容压在上层） ---------- */
 .head-top {
   position: relative;
   z-index: 1;

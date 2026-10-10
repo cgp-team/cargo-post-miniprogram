@@ -14,18 +14,6 @@
   overflow: hidden;
 }
 
-/* 顶部落款横档（站牌金属边） */
-.login-banner::before {
-  content: '';
-  position: absolute;
-  top: 14rpx;
-  left: 30rpx;
-  right: 30rpx;
-  height: 5rpx;
-  background: rgba(255, 255, 255, 0.26);
-  border-radius: 3rpx;
-}
-
 /* 角落光晕 */
 .login-banner::after {
   content: '';
@@ -86,18 +74,6 @@
   background: linear-gradient(160deg, var(--color-primary-dark) 0%, var(--color-primary) 60%, var(--color-primary-dark) 100%);
   border-radius: 0 0 32rpx 32rpx;
   overflow: hidden;
-}
-
-/* 顶部落款横档 */
-.banner-bg::before {
-  content: '';
-  position: absolute;
-  top: 14rpx;
-  left: 30rpx;
-  right: 30rpx;
-  height: 5rpx;
-  background: rgba(255, 255, 255, 0.26);
-  border-radius: 3rpx;
 }
 
 /* 角落光晕 */

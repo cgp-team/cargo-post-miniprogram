@@ -57,6 +57,8 @@ Page({
     const app = getApp()
     this.setData({
       userInfo: userInfo || {},
+      // 头像圆内只放昵称首字（整段昵称在 64-76rpx 圆内会被截成"体…"）
+      avatarChar: userInfo && userInfo.nickname ? String(userInfo.nickname).charAt(0) : '',
       currentVillage: app.globalData.currentVillage || '云山村'
     })
     this.loadProducts()

@@ -5,7 +5,7 @@ const api = require('../../utils/api')
 const appearance = require('../../utils/appearance')
 const productImg = require('../../utils/product-img')
 const feedback = require('../../utils/feedback')
-const { formatBackendTime, navThrottled } = require('../../utils/util')
+const { formatBackendTime, navThrottled, errorSubText } = require('../../utils/util')
 
 /** 寄货订单状态（TransportOrderStatusEnum）：文案与「快递」页保持一致 */
 const SEND_STATUS = {
@@ -42,6 +42,8 @@ Page({
     total: 0,
     loading: false,
     loadError: false,
+    // 错误态副文案（按 errType 区分断网/服务异常）
+    loadErrorSub: '网络不太好，再试一次',
     hasMore: true,
     elderlyMode: false,
     themeColor: 'green',
@@ -132,7 +134,7 @@ Page({
       return true
     } catch (e) {
       // 错误提示已由 api.js 统一处理；标记错误态（列表为空时给"重新加载"入口），并避免下拉误弹"已刷新"
-      if (seq === this._reqSeq) this.setData({ loadError: true })
+      if (seq === this._reqSeq) this.setData({ loadError: true, loadErrorSub: errorSubText(e) })
       return false
     } finally {
       // 过期的在途请求不得把 loading 收回——更新的请求还在跑

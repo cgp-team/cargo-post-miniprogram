@@ -28,6 +28,7 @@ function handle401() {
   wx.removeStorageSync('userInfo')
   wx.removeStorageSync('refreshToken')
   wx.removeStorageSync('userId')
+  wx.removeStorageSync('isDriver')
   const now = Date.now()
   if (now - last401At < 2000) return
   last401At = now
@@ -84,24 +85,29 @@ function request(url, method = 'GET', data = {}, options = {}) {
         const body = res.data
         if (!body || typeof body !== 'object') {
           if (!silent) wx.showToast({ title: '请求失败', icon: 'none', duration: 2500 })
-          reject(new Error('empty response'))
+          const emptyErr = new Error('empty response')
+          emptyErr.errType = 'server'
+          reject(emptyErr)
           return
         }
         if (res.statusCode === 200 && body.code === 0) {
           resolve(body.data)
         } else if (res.statusCode === 401 || body.code === 401) {
           handle401()
-          reject(body)
+          // 401 不是网络问题：打上 errType，页面错误态文案才不会误导成"网络不太好"
+          reject(Object.assign(body, { errType: 'server' }))
         } else {
           const errMsg = body.msg || '请求失败'
           if (!silent) wx.showToast({ title: errMsg, icon: 'none', duration: 2500 })
-          reject(body)
+          // errType 供页面错误态区分文案：server=服务/业务异常（区别于断网）
+          reject(Object.assign(body, { errType: 'server' }))
         }
       },
       fail(err) {
         console.error('网络请求失败:', err)
         if (!silent) wx.showToast({ title: '网络连接失败，请检查网络', icon: 'none', duration: 2500 })
-        reject(err)
+        // errType=network：页面错误态据此显示"网络不太好"而不是"服务异常"
+        reject(Object.assign(err || {}, { errType: 'network' }))
       }
     })
   })

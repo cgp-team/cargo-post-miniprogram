@@ -17,21 +17,22 @@
         <text>物品信息</text>
       </view>
 
-      <view class="form-group">
+      <view class="form-group" id="f-goodsName">
         <text class="form-label">货物名称 *</text>
         <input
-          class="form-input"
+          class="form-input {{errors.goodsName ? 'input-error' : ''}}"
           placeholder="如：脆李、土鸡蛋、红薯粉"
           value="{{goodsName}}"
           bindinput="onNameInput"
         />
+        <view wx:if="{{errors.goodsName}}" class="form-error">{{errors.goodsName}}</view>
       </view>
 
-      <view class="form-group">
+      <view class="form-group" id="f-goodsWeight">
         <text class="form-label">货物重量 *</text>
         <view class="weight-row">
           <input
-            class="form-input flex-1"
+            class="form-input flex-1 {{errors.goodsWeight ? 'input-error' : ''}}"
             type="digit"
             placeholder="如：50"
             value="{{goodsWeight}}"
@@ -39,6 +40,7 @@
           />
           <text class="weight-unit">斤</text>
         </view>
+        <view wx:if="{{errors.goodsWeight}}" class="form-error">{{errors.goodsWeight}}</view>
       </view>
 
       <view class="form-group">
@@ -51,11 +53,11 @@
         </picker>
       </view>
 
-      <view class="form-group">
+      <view class="form-group" id="f-itemCount">
         <text class="form-label">货物件数 *</text>
         <view class="weight-row">
           <input
-            class="form-input flex-1"
+            class="form-input flex-1 {{errors.itemCount ? 'input-error' : ''}}"
             type="number"
             placeholder="如：2"
             value="{{itemCount}}"
@@ -63,13 +65,14 @@
           />
           <text class="weight-unit">件</text>
         </view>
+        <view wx:if="{{errors.itemCount}}" class="form-error">{{errors.itemCount}}</view>
       </view>
 
-      <view class="form-group">
+      <view class="form-group" id="f-size">
         <text class="form-label">货物体积 *</text>
         <view class="size-row">
           <input
-            class="form-input size-input"
+            class="form-input size-input {{errors.size ? 'input-error' : ''}}"
             type="digit"
             placeholder="长cm"
             value="{{sizeLength}}"
@@ -78,7 +81,7 @@
           />
           <text class="size-x">×</text>
           <input
-            class="form-input size-input"
+            class="form-input size-input {{errors.size ? 'input-error' : ''}}"
             type="digit"
             placeholder="宽cm"
             value="{{sizeWidth}}"
@@ -87,7 +90,7 @@
           />
           <text class="size-x">×</text>
           <input
-            class="form-input size-input"
+            class="form-input size-input {{errors.size ? 'input-error' : ''}}"
             type="digit"
             placeholder="高cm"
             value="{{sizeHeight}}"
@@ -95,6 +98,7 @@
             bindinput="onSizeInput"
           />
         </view>
+        <view wx:if="{{errors.size}}" class="form-error">{{errors.size}}</view>
         <text class="form-hint">体积约 {{volumeText}} m³（按长×宽×高，单位厘米换算）</text>
       </view>
 
@@ -186,10 +190,10 @@
         <text wx:if="{{originalAddress}}" class="form-hint">原始地址：{{originalAddress}}</text>
       </view>
 
-      <view class="form-group">
+      <view class="form-group" id="f-pickupStation">
         <text class="form-label">取货站点 *</text>
         <!-- 站点触发行：起点绿 pin 圆标 + 站名 + 箭头（组件内部） -->
-        <view class="station-anchor">
+        <view class="station-anchor {{errors.pickupStation ? 'input-error' : ''}}">
           <view class="station-anchor-pin">
             <icon name="pin" size="30" color="#FFFFFF" />
           </view>
@@ -205,6 +209,7 @@
             bindretry="loadStations"
           />
         </view>
+        <view wx:if="{{errors.pickupStation}}" class="form-error">{{errors.pickupStation}}</view>
         <!-- 该站点车辆进不去时：提示并就就近更换（不可达场景的首要操作） -->
         <view wx:if="{{stationSuggestion}}" class="station-suggest anim-rise">
           <text class="station-suggest-text">
@@ -224,7 +229,7 @@
         <text>收件 · 送到哪里</text>
       </view>
 
-      <view class="form-group">
+      <view class="form-group" id="f-deliveryStation">
         <text class="form-label">送达站点 *</text>
         <!-- 手填送达地址 → 推荐送达站点：与取货侧同一套逻辑 -->
         <view class="addr-row">
@@ -254,7 +259,7 @@
           </view>
         </view>
         <!-- 站点触发行：终点橙 pin 圆标 -->
-        <view class="station-anchor">
+        <view class="station-anchor {{errors.deliveryStation ? 'input-error' : ''}}">
           <view class="station-anchor-pin station-anchor-pin--clay">
             <icon name="pin" size="30" color="#FFFFFF" />
           </view>
@@ -270,6 +275,7 @@
             bindretry="loadStations"
           />
         </view>
+        <view wx:if="{{errors.deliveryStation}}" class="form-error">{{errors.deliveryStation}}</view>
       </view>
     </view>
 

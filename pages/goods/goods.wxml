@@ -1,6 +1,6 @@
 <!-- 商城页 - 买家界面 -->
 <view class="page-goods {{elderlyMode ? 'elderly-mode' : ''}}" style="{{themeStyle}}">
-  <!-- 顶部站牌栏：深绿实板 + 落款横档 -->
+  <!-- 顶部站牌栏：深绿实板 -->
   <view class="top-bar" style="padding-top: {{statusBarHeight + 16}}px">
     <view class="top-bar-main">
       <view class="top-left">
@@ -12,7 +12,7 @@
         <text class="top-sub">山货集市 · 村里直发</text>
       </view>
       <view class="user-avatar" bindtap="goToProfile" hover-class="hover">
-        <text wx:if="{{userInfo.nickname}}">{{userInfo.nickname}}</text>
+        <text wx:if="{{avatarChar}}">{{avatarChar}}</text>
         <icon wx:else name="user" size="40" color="#FFFFFF" />
       </view>
     </view>

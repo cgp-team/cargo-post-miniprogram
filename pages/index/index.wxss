@@ -5,24 +5,12 @@
   padding-bottom: calc(110rpx + env(safe-area-inset-bottom));
 }
 
-/* 顶部栏 —— 站牌式：深绿实板 + 落款横档 + 线路号 chip */
+/* 顶部栏 —— 站牌式：深绿实板 + 线路号 chip */
 .top-bar {
   background: linear-gradient(160deg, var(--color-primary-dark) 0%, var(--color-primary) 60%, var(--color-primary-dark) 100%);
   padding: 20rpx 30rpx 48rpx;
   position: relative;
   overflow: hidden;
-}
-
-/* 顶部落款横档（站牌金属边） */
-.top-bar::before {
-  content: '';
-  position: absolute;
-  top: 14rpx;
-  left: 30rpx;
-  right: 30rpx;
-  height: 5rpx;
-  background: rgba(255, 255, 255, 0.26);
-  border-radius: 3rpx;
 }
 
 /* 顶部装饰光晕 */
@@ -724,3 +712,19 @@
 .elderly-mode .top-badge { font-size: 24rpx; }
 .elderly-mode .top-sub { font-size: 26rpx; }
 .elderly-mode .notice-tag { font-size: 26rpx; }
+
+/* 公告为空的细条占位：与 notice-swiper 同槽位同左右边距，高度减半、不抢首屏 */
+.notice-empty {
+  margin: 24rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  color: var(--color-text-tertiary);
+}
+
+.notice-empty-text { font-size: 24rpx; }
+
+.elderly-mode .notice-empty { height: 64rpx; }
+.elderly-mode .notice-empty-text { font-size: 28rpx; }

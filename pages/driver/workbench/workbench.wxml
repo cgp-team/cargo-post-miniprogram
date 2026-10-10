@@ -357,6 +357,17 @@
     </view>
   </view>
 
+  <!-- ========== 非司机身份：整页空态 + 返回村民端出口（盖在站牌头/TabBar 之上） ========== -->
+  <view wx:if="{{noDriverProfile}}" class="no-driver-mask anim-fade">
+    <empty-state
+      icon="bus"
+      text="当前账号没有司机身份"
+      subText="如需开通司机端，请联系站长或管理员"
+      btnText="返回村民端"
+      bind:tapbtn="backToVillager"
+    />
+  </view>
+
   <!-- ========== 底部自定义TabBar ========== -->
   <driver-tab-bar current="workbench" elderly="{{elderlyMode}}"></driver-tab-bar>
 </view>

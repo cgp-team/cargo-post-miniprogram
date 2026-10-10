@@ -839,3 +839,23 @@
 .elderly-mode .form-foot-bar { padding: 20rpx 28rpx calc(20rpx + env(safe-area-inset-bottom)); }
 .elderly-mode .step-body { padding-bottom: calc(280rpx + env(safe-area-inset-bottom)); }
 .elderly-mode .step-body.match-success { padding-bottom: 24rpx; }
+
+/* 行内校验错误态（第 1 步表单：一次标出全部错误字段） */
+.form-input.input-error {
+  border-color: var(--color-danger);
+}
+
+/* 站点选择器内部 .sp-row 自带边框且组件样式隔离，页面侧用带内边距的外框示意错误，避免双框叠边 */
+.station-anchor.input-error .station-anchor-picker {
+  border: 2rpx solid var(--color-danger);
+  border-radius: 18rpx;
+  padding: 4rpx;
+}
+
+.form-error {
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: var(--color-danger);
+}
+
+.elderly-mode .form-error { font-size: 28rpx; }

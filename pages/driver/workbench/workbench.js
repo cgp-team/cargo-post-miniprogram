@@ -104,6 +104,8 @@ Page({
 
     loaded: false,
     loadError: false,
+    // 非司机身份：拉不到司机档案时整页空态接管（村民误点"切换为司机模式"的兜底出口）
+    noDriverProfile: false,
     driverUnreadCount: 0
   },
 
@@ -157,9 +159,11 @@ Page({
     try {
       // 身份由后端按登录会员解析，前端不再传手机号/driverId
       const profile = await api.getDriverProfile()
+      // 缓存司机身份给「我的-切换为司机模式」做预判（'1'/'0'；无缓存=未知，照常跳转）
+      wx.setStorageSync('isDriver', profile ? '1' : '0')
       if (!profile) {
-        wx.showToast({ title: '未找到司机档案，请联系管理员', icon: 'none', duration: 2500 })
-        this.setData({ loaded: true })
+        // 空 toast 会把村民困在空工作台（reLaunch 进来无返回栈），改整页空态 + 返回出口
+        this.setData({ loaded: true, noDriverProfile: true })
         return
       }
       this.driverId = profile.driverId
@@ -1029,6 +1033,12 @@ Page({
   goNotifications() {
     if (navThrottled(this)) return
     wx.navigateTo({ url: '/pages/notification/notification?driverMode=1' })
+  },
+
+  /** 非司机空态出口：回到村民端首页（reLaunch 进来时无返回栈，必须给明确出口） */
+  backToVillager() {
+    feedback.tap()
+    wx.reLaunch({ url: '/pages/index/index' })
   },
 
   /** 长按复制单号（电话核对/手动录入场景要报完整单号）；系统自带「已复制」提示 */

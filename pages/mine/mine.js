@@ -75,9 +75,22 @@ Page({
     wx.navigateTo({ url: '/pages/settings/settings' })
   },
 
-  /** 切换为司机模式 */
+  /** 切换为司机模式（已知非司机先拦一道；缓存过期允许"仍要进入"兜底） */
   switchToDriver() {
     if (!auth.requireLogin()) return
+    // isDriver 缓存由司机工作台拉取档案时写入（'1'/'0'；无缓存=未知，照常跳转）
+    if (wx.getStorageSync('isDriver') === '0') {
+      wx.showModal({
+        title: '未开通司机身份',
+        content: '当前账号没有司机档案。如刚开通还未生效，可进入重试。',
+        confirmText: '仍要进入',
+        cancelText: '取消',
+        success: (res) => {
+          if (res.confirm) wx.reLaunch({ url: '/pages/driver/workbench/workbench' })
+        }
+      })
+      return
+    }
     wx.reLaunch({ url: '/pages/driver/workbench/workbench' })
   },
 
@@ -95,6 +108,7 @@ Page({
           wx.removeStorageSync('userInfo')
           wx.removeStorageSync('refreshToken')
           wx.removeStorageSync('userId')
+          wx.removeStorageSync('isDriver')
           this.setData({ userInfo: {}, isLoggedIn: false })
           feedback.tap()
           wx.reLaunch({ url: '/pages/login/login' })

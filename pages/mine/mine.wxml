@@ -18,7 +18,7 @@
 
   <!-- 已登录态 -->
   <view wx:else>
-    <!-- 用户信息区：站牌式头部（深绿实板 + 落款横档 + 光晕 + 角色线路章） -->
+    <!-- 用户信息区：站牌式头部（深绿实板 + 光晕 + 角色线路章） -->
     <view class="user-banner">
       <view style="height: {{statusBarHeight || 0}}px"></view>
       <view class="banner-bg"></view>
@@ -48,7 +48,7 @@
         <view class="farmer-btn send-btn" bindtap="goToSend" hover-class="hover">
           <icon class="farmer-btn-icon" name="send" size="64" color="#FFFFFF" />
           <text class="farmer-btn-text">我要寄货</text>
-          <text class="farmer-btn-desc">语音下单 · 大巴承运 · 直达城里</text>
+          <text class="farmer-btn-desc">拍照下单 · 大巴承运 · 直达城里</text>
         </view>
       </view>
     </view>

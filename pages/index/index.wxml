@@ -89,7 +89,11 @@
       </view>
     </swiper-item>
   </swiper>
-  <empty-state wx:else icon="notice" text="暂无公告" subText="平台公告发布后会在这里展示" />
+  <!-- 公告为空：一行细条占位（不再用大空态占首屏）；有公告时仍是轮播横幅 -->
+  <view wx:else class="notice-empty">
+    <icon name="notice" size="26" color="#B5AE9E" />
+    <text class="notice-empty-text">暂无公告</text>
+  </view>
 
   <!-- 功能入口 - 四宫格（阶梯入场） -->
   <view class="feature-grid">

@@ -15,8 +15,8 @@
  *   图标：  <icon color="{{iconColor}}" />（见 apply 注释）
  */
 
-/** 默认主题：白色 + 蓝色（答辩/演示要求；绿色/橙色/红色仍可在设置里切换） */
-const DEFAULT_THEME = 'blue'
+/** 默认主题：山野绿（品牌色；新用户首装即绿，设置页可换橙/蓝/红） */
+const DEFAULT_THEME = 'green'
 
 /* 导航栏换色去重：wx.setNavigationBarColor 只作用于当前页面，
  * 主题或页面任一变化时才重新设置，避免同页 onShow 重复调用 */

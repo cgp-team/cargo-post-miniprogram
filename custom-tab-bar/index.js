@@ -6,6 +6,7 @@
  * 主题：每次显示时同步主题色变量（选中态颜色跟随主题）
  */
 const appearance = require('../utils/appearance')
+const feedback = require('../utils/feedback')
 
 Component({
   data: {
@@ -63,6 +64,7 @@ Component({
 
       // 立即更新本地状态，消除点击延迟感
       this.setData({ selected: index })
+      feedback.tap()
       wx.switchTab({ url: path })
     }
   }

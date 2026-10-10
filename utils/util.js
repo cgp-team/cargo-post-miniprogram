@@ -96,6 +96,14 @@ function syncTabBar(page, index) {
   if (bar && bar.data.selected !== index) bar.setData({ selected: index })
 }
 
+/**
+ * 列表错误态副文案：按 api.js request 打上的 errType 区分——
+ * network=断网/超时（"网络不太好"），server=服务或业务异常（不甩锅给网络）。
+ */
+function errorSubText(err) {
+  return err && err.errType === 'server' ? '服务暂时不可用，稍后再试' : '网络不太好，再试一次'
+}
+
 module.exports = {
   validatePhone,
   cmSizeToM3,
@@ -104,5 +112,6 @@ module.exports = {
   formatBackendTime,
   navThrottled,
   syncTabBar,
+  errorSubText,
   VILLAGES
 }
