@@ -417,9 +417,9 @@ function pageMyNotifications(params) {
   return request('/app-api/transport/notification/page', 'GET', params)
 }
 
-/** 我的未读消息数（红点） */
-function getNotificationUnreadCount() {
-  return request('/app-api/transport/notification/unread-count', 'GET')
+/** 我的未读消息数（红点；可选 silent 静默——首页悬浮入口轮询失败不弹 toast） */
+function getNotificationUnreadCount(options) {
+  return request('/app-api/transport/notification/unread-count', 'GET', {}, options)
 }
 
 /** 标记单条消息已读 */

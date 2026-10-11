@@ -13,6 +13,7 @@ Page({
     userInfo: {},
     isLoggedIn: false,
     role: 'consumer',
+    unreadCount: 0,      // 「消息通知」菜单项未读红点
     elderlyMode: false,
     themeColor: 'green',
     themeStyle: ''
@@ -28,6 +29,19 @@ Page({
     this.loadUserInfo()
     // 同步老年模式 / 主题色（改动后回来立即生效）
     this._applyAppearance()
+    // 「消息通知」菜单项未读红点（消息中心已读回来后立即消点）
+    this.refreshUnread()
+  },
+
+  /** 消息中心未读数（静默失败不打断页面、不弹 toast） */
+  refreshUnread() {
+    if (!auth.isLogin()) {
+      if (this.data.unreadCount !== 0) this.setData({ unreadCount: 0 })
+      return
+    }
+    api.getNotificationUnreadCount({ silent: true }).then((count) => {
+      if ((count || 0) !== this.data.unreadCount) this.setData({ unreadCount: count || 0 })
+    }).catch(() => {})
   },
 
   loadUserInfo() {

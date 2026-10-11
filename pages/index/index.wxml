@@ -267,4 +267,10 @@
 
   <!-- 底部安全区 -->
   <view class="safe-area-bottom"></view>
+
+  <!-- 消息中心悬浮入口：常驻右下（tabBar 上方），未读红点即"有新消息"的最强提示 -->
+  <view class="msg-fab" bindtap="goToNotifications" hover-class="hover">
+    <icon name="bell" size="{{elderlyMode ? 52 : 44}}" color="{{iconDeep}}" />
+    <view wx:if="{{unreadCount > 0}}" class="msg-fab-badge anim-pop">{{unreadCount > 99 ? '99+' : unreadCount}}</view>
+  </view>
 </view>
