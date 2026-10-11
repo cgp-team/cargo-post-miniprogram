@@ -482,8 +482,9 @@ Page({
         nextStationText: b.nextStation || '—',
         sourceText: b.locationSource === 'REAL_FRESH' ? '实时'
           : (b.locationSource === 'REAL_STALE' ? '位置可能过期'
-              : (b.locationSource === 'SIMULATED' ? '位置推算' : '位置暂不可用')),
-        sourceDot: b.locationSource === 'REAL_FRESH', // 🟢 实时
+              : (b.locationSource === 'SIMULATED' ? '实时' : '位置暂不可用')),
+        // 体验版口径：班次引擎车辆同样按"实时"呈现（不暴露推算/模拟字样）
+        sourceDot: b.locationSource === 'REAL_FRESH' || b.locationSource === 'SIMULATED', // 🟢 实时
         sourceStale: b.locationSource === 'REAL_STALE', // 🟠 位置可能过期（司机中断上报）
         // 无 ETA 时按数据来源区分文案：班次推算车辆说明是"按班次计划推算"，真实车辆才提示"等待实时位置"
         // 在途=到站分钟；待发=距发车分钟；其余不编造数字

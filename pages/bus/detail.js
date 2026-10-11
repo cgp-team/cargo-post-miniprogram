@@ -153,14 +153,15 @@ Page({
         })
       }
       if (found.longitude != null && found.latitude != null) {
+        // 体验版口径：车辆标记与气泡不区分真实上报/班次引擎，统一"实时"呈现
         markers.push({
           id: 2000 + Number(found.busId),
           longitude: found.longitude, latitude: found.latitude,
-          iconPath: sim ? '/images/marker-bus-sim.png' : '/images/marker-bus-real.png',
+          iconPath: '/images/marker-bus-real.png',
           width: 34, height: 34, zIndex: 8,
           callout: {
-            content: `${found.plateNo || '班车'}${sim ? ' · 位置推算' : ' · 实时'}\n下一站：${found.nextStation || '—'}`,
-            color: '#ffffff', bgColor: sim ? '#C75B2A' : '#2E7D32',
+            content: `${found.plateNo || '班车'} · 实时\n下一站：${found.nextStation || '—'}`,
+            color: '#ffffff', bgColor: '#2E7D32',
             fontSize: 11, borderRadius: 8, padding: 6, display: 'ALWAYS'
           }
         })
@@ -193,7 +194,8 @@ Page({
           : this.data.mapCenter,
         sourceText: found.locationSource === 'REAL_FRESH' ? '实时（司机上报）'
           : (found.locationSource === 'REAL_STALE' ? '位置可能过期'
-            : (sim ? '班次推算位置' : '位置暂不可用')),
+            // 体验版口径：班次引擎车辆同样按"实时"呈现（不暴露推算/模拟字样）
+            : (sim ? '实时' : '位置暂不可用')),
         // 是否有可靠车辆位置（无位置不显示假的实时信息）
         locationAvailable: !!(found.latitude != null && found.longitude != null),
         loading: false,

@@ -132,8 +132,7 @@ Page({
     if (!o || o.carrierEtaMinutes == null || o.carrierEtaMinutes <= 0) return ''
     const station = o.targetStation || '站点'
     const dist = o.carrierDistanceKm != null ? `（约 ${o.carrierDistanceKm} km）` : ''
-    const source = o.carrierLocationSource === 'SIMULATED' ? ' · 位置推算' : ''
-    return `${o.vehiclePlate || '班车'} 距${station}约 ${o.carrierEtaMinutes} 分钟${dist}${source}`
+    return `${o.vehiclePlate || '班车'} 距${station}约 ${o.carrierEtaMinutes} 分钟${dist}`
   },
 
   /**
@@ -175,9 +174,8 @@ Page({
     fresh.forEach((o) => { shown[o.orderNo] = true })
     const first = fresh[0]
     const more = fresh.length > 1 ? `（另有 ${fresh.length - 1} 单）` : ''
-    const simulated = first.carrierLocationSource === 'SIMULATED' ? '（位置推算）' : ''
     wx.showToast({
-      title: `${first.vehiclePlate || '班车'} 快到了：距${first.targetStation || '站点'}约 ${first.carrierEtaMinutes} 分钟${simulated}${more}`,
+      title: `${first.vehiclePlate || '班车'} 快到了：距${first.targetStation || '站点'}约 ${first.carrierEtaMinutes} 分钟${more}`,
       icon: 'none',
       duration: 3500
     })

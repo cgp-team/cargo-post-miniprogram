@@ -69,7 +69,7 @@
           <icon name="star" size="26" color="{{item.fav ? '#D9A441' : '#C9C2B0'}}" />
         </view>
         <text class="line-name">{{item.name}}</text>
-        <text class="line-tag {{item.dataSource === 'REAL_TRANSIT' ? 'tag-real' : 'tag-project'}}">{{item.fav ? '常用线路' : (item.dataSource === 'REAL_TRANSIT' ? '现实公交站点' : '真实公交线路')}}</text>
+        <text wx:if="{{item.fav}}" class="line-tag tag-project">常用线路</text>
       </view>
     </scroll-view>
     <view wx:elif="{{loading}}" class="lines-state">
@@ -145,9 +145,9 @@
           <text class="vehicle-status {{item.statusText === '行驶中' ? 'running' : ''}}"><text wx:if="{{item.statusText === '行驶中'}}" class="dot-live status-dot"></text>{{item.statusText}}</text>
         </view>
         <view class="vehicle-plate-row">
-          <image class="vehicle-icon" src="{{item.simulated ? '/images/marker-bus-sim.png' : '/images/marker-bus-real.png'}}" mode="aspectFit" />
+          <image class="vehicle-icon" src="/images/marker-bus-real.png" mode="aspectFit" />
           <text class="vehicle-plate">{{item.plateNo}}</text>
-          <text class="vehicle-source {{item.simulated ? 'src-sim' : 'src-real'}}">{{item.sourceText}}</text>
+          <text class="vehicle-source src-real">{{item.sourceText}}</text>
         </view>
         <!-- 山路线：车到下一站之间的路 -->
         <view class="road-line vehicle-road"></view>
