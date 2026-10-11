@@ -48,6 +48,7 @@
     wx:elif="{{!loading && loadError && !allProducts.length}}"
     icon="notice" text="山货集市暂时打不开" subText="网络不太好，请稍后再试"
     btnText="重新加载" bind:tapbtn="reloadProducts"
+    phone="{{servicePhone}}"
   />
 
   <!-- 空列表（区分"全部没货"与"当前分类没货"） -->
@@ -56,6 +57,7 @@
     icon="box"
     text="{{activeCategory === 0 ? '山货还没上新' : '这类山货暂时没货'}}"
     subText="{{activeCategory === 0 ? '农户正在备货，过会儿再来看看' : '切到「全部」看看其他山货'}}"
+    phone="{{servicePhone}}"
   />
 
   <!-- 商品网格 -->

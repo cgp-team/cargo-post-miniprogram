@@ -775,3 +775,61 @@
   line-height: 44rpx;
   font-size: 26rpx;
 }
+
+/* 新手引导：遮罩 + 居中引导卡（首次进入，看完不再出） */
+.guide-mask {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+  background: rgba(30, 28, 22, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48rpx;
+}
+
+.guide-card {
+  width: 100%;
+  max-width: 600rpx;
+  background: var(--color-card);
+  border-radius: 24rpx;
+  padding: 40rpx 36rpx;
+  box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.22);
+}
+
+.guide-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: var(--color-ink);
+  margin-bottom: 28rpx;
+  text-align: center;
+}
+
+.guide-item {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 14rpx 0;
+  font-size: 30rpx;
+  color: var(--color-ink);
+}
+
+.guide-btn {
+  margin-top: 28rpx;
+  height: 88rpx;
+  border-radius: 999rpx;
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.elderly-mode .guide-title { font-size: 38rpx; }
+.elderly-mode .guide-item { font-size: 34rpx; padding: 18rpx 0; }
+.elderly-mode .guide-btn { height: 96rpx; font-size: 36rpx; }

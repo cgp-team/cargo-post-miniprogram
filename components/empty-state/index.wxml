@@ -6,4 +6,5 @@
   <text class="es-text">{{text}}</text>
   <text wx:if="{{subText}}" class="es-sub">{{subText}}</text>
   <view wx:if="{{btnText}}" class="es-btn" hover-class="es-btn-hover" bindtap="onBtnTap">{{btnText}}</view>
+  <view wx:if="{{phone}}" class="es-phone" hover-class="es-btn-hover" bindtap="onPhoneTap">打电话问站长</view>
 </view>

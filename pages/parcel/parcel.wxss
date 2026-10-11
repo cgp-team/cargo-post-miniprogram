@@ -1036,3 +1036,20 @@
 .elderly-mode .arrange-plate { font-size: 28rpx; }
 .elderly-mode .pill-gold { font-size: 26rpx; }
 .elderly-mode .arrange-cta { font-size: 28rpx; padding: 30rpx 0; margin: -30rpx 0; }
+
+/* 扫码查单入口：查询条内的绿色小方块，与「查询」按钮同色系但弱一级 */
+.scan-entry {
+  flex: none;
+  width: 80rpx;
+  height: 80rpx;
+  margin: 0 12rpx;
+  border-radius: 14rpx;
+  background: var(--color-accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.scan-entry:active { opacity: 0.85; }
+
+.elderly-mode .scan-entry { width: 96rpx; height: 96rpx; }

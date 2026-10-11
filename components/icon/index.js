@@ -39,6 +39,7 @@ const ICONS = {
   search: '<g fill="none" stroke="%C%" stroke-width="1.8" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></g>',
   notice: '<g fill="none" stroke="%C%" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 10v4c0 .6.4 1 1 1h2l4.5 3.5c.6.4 1.5 0 1.5-.8V6.3c0-.8-.9-1.2-1.5-.8L7 9H5c-.6 0-1 .4-1 1z"/><path d="M17.5 9c.8 1 .8 5 0 6M18 7c1.7 2 1.7 8 0 10"/></g>',
   bell: '<g fill="none" stroke="%C%" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 9.5a6 6 0 1 0-12 0c0 5.5-2.5 6.5-2.5 6.5h17S18 15 18 9.5z"/><path d="M10 19.5a2.2 2.2 0 0 0 4 0"/></g>',
+  star: '<path fill="%C%" d="M12 2.8l2.8 5.8 6.4.9-4.6 4.5 1.1 6.3L12 17.2l-5.7 3.1 1.1-6.3L2.8 9.5l6.4-.9L12 2.8z"/>',
   sun: '<g fill="none" stroke="%C%" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.8v2.4M12 18.8v2.4M2.8 12h2.4M18.8 12h2.4M5.2 5.2l1.7 1.7M17.1 17.1l1.7 1.7M18.8 5.2l-1.7 1.7M6.9 17.1l-1.7 1.7"/></g>',
   pin: '<path d="M12 21.5s-7-6.3-7-11.3a7 7 0 0 1 14 0c0 5-7 11.3-7 11.3zm0-9a2.3 2.3 0 1 0 0-4.6 2.3 2.3 0 0 0 0 4.6z" fill="none" stroke="%C%" stroke-width="1.8"/>',
   clock: '<g fill="none" stroke="%C%" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3.2 2"/></g>',

@@ -273,4 +273,17 @@
     <icon name="bell" size="{{elderlyMode ? 52 : 44}}" color="{{iconDeep}}" />
     <view wx:if="{{unreadCount > 0}}" class="msg-fab-badge anim-pop">{{unreadCount > 99 ? '99+' : unreadCount}}</view>
   </view>
+
+  <!-- 新手引导：首次进入提示核心入口（看完不再出） -->
+  <view wx:if="{{showGuide}}" class="guide-mask anim-fade" bindtap="closeGuide">
+    <view class="guide-card anim-pop" catchtap="noop">
+      <view class="guide-title">第一次来？先认识这几个入口</view>
+      <view class="guide-item"><icon name="bus" size="34" color="{{iconDeep}}" /><text>实时公交：看大巴到哪儿了</text></view>
+      <view class="guide-item"><icon name="leaf" size="34" color="{{iconDeep}}" /><text>农产品：买村里直发的好货</text></view>
+      <view class="guide-item"><icon name="box" size="34" color="{{iconDeep}}" /><text>我的快递：查包裹走到哪里</text></view>
+      <view class="guide-item"><icon name="send" size="34" color="{{iconDeep}}" /><text>我要寄货：东西捎进城</text></view>
+      <view class="guide-item"><icon name="bell" size="34" color="{{iconDeep}}" /><text>右下角铃铛：有新消息会亮红点</text></view>
+      <view class="guide-btn" bindtap="closeGuide" hover-class="hover">知道了</view>
+    </view>
+  </view>
 </view>

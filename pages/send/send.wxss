@@ -859,3 +859,24 @@
 }
 
 .elderly-mode .form-error { font-size: 28rpx; }
+
+/* 字段标签行（标签 + 右侧快捷动作，如「填我的手机号」） */
+.form-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12rpx;
+}
+
+.form-label-row .form-label { margin-bottom: 0; }
+
+.label-action {
+  font-size: 24rpx;
+  color: var(--color-primary);
+  font-weight: 600;
+  padding: 8rpx 20rpx;
+  background: var(--color-primary-light);
+  border-radius: 999rpx;
+}
+
+.elderly-mode .label-action { font-size: 28rpx; padding: 12rpx 28rpx; }

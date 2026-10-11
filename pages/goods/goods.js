@@ -5,6 +5,7 @@
 const api = require('../../utils/api')
 const productImg = require('../../utils/product-img')
 const { VILLAGES, navThrottled, syncTabBar } = require('../../utils/util')
+const { SERVICE_PHONE } = require('../../utils/config')
 
 /** 分类名 → 商品名关键词（后端暂无分类字段，按名称归类） */
 const CATEGORY_KEYWORDS = {
@@ -48,7 +49,9 @@ Page({
     total: 0,
     hasMore: true,
     loading: true,
-    loadError: false // 首屏加载失败（区别于"没有商品"空态）
+    loadError: false, // 首屏加载失败（区别于"没有商品"空态）
+    // 站长/客服电话（空态「打电话问站长」；config 留空时入口自动隐藏）
+    servicePhone: SERVICE_PHONE
   },
 
   onLoad() {

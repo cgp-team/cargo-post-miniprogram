@@ -22,12 +22,19 @@ Component({
     emoji: { type: String, value: '' },     // 提供时渲染 emoji 代替 icon
     text: { type: String, value: '' },      // 主文案
     subText: { type: String, value: '' },   // 可选副文案
-    btnText: { type: String, value: '' }    // 可选按钮文案，提供时显示按钮
+    btnText: { type: String, value: '' },   // 可选按钮文案，提供时显示按钮
+    phone: { type: String, value: '' }      // 可选站长/客服电话，提供时显示「打电话问站长」入口
   },
 
   methods: {
     onBtnTap() {
       this.triggerEvent('tapbtn')
+    },
+
+    /** 拨打站长/客服电话（农村服务场景：空态给"找人说"的出口） */
+    onPhoneTap() {
+      if (!this.data.phone) return
+      wx.makePhoneCall({ phoneNumber: this.data.phone })
     }
   }
 })

@@ -475,3 +475,14 @@
 .safe-area-bottom {
   height: calc(24rpx + env(safe-area-inset-bottom));
 }
+
+/* 常用线路收藏：chip 右上角星标（热区外扩，catchtap 不吃掉 chip 的选中点击） */
+.line-chip { position: relative; }
+
+.line-fav {
+  position: absolute;
+  top: 2rpx;
+  right: 2rpx;
+  padding: 10rpx;
+  z-index: 2;
+}

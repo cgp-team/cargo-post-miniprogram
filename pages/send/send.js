@@ -99,6 +99,7 @@ Page({
     receiverName: '',
     receiverMobile: '',
     receiverAddress: '',
+    myMobile: '', // 本人手机号（收货电话一键回填；onLoad 从 userInfo 读）
     // 承运审核"需客户操作"时的就近交接站点（客户送站导航用）
     servicePointStationName: '',
     servicePointDistanceKm: null,
@@ -112,6 +113,8 @@ Page({
     submitting: false, // 确认发布防重入（按钮 disabled/loading 同步绑定）
     // 第 1 步行内校验错误（字段名 → 错误文案）：一次性标出全部，替代逐条 toast
     errors: {},
+    // 订单动态订阅：'' 未订阅 / 'done' 已开启 / 'none' 后端无可用模板（隐藏入口）
+    subscribeState: '',
     elderlyMode: false,
     themeColor: 'green',
     themeStyle: ''
@@ -120,6 +123,9 @@ Page({
   async onLoad() {
     if (!auth.requireLogin()) return
     appearance.apply(this)
+    // 本人手机号：收货电话一键回填用（很多人就是寄到自己镇上地址转亲戚）
+    const userInfo = wx.getStorageSync('userInfo')
+    if (userInfo && userInfo.mobile) this.setData({ myMobile: String(userInfo.mobile) })
     this.loadStations()
     this._restoreDraft()
   },
@@ -224,6 +230,14 @@ Page({
   onReceiverNameInput(e) { this.setData({ receiverName: e.detail.value }); this._scheduleSaveDraft() },
   onReceiverMobileInput(e) { this.setData({ receiverMobile: e.detail.value }); this._scheduleSaveDraft() },
   onReceiverAddressInput(e) { this.setData({ receiverAddress: e.detail.value }); this._scheduleSaveDraft() },
+
+  /** 收货电话一键填本人手机号（少输 11 位数字） */
+  fillMyMobile() {
+    if (!this.data.myMobile) return
+    feedback.tap()
+    this.setData({ receiverMobile: this.data.myMobile })
+    this._scheduleSaveDraft()
+  },
 
   /** 货物类型选择 */
   onCategoryChange(e) {
@@ -919,6 +933,39 @@ Page({
     if (!this.data.orderNo) return
     getApp().globalData.parcelIntent = { type: 'track', no: this.data.orderNo }
     wx.switchTab({ url: '/pages/parcel/parcel' })
+  },
+
+  /**
+   * 订阅订单动态微信提醒（村民侧，对齐司机端 subscribeDispatch 模式）：
+   * 拉模板列表 → wx.requestSubscribeMessage 授权；后端未配置模板时隐藏入口（'none'），不引空。
+   */
+  async subscribeOrderUpdates() {
+    if (this.data.subscribeState === 'done') return
+    try {
+      const templates = await api.getSubscribeTemplateList()
+      if (!templates || !templates.length) {
+        this.setData({ subscribeState: 'none' })
+        wx.showToast({ title: '微信提醒暂未开通，可在「消息通知」查看订单动态', icon: 'none', duration: 2500 })
+        return
+      }
+      // 村民侧模板：优先订单/物流类标题，取不到就用第一个
+      const tpl = templates.find((t) => /订单|到货|取件|物流|发货/.test(t.title)) || templates[0]
+      wx.requestSubscribeMessage({
+        tmplIds: [tpl.id],
+        success: (res) => {
+          if (res[tpl.id] === 'accept') {
+            feedback.tap()
+            this.setData({ subscribeState: 'done' })
+            wx.showToast({ title: '已开启微信提醒', icon: 'success' })
+          } else {
+            wx.showToast({ title: '未开启提醒', icon: 'none' })
+          }
+        },
+        fail: () => wx.showToast({ title: '订阅失败，请重试', icon: 'none' })
+      })
+    } catch (e) {
+      wx.showToast({ title: '订阅失败，请重试', icon: 'none' })
+    }
   },
 
   /** 返回首页 */

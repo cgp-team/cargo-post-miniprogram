@@ -412,7 +412,10 @@
         </view>
       </view>
       <view class="form-group">
-        <text class="form-label">收货电话 *</text>
+        <view class="form-label-row">
+          <text class="form-label">收货电话 *</text>
+          <text wx:if="{{myMobile}}" class="label-action" bindtap="fillMyMobile" hover-class="hover">填我的手机号</text>
+        </view>
         <input
           class="form-input"
           type="number"
@@ -505,6 +508,13 @@
       <button wx:if="{{reviewMode === 'rejected'}}" class="btn-primary" bindtap="resetSend">重新填写，再寄一次</button>
       <!-- 正常受理：一键直达该单物流详情，新单立刻可见 -->
       <button wx:else class="btn-primary" bindtap="goTrack">查看寄货进度</button>
+      <!-- 微信订阅提醒：订单动态推送到微信（后端无模板时整行隐藏，不引空） -->
+      <button
+        wx:if="{{subscribeState !== 'none'}}"
+        class="btn-outline subscribe-btn"
+        bindtap="subscribeOrderUpdates"
+        disabled="{{subscribeState === 'done'}}"
+      >{{subscribeState === 'done' ? '✓ 已开启微信到货提醒' : '订单动态微信提醒我'}}</button>
       <button class="btn-outline" bindtap="goHome">返回首页</button>
     </view>
 

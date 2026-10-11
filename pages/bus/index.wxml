@@ -64,8 +64,12 @@
         bindtap="selectNearbyLine"
         hover-class="hover"
       >
+        <!-- 常用线路收藏（catchtap：不触发选中线路） -->
+        <view class="line-fav" catchtap="toggleFavorite" data-key="{{item.key}}">
+          <icon name="star" size="26" color="{{item.fav ? '#D9A441' : '#C9C2B0'}}" />
+        </view>
         <text class="line-name">{{item.name}}</text>
-        <text class="line-tag {{item.dataSource === 'REAL_TRANSIT' ? 'tag-real' : 'tag-project'}}">{{item.dataSource === 'REAL_TRANSIT' ? '现实公交站点' : '真实公交线路'}}</text>
+        <text class="line-tag {{item.dataSource === 'REAL_TRANSIT' ? 'tag-real' : 'tag-project'}}">{{item.fav ? '常用线路' : (item.dataSource === 'REAL_TRANSIT' ? '现实公交站点' : '真实公交线路')}}</text>
       </view>
     </scroll-view>
     <view wx:elif="{{loading}}" class="lines-state">
@@ -117,7 +121,7 @@
     </view>
 
     <view wx:if="{{!vehicles.length && !loading}}" class="running-empty">
-      <empty-state wx:if="{{hasError}}" icon="bus" text="网络不太好，车辆信息没加载出来" btnText="重新加载" bind:tapbtn="loadNearby" />
+      <empty-state wx:if="{{hasError}}" icon="bus" text="网络不太好，车辆信息没加载出来" btnText="重新加载" bind:tapbtn="loadNearby" phone="{{servicePhone}}" />
       <empty-state wx:elif="{{runningEmptyText}}" icon="bus" text="{{runningEmptyText}}" />
       <empty-state wx:elif="{{nearbyLineCount}}" icon="bus" text="附近有 {{nearbyLineCount}} 条线路，当前暂无车辆经过" />
       <empty-state wx:else icon="bus" text="附近暂无公交车" />

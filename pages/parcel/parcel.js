@@ -346,6 +346,24 @@ Page({
     this.setData({ trackingNo: e.detail.value })
   },
 
+  /** 扫码查单：读面单条码/二维码直接带出单号并查询（免手输长串数字） */
+  scanTrackingNo() {
+    wx.scanCode({
+      scanType: ['barCode', 'qrCode'],
+      success: (res) => {
+        const no = String((res && res.result) || '').trim()
+        if (!no) {
+          wx.showToast({ title: '没扫到单号，再试一次', icon: 'none' })
+          return
+        }
+        feedback.tap()
+        this.setData({ activeTab: 2, trackingNo: no })
+        this.searchParcel()
+      },
+      fail: () => { /* 用户取消扫码不提示 */ }
+    })
+  },
+
   /** 多段运输进度（仅多段联运订单有分段；查询失败按"无多段"处理，不影响物流主流程） */
   async loadLegs(no) {
     try {
