@@ -40,7 +40,8 @@ Page({
     nearbyBusUpdatedAt: 0,      // 最近成功更新时间戳（相对文案用）
     nearbyBusUpdatedText: '',   // "已更新：刚刚" / "更新于 12 秒前"
     nearbyBusLocatedText: '',   // "根据当前位置展示" / "根据当前区域展示"
-    recommendProducts: []       // 推荐农产品（真实接口，失败/为空时展示空态，不再硬编码演示商品）
+    recommendProducts: [],      // 推荐农产品（真实接口，失败/为空时展示空态，不再硬编码演示商品）
+    unreadCount: 0              // 消息中心未读数（右下角悬浮入口红点）
   },
 
   onLoad() {
@@ -98,6 +99,22 @@ Page({
     this._entered = true
     // 恢复 15s 自动刷新（onHide 已停止）
     this.startNearbyTimer()
+    // 悬浮消息入口的未读红点：每次回首页都校准（消息中心已读回来后立即消点）
+    this.refreshUnread()
+  },
+
+  /** 消息中心未读数（悬浮入口红点；静默失败不打断首页、不弹 toast） */
+  refreshUnread() {
+    if (!auth.isLogin()) return
+    api.getNotificationUnreadCount({ silent: true }).then((count) => {
+      this.setData({ unreadCount: count || 0 })
+    }).catch(() => {})
+  },
+
+  /** 悬浮消息入口 → 消息通知中心 */
+  goToNotifications() {
+    if (navThrottled(this)) return
+    wx.navigateTo({ url: '/pages/notification/notification' })
   },
 
   /**

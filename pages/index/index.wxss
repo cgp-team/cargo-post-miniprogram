@@ -728,3 +728,50 @@
 
 .elderly-mode .notice-empty { height: 64rpx; }
 .elderly-mode .notice-empty-text { font-size: 28rpx; }
+
+/* 消息中心悬浮入口：右下常驻（custom tabBar 上方，白底圆形呼应车票卡），未读红点即"有新消息"的最强提示 */
+.msg-fab {
+  position: fixed;
+  right: 28rpx;
+  bottom: calc(140rpx + env(safe-area-inset-bottom));
+  z-index: 50;
+  width: 96rpx;
+  height: 96rpx;
+  border-radius: 50%;
+  background: var(--color-card);
+  border: 1rpx solid var(--color-line);
+  box-shadow: 0 8rpx 24rpx rgba(43, 43, 40, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.msg-fab-badge {
+  position: absolute;
+  top: -6rpx;
+  right: -6rpx;
+  min-width: 36rpx;
+  height: 36rpx;
+  box-sizing: border-box;
+  padding: 0 8rpx;
+  border-radius: 999rpx;
+  background: var(--color-danger);
+  color: #fff;
+  font-size: 22rpx;
+  font-weight: 600;
+  line-height: 36rpx;
+  text-align: center;
+  box-shadow: 0 0 0 3rpx var(--color-paper);
+}
+
+.elderly-mode .msg-fab {
+  width: 112rpx;
+  height: 112rpx;
+}
+
+.elderly-mode .msg-fab-badge {
+  min-width: 44rpx;
+  height: 44rpx;
+  line-height: 44rpx;
+  font-size: 26rpx;
+}

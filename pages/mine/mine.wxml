@@ -108,6 +108,7 @@
           <icon name="notice" size="{{elderlyMode ? 48 : 40}}" color="{{iconColor}}" />
         </view>
         <text class="menu-text">消息通知</text>
+        <text wx:if="{{unreadCount > 0}}" class="menu-badge">{{unreadCount > 99 ? '99+' : unreadCount}}</text>
         <text class="menu-arrow">›</text>
       </view>
       <view class="menu-item" bindtap="goToProfile" hover-class="hover">

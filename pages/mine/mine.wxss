@@ -275,3 +275,26 @@
 .elderly-mode .login-arrow { font-size: 56rpx; }
 .elderly-mode .menu-item { padding: 32rpx 28rpx; }
 .elderly-mode .menu-icon-box { width: 84rpx; height: 84rpx; }
+
+/* 「消息通知」菜单项未读红点（.menu-text 已 flex:1，红点自然贴右侧箭头前） */
+.menu-badge {
+  min-width: 40rpx;
+  height: 40rpx;
+  box-sizing: border-box;
+  padding: 0 12rpx;
+  margin-right: 16rpx;
+  border-radius: 999rpx;
+  background: var(--color-danger);
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: 600;
+  line-height: 40rpx;
+  text-align: center;
+}
+
+.elderly-mode .menu-badge {
+  min-width: 48rpx;
+  height: 48rpx;
+  line-height: 48rpx;
+  font-size: 28rpx;
+}
