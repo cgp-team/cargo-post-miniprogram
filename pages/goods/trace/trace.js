@@ -6,6 +6,7 @@
 const api = require('../../../utils/api')
 const appearance = require('../../../utils/appearance')
 const qrcodeRender = require('../../../utils/qrcode-render')
+const { normalizeMediaUrl } = require('../../../utils/config')
 
 /** 商城订单状态兜底文案（后端偶尔缺 statusName 时）：与「我的订单/快递 - 我的购物」同一口径 */
 const PRODUCT_STATUS = { 0: '待发货', 1: '配送中', 2: '已完成', 3: '已取消' }
@@ -63,6 +64,11 @@ Page({
     this.setData({ loading: true, loadError: false })
     try {
       const trace = await api.getProductOrderTrace(this.data.orderId)
+      // 司机凭证照可能是 HTTP IP 地址（真机合法域名不认 IP），统一直写 HTTPS 域名
+      if (trace) {
+        trace.loadPhotoUrl = normalizeMediaUrl(trace.loadPhotoUrl)
+        trace.deliverPhotoUrl = normalizeMediaUrl(trace.deliverPhotoUrl)
+      }
       this.renderTrace(trace || {})
     } catch (e) {
       // 网络失败（errMsg）给"重新加载"入口；业务错误（未发货/无轨迹，body 只有 code/msg）仍走空态

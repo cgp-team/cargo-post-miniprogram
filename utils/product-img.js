@@ -5,11 +5,14 @@
  * 这里统一把商品映射到本地实拍图：
  *   - 重庆特产：images/products/*.jpg（高清实拍，随包发布，不依赖外网）
  *   - 农产品：images/product-*.png
- * 已经是图片路径/URL 的原样返回；都不匹配返回 ''（调用方显示占位图）。
+ * 已经是图片路径/URL 的过 normalizeMediaUrl（HTTP IP 直写 HTTPS 域名，真机可达）；
+ * 都不匹配返回 ''（调用方显示占位图）。
  *
  * 用法：const productImg = require('../../utils/product-img')
  *       imageUrl: productImg.resolve(p)
  */
+
+const { normalizeMediaUrl } = require('./config')
 
 const LOCAL_MAP = [
   // ===== 重庆特产（真实照片，随小程序包发布）=====
@@ -36,12 +39,13 @@ function resolve(product) {
   // 表现就是"后台换了商品图片，小程序里还是旧图/占位图"。
   if (typeof url === 'string'
     && /^(https?:\/\/|\/\/|\/images\/|\/uploads\/|\/app-api\/|\/admin-api\/|\/infra\/)/.test(url.trim())) {
-    return url.trim()
+    // HTTP IP 等真机不可达地址统一直写为 HTTPS 域名（见 config.normalizeMediaUrl）
+    return normalizeMediaUrl(url)
   }
   const img = product.image
   if (typeof img === 'string'
     && (/^https?:\/\//.test(img) || /^\/\//.test(img) || /^\/images\//.test(img) || /^\/admin-api\//.test(img))) {
-    return img
+    return normalizeMediaUrl(img)
   }
   const text = String(product.name || '') + String(img || '')
   for (const [re, path] of LOCAL_MAP) {

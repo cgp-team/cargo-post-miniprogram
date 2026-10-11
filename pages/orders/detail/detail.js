@@ -8,6 +8,7 @@
 const api = require('../../../utils/api')
 const appearance = require('../../../utils/appearance')
 const productImg = require('../../../utils/product-img')
+const { normalizeMediaUrl } = require('../../../utils/config')
 const { formatBackendTime, navThrottled } = require('../../../utils/util')
 
 /** 商城订单状态兜底文案（后端偶尔缺 statusName 时）：与「我的订单/快递 - 我的购物」同一口径 */
@@ -72,6 +73,11 @@ Page({
     this.setData({ loading: true })
     try {
       const order = await api.getProductOrderTrace(this.data.orderId)
+      // 司机凭证照可能是 HTTP IP 地址（真机合法域名不认 IP），统一直写 HTTPS 域名
+      if (order) {
+        order.loadPhotoUrl = normalizeMediaUrl(order.loadPhotoUrl)
+        order.deliverPhotoUrl = normalizeMediaUrl(order.deliverPhotoUrl)
+      }
       this.renderOrder(order || {})
       return true
     } catch (e) {

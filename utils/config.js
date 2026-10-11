@@ -54,4 +54,28 @@ function getAmapMiniKey() {
 /** 站长/客服电话（空态「打电话问站长」入口；留空 = 不显示该入口，配置真实号码后生效） */
 const SERVICE_PHONE = ''
 
-module.exports = { getBaseUrl, getAmapMiniKey, DEFAULT_MAP_CENTER, DRIVER_DEFAULT_MAP_CENTER, SERVICE_PHONE }
+/**
+ * 后端历史图片地址是 HTTP IP（http://1.15.29.107/...）：
+ * 体验版/正式版强制 HTTPS，且微信合法域名只认域名不认 IP，这类 URL 在真机上根本发不出请求。
+ * 同一台 nginx 已在 HTTPS 域名下伺服同路径资源，按 host 直写即可（路径不变）。
+ * key 为不带端口的主机名/IP，value 为替换后的 HTTPS 域名。
+ */
+const MEDIA_HOST_MAP = {
+  '1.15.29.107': 'api.qwer2333.com'
+}
+
+/**
+ * 规范化后端下发的媒体 URL：HTTP IP/内网地址直写为 HTTPS 域名；其余（HTTPS、相对路径、本地包路径）原样返回。
+ * 用法：<image src> 前统一过一道，避免"后台配的图在真机上加载不出来"。
+ */
+function normalizeMediaUrl(url) {
+  if (typeof url !== 'string') return url
+  const trimmed = url.trim()
+  const m = trimmed.match(/^http:\/\/([^/]+)(\/.*)$/)
+  if (!m) return trimmed
+  const hostNoPort = m[1].split(':')[0]
+  const mapped = MEDIA_HOST_MAP[hostNoPort]
+  return mapped ? `https://${mapped}${m[2]}` : trimmed
+}
+
+module.exports = { getBaseUrl, getAmapMiniKey, DEFAULT_MAP_CENTER, DRIVER_DEFAULT_MAP_CENTER, SERVICE_PHONE, normalizeMediaUrl }
