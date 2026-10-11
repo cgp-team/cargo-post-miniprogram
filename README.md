@@ -8,7 +8,7 @@
 
 本仓库从 [cargo-post-platform](https://github.com/cgp-team/cargo-post-platform) 拆分为独立仓库（提交历史已完整迁移）。小程序与管理端共用同一个 Spring Boot 后端（由 platform 仓库提供），只调用 `/app-api`，不直连算法服务。
 
-<img src="docs/images/miniprogram.png" width="86%" alt="小程序：首页 / 客户功能 / 司机界面">
+<img src="docs/images/miniprogram.jpg" width="86%" alt="小程序：首页 / 客户功能 / 司机界面">
 
 ## 快速开始
 
