@@ -508,7 +508,8 @@ Page({
       simulated,
       isReal: b.locationSource === 'REAL_FRESH' || b.dataSource === 'REAL',
       sourceText: b.locationSource === 'REAL_FRESH' ? '实时'
-        : (b.locationSource === 'REAL_STALE' ? '位置可能过期' : (simulated ? '位置推算' : '位置暂不可用')),
+        // 体验版口径：班次引擎车辆同样按"实时"呈现（不暴露推算/模拟字样）
+        : (b.locationSource === 'REAL_STALE' ? '位置可能过期' : (simulated ? '实时' : '位置暂不可用')),
       longitude: b.longitude,
       latitude: b.latitude
     }
@@ -556,19 +557,19 @@ Page({
       if (b.latitude == null || b.longitude == null) return
       const id = MARKER_BUS_BASE + b.busId
       const frame = byId[id]
-      const simulated = b.locationSource === 'SIMULATED' || b.dataSource === 'SIMULATED'
+      // 体验版口径：车辆标记与气泡不区分真实上报/班次引擎，统一"实时"呈现
       markers.push({
         id,
         longitude: frame ? frame.longitude : b.longitude,
         latitude: frame ? frame.latitude : b.latitude,
-        iconPath: simulated ? '/images/marker-bus-sim.png' : '/images/marker-bus-real.png',
+        iconPath: '/images/marker-bus-real.png',
         width: 34,
         height: 34,
         zIndex: 8,
         callout: {
-          content: `${b.plateNo || '班车'}${simulated ? ' · 位置推算' : ' · 实时'}\n下一站：${b.nextStation || '—'}`,
+          content: `${b.plateNo || '班车'} · 实时\n下一站：${b.nextStation || '—'}`,
           color: '#ffffff',
-          bgColor: simulated ? '#C75B2A' : '#2E7D32',
+          bgColor: '#2E7D32',
           fontSize: 11,
           borderRadius: 8,
           padding: 6,

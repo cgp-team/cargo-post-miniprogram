@@ -9,7 +9,6 @@
         <text class="driver-text">{{driverName}}</text>
       </view>
       <text class="driver-plate">{{plateNo}}</text>
-      <text class="location-source {{locationSource === 'SIMULATED' ? 'sim' : ''}}" wx:if="{{locationSource === 'SIMULATED'}}">模拟运行</text>
       <text class="driver-capacity">货仓 {{cargoLimit}} 件</text>
       <view class="notif-bell" bindtap="goNotifications" hover-class="hover">
         <icon name="notice" size="38" color="#FFFFFF" />
