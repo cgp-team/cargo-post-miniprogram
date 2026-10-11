@@ -8,10 +8,28 @@
 const assert = require('assert')
 const productImg = require('../utils/product-img')
 
-// 1) 后台上传的绝对地址：原样使用
+// 1) 后台上传的绝对地址：HTTP IP 直写为 HTTPS 域名（真机合法域名不认 IP，原样返回会加载不出）
 assert.strictEqual(
   productImg.resolve({ name: '高山脆李', image: '🍑', imageUrl: 'http://1.15.29.107/admin-api/infra/file/4/get/a.jpg' }),
-  'http://1.15.29.107/admin-api/infra/file/4/get/a.jpg'
+  'https://api.qwer2333.com/admin-api/infra/file/4/get/a.jpg'
+)
+
+// 1b) HTTP IP + 端口：端口一并去掉
+assert.strictEqual(
+  productImg.resolve({ name: '任意', image: '', imageUrl: 'http://1.15.29.107:8080/images/products/plum.jpg' }),
+  'https://api.qwer2333.com/images/products/plum.jpg'
+)
+
+// 1c) 非映射 host 的 http 地址：原样返回（不误伤第三方）
+assert.strictEqual(
+  productImg.resolve({ name: '任意', image: '', imageUrl: 'http://other.example.com/a.jpg' }),
+  'http://other.example.com/a.jpg'
+)
+
+// 1d) HTTPS 地址：原样返回
+assert.strictEqual(
+  productImg.resolve({ name: '任意', image: '', imageUrl: 'https://cdn.example.com/a.jpg' }),
+  'https://cdn.example.com/a.jpg'
 )
 
 // 2) 后台上传的相对地址（文件配置未填域名时）：也要原样使用，不能退化成"按名字猜图"
