@@ -28,6 +28,10 @@
       confirm-type="search"
       bindconfirm="searchParcel"
     />
+    <!-- 扫码录入：面单条码/二维码直接读，免手输长串数字 -->
+    <view class="scan-entry" bindtap="scanTrackingNo" hover-class="hover">
+      <icon name="qr" size="36" color="#FFFFFF" />
+    </view>
     <view class="search-btn" bindtap="searchParcel" hover-class="hover">查询</view>
   </view>
 

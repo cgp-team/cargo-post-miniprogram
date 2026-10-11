@@ -51,4 +51,7 @@ function getAmapMiniKey() {
   return AMAP_MINI_KEY || ''
 }
 
-module.exports = { getBaseUrl, getAmapMiniKey, DEFAULT_MAP_CENTER, DRIVER_DEFAULT_MAP_CENTER }
+/** 站长/客服电话（空态「打电话问站长」入口；留空 = 不显示该入口，配置真实号码后生效） */
+const SERVICE_PHONE = ''
+
+module.exports = { getBaseUrl, getAmapMiniKey, DEFAULT_MAP_CENTER, DRIVER_DEFAULT_MAP_CENTER, SERVICE_PHONE }

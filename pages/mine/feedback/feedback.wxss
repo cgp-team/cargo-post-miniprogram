@@ -159,3 +159,54 @@
   padding: 20rpx 0;
 }
 .elderly-mode .fb-foot { font-size: 28rpx; }
+
+/* 附图行：缩略图 + 添加按钮（最多 3 张） */
+.photo-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-top: 16rpx;
+}
+
+.photo-thumb {
+  position: relative;
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+
+.photo-thumb image { width: 100%; height: 100%; }
+
+.photo-del {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 40rpx;
+  height: 40rpx;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 28rpx;
+  line-height: 40rpx;
+  text-align: center;
+  border-radius: 0 12rpx 0 12rpx;
+}
+
+.photo-add {
+  width: 120rpx;
+  height: 120rpx;
+  border: 2rpx dashed var(--color-line-deep);
+  border-radius: 12rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6rpx;
+}
+
+.photo-add-text {
+  font-size: 22rpx;
+  color: var(--color-text-tertiary);
+}
+
+.elderly-mode .photo-add-text { font-size: 26rpx; }

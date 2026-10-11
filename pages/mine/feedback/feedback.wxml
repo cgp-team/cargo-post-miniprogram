@@ -15,6 +15,17 @@
       placeholder-class="form-ph"
       bindinput="onContentInput"
     />
+    <!-- 附图（最多 3 张）：拍路况/包裹破损等，比纯文字好说明问题 -->
+    <view class="photo-row">
+      <view class="photo-thumb" wx:for="{{photos}}" wx:key="index" data-index="{{index}}" bindtap="previewPhoto">
+        <image src="{{item}}" mode="aspectFill" />
+        <view class="photo-del" catchtap="removePhoto" data-index="{{index}}">×</view>
+      </view>
+      <view wx:if="{{photos.length < 3}}" class="photo-add" bindtap="choosePhoto" hover-class="hover">
+        <icon name="camera" size="44" color="{{iconColor}}" />
+        <text class="photo-add-text">{{uploading ? '上传中…' : '附图'}}</text>
+      </view>
+    </view>
     <view class="form-item">
       <text class="form-label">称呼</text>
       <input class="form-input" value="{{name}}" placeholder="选填" placeholder-class="form-ph" bindinput="onNameInput" />

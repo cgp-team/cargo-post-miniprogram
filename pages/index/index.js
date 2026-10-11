@@ -41,7 +41,8 @@ Page({
     nearbyBusUpdatedText: '',   // "已更新：刚刚" / "更新于 12 秒前"
     nearbyBusLocatedText: '',   // "根据当前位置展示" / "根据当前区域展示"
     recommendProducts: [],      // 推荐农产品（真实接口，失败/为空时展示空态，不再硬编码演示商品）
-    unreadCount: 0              // 消息中心未读数（右下角悬浮入口红点）
+    unreadCount: 0,             // 消息中心未读数（右下角悬浮入口红点）
+    showGuide: false            // 新手引导层（首次进入显示，storage 标记后不再出）
   },
 
   onLoad() {
@@ -62,6 +63,8 @@ Page({
     this.loadNearbyBusData()
     this.loadWeather()
     this.loadHomeData()
+    // 新手引导：首次进入提示核心入口（storage 标记，看完不再出）
+    if (!wx.getStorageSync('homeGuideSeen')) this.setData({ showGuide: true })
     // 定位变化（缓存秒出后后台刷到新位置）→ 主动刷新附近公交，避免一直用旧位置查询
     this._offLocationChange = location.onLocationChange((loc) => {
       // 页面在后台时不查公交（省电省流量）；onShow 会补一次刷新
@@ -116,6 +119,15 @@ Page({
     if (navThrottled(this)) return
     wx.navigateTo({ url: '/pages/notification/notification' })
   },
+
+  /** 新手引导：关闭并标记已看（之后不再出） */
+  closeGuide() {
+    wx.setStorageSync('homeGuideSeen', '1')
+    this.setData({ showGuide: false })
+  },
+
+  /** 引导卡点击拦截（点卡片不穿透关闭，只有按钮/遮罩关闭） */
+  noop() {},
 
   /**
    * 获取天气 — 缓存/本地兜底秒开，后台刷新真实数据
@@ -505,6 +517,9 @@ Page({
     this._nearbyTimer = setInterval(() => {
       this._updateBusUpdatedText()
       this.loadNearbyBusData({ silent: true })
+      // 未读红点搭同一轮询：每 4 个 tick（60s）校准一次，新消息不用等切页才亮
+      this._unreadTick = (this._unreadTick || 0) + 1
+      if (this._unreadTick % 4 === 0) this.refreshUnread()
     }, 15000)
   },
 

@@ -17,7 +17,7 @@ const location = require('../../utils/location')
 const transitAmap = require('../../utils/transit-amap')
 const motion = require('../../utils/bus-motion')
 const { navThrottled } = require('../../utils/util')
-const { DEFAULT_MAP_CENTER } = require('../../utils/config')
+const { DEFAULT_MAP_CENTER, SERVICE_PHONE } = require('../../utils/config')
 
 /** 车辆/定位刷新间隔（保留原 15s） */
 const REFRESH_MS = 15000
@@ -55,6 +55,8 @@ Page({
     showAllLines: false,
     visibleLines: [],
     vehicles: [],
+    // 常用线路收藏（key 列表，storage 持久化；收藏线路在「附近线路」置顶）
+    favoriteLines: [],
     // 线路（项目线路几何 + 车辆）
     lines: [],
     activeLineKey: 'NEARBY',
@@ -64,11 +66,15 @@ Page({
     mapCenter: DEFAULT_MAP_CENTER,
     mapScale: 14,
     markers: [],
-    polyline: []
+    polyline: [],
+    // 站长/客服电话（空态「打电话问站长」；config 留空时入口自动隐藏）
+    servicePhone: SERVICE_PHONE
   },
 
   onLoad() {
     this._initPageBase()
+    // 常用线路收藏（本地持久化，纯前端）
+    this.setData({ favoriteLines: wx.getStorageSync('favoriteBusLines') || [] })
     // 定位变化（缓存秒出→后台刷新到真实位置）→ 更新地图中心 + 重查附近公交
     this._offLocationChange = location.onLocationChange((loc) => {
       // 页面在后台时不查公交（省电省流量）；onShow 会补一次刷新
@@ -240,7 +246,7 @@ Page({
       // 不在运营时间：不展示车辆卡片（凌晨把一堆"待发车"卡片铺出来会让人误以为正在运行），
       // 只保留"当前不在运营时间 + 下一班几点"的说明。
       const visibleBuses = inServiceFlag === false ? [] : buses
-      const visibleLines = this._buildVisibleLines(lines, stations)
+      const visibleLines = this._applyFavSort(this._buildVisibleLines(lines, stations))
       this.setData({
         nearbyStations: stations,
         nearbyStationCount: stations.length,
@@ -295,6 +301,15 @@ Page({
     return '附近暂无正在运行的车辆'
   },
 
+  /** 常用线路置顶：按收藏 key 标记 fav 并稳定排序（收藏在前，其余保持原顺序） */
+  _applyFavSort(list, favs) {
+    const favSet = {}
+    ;(favs || this.data.favoriteLines || []).forEach((k) => { favSet[k] = true })
+    return (list || [])
+      .map((l) => Object.assign({}, l, { fav: !!favSet[l.key] }))
+      .sort((a, b) => (b.fav ? 1 : 0) - (a.fav ? 1 : 0))
+  },
+
   _buildVisibleLines(lines, stations) {
     const result = []
     const seen = {}
@@ -323,11 +338,29 @@ Page({
 
   toggleAllLines() {
     const showAll = !this.data.showAllLines
-    const all = this._buildVisibleLines(this.data.nearbyLines, this._stations || [])
+    const all = this._applyFavSort(this._buildVisibleLines(this.data.nearbyLines, this._stations || []))
     this.setData({
       showAllLines: showAll,
       visibleLines: showAll ? all : all.slice(0, MAX_NEARBY_LINES)
     })
+  },
+
+  /** 收藏/取消常用线路（置顶展示；storage 持久化，纯前端；catchtap 不触发选中线路） */
+  toggleFavorite(e) {
+    const key = e.currentTarget.dataset.key
+    if (!key) return
+    const favs = (this.data.favoriteLines || []).slice()
+    const idx = favs.indexOf(key)
+    const adding = idx < 0
+    if (adding) favs.push(key)
+    else favs.splice(idx, 1)
+    wx.setStorageSync('favoriteBusLines', favs)
+    const all = this._applyFavSort(this._buildVisibleLines(this.data.nearbyLines, this._stations || []), favs)
+    this.setData({
+      favoriteLines: favs,
+      visibleLines: this.data.showAllLines ? all : all.slice(0, MAX_NEARBY_LINES)
+    })
+    wx.showToast({ title: adding ? '已置顶为常用线路' : '已取消常用线路', icon: 'none' })
   },
 
   /** 点击附近线路：切到该线路（项目线路按需拉取真实道路轨迹，失败回退站点连线） */
